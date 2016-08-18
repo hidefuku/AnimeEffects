@@ -1,2 +1,3 @@
 # AnimeEffects
-2D Animation Tool
+2D Animation Tool.  
+It's unstable yet...
