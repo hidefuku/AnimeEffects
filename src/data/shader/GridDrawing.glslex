@@ -1,0 +1,21 @@
+#begin_vertex_shader   //---------------------------------------------------------------
+#version 130
+
+in highp vec4  inPosition;
+
+uniform highp mat4 uViewMatrix;
+
+void main(void)
+{
+    gl_Position = uViewMatrix * inPosition;
+}
+
+
+#begin_fragment_shader //---------------------------------------------------------------
+
+uniform vec4 uColor;
+
+void main(void)
+{
+    gl_FragColor = uColor;
+}

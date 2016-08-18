@@ -1,0 +1,70 @@
+#begin_vertex_shader   //---------------------------------------------------------------
+#version 130
+
+in highp vec4  inPosition;
+in highp vec2  inTexCoord;
+
+uniform highp mat4 uViewMatrix;
+
+out vec2 vTexCoord;
+out vec2 vDestCoord;
+
+void main(void)
+{
+    vec4 pos = uViewMatrix * inPosition;
+    vec3 screenPos = pos.xyz / pos.w;
+
+    gl_Position = pos;
+    vDestCoord = vec2((screenPos.x + 1.0) * 0.5, (screenPos.y + 1.0) * 0.5);
+    vTexCoord = inTexCoord;
+}
+
+
+#begin_fragment_shader //---------------------------------------------------------------
+#version 130
+
+#variation IS_CLIPPEE 0
+
+uniform vec4 uColor;
+uniform int uClipperId;
+uniform sampler2D uTexture;
+uniform usampler2D uDestTexture;
+
+#if IS_CLIPPEE
+uniform int uClippingId;
+#endif
+
+in vec2 vTexCoord;
+in vec2 vDestCoord;
+
+out uvec2 oClip;
+
+void main(void)
+{
+    vec4 color = uColor * texture2D(uTexture, vTexCoord);
+    uvec2 destData = texture(uDestTexture, vDestCoord).xy;
+
+#if IS_CLIPPEE
+    if (uint(uClippingId) == destData.x)
+    {
+        oClip = uvec2(uint(uClipperId), uint(color.a * float(destData.y)));
+    }
+    else if (uint(uClipperId) == destData.x)
+    {
+        oClip = uvec2(uint(uClipperId), min(uint(255), uint(color.a * 255.0) + destData.y));
+    }
+    else
+    {
+        oClip = uvec2(0, 0);
+    }
+#else
+    if (uint(uClipperId) == destData.x)
+    {
+        oClip = uvec2(uint(uClipperId), min(uint(255), uint(color.a * 255.0) + destData.y));
+    }
+    else
+    {
+        oClip = uvec2(uint(uClipperId), uint(color.a * 255.0));
+    }
+#endif
+}

@@ -1,0 +1,121 @@
+QFrame#holder {
+font-family: Meiryo UI;font-style: normal;font-size: 9pt;font-weight:normal;
+background-color: #fafafa;
+border-radius:2px;
+}
+
+QComboBox {
+border-radius: 2px;
+color: #101010;
+padding-left: 8px;
+padding-bottom: 1px;
+padding-right: 8px;
+}
+
+QComboBox::enabled {
+background-color: #fefefe;
+border: 1px solid #d8d8d8;
+color: #3C3C3C;
+}
+
+QComboBox::disabled {
+background-color: #ececec;
+border: 1px solid #d0d0d0;
+color: #909090;
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: right;
+    width:  16px;
+    height: 16px;
+    border: 0px solid #d0d0d0;
+}
+
+QComboBox::down-arrow {
+    image: url(data/icon/downarrow.png);
+    width:   10px;
+    height:  10px;
+}
+QComboBox::down-arrow:disabled {
+    image: url(data/icon/downarrow2.png);
+}
+
+QCheckBox#keyIcon {
+}
+
+QCheckBox#keyIcon::indicator {
+width: 15px;
+height: 15px;
+}
+
+QCheckBox#keyIcon::indicator::checked {
+image: url(data/icon/paperpin.png);
+}
+
+QCheckBox#keyIcon::indicator::unchecked {
+image: url(data/icon/paperpinshadow.png);
+}
+
+QCheckBox#keyIcon::indicator::enabled {
+image: url(data/icon/paperpinshadow.png);
+}
+QCheckBox#keyIcon::indicator::disabled {
+image: url(data/icon/paperpin.png);
+}
+
+QGroupBox#keyGroup {
+font-family: Meiryo UI;font-style: normal;font-size: 9pt;font-weight:normal;
+background-color: #f8f8f8;
+border:1px solid transparent;
+border-radius:4px;
+margin-top: 0ex;
+padding-top: 10px;
+}
+
+QGroupBox#keyGroup::title {
+subcontrol-origin: margin;
+subcontrol-position:top left;
+padding-left: 20px;
+padding-top: 2px;
+}
+
+QGroupBox#attrGroup {
+font-family: Meiryo UI;font-style: normal;font-size: 9pt;font-weight:normal;
+background-color: #f8f8f8;
+border:1px solid transparent;
+border-radius:4px;
+margin-top: 0ex;
+padding-top: 10px;
+}
+
+QGroupBox#attrGroup::title {
+subcontrol-origin: margin;
+subcontrol-position:top left;
+padding-left: 10px;
+padding-top: 2px;
+}
+
+QGroupBox#propertyPanel {
+font-family: Meiryo UI;font-style: normal;font-size: 10pt;font-weight:normal;
+background-color: #d0d0d0;
+border:1px solid transparent;
+border-radius:8px;
+margin-top: 0ex;
+padding-top: 10px;
+}
+
+QGroupBox#propertyPanel::title {
+subcontrol-origin: margin;
+subcontrol-position:top left;
+padding-left: 8px;
+}
+
+QGroupBox#propertyPanel::indicator:unchecked {
+image: url(data/icon/branchclose.png);
+}
+
+QGroupBox#propertyPanel::indicator:checked {
+image: url(data/icon/branchopen.png);
+}
+
