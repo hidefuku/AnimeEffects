@@ -9,6 +9,7 @@ enum BoneEditMode
     BoneEditMode_Create,
     BoneEditMode_Delete,
     BoneEditMode_MoveJoint,
+    BoneEditMode_BindNodes,
     BoneEditMode_Influence,
     BoneEditMode_PaintInfl,
     BoneEditMode_EraseInfl,

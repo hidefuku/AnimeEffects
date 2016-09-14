@@ -93,7 +93,8 @@ SOURCES += \
     srt/srt_CentroidMover.cpp \
     bone/bone_DeleteMode.cpp \
     bone/bone_DeleteBone.cpp \
-    mesh/mesh_SplitMode.cpp
+    mesh/mesh_SplitMode.cpp \
+    bone/bone_BindNodesMode.cpp
 
 HEADERS += \
     Driver.h \
@@ -163,4 +164,5 @@ HEADERS += \
     srt/srt_CentroidMover.h \
     bone/bone_DeleteMode.h \
     bone/bone_DeleteBone.h \
-    mesh/mesh_SplitMode.h
+    mesh/mesh_SplitMode.h \
+    bone/bone_BindNodesMode.h

@@ -3,6 +3,7 @@
 #include "ctrl/bone/bone_CreateMode.h"
 #include "ctrl/bone/bone_DeleteMode.h"
 #include "ctrl/bone/bone_MoveJointMode.h"
+#include "ctrl/bone/bone_BindNodesMode.h"
 #include "ctrl/bone/bone_InfluenceMode.h"
 #include "ctrl/bone/bone_PaintInflMode.h"
 #include "ctrl/bone/bone_EraseInflMode.h"
@@ -188,6 +189,10 @@ void BoneEditor::createMode()
 
     case BoneEditMode_MoveJoint:
         mCurrent.reset(new bone::MoveJointMode(mProject, mTarget, mKeyOwner));
+        break;
+
+    case BoneEditMode_BindNodes:
+        mCurrent.reset(new bone::BindNodesMode(mProject, mTarget, mKeyOwner));
         break;
 
     case BoneEditMode_Influence:

@@ -34,6 +34,7 @@ void BonePanel::createMode()
                             "Add Bones" <<
                             "Remove Bones" <<
                             "Move Joints" <<
+                            "Bind Nodes" <<
                             "Adjust Influence" <<
                             "Paint Influence" <<
                             "Erase Influence");
@@ -41,6 +42,7 @@ void BonePanel::createMode()
                          mResources.icon("plus") <<
                          mResources.icon("minus") <<
                          mResources.icon("move") <<
+                         mResources.icon("plus") <<
                          mResources.icon("influence") <<
                          mResources.icon("pencil") <<
                          mResources.icon("eraser"));
