@@ -22,12 +22,9 @@ BoneEditor::BoneEditor(Project& aProject)
 {
     /// @todo
     /// jugdge a targetability by a binding tree
-    /// update a bone influence when undo/redo invoked
-    /// update a bone influence when a timeline modified
     /// merge a holder timeline
     /// support timeline modifying to a holder key
     /// brush up a rendering userbility
-    /// syncronize bone and pose tree structures
 }
 
 BoneEditor::~BoneEditor()
