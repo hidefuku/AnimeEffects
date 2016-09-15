@@ -6,6 +6,7 @@
 #include "core/Project.h"
 #include "ctrl/Driver.h"
 #include "ctrl/ToolType.h"
+#include "ctrl/GraphicStyle.h"
 
 namespace gui
 {
@@ -16,7 +17,7 @@ public:
     DriverHolder();
     ~DriverHolder();
 
-    void create(core::Project& aProject);
+    void create(core::Project& aProject, ctrl::GraphicStyle& aGraphicStyle);
     void destroy();
 
     ctrl::Driver* driver() { return mDriver.data(); }

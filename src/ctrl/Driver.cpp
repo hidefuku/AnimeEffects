@@ -15,8 +15,9 @@ struct ScopeCounter
 namespace ctrl
 {
 
-Driver::Driver(core::Project& aProject)
+Driver::Driver(core::Project& aProject, GraphicStyle& aGraphicStyle)
     : mProject(aProject)
+    , mGraphicStyle(aGraphicStyle)
     , mToolType(ToolType_TERM)
     , mBlender(aProject.objectTree())
     , mEditor()

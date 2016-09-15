@@ -14,6 +14,7 @@
 #include "ctrl/BoneEditor.h"
 #include "ctrl/PoseEditor.h"
 #include "ctrl/MeshEditor.h"
+#include "ctrl/GraphicStyle.h"
 
 namespace ctrl
 {
@@ -21,7 +22,7 @@ namespace ctrl
 class Driver
 {
 public:
-    Driver(core::Project& aProject);
+    Driver(core::Project& aProject, GraphicStyle& aGraphicStyle);
 
     void setTarget(core::ObjectNode* aNode);
     core::ObjectNode* currentTarget() const { return mCurrentNode; }
@@ -45,6 +46,7 @@ private:
     void drawOutline(const core::RenderInfo& aRenderInfo, QPainter& aPainter);
 
     core::Project& mProject;
+    GraphicStyle& mGraphicStyle;
     ToolType mToolType;
     core::TimeKeyBlender mBlender;
     QScopedPointer<IEditor> mEditor;

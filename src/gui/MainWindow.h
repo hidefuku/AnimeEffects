@@ -8,6 +8,7 @@
 #include "ctrl/System.h"
 #include "gui/MainMenuBar.h"
 #include "gui/MainDisplayWidget.h"
+#include "gui/MainDisplayStyle.h"
 #include "gui/TargetWidget.h"
 #include "gui/PropertyWidget.h"
 #include "gui/ToolWidget.h"
@@ -49,6 +50,7 @@ private:
     GUIResourceSet* mResourceSet;
     ViaPoint mViaPoint;
     MainMenuBar* mMainMenuBar;
+    QScopedPointer<MainDisplayStyle> mMainDisplayStyle;
     MainDisplayWidget* mMainDisplay;
     ProjectTabBar* mProjectTabBar;
     TargetWidget* mTarget;

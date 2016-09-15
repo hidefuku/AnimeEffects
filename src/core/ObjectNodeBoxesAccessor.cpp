@@ -1,3 +1,4 @@
+#if 0
 #include "core/ObjectNodeBoxesAccessor.h"
 #include "core/ObjectNode.h"
 #include "util/MathUtil.h"
@@ -278,3 +279,4 @@ void ObjectNodeBoxesAccessor::drawBindArrow(const RenderInfo& aInfo, QPainter& a
 }
 
 } // namespace core
+#endif

@@ -39,6 +39,7 @@ MainWindow::MainWindow(
     , mResourceSet(aResources)
     , mViaPoint(this)
     , mMainMenuBar()
+    , mMainDisplayStyle()
     , mMainDisplay()
     , mProjectTabBar()
     , mTarget()
@@ -80,6 +81,7 @@ MainWindow::MainWindow(
     }
 
     {
+        mMainDisplayStyle.reset(new MainDisplayStyle(*this, *mResourceSet));
         mMainDisplay = new MainDisplayWidget(mViaPoint, this);
         this->setCentralWidget(mMainDisplay);
 
@@ -256,7 +258,7 @@ void MainWindow::resetProjectRefs(core::Project* aProject)
 
     if (aProject)
     {
-        mDriverHolder->create(*aProject);
+        mDriverHolder->create(*aProject, *mMainDisplayStyle);
     }
     else
     {

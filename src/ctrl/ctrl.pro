@@ -165,4 +165,5 @@ HEADERS += \
     bone/bone_DeleteMode.h \
     bone/bone_DeleteBone.h \
     mesh/mesh_SplitMode.h \
-    bone/bone_BindNodesMode.h
+    bone/bone_BindNodesMode.h \
+    GraphicStyle.h

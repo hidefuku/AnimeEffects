@@ -110,7 +110,6 @@ HEADERS += \
     PropertyWidget.h \
     TimeLineWidget.h \
     ToolWidget.h \
-    WidgetMetrics.h \
     TargetWidget.h \
     prop/prop_ObjectPanel.h \
     prop/prop_Panel.h \
@@ -151,7 +150,8 @@ HEADERS += \
     menu/menu_ProgressReporter.h \
     tool/tool_ViewPanel.h \
     tool/tool_FlowLayout.h \
-    MainViewSetting.h
+    MainViewSetting.h \
+    MainDisplayStyle.h
 
 FORMS +=
 

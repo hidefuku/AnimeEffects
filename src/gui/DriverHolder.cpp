@@ -17,7 +17,7 @@ DriverHolder::~DriverHolder()
     destroy();
 }
 
-void DriverHolder::create(core::Project& aProject)
+void DriverHolder::create(core::Project& aProject, ctrl::GraphicStyle& aGraphicStyle)
 {
     destroy();
 
@@ -26,7 +26,7 @@ void DriverHolder::create(core::Project& aProject)
     mResourceSlot = mProject->onResourceModified.connect(this, &DriverHolder::onResourceUpdated);
     mTreeSlot     = mProject->onTreeRestructured.connect(this, &DriverHolder::onTreeRestructured);
 
-    mDriver.reset(new ctrl::Driver(aProject));
+    mDriver.reset(new ctrl::Driver(aProject, aGraphicStyle));
     onVisualUpdated();
 }
 

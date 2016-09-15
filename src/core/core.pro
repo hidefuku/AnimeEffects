@@ -106,7 +106,6 @@ HEADERS += \
     TimeInfo.h \
     TimeKey.h \
     TimeLine.h \
-    GraphicsMetrics.h \
     SRTKey.h \
     Animator.h \
     TimeLineEvent.h \

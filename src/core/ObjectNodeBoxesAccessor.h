@@ -1,6 +1,7 @@
 #ifndef CORE_OBJECTNODEBOXESACCESSOR_H
 #define CORE_OBJECTNODEBOXESACCESSOR_H
 
+#if 0
 #include <QMultiMap>
 #include <QVector>
 #include <QPainter>
@@ -41,5 +42,6 @@ private:
 };
 
 } // namespace core
+#endif
 
 #endif // CORE_OBJECTNODEBOXESACCESSOR_H
