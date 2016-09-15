@@ -10,8 +10,10 @@ using namespace core;
 namespace ctrl {
 namespace bone {
 
-BindNodesMode::BindNodesMode(Project& aProject, const Target& aTarget, KeyOwner& aKey)
+BindNodesMode::BindNodesMode(Project& aProject, const Target& aTarget,
+                             KeyOwner& aKey, const GraphicStyle& aGraphicStyle)
     : mProject(aProject)
+    , mGraphicStyle(aGraphicStyle)
     , mTarget(*aTarget.node)
     , mKeyOwner(aKey)
     , mTargetMtx(aTarget.mtx)
@@ -61,27 +63,39 @@ void BindNodesMode::renderQt(const RenderInfo& aInfo, QPainter& aPainter)
         renderer.renderBones(bone);
     }
 
+    renderChildNodes(aInfo, aPainter);
+}
+
+void BindNodesMode::renderChildNodes(const core::RenderInfo& aInfo, QPainter& aPainter)
+{
+    static const int kRowHeight = 16;
+    static const int kMargin = 2;
+    static const int kLetterPixelSize = kRowHeight - 2 * kMargin;
+    const int kIconWidth = kRowHeight;
+    const QSize kIconSize(kIconWidth, kIconWidth);
+    const QPoint kIconOffset(-kIconWidth - 2, 0);
+    const QColor backColor(0, 0, 0, 200);
+    const QColor textColor(255, 255, 255, 255);
+    const QBrush textBrush(textColor);
+    const QBrush backBrush(backColor);
+
+    QPixmap iconOpen = mGraphicStyle.icon("plus").pixmap(kIconSize);
 
     QFont font = aPainter.font();
-    //font.setPixelSize(16);
-    //font.setPixelSize(13);
-    font.setPointSize(10);
+    font.setPixelSize(kLetterPixelSize);
+    //font.setPointSize(10);
     //font.setFamily("Courier New");
     //font.setFamily("Meiryo");
-    //font.setStyleStrategy(QFont::PreferAntialias);
-    font.setStyleStrategy(
-                QFont::StyleStrategy(
-                    QFont::PreferOutline |
-                    QFont::PreferAntialias |
-                    QFont::PreferQuality));
+    font.setStyleStrategy(QFont::StyleStrategy(
+                              QFont::PreferOutline |
+                              QFont::PreferAntialias |
+                              QFont::PreferQuality));
     ///@note In windows, the font antialiasing doesn't work. (seems like a bug?)
     /// The cause is unknown but it's probably avoidable by bold setting.
     font.setBold(true);
-
-    //font.setWeight(QFont::Bold);
     //font.setFixedPitch(false);
     //font.setStretch(QFont::UltraExpanded);
-    //font.setLetterSpacing(QFont::PercentageSpacing, 120);
+    //font.setLetterSpacing(QFont::PercentageSpacing, 105);
     aPainter.setFont(font);
 
 #if 1
@@ -93,35 +107,30 @@ void BindNodesMode::renderQt(const RenderInfo& aInfo, QPainter& aPainter)
 
     for (auto node : mTarget.children())
     {
+        auto nodeName = node->name();
+
         ///@todo Is this safe to get(calculate if necessary) current position in rendering?
         auto mtx = TimeKeyBlender::getWorldMatrix(*node, mProject.currentTimeInfo());
         auto pos = mtx.column(3).toVector3D();
 
-        const QColor backColor(0, 0, 0, 200);
-        const QColor textColor(255, 255, 255, 255);
-        QBrush textBrush(textColor);
-        QBrush backBrush(backColor);
-        //aPainter.setPen(QPen(backBrush, 2.0f));
         aPainter.setPen(Qt::NoPen);
         aPainter.setBrush(backBrush);
 
-        //const QRect charRectangle = QRect(0, 0, 0, 0);
-        //QRect boundingRect;
-        //aPainter.drawText(charRectangle, 0, node->name(), &boundingRect);
-        QRect boundingRect = aPainter.fontMetrics().boundingRect(node->name());
+        QRect boundingRect = aPainter.fontMetrics().boundingRect(nodeName);
 
         auto scrPos = aInfo.camera.toScreenPos(pos.toPointF());
-        QRect scrRect(scrPos.toPoint(), boundingRect.size());
+        const QRect scrRect(scrPos.toPoint(), boundingRect.size());
 
-        aPainter.drawRect(scrRect.marginsAdded(QMargins(2, 1, 2, 1)));
+        // background
+        aPainter.drawRect(scrRect.marginsAdded(QMargins(kMargin, kMargin, kMargin, kMargin)));
 
-        //aPainter.setPen(Qt::NoPen);
+        // text
         aPainter.setPen(QPen(textBrush, 1.0f));
-        //aPainter.setBrush(textBrush);
-        //aPainter.setBrush(Qt::NoBrush);
+        aPainter.drawText(scrRect, Qt::AlignCenter, nodeName);
 
-        aPainter.drawText(scrRect, Qt::AlignCenter, node->name());
-        //aPainter.drawText(scrPos, node->name());
+        // icon
+        const QRect iconRect(scrRect.topLeft() + kIconOffset, kIconSize);
+        aPainter.drawPixmap(iconRect, iconOpen);
     }
 }
 

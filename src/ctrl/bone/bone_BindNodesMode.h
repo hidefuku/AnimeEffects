@@ -4,6 +4,7 @@
 #include "core/Project.h"
 #include "core/ObjectNode.h"
 #include "core/BoneKey.h"
+#include "ctrl/GraphicStyle.h"
 #include "ctrl/bone/bone_IMode.h"
 #include "ctrl/bone/bone_KeyOwner.h"
 #include "ctrl/bone/bone_Target.h"
@@ -15,12 +16,15 @@ namespace bone {
 class BindNodesMode : public IMode
 {
 public:
-    BindNodesMode(core::Project& aProject, const Target& aTarget, KeyOwner& aKey);
+    BindNodesMode(core::Project& aProject, const Target& aTarget,
+                  KeyOwner& aKey, const GraphicStyle& aGraphicStyle);
     virtual bool updateCursor(const core::CameraInfo&, const core::AbstractCursor&);
     virtual void renderQt(const core::RenderInfo& aInfo, QPainter& aPainter);
 
 private:
+    void renderChildNodes(const core::RenderInfo& aInfo, QPainter& aPainter);
     core::Project& mProject;
+    const GraphicStyle& mGraphicStyle;
     core::ObjectNode& mTarget;
     KeyOwner& mKeyOwner;
     QMatrix4x4 mTargetMtx;

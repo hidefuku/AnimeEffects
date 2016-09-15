@@ -56,7 +56,7 @@ void Driver::setTool(ToolType aType)
     }
     else if (mToolType == ToolType_Bone)
     {
-        mEditor.reset(new BoneEditor(mProject));
+        mEditor.reset(new BoneEditor(mProject, mGraphicStyle));
     }
     else if (mToolType == ToolType_Pose)
     {

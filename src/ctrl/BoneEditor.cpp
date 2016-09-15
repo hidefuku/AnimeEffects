@@ -14,8 +14,9 @@ using namespace core;
 namespace ctrl
 {
 
-BoneEditor::BoneEditor(Project& aProject)
+BoneEditor::BoneEditor(Project& aProject, GraphicStyle& aStyle)
     : mProject(aProject)
+    , mGraphicStyle(aStyle)
     , mParam()
     , mCurrent()
     , mTarget()
@@ -192,7 +193,7 @@ void BoneEditor::createMode()
         break;
 
     case BoneEditMode_BindNodes:
-        mCurrent.reset(new bone::BindNodesMode(mProject, mTarget, mKeyOwner));
+        mCurrent.reset(new bone::BindNodesMode(mProject, mTarget, mKeyOwner, mGraphicStyle));
         break;
 
     case BoneEditMode_Influence:
