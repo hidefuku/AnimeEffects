@@ -19,19 +19,27 @@ BindNodesMode::BindNodesMode(Project& aProject, const Target& aTarget,
     , mTargetMtx(aTarget.mtx)
     , mTargetInvMtx(aTarget.invMtx)
     , mFocuser()
+    , mNodeSelector(*aTarget.node, aGraphicStyle)
 {
     XC_PTR_ASSERT(mKeyOwner.key);
     mFocuser.setTopBones(mKeyOwner.key->data().topBones());
     mFocuser.setTargetMatrix(mTargetMtx);
+
+    mNodeSelector.updateGeometry(mProject.currentTimeInfo());
 }
 
 bool BindNodesMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCursor)
 {
     auto focus = mFocuser.update(aCamera, aCursor.screenPos());
-    bool updated = mFocuser.focusChanged();
+    mNodeSelector.updateFocus(aCamera, aCursor.screenPos());
+
+    bool updated = mFocuser.focusChanged() || mNodeSelector.focusChanged();
+
 
     if (aCursor.isLeftPressState())
     {
+        mNodeSelector.select();
+
         mFocuser.clearFocus();
         mFocuser.clearSelection();
         if (focus)
@@ -63,7 +71,8 @@ void BindNodesMode::renderQt(const RenderInfo& aInfo, QPainter& aPainter)
         renderer.renderBones(bone);
     }
 
-    renderChildNodes(aInfo, aPainter);
+    //renderChildNodes(aInfo, aPainter);
+    mNodeSelector.render(aInfo, aPainter);
 }
 
 void BindNodesMode::renderChildNodes(const core::RenderInfo& aInfo, QPainter& aPainter)

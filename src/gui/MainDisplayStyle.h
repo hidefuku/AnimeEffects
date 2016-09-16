@@ -20,6 +20,11 @@ public:
     {
     }
 
+    virtual QFont font() const
+    {
+        return mWidget.font();
+    }
+
     virtual QRect boundingRect(const QString& aText) const
     {
         return mWidget.fontMetrics().boundingRect(aText);

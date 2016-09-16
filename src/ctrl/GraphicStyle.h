@@ -12,6 +12,7 @@ class GraphicStyle
 {
 public:
     virtual ~GraphicStyle() {}
+    virtual QFont font() const = 0;
     virtual QRect boundingRect(const QString& aText) const = 0;
     virtual QIcon icon(const QString& aName) const = 0;
 };

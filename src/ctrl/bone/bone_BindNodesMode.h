@@ -9,6 +9,7 @@
 #include "ctrl/bone/bone_KeyOwner.h"
 #include "ctrl/bone/bone_Target.h"
 #include "ctrl/bone/bone_Focuser.h"
+#include "ctrl/bone/bone_NodeSelector.h"
 
 namespace ctrl {
 namespace bone {
@@ -30,6 +31,7 @@ private:
     QMatrix4x4 mTargetMtx;
     QMatrix4x4 mTargetInvMtx;
     Focuser mFocuser;
+    NodeSelector mNodeSelector;
 };
 
 } // namespace bone
