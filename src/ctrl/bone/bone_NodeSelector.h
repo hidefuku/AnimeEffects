@@ -45,7 +45,8 @@ private:
     void updateGeometryRecursive(Tag& aTag, const core::TimeInfo& aTime);
     QRectF getNodeRectF(core::ObjectNode& aNode, const core::TimeInfo& aInfo) const;
     bool updateIntersection(Tag& aTag, const core::CameraInfo& aCamera, const QPointF& aPos);
-    void renderOneNode(const Tag& aTag, QPixmap& aIconPix, const core::RenderInfo& aInfo, QPainter& aPainter);
+    void renderOneNode(const Tag& aTag, QPixmap& aIconPix, int aColorType,
+                       const core::RenderInfo& aInfo, QPainter& aPainter);
 
     const GraphicStyle& mGraphicStyle;
     core::ObjectNode& mTopNode;

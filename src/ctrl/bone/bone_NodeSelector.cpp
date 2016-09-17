@@ -90,6 +90,7 @@ ObjectNode* NodeSelector::updateFocus(const CameraInfo& aCamera, const QVector2D
         }
     }
 
+    mFocusChanged = (prevIconFocused != mIconFocused || prevCurrentFocus != mCurrentFocus);
     return nullptr;
 }
 
@@ -214,19 +215,40 @@ void NodeSelector::render(const core::RenderInfo& aInfo, QPainter& aPainter)
 
     if (!mCurrentTopTag->invisibleTop())
     {
-        renderOneNode(*mCurrentTopTag, iconPix, aInfo, aPainter);
+        renderOneNode(*mCurrentTopTag, iconPix, 0, aInfo, aPainter);
     }
 
     for (auto childTag : mCurrentTopTag->children)
     {
-        renderOneNode(childTag, iconPix, aInfo, aPainter);
+        renderOneNode(childTag, iconPix, 0, aInfo, aPainter);
+    }
+
+    if (mCurrentFocus)
+    {
+        renderOneNode(*mCurrentFocus, iconPix, 1, aInfo, aPainter);
+    }
+    if (mCurrentSelect)
+    {
+        renderOneNode(*mCurrentSelect, iconPix, 2, aInfo, aPainter);
     }
 }
 
-void NodeSelector::renderOneNode(const Tag& aTag, QPixmap& aIconPix, const RenderInfo& aInfo, QPainter& aPainter)
+void NodeSelector::renderOneNode(const Tag& aTag, QPixmap& aIconPix, int aColorType,
+                                 const RenderInfo& aInfo, QPainter& aPainter)
 {
-    const QBrush textBrush(QColor(255, 255, 255, 255));
-    const QBrush backBrush(QColor(0, 0, 0, 200));
+    QBrush textBrush(QColor(255, 255, 255, 255));
+    QBrush backBrush(QColor(0, 0, 0, 200));
+
+    if (aColorType == 1)
+    {
+        textBrush.setColor(QColor(0, 0, 0, 255));
+        backBrush.setColor(QColor(255, 255, 255, 255));
+    }
+    else if (aColorType == 2)
+    {
+        textBrush.setColor(QColor(0, 0, 0, 255));
+        backBrush.setColor(QColor(192, 192, 255, 255));
+    }
 
     auto nodeName = aTag.node->name();
 
