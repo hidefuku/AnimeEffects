@@ -183,7 +183,7 @@ void NodeSelector::clearSelection()
 void NodeSelector::render(const core::RenderInfo& aInfo, QPainter& aPainter)
 {
     auto tagHeight = mCurrentTopTag->rect.height();
-    QPixmap iconPix = mGraphicStyle.icon("plus").pixmap(tagHeight);
+    QPixmap iconPix = mGraphicStyle.icon("dooropen").pixmap(tagHeight);
 
 #if 1
     QFont font = mGraphicStyle.font();
