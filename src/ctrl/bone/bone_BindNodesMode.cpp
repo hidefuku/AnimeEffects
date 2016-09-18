@@ -91,7 +91,7 @@ void BindNodesMode::renderChildNodes(const core::RenderInfo& aInfo, QPainter& aP
     const QBrush textBrush(textColor);
     const QBrush backBrush(backColor);
 
-    QPixmap iconOpen = mGraphicStyle.icon("plus").pixmap(kIconSize);
+    QPixmap iconOpen = mGraphicStyle.icon("dooropen").pixmap(kIconSize);
 
     QFont font = aPainter.font();
     font.setPixelSize(kLetterPixelSize);
