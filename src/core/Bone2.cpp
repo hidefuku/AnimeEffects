@@ -11,6 +11,7 @@ Bone2::Bone2()
     , mLocalAngle()
     , mRange()
     , mShape()
+    , mBindingNodes()
     , mWorldPos()
     , mWorldAngle()
     , mRotate()
@@ -26,6 +27,7 @@ Bone2::Bone2(const Bone2& aRhs)
     , mLocalAngle(aRhs.mLocalAngle)
     , mRange(aRhs.mRange)
     , mShape(aRhs.mShape)
+    , mBindingNodes(aRhs.mBindingNodes)
     , mWorldPos(aRhs.mWorldPos)
     , mWorldAngle(aRhs.mWorldAngle)
     , mRotate(aRhs.mRotate)
@@ -66,6 +68,17 @@ void Bone2::setShape(const BoneShape& aShape)
 const BoneShape& Bone2::shape() const
 {
     return mOrigin ? mOrigin->mShape : mShape;
+}
+
+QList<ObjectNode*>& Bone2::bindingNodes()
+{
+    XC_ASSERT(!mOrigin);
+    return mBindingNodes;
+}
+const QList<ObjectNode*>& Bone2::bindingNodes() const
+{
+    XC_ASSERT(!mOrigin);
+    return mBindingNodes;
 }
 
 void Bone2::setRotate(float aRotate)
@@ -188,6 +201,12 @@ bool Bone2::serialize(Serializer& aOut) const
         return false;
     }
 
+    aOut.write(mBindingNodes.count());
+    for (auto node : mBindingNodes)
+    {
+        aOut.writeID(node);
+    }
+
     aOut.write(mWorldPos);
     aOut.write(mWorldAngle);
     aOut.write(mRotate);
@@ -219,6 +238,21 @@ bool Bone2::deserialize(Deserializer& aIn)
     if (!mShape.deserialize(aIn))
     {
         return false;
+    }
+
+    {
+        int bindCount = 0;
+        aIn.read(bindCount);
+        if (bindCount < 0) return false;
+
+        for (int i = 0; i < bindCount; ++i)
+        {
+            auto solver = [=](void* aPtr){ if (aPtr) { this->mBindingNodes.push_back((ObjectNode*)aPtr); } };
+            if (!aIn.orderIDData(solver))
+            {
+                return aIn.errored("invalid reference id");
+            }
+        }
     }
 
     aIn.read(mWorldPos);

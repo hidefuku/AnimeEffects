@@ -24,6 +24,8 @@ BindNodesMode::BindNodesMode(Project& aProject, const Target& aTarget,
     XC_PTR_ASSERT(mKeyOwner.key);
     mFocuser.setTopBones(mKeyOwner.key->data().topBones());
     mFocuser.setTargetMatrix(mTargetMtx);
+    mFocuser.setFocusConnector(true);
+
 
     mNodeSelector.updateGeometry(mProject.currentTimeInfo());
 }
@@ -65,6 +67,7 @@ void BindNodesMode::renderQt(const RenderInfo& aInfo, QPainter& aPainter)
     bone::Renderer renderer(aPainter, aInfo);
     renderer.setAntialiasing(true);
     renderer.setTargetMatrix(mTargetMtx);
+    renderer.setFocusConnector(true);
 
     for (auto bone : mKeyOwner.key->data().topBones())
     {

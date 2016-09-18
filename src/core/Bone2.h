@@ -9,6 +9,7 @@
 #include "core/BoneShape.h"
 #include "core/Serializer.h"
 #include "core/Deserializer.h"
+namespace core { class ObjectNode; }
 
 namespace core
 {
@@ -28,6 +29,8 @@ public:
     void setWorldPos(const QVector2D& aWorldPos, const Bone2* aParent);
     void setRange(int aIndex, const QVector2D& aRange);
     void setShape(const BoneShape& aShape);
+    QList<ObjectNode*>& bindingNodes();
+    const QList<ObjectNode*>& bindingNodes() const;
 
     // geometry info
     const QVector2D& localPos() const;
@@ -69,6 +72,8 @@ private:
     float mLocalAngle;
     std::array<QVector2D, 2> mRange;
     BoneShape mShape;
+    // bind
+    QList<ObjectNode*> mBindingNodes;
     // cache
     QVector2D mWorldPos;
     float mWorldAngle;
