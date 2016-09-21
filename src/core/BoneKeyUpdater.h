@@ -6,6 +6,7 @@
 #include "core/ResourceEvent.h"
 #include "core/TimeLineEvent.h"
 #include "core/ProjectEvent.h"
+namespace core { class ObjectTree; }
 
 namespace core
 {
@@ -20,6 +21,11 @@ public:
     static void onResourceModified(ResourceEvent& aEvent);
 
     static void onProjectAttributeModified(ProjectEvent& aEvent);
+
+     // for tree restructuring
+    static cmnd::Base* createNodeUnbinderForDelete(ObjectNode& aNode);
+    static cmnd::Base* createNodeUnbinderForMove(
+            ObjectTree& aTree, const util::TreePos& aFrom, const util::TreePos& aTo);
 
 private:
     static void onTimeLineModified(

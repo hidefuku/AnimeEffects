@@ -31,6 +31,7 @@ public:
     void setShape(const BoneShape& aShape);
     QList<ObjectNode*>& bindingNodes();
     const QList<ObjectNode*>& bindingNodes() const;
+    bool isBinding(const ObjectNode& aNode) const;
 
     // geometry info
     const QVector2D& localPos() const;

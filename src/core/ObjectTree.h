@@ -44,6 +44,7 @@ public:
 
     void render(const RenderInfo& aRenderInfo, bool aUseWorkingCache);
 
+    cmnd::Vector createNodeDeleter(ObjectNode& aNode);
     cmnd::Vector createNodeMover(const util::TreePos& aFrom, const util::TreePos& aTo);
     cmnd::Vector createResourceUpdater(const ResourceEvent& aEvent);
 

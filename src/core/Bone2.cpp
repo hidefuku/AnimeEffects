@@ -81,6 +81,15 @@ const QList<ObjectNode*>& Bone2::bindingNodes() const
     return mBindingNodes;
 }
 
+bool Bone2::isBinding(const ObjectNode& aNode) const
+{
+    for (auto node : mBindingNodes)
+    {
+        if (node == &aNode) return true;
+    }
+    return false;
+}
+
 void Bone2::setRotate(float aRotate)
 {
     mRotate = aRotate;

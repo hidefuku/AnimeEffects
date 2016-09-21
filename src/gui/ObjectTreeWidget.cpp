@@ -561,11 +561,12 @@ void ObjectTreeWidget::onDeleteActionTriggered(bool)
         if (!objItem) return;
 
         core::ObjectNode& node = objItem->node();
+
         core::ObjectNode* parent = node.parent();
         if (!parent) return;
 
-        auto index = parent->children().indexOf(&node);
-        if (index < 0) return;
+        //auto index = parent->children().indexOf(&node);
+        //if (index < 0) return;
 
         QTreeWidgetItem* parentItem = mActionItem->parent();
         if (!parentItem) return;
@@ -585,8 +586,9 @@ void ObjectTreeWidget::onDeleteActionTriggered(bool)
             macro.grabListener(new obj::RestructureNotifier(*this));
 
             // delete node
-            mProject->commandStack().push(new cmnd::RemoveTree<core::ObjectNode>(&(parent->children()), index));
-            mProject->commandStack().push(new cmnd::GrabDeleteObject<core::ObjectNode>(&node));
+            //mProject->commandStack().push(new cmnd::RemoveTree<core::ObjectNode>(&(parent->children()), index));
+            //mProject->commandStack().push(new cmnd::GrabDeleteObject<core::ObjectNode>(&node));
+            mProject->commandStack().push(mProject->objectTree().createNodeDeleter(node));
 
             // delete item
             mProject->commandStack().push(new obj::RemoveItem(*parentItem, itemIndex, *objItem));

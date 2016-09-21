@@ -4,6 +4,7 @@
 #include "util/TreeUtil.h"
 #include "cmnd/Stable.h"
 #include "cmnd/Vector.h"
+#include "cmnd/BasicCommands.h"
 #include "core/ObjectTree.h"
 #include "core/LayerNode.h"
 #include "core/LayerSetNode.h"
@@ -122,6 +123,25 @@ void ObjectTree::render(const RenderInfo& aInfo, bool aUseWorkingCache)
     }
 }
 
+cmnd::Vector ObjectTree::createNodeDeleter(ObjectNode& aNode)
+{
+    cmnd::Vector commands;
+
+    core::ObjectNode* parent = aNode.parent();
+    XC_PTR_ASSERT(parent);
+    if (!parent) return commands; // fail safe code
+
+    auto index = parent->children().indexOf(&aNode);
+    XC_ASSERT(index >= 0);
+    if (index < 0) return commands; // fail safe code
+
+    commands.push(BoneKeyUpdater::createNodeUnbinderForDelete(aNode));
+    commands.push(new cmnd::RemoveTree<core::ObjectNode>(&(parent->children()), index));
+    commands.push(new cmnd::GrabDeleteObject<core::ObjectNode>(&aNode));
+
+    return commands;
+}
+
 cmnd::Vector ObjectTree::createNodeMover(
         const util::TreePos& aFrom, const util::TreePos& aTo)
 {
@@ -155,6 +175,7 @@ cmnd::Vector ObjectTree::createNodeMover(
     };
 
     cmnd::Vector commands;
+    commands.push(BoneKeyUpdater::createNodeUnbinderForMove(*this, aFrom, aTo));
     commands.push(new MoveNodeCommand(*this, aFrom, aTo));
     return commands;
 }

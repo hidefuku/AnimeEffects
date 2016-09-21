@@ -96,6 +96,17 @@ bool TreePos::operator==(const TreePos& aRhs) const
     return true;
 }
 
+bool TreePos::contains(const TreePos &aRhs) const
+{
+    if (depth() > aRhs.depth()) return false;
+
+    for (int i = 0; i < depth(); ++i)
+    {
+        if (row(i) != aRhs.row(i)) return false;
+    }
+    return true;
+}
+
 void TreePos::setValidity(bool aIsValid)
 {
     mIsValid = aIsValid;

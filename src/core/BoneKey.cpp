@@ -54,6 +54,19 @@ void BoneKey::Data::deleteAll()
     mTopBones.clear();
 }
 
+bool BoneKey::Data::isBinding(const ObjectNode& aNode) const
+{
+    for (auto topBone : mTopBones)
+    {
+        Bone2::ConstIterator itr(topBone);
+        while (itr.hasNext())
+        {
+            if (itr.next()->isBinding(aNode)) return true;
+        }
+    }
+    return false;
+}
+
 //-------------------------------------------------------------------------------------------------
 BoneKey::Cache::Cache()
     : mInfluence()

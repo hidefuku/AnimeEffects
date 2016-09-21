@@ -29,6 +29,7 @@ public:
         QList<Bone2*>& topBones();
         const QList<Bone2*>& topBones() const;
         void deleteAll();
+        bool isBinding(const ObjectNode& aNode) const;
     };
 
     class Cache
