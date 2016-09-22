@@ -34,11 +34,13 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mHandMove(false)
     , mViewSetting()
 {
+#if 0
     // setup opengl format (for gl removed)
     QSurfaceFormat format = this->format();
     format.setVersion(4, 0);
     format.setProfile(QSurfaceFormat::CoreProfile);
     this->setFormat(format);
+#endif
 
     this->setObjectName(QStringLiteral("MainDisplayWidget"));
     this->setMouseTracking(true);
@@ -114,6 +116,7 @@ void MainDisplayWidget::initializeGL()
     gl::DeviceInfo::createInstance();
     mViaPoint.setGLDeviceInfo(gl::DeviceInfo::instance());
 
+#if 0
     // initialize default vao(for gl removed)
     static GLuint sDefaultVao = 0;
     if (sDefaultVao == 0)
@@ -122,6 +125,7 @@ void MainDisplayWidget::initializeGL()
         gl::Global::functions().glBindVertexArray(sDefaultVao);
         XC_ASSERT(sDefaultVao);
     }
+#endif
 
     // create framebuffer for display
     mFramebuffer.reset(new QOpenGLFramebufferObject(this->size()));

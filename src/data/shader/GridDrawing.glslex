@@ -1,9 +1,9 @@
 #begin_vertex_shader   //---------------------------------------------------------------
-#version 130
+#version 330
 
-in highp vec4  inPosition;
+in vec4  inPosition;
 
-uniform highp mat4 uViewMatrix;
+uniform mat4 uViewMatrix;
 
 void main(void)
 {
@@ -12,10 +12,12 @@ void main(void)
 
 
 #begin_fragment_shader //---------------------------------------------------------------
+#version 330
 
 uniform vec4 uColor;
+layout(location = 0, index = 0) out vec4 oFragColor;
 
 void main(void)
 {
-    gl_FragColor = uColor;
+    oFragColor = uColor;
 }

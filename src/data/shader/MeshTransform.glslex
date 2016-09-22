@@ -4,19 +4,19 @@
 #variation USE_SKINNING 1
 #variation USE_DUAL_QUATERNION 1
 
-in highp vec4  inPosition;
-in highp ivec4 inBoneIndex0;
-in highp ivec4 inBoneIndex1;
-in highp vec4  inBoneWeight0;
-in highp vec4  inBoneWeight1;
+in vec4  inPosition;
+in ivec4 inBoneIndex0;
+in ivec4 inBoneIndex1;
+in vec4  inBoneWeight0;
+in vec4  inBoneWeight1;
 
-uniform highp mat4 uInnerMatrix;
-uniform highp mat4 uWorldMatrix;
+uniform mat4 uInnerMatrix;
+uniform mat4 uWorldMatrix;
 
 #if USE_DUAL_QUATERNION == 0
-uniform highp mat4 uBoneMatrix[32];
+uniform mat4 uBoneMatrix[32];
 #else
-uniform highp vec4 uBoneDualQuat[64];
+uniform vec4 uBoneDualQuat[64];
 #endif
 
 out vec3 outPosition;

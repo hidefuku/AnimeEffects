@@ -189,7 +189,7 @@ void MeshTransformer::callGL(
         program.release();
     }
     ggl.glDisable(GL_RASTERIZER_DISCARD);
-    XC_ASSERT(ggl.glGetError() == GL_NO_ERROR);
+    GL_CHECK_ERROR();
 
     // copy to array buffer
     {
