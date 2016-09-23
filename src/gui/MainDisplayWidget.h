@@ -7,6 +7,7 @@
 #include <QTabBar>
 #include <QReadWriteLock>
 #include "gl/Global.h"
+#include "gl/VertexArrayObject.h"
 #include "gl/EasyTextureDrawer.h"
 #include "core/Project.h"
 #include "core/AbstractCursor.h"
@@ -61,9 +62,10 @@ private:
     void updatePenInfo(QEvent::Type aType, const QPoint& aPos, float aPressure);
 
     ViaPoint& mViaPoint;
+    util::LinkPointer<core::Project> mProject;
+    QScopedPointer<gl::VertexArrayObject> mDefaultVAO;
     QScopedPointer<QOpenGLFramebufferObject> mFramebuffer;
     QScopedPointer<core::ClippingFrame> mClippingFrame;
-    util::LinkPointer<core::Project> mProject;
     QScopedPointer<gl::EasyTextureDrawer> mTextureDrawer;
     QReadWriteLock mRenderingLock;
     core::RenderInfo* mRenderInfo;

@@ -13,6 +13,8 @@
 #include <QOpenGLFunctions>
 #include "core/ClippingFrame.h"
 
+#define USE_GL_CORE_PROFILE 0
+
 namespace gui
 {
 
@@ -20,9 +22,10 @@ namespace gui
 MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     : QOpenGLWidget(aParent)
     , mViaPoint(aViaPoint)
+    , mProject()
+    , mDefaultVAO()
     , mFramebuffer()
     , mClippingFrame()
-    , mProject()
     , mTextureDrawer()
     , mRenderingLock()
     , mRenderInfo()
@@ -34,7 +37,7 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mHandMove(false)
     , mViewSetting()
 {
-#if 0
+#if USE_GL_CORE_PROFILE
     // setup opengl format (for gl removed)
     QSurfaceFormat format = this->format();
     format.setVersion(4, 0);
@@ -52,6 +55,7 @@ MainDisplayWidget::~MainDisplayWidget()
     mTextureDrawer.reset();
     mClippingFrame.reset();
     mFramebuffer.reset();
+    mDefaultVAO.reset();
 
     gl::Global::clearFunctions();
 }
@@ -116,15 +120,10 @@ void MainDisplayWidget::initializeGL()
     gl::DeviceInfo::createInstance();
     mViaPoint.setGLDeviceInfo(gl::DeviceInfo::instance());
 
-#if 0
-    // initialize default vao(for gl removed)
-    static GLuint sDefaultVao = 0;
-    if (sDefaultVao == 0)
-    {
-        gl::Global::functions().glGenVertexArrays(1, &sDefaultVao);
-        gl::Global::functions().glBindVertexArray(sDefaultVao);
-        XC_ASSERT(sDefaultVao);
-    }
+#if USE_GL_CORE_PROFILE
+    // initialize default vao
+    mDefaultVAO.reset(new gl::VertexArrayObject());
+    mDefaultVAO->bind(); // keep binding
 #endif
 
     // create framebuffer for display
@@ -228,9 +227,12 @@ void MainDisplayWidget::paintEvent(QPaintEvent* aEvent)
 
     if (mDriver)
     {
+        // QPainter use legacy gl commands.
+#if !USE_GL_CORE_PROFILE
         XC_PTR_ASSERT(mRenderInfo);
         mDriver->renderQt(*mRenderInfo, painter);
         GL_CHECK_ERROR();
+#endif
     }
 
     // we must call end function
