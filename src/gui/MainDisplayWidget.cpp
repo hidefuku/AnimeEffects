@@ -140,6 +140,8 @@ void MainDisplayWidget::initializeGL()
     {
         XC_FATAL_ERROR("OpenGL Error", "Failed to initialize texture drawer.", "");
     }
+
+    GL_CHECK_ERROR();
 }
 
 void MainDisplayWidget::paintGL()
@@ -149,6 +151,7 @@ void MainDisplayWidget::paintGL()
     // clear clipping
     mClippingFrame->clearTexture();
     mClippingFrame->resetClippingId();
+    GL_CHECK_ERROR();
 
     if (!mFramebuffer->bind())
     {
@@ -159,6 +162,7 @@ void MainDisplayWidget::paintGL()
     gl::Util::setViewportAsActualPixels(this->size());
     gl::Util::clearColorBuffer(0.25f, 0.25f, 0.25f, 1.0f);
     gl::Util::resetRenderState();
+    GL_CHECK_ERROR();
 
     // setup renderinfo
     if (mProject)
@@ -181,6 +185,7 @@ void MainDisplayWidget::paintGL()
         auto gridTarget = mViewSetting.showLayerMesh ?
                               mDriver->currentTarget() : nullptr;
         mDriver->renderGL(*mRenderInfo, gridTarget);
+        GL_CHECK_ERROR();
     }
 
     if (!mFramebuffer->release())
@@ -225,6 +230,7 @@ void MainDisplayWidget::paintEvent(QPaintEvent* aEvent)
     {
         XC_PTR_ASSERT(mRenderInfo);
         mDriver->renderQt(*mRenderInfo, painter);
+        GL_CHECK_ERROR();
     }
 
     // we must call end function
@@ -248,6 +254,7 @@ void MainDisplayWidget::resizeGL(int w, int h)
     {
         mProjectTabBar->updateTabPosition(QSize(w, h));
     }
+    GL_CHECK_ERROR();
 }
 
 void MainDisplayWidget::mouseMoveEvent(QMouseEvent* aEvent)

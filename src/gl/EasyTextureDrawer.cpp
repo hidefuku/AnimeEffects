@@ -135,8 +135,8 @@ void EasyTextureDrawer::draw(
         //static const GLuint kIndices[4] = { 0, 1, 2, 3 };
         static const GLuint kIndices[4] = { 0, 1, 3, 2 };
         mShader.bind();
-        mShader.setAttributeArray("inPosition", aPositions.data());
-        mShader.setAttributeArray("inTexCoord", aTexCoords.data());
+        mShader.setAttributeArray("inPosition", aPositions.data(), 4);
+        mShader.setAttributeArray("inTexCoord", aTexCoords.data(), 4);
         mShader.setUniformValue("uTexture0", 0);
         //ggl.glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, kIndices);
         ggl.glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, kIndices); // for gl removed

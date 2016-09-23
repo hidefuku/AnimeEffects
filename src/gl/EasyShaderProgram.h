@@ -18,6 +18,7 @@ class EasyShaderProgram
 {
 public:
     EasyShaderProgram();
+    ~EasyShaderProgram();
 
     bool setAllSource(const ExtendShader& aShader);
     bool setVertexSource(const ExtendShader& aShader);
@@ -38,32 +39,30 @@ public:
             GLenum aType, int aTuple, int aOffset = 0);
 
     void setRawAttributeArray(
-            const char* aName, GLenum aType,
-            const void* aArray, int aTuple, int aStride = 0);
+            const char* aName, GLenum aType, GLsizeiptr aTypeSize,
+            const void* aArray, int aCount, int aTuple, int aStride = 0);
 
     void setRawAttributeArray(
-            int aLocation, GLenum aType,
-            const void* aArray, int aTuple, int aStride = 0);
+            int aLocation, GLenum aType, GLsizeiptr aTypeSize,
+            const void* aArray, int aCount, int aTuple, int aStride = 0);
 
-    void setAttributeArray(const char* aName, const GLfloat* aArray);
-    void setAttributeArray(const char* aName, const gl::Vector2* aArray);
-    void setAttributeArray(const char* aName, const gl::Vector3* aArray);
-    void setAttributeArray(const char* aName, const gl::Vector4* aArray);
-    void setAttributeArray(const char* aName, const GLubyte* aArray);
-    void setAttributeArray(const char* aName, const gl::Vector2I* aArray);
-    void setAttributeArray(const char* aName, const gl::Vector4I* aArray);
+    void setRawAttributeIArray(
+            const char* aName, GLenum aType, GLsizeiptr aTypeSize,
+            const void* aArray, int aCount, int aTuple, int aStride = 0);
 
-    void setAttributeArray(int aLocation, const GLfloat* aArray);
-    void setAttributeArray(int aLocation, const GLubyte* aArray);
+    void setRawAttributeIArray(
+            int aLocation, GLenum aType, GLsizeiptr aTypeSize,
+            const void* aArray, int aCount, int aTuple, int aStride = 0);
 
-    template<typename tType>
-    void setTupleAttributeArray(const char* aName, const tType* aArray, int aTuple)
-    {
-        const int location = mImpl.attributeLocation(aName);
-        mImpl.enableAttributeArray(location);
-        mImpl.setAttributeArray(location, aArray, aTuple);
-        mAttributeLocations.push_back(location);
-    }
+    void setAttributeArray(const char* aName, const GLfloat* aArray, int aCount);
+    void setAttributeArray(const char* aName, const gl::Vector2* aArray, int aCount);
+    void setAttributeArray(const char* aName, const gl::Vector3* aArray, int aCount);
+    void setAttributeArray(const char* aName, const gl::Vector4* aArray, int aCount);
+    void setAttributeArray(const char* aName, const GLubyte* aArray, int aCount);
+    void setAttributeArray(const char* aName, const gl::Vector2I* aArray, int aCount);
+    void setAttributeArray(const char* aName, const gl::Vector4I* aArray, int aCount);
+    void setAttributeArray(int aLocation, const GLfloat* aArray, int aCount);
+    void setAttributeArray(int aLocation, const GLubyte* aArray, int aCount);
 
     int uniformLocation(const char* aName) const;
 
@@ -92,8 +91,11 @@ public:
     }
 
 private:
+    void makeSureVBO(int aLocation, GLsizeiptr aTypeSize, const void* aArray, int aCount);
+
     QOpenGLShaderProgram mImpl;
     std::vector<int> mAttributeLocations;
+    QMap<int, BufferObject*> mVBOs;
 };
 
 } // namespace gl

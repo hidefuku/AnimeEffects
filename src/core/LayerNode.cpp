@@ -203,7 +203,7 @@ void LayerNode::renderClipper(
         shader.bind();
 
         shader.setAttributeBuffer("inPosition", mMeshTransformer.positions(), GL_FLOAT, 3);
-        shader.setAttributeArray("inTexCoord", mCurrentMesh->texCoords());
+        shader.setAttributeArray("inTexCoord", mCurrentMesh->texCoords(), mCurrentMesh->vertexCount());
 
         shader.setUniformValue("uViewMatrix", viewMatrix);
         shader.setUniformValue("uColor", color);
@@ -331,7 +331,7 @@ void LayerNode::renderShape(
         shader.bind();
 
         shader.setAttributeBuffer("inPosition", mMeshTransformer.positions(), GL_FLOAT, 3);
-        shader.setAttributeArray("inTexCoord", mCurrentMesh->texCoords());
+        shader.setAttributeArray("inTexCoord", mCurrentMesh->texCoords(), mCurrentMesh->vertexCount());
 
         shader.setUniformValue("uViewMatrix", viewMatrix);
         shader.setUniformValue("uColor", color);

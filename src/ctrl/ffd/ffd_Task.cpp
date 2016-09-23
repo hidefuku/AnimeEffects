@@ -277,6 +277,7 @@ void Task::onRequested()
 
     gl::Global::Functions& ggl = gl::Global::functions();
     gl::EasyShaderProgram& program = mResource.program(mParam.type, mParam.hardness);
+    const int srcVtxCount = mSrcMesh.count();
 
     gl::Util::resetRenderState();
     ggl.glEnable(GL_RASTERIZER_DISCARD);
@@ -285,7 +286,7 @@ void Task::onRequested()
 
         if (mParam.type == kTypeDeformer)
         {
-            program.setAttributeArray("inPosition", mSrcMesh.array());
+            program.setAttributeArray("inPosition", mSrcMesh.array(), srcVtxCount);
             program.setAttributeBuffer("inWorldPosition", mMeshTransformer.positions(), GL_FLOAT, 3);
             program.setAttributeBuffer("inXArrow", mMeshTransformer.xArrows(), GL_FLOAT, 3);
             program.setAttributeBuffer("inYArrow", mMeshTransformer.yArrows(), GL_FLOAT, 3);
@@ -301,9 +302,9 @@ void Task::onRequested()
         }
         else
         {
-            program.setAttributeArray("inPosition", mSrcMesh.array());
+            program.setAttributeArray("inPosition", mSrcMesh.array(), srcVtxCount);
             program.setAttributeBuffer("inWorldPosition", mMeshTransformer.positions(), GL_FLOAT, 3);
-            program.setAttributeArray("inOriginPosition", mOriginMesh);
+            program.setAttributeArray("inOriginPosition", mOriginMesh, srcVtxCount);
 
             program.setUniformValue("uBrushCenter", mBrushCenter);
             program.setUniformValue("uBrushRadius", (float)mParam.eraseRadius);
@@ -332,9 +333,10 @@ void Task::requestBlur()
 {
     gl::Global::Functions& ggl = gl::Global::functions();
     gl::EasyShaderProgram& program = mResource.blurProgram();
+    const int srcVtxCount = mSrcMesh.count();
 
-    mWorkInMesh.copyFrom<gl::Vector3>(mOutMesh);
-    mWorkInWeight.copyFrom<GLfloat>(mOutWeight);
+    mWorkInMesh.copyFrom(mOutMesh);
+    mWorkInWeight.copyFrom(mOutWeight);
 
     ggl.glEnable(GL_RASTERIZER_DISCARD);
     ggl.glEnable(GL_TEXTURE_1D);
@@ -356,9 +358,8 @@ void Task::requestBlur()
 
                 program.setAttributeBuffer("inPosition", mWorkInMesh, GL_FLOAT, 3);
                 program.setAttributeBuffer("inWeight", mWorkInWeight, GL_FLOAT, 1);
-                program.setAttributeArray("inOriginPosition", mOriginMesh);
-                program.setAttributeArray("inIndexRange",
-                                          mArrayedConnectionList.indexRanges.data());
+                program.setAttributeArray("inOriginPosition", mOriginMesh, srcVtxCount);
+                program.setAttributeArray("inIndexRange", mArrayedConnectionList.indexRanges.data(), srcVtxCount);
 
                 program.setUniformValue("uConnections", 0);
                 program.setUniformValue("uConnectionCount",

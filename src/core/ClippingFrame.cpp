@@ -135,7 +135,8 @@ void ClippingFrame::singulate(uint8 aId)
 {
     if (mTexture->id() == 0) return;
 
-    static const GLuint kIndices[4] = { 0, 1, 2, 3 };
+    //static const GLuint kIndices[4] = { 0, 1, 2, 3 };
+    static const GLuint kIndices[4] = { 0, 1, 3, 2 };
     std::array<gl::Vector2, 4> positions;
     positions[0].set(-1.0f, -1.0f);
     positions[1].set(-1.0f,  1.0f);
@@ -161,11 +162,12 @@ void ClippingFrame::singulate(uint8 aId)
     ggl.glBindTexture(GL_TEXTURE_2D, textureId);
 
     shader.bind();
-    shader.setAttributeArray("inPosition", positions.data());
-    shader.setAttributeArray("inTexCoord", texCoords.data());
+    shader.setAttributeArray("inPosition", positions.data(), 4);
+    shader.setAttributeArray("inTexCoord", texCoords.data(), 4);
     shader.setUniformValue("uSingulation", (GLuint)aId);
     shader.setUniformValue("uTexture0", 0);
-    ggl.glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, kIndices);
+    //ggl.glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, kIndices);
+    ggl.glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, kIndices); // for gl removed
     shader.release();
 
     ggl.glActiveTexture(GL_TEXTURE0);
@@ -216,10 +218,10 @@ void ClippingFrame::drawClipping(gl::BufferObject& aPositions)
         positions[2].set( 1.0f,  1.0f);
         positions[3].set( 1.0f, -1.0f);
 
-        static const GLuint kIndices[4] = { 0, 1, 2, 3 };
+        static const GLuint kIndices[4] = { 0, 1, 3, 2 };
         shader.bind();
         shader.setAttributeArray("inPosition", positions.data());
-        ggl.glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, kIndices);
+        ggl.glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, kIndices);
         shader.release();
     }
 }

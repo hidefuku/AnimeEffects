@@ -127,14 +127,16 @@ void MeshTransformer::callGL(
     const bool useDualQuaternion = true;
     BoneInfluenceMap::Accessor inflData;
 
+    const int vtxCount = aPositions.count();
+
     if (useInfluence)
     {
         worldMatrix = aExpans.outerMatrix();
         innerMatrix = aExpans.innerMatrix();
         inflData = influence->accessor();
 
-        XC_MSG_ASSERT(influence->vertexCount() == aPositions.count(),
-                      "%d, %d", aPositions.count(), influence->vertexCount());
+        XC_MSG_ASSERT(influence->vertexCount() == vtxCount,
+                      "%d, %d", vtxCount, influence->vertexCount());
     }
     else
     {
@@ -150,16 +152,16 @@ void MeshTransformer::callGL(
     {
         program.bind();
 
-        program.setAttributeArray("inPosition", aPositions.array());
+        program.setAttributeArray("inPosition", aPositions.array(), vtxCount);
         program.setUniformValue("uInnerMatrix", innerMatrix);
         program.setUniformValue("uWorldMatrix", worldMatrix);
 
         if (useInfluence)
         {
-            program.setAttributeArray("inBoneIndex0", inflData.indices0());
-            program.setAttributeArray("inBoneWeight0", inflData.weights0());
-            program.setAttributeArray("inBoneIndex1", inflData.indices1());
-            program.setAttributeArray("inBoneWeight1", inflData.weights1());
+            program.setAttributeArray("inBoneIndex0", inflData.indices0(), vtxCount);
+            program.setAttributeArray("inBoneWeight0", inflData.weights0(), vtxCount);
+            program.setAttributeArray("inBoneIndex1", inflData.indices1(), vtxCount);
+            program.setAttributeArray("inBoneWeight1", inflData.weights1(), vtxCount);
 
             if (useDualQuaternion)
             {

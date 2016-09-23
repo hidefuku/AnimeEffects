@@ -8,7 +8,9 @@ namespace gl
 BufferObject::BufferObject(GLenum aType)
     : mType(aType)
     , mId(0)
+    , mTypeSize(0)
     , mDataCount(0)
+    , mUsage()
 {
     Global::functions().glGenBuffers(1, &mId);
 }
@@ -21,25 +23,44 @@ BufferObject::~BufferObject()
     }
 }
 
-void BufferObject::resetDataImpl(GLsizeiptr aSize, const GLvoid* aData, GLenum aUsage)
+void BufferObject::resetRawData(GLsizeiptr aTypeSize, const GLvoid* aData,
+                                int aDataCount, GLenum aUsage)
 {
     Global::Functions& ggl = Global::functions();
-    ggl.glBindBuffer(mType, mId);
-    ggl.glBufferData(mType, aSize, aData, aUsage);
-    ggl.glBindBuffer(mType, 0);
-    XC_ASSERT(ggl.glGetError() == GL_NO_ERROR);
+    if (mTypeSize == aTypeSize && mDataCount == aDataCount && mUsage == aUsage)
+    {
+        if (aData)
+        {
+            ggl.glBindBuffer(mType, mId);
+            ggl.glBufferSubData(mType, 0, aTypeSize * aDataCount, aData);
+            ggl.glBindBuffer(mType, 0);
+            GL_CHECK_ERROR();
+        }
+    }
+    else
+    {
+        mTypeSize = aTypeSize;
+        mDataCount = aDataCount;
+        mUsage = aUsage;
+
+        ggl.glBindBuffer(mType, mId);
+        ggl.glBufferData(mType, aTypeSize * aDataCount, aData, aUsage);
+        ggl.glBindBuffer(mType, 0);
+        GL_CHECK_ERROR();
+    }
 }
 
-void BufferObject::copyFromImpl(const BufferObject& aFrom, size_t aTypeSize)
+void BufferObject::copyFrom(const BufferObject& aFrom)
 {
     XC_ASSERT(mDataCount == aFrom.dataCount());
+    XC_ASSERT(mTypeSize == aFrom.typeSize());
     XC_ASSERT(mId != 0 && aFrom.id() != 0);
 
     Global::Functions& ggl = Global::functions();
 
     ggl.glBindBuffer(mType, mId);
     ggl.glBindBuffer(aFrom.type(), aFrom.id());
-    ggl.glCopyBufferSubData(aFrom.type(), mType, 0, 0, aTypeSize * mDataCount);
+    ggl.glCopyBufferSubData(aFrom.type(), mType, 0, 0, mTypeSize * mDataCount);
     ggl.glBindBuffer(mType, 0);
     ggl.glBindBuffer(aFrom.type(), 0);
 }

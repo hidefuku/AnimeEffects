@@ -16,31 +16,29 @@ public:
     template<typename tValue>
     void resetData(int aDataCount, GLenum aUsage, const tValue* aDataPtr = NULL)
     {
-        mDataCount = aDataCount;
-        resetDataImpl(sizeof(tValue) * aDataCount, aDataPtr, aUsage);
+        resetRawData(sizeof(tValue), aDataPtr, aDataCount, aUsage);
     }
 
-    template<typename tType>
-    void copyFrom(const BufferObject& aFrom)
-    {
-        copyFromImpl(aFrom, sizeof(tType));
-    }
+    void resetRawData(GLsizeiptr aTypeSize, const GLvoid* aData,
+                      int aDataCount, GLenum aUsage);
+
+    void copyFrom(const BufferObject& aFrom);
 
     explicit operator bool() const { return mId != 0; }
     int dataCount() const { return mDataCount; }
     GLenum type() const { return mType; }
     GLuint id() const { return mId; }
+    GLsizeiptr typeSize() const { return mTypeSize; }
 
     void bind();
     void release();
 
 private:
-    void resetDataImpl(GLsizeiptr aSize, const GLvoid* aData, GLenum aUsage);
-    void copyFromImpl(const BufferObject& aFrom, size_t aTypeSize);
-
     GLenum mType;
     GLuint mId;
+    GLsizeiptr mTypeSize;
     int mDataCount;
+    GLenum mUsage;
 };
 
 } // namespace gl
