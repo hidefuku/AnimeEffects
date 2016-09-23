@@ -1,11 +1,11 @@
 #begin_vertex_shader   //---------------------------------------------------------------
 #version 130
 
-in highp vec4  inPosition;
-in highp vec2  inTexCoord;
-//in highp vec3  inNormal;
+in vec4  inPosition;
+in vec2  inTexCoord;
+//in vec3  inNormal;
 
-uniform highp mat4 uViewMatrix;
+uniform mat4 uViewMatrix;
 
 out vec2 vTexCoord;
 out vec2 vDestCoord;

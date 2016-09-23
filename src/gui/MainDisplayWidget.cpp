@@ -34,6 +34,12 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mHandMove(false)
     , mViewSetting()
 {
+    // setup opengl format (for gl removed)
+    QSurfaceFormat format = this->format();
+    format.setVersion(4, 0);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    this->setFormat(format);
+
     this->setObjectName(QStringLiteral("MainDisplayWidget"));
     this->setMouseTracking(true);
     this->setAutoFillBackground(false); // avoid auto fill on QPainter::begin()
@@ -107,6 +113,15 @@ void MainDisplayWidget::initializeGL()
     // initialize opengl device info
     gl::DeviceInfo::createInstance();
     mViaPoint.setGLDeviceInfo(gl::DeviceInfo::instance());
+
+    // initialize default vao(for gl removed)
+    static GLuint sDefaultVao = 0;
+    if (sDefaultVao == 0)
+    {
+        gl::Global::functions().glGenVertexArrays(1, &sDefaultVao);
+        gl::Global::functions().glBindVertexArray(sDefaultVao);
+        XC_ASSERT(sDefaultVao);
+    }
 
     // create framebuffer for display
     mFramebuffer.reset(new QOpenGLFramebufferObject(this->size()));
@@ -188,6 +203,7 @@ void MainDisplayWidget::paintGL()
     }
 
     ggl.glFlush();
+    GL_CHECK_ERROR();
 }
 
 void MainDisplayWidget::paintEvent(QPaintEvent* aEvent)

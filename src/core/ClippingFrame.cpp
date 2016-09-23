@@ -156,7 +156,7 @@ void ClippingFrame::singulate(uint8 aId)
     gl::Util::setViewportAsActualPixels(textureSize);
     gl::Util::resetRenderState();
 
-    ggl.glEnable(GL_TEXTURE_2D);
+    //ggl.glEnable(GL_TEXTURE_2D);
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_2D, textureId);
 
@@ -170,7 +170,7 @@ void ClippingFrame::singulate(uint8 aId)
 
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_2D, 0);
-    ggl.glDisable(GL_TEXTURE_2D);
+    //ggl.glDisable(GL_TEXTURE_2D);
 
     mFramebuffer->release();
     XC_ASSERT(ggl.glGetError() == GL_NO_ERROR);

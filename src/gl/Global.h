@@ -31,4 +31,17 @@ private:
 
 } // namespace gl
 
+
+#include "XCAssert.h"
+
+#define GL_CHECK_ERROR()                                  \
+    do {                                                  \
+        GLuint e = gl::Global::functions().glGetError();  \
+        if (e != GL_NO_ERROR) {                           \
+            XC_DEBUG_REPORT("OpenGL Error (code:%u)", e); \
+            Q_ASSERT(0);                                  \
+        }                                                 \
+    } while (0)
+
+
 #endif // GL_GLOBAL_H

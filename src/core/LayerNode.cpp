@@ -188,7 +188,7 @@ void LayerNode::renderClipper(
     frame.setupDrawBuffers();
 
     // bind textures
-    ggl.glEnable(GL_TEXTURE_2D);
+    //ggl.glEnable(GL_TEXTURE_2D);
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_2D, mTexture.id());
     ggl.glActiveTexture(GL_TEXTURE1);
@@ -226,7 +226,7 @@ void LayerNode::renderClipper(
     // unbind texture
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_2D, 0);
-    ggl.glDisable(GL_TEXTURE_2D);
+    //ggl.glDisable(GL_TEXTURE_2D);
 
     // release framebuffer
     frame.release();
@@ -308,7 +308,7 @@ void LayerNode::renderShape(
     }
     else
     {
-        ggl.glEnable(GL_TEXTURE_2D);
+        //ggl.glEnable(GL_TEXTURE_2D);
         ggl.glActiveTexture(GL_TEXTURE0);
         ggl.glBindTexture(GL_TEXTURE_2D, mTexture.id());
         ggl.glActiveTexture(GL_TEXTURE1);
@@ -360,7 +360,7 @@ void LayerNode::renderShape(
     {
         ggl.glActiveTexture(GL_TEXTURE0);
         ggl.glBindTexture(GL_TEXTURE_2D, 0);
-        ggl.glDisable(GL_TEXTURE_2D);
+        //ggl.glDisable(GL_TEXTURE_2D);
     }
 
     ggl.glFlush();

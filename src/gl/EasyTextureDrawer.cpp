@@ -23,6 +23,7 @@ bool EasyTextureDrawer::init()
             "  vTexCoord = inTexCoord;"
             "}";
     static const char* kFragmentShaderText =
+            "#version 130 \n"
             "uniform sampler2D uTexture0;"
             "in vec2 vTexCoord;"
             "void main(void){"
@@ -126,21 +127,25 @@ void EasyTextureDrawer::draw(
 
     Util::resetRenderState();
 
-    ggl.glEnable(GL_TEXTURE_2D);
+    //ggl.glEnable(GL_TEXTURE_2D);
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_2D, aTexture);
     {
-        static const GLuint kIndices[4] = { 0, 1, 2, 3 };
+        //static const GLuint kIndices[4] = { 0, 1, 2, 3 };
+        static const GLuint kIndices[4] = { 0, 1, 3, 2 };
         mShader.bind();
         mShader.setAttributeArray("inPosition", aPositions.data());
         mShader.setAttributeArray("inTexCoord", aTexCoords.data());
         mShader.setUniformValue("uTexture0", 0);
-        ggl.glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, kIndices);
+        //ggl.glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, kIndices);
+        ggl.glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, kIndices); // for gl removed
         mShader.release();
     }
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_2D, 0);
-    ggl.glDisable(GL_TEXTURE_2D);
+    //ggl.glDisable(GL_TEXTURE_2D);
+
+    GL_CHECK_ERROR();
 }
 
 } // namespace gl

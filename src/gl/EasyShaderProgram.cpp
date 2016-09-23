@@ -118,7 +118,22 @@ void EasyShaderProgram::setAttributeArray(const char* aName, const GLfloat* aArr
 
 void EasyShaderProgram::setAttributeArray(const char* aName, const gl::Vector2* aArray)
 {
+    // for gl removed
+#if 1
+    static GLuint sVB = 0;
+    if (!sVB) {
+        gl::Global::functions().glGenBuffers(1, &sVB);
+        gl::Global::functions().glBindBuffer(GL_ARRAY_BUFFER, sVB);
+        gl::Global::functions().glBufferData(GL_ARRAY_BUFFER, 1024 * 1024, NULL, GL_STATIC_DRAW);
+    }
+    else
+    {
+        gl::Global::functions().glBindBuffer(GL_ARRAY_BUFFER, sVB);
+    }
+#endif
+
     setTupleAttributeArray<GLfloat>(aName, (const GLfloat*)aArray, 2);
+    GL_CHECK_ERROR();
 }
 
 void EasyShaderProgram::setAttributeArray(const char* aName, const gl::Vector3* aArray)
