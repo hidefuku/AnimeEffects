@@ -94,6 +94,8 @@ Bone2* Focuser::updateImpl(const CameraInfo& aCamera, const QVector2D& aPos)
             const QVector2D ppos = (mTargetMtx * QVector3D(parent->worldPos())).toVector2D();
             const QVector2D cpos = (mTargetMtx * QVector3D(bone->worldPos())).toVector2D();
 
+            if ((ppos - cpos).length() < FLT_EPSILON) continue;
+
             auto quad = Renderer::getBoneQuad(
                         ppos.toPointF(), cpos.toPointF());
             // quad
