@@ -7,6 +7,7 @@
 #include <QTabBar>
 #include <QReadWriteLock>
 #include "gl/Global.h"
+#include "gl/Root.h"
 #include "gl/VertexArrayObject.h"
 #include "gl/EasyTextureDrawer.h"
 #include "core/Project.h"
@@ -46,6 +47,15 @@ public:
     void onProjectAttributeUpdated();
 
 private:
+    class GLContextAccessor : public gl::ContextAccessor
+    {
+        MainDisplayWidget* mOwner;
+    public:
+        GLContextAccessor(MainDisplayWidget* aOwner) : mOwner(aOwner) {}
+        virtual void makeCurrent() { mOwner->makeCurrent(); }
+        virtual void doneCurrent() { mOwner->doneCurrent(); }
+    };
+
     // from QOpenGLWidget
     virtual void initializeGL();
     virtual void paintGL();
@@ -63,6 +73,8 @@ private:
 
     ViaPoint& mViaPoint;
     util::LinkPointer<core::Project> mProject;
+    gl::Root mGLRoot;
+    GLContextAccessor mGLContextAccessor;
     QScopedPointer<gl::VertexArrayObject> mDefaultVAO;
     QScopedPointer<QOpenGLFramebufferObject> mFramebuffer;
     QScopedPointer<core::ClippingFrame> mClippingFrame;

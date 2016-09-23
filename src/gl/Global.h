@@ -14,6 +14,8 @@ class Global
 public:
     typedef QOpenGLFunctions_4_0_Core Functions;
     //typedef QOpenGLFunctions_3_2_Core Functions;
+    enum { kMajorVersion = 4 };
+    enum { kMinorVersion = 0 };
 
     static void setFunctions(Functions& aFunctions);
     static void clearFunctions();

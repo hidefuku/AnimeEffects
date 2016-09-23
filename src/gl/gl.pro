@@ -35,7 +35,8 @@ SOURCES += \
     DeviceInfo.cpp \
     Framebuffer.cpp \
     EasyTextureDrawer.cpp \
-    VertexArrayObject.cpp
+    VertexArrayObject.cpp \
+    Root.cpp
 
 HEADERS += \
     EasyShaderProgram.h \
@@ -54,4 +55,5 @@ HEADERS += \
     DeviceInfo.h \
     Framebuffer.h \
     EasyTextureDrawer.h \
-    VertexArrayObject.h
+    VertexArrayObject.h \
+    Root.h

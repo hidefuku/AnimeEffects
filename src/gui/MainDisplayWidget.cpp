@@ -23,6 +23,8 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     : QOpenGLWidget(aParent)
     , mViaPoint(aViaPoint)
     , mProject()
+    , mGLRoot()
+    , mGLContextAccessor(this)
     , mDefaultVAO()
     , mFramebuffer()
     , mClippingFrame()
@@ -40,7 +42,7 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
 #if USE_GL_CORE_PROFILE
     // setup opengl format (for gl removed)
     QSurfaceFormat format = this->format();
-    format.setVersion(4, 0);
+    format.setVersion(gl::Global::kMajorVersion, gl::Global::kMinorVersion);
     format.setProfile(QSurfaceFormat::CoreProfile);
     this->setFormat(format);
 #endif
@@ -115,6 +117,9 @@ void MainDisplayWidget::initializeGL()
     // setup global info
     gl::Global::setContext(*this);
     gl::Global::setFunctions(*functions);
+    // setup gl root
+    mGLRoot.setContextAccessor(mGLContextAccessor);
+    mGLRoot.setFunctions(*functions);
 
     // initialize opengl device info
     gl::DeviceInfo::createInstance();
