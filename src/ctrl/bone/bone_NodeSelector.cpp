@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "core/TimeKeyBlender.h"
 #include "ctrl/bone/bone_NodeSelector.h"
 
@@ -10,7 +11,8 @@ NodeSelector::Tag::Tag()
     : node()
     , parent()
     , children()
-    , rect()
+    , originRect()
+    , sortedRect()
     , isDir(false)
     , isOpened(false)
 {
@@ -25,6 +27,7 @@ NodeSelector::NodeSelector(ObjectNode& aTopNode, const GraphicStyle& aStyle)
     , mCurrentSelect()
     , mIconFocused(false)
     , mFocusChanged(false)
+    , mSortVector()
 {
     resetTags(mTopNode, mTopTag);
     mTopTag.isOpened = true;
@@ -45,18 +48,67 @@ void NodeSelector::resetTags(ObjectNode& aNode, Tag& aTag)
     }
 }
 
-void NodeSelector::updateGeometry(const TimeInfo& aTime)
+void NodeSelector::initGeometries()
 {
-    updateGeometryRecursive(mTopTag, aTime);
+    setGeometryRecursive(mTopTag);
 }
 
-void NodeSelector::updateGeometryRecursive(Tag& aTag, const TimeInfo& aTime)
+void NodeSelector::setGeometryRecursive(Tag& aTag)
 {
-    aTag.rect = getNodeRectF(*aTag.node, aTime);
+    aTag.originRect = getNodeRectF(*aTag.node);
+    aTag.sortedRect = aTag.originRect;
 
     for (auto& childTag : aTag.children)
     {
-        updateGeometryRecursive(childTag, aTime);
+        setGeometryRecursive(childTag);
+    }
+}
+
+bool NodeSelector::compareNodeTagHeight(Tag* a, Tag* b)
+{
+    return a->originRect.y() < b->originRect.y();
+}
+
+void NodeSelector::sortCurrentGeometries(const core::CameraInfo& aCamera)
+{
+    mSortVector.clear();
+
+    auto childrenCount = mCurrentTopTag->children.size();
+    const int sortCount = childrenCount + (mCurrentTopTag->invisibleTop() ? 0 : 1);
+    if (sortCount == 0) return;
+
+    if (mSortVector.size() < sortCount)
+    {
+        mSortVector.reserve(sortCount);
+    }
+
+    if (!mCurrentTopTag->invisibleTop())
+    {
+        mSortVector.push_back(mCurrentTopTag);
+    }
+    for (auto& childTag : mCurrentTopTag->children)
+    {
+        mSortVector.push_back(&childTag);
+    }
+    std::stable_sort(mSortVector.begin(), mSortVector.end(), compareNodeTagHeight);
+
+    // initialize a geometry of the highest tag
+    auto highestTag = mSortVector[0];
+    highestTag->sortedRect.moveTopLeft(aCamera.toScreenPos(highestTag->originRect.topLeft()));
+
+    for (int i = 1; i < mSortVector.size(); ++i)
+    {
+        Tag* tag = mSortVector[i];
+        tag->sortedRect.moveTopLeft(aCamera.toScreenPos(tag->originRect.topLeft()));
+
+        for (int k = 0; k < i; ++k)
+        {
+            Tag* higherTag = mSortVector[k];
+            if (tag->sortedRect.intersects(higherTag->sortedRect))
+            {
+                tag->sortedRect.moveTop(higherTag->sortedRect.bottom());
+            }
+        }
     }
 }
 
@@ -73,7 +125,7 @@ ObjectNode* NodeSelector::updateFocus(const CameraInfo& aCamera, const QVector2D
     // update intersection with the top
     if (!mCurrentTopTag->invisibleTop())
     {
-        if (updateIntersection(*mCurrentTopTag, aCamera, scrPointF))
+        if (updateIntersection(*mCurrentTopTag, scrPointF))
         {
             mFocusChanged = (prevIconFocused != mIconFocused || prevCurrentFocus != mCurrentFocus);
             return mCurrentTopTag->node;
@@ -83,7 +135,7 @@ ObjectNode* NodeSelector::updateFocus(const CameraInfo& aCamera, const QVector2D
     // update intersections with children
     for (auto& childTag : mCurrentTopTag->children)
     {
-        if (updateIntersection(childTag, aCamera, scrPointF))
+        if (updateIntersection(childTag, scrPointF))
         {
             mFocusChanged = (prevIconFocused != mIconFocused || prevCurrentFocus != mCurrentFocus);
             return childTag.node;
@@ -94,13 +146,11 @@ ObjectNode* NodeSelector::updateFocus(const CameraInfo& aCamera, const QVector2D
     return nullptr;
 }
 
-bool NodeSelector::updateIntersection(
-        Tag& aTag, const CameraInfo& aCamera, const QPointF& aPos)
+bool NodeSelector::updateIntersection(Tag& aTag, const QPointF& aPos)
 {
     XC_ASSERT(!aTag.invisibleTop());
 
-    QRectF scrRect = aTag.rect;
-    scrRect.moveTopLeft(aCamera.toScreenPos(scrRect.topLeft()));
+    QRectF scrRect = aTag.sortedRect;
     const float iconSize = scrRect.height();
 
     const QRectF scrIconRect(scrRect.topLeft() + QPointF(-iconSize, 0.0f),
@@ -121,9 +171,8 @@ bool NodeSelector::updateIntersection(
     return false;
 }
 
-QRectF NodeSelector::getNodeRectF(ObjectNode& aNode, const TimeInfo& aInfo) const
+QRectF NodeSelector::getNodeRectF(ObjectNode& aNode) const
 {
-    (void)aInfo;
     XC_PTR_ASSERT(aNode.timeLine());
     auto mtx = aNode.timeLine()->current().srt().worldMatrix();
     auto pos = mtx.column(3).toVector3D();
@@ -132,7 +181,7 @@ QRectF NodeSelector::getNodeRectF(ObjectNode& aNode, const TimeInfo& aInfo) cons
     return QRectF(pos.toPointF(), QSizeF(bb.size()));
 }
 
-ObjectNode* NodeSelector::click()
+ObjectNode* NodeSelector::click(const CameraInfo& aCamera)
 {
     if (mCurrentFocus)
     {
@@ -152,6 +201,7 @@ ObjectNode* NodeSelector::click()
             }
             mCurrentFocus = nullptr;
             mIconFocused = false;
+            sortCurrentGeometries(aCamera);
             return nullptr;
         }
         else
@@ -186,6 +236,19 @@ void NodeSelector::clearSelection()
     mCurrentSelect = nullptr;
 }
 
+NodeSelector::Tag* NodeSelector::findVisibleTag(const core::ObjectNode& aNode) const
+{
+    if (!mCurrentTopTag->invisibleTop())
+    {
+        if (mCurrentTopTag->node == &aNode) return mCurrentTopTag;
+    }
+
+    for (auto& child : mCurrentTopTag->children)
+    {
+        if (child.node == &aNode) return &child;
+    }
+    return nullptr;
+}
 
 void NodeSelector::renderBindings(const RenderInfo& aInfo, QPainter& aPainter,
                                   const QMatrix4x4& aTargetMtx, const Bone2* aTopBone)
@@ -194,24 +257,32 @@ void NodeSelector::renderBindings(const RenderInfo& aInfo, QPainter& aPainter,
     while (itr.hasNext())
     {
         auto bone = itr.next();
+        auto parent = bone->parent();
         auto bpos = aInfo.camera.toScreenPos(aTargetMtx * QVector3D(bone->worldPos())).toPointF();
+        if (parent)
+        {
+            auto pbpos = aInfo.camera.toScreenPos(aTargetMtx * QVector3D(parent->worldPos())).toPointF();
+            bpos = (bpos + pbpos) / 2.0f;
+        }
 
         aPainter.setBrush(Qt::NoBrush);
         aPainter.setPen(QPen(QBrush(QColor(255, 255, 255, 128)), 1.5f, Qt::DotLine));
 
         for (auto node : bone->bindingNodes())
         {
-            if (!node->timeLine()) continue;
-            auto worldMatrix = node->timeLine()->current().srt().worldMatrix();
-            auto npos = aInfo.camera.toScreenPos((worldMatrix * QVector3D(0, 0, 0)).toVector2D());
-            aPainter.drawLine(bpos, npos.toPointF());
+            auto tag = findVisibleTag(*node);
+            if (tag)
+            {
+                auto npos = tag->sortedRect.center();
+                aPainter.drawLine(bpos, npos);
+            }
         }
     }
 }
 
 void NodeSelector::renderTags(const core::RenderInfo& aInfo, QPainter& aPainter)
 {
-    auto tagHeight = mCurrentTopTag->rect.height();
+    auto tagHeight = mCurrentTopTag->sortedRect.height();
     QPixmap iconPix = mGraphicStyle.icon("dooropen").pixmap(tagHeight);
 
 #if 1
@@ -265,6 +336,7 @@ void NodeSelector::renderTags(const core::RenderInfo& aInfo, QPainter& aPainter)
 void NodeSelector::renderOneNode(const Tag& aTag, QPixmap& aIconPix, int aColorType,
                                  const RenderInfo& aInfo, QPainter& aPainter)
 {
+    (void)aInfo;
     QBrush textBrush(QColor(255, 255, 255, 255));
     QBrush backBrush(QColor(0, 0, 0, 200));
 
@@ -280,10 +352,7 @@ void NodeSelector::renderOneNode(const Tag& aTag, QPixmap& aIconPix, int aColorT
     }
 
     auto nodeName = aTag.node->name();
-
-    QRectF scrRectF = aTag.rect;
-    scrRectF.moveTopLeft(aInfo.camera.toScreenPos(scrRectF.topLeft()));
-    const QRect scrRect = scrRectF.toRect();
+    const QRect scrRect = aTag.sortedRect.toRect();
 
     aPainter.setPen(Qt::NoPen);
     aPainter.setBrush(backBrush);
@@ -298,7 +367,7 @@ void NodeSelector::renderOneNode(const Tag& aTag, QPixmap& aIconPix, int aColorT
     // icon
     if (aTag.isDir)
     {
-        const int iconWidth = aTag.rect.height();
+        const int iconWidth = aTag.sortedRect.height();
         const QSize iconSize(iconWidth, iconWidth);
         const QPoint iconOffset(-iconWidth, 0);
         const QRect iconRect(scrRect.topLeft() + iconOffset, iconSize);

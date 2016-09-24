@@ -1,9 +1,9 @@
 #ifndef CTRL_BONE_NODESELECTOR_H
 #define CTRL_BONE_NODESELECTOR_H
 
+#include <vector>
 #include "core/ObjectNode.h"
 #include "core/CameraInfo.h"
-#include "core/TimeInfo.h"
 #include "ctrl/GraphicStyle.h"
 
 namespace ctrl {
@@ -14,10 +14,11 @@ class NodeSelector
 public:
     NodeSelector(core::ObjectNode& aTopNode, const GraphicStyle& aStyle);
 
-    void updateGeometry(const core::TimeInfo& aTime);
+    void initGeometries();
+    void sortCurrentGeometries(const core::CameraInfo& aCamera);
     core::ObjectNode* updateFocus(const core::CameraInfo& aCamera, const QVector2D& aPos);
 
-    core::ObjectNode* click();
+    core::ObjectNode* click(const core::CameraInfo& aCamera);
 
     void clearFocus();
     bool focusChanged() const;
@@ -37,18 +38,21 @@ private:
         core::ObjectNode* node;
         Tag* parent;
         QList<Tag> children;
-        QRectF rect;
+        QRectF originRect;
+        QRectF sortedRect;
         bool isDir;
         bool isOpened;
         bool invisibleTop() const { return !parent; }
     };
 
+    static bool compareNodeTagHeight(Tag* a, Tag* b);
     void resetTags(core::ObjectNode& aNode, Tag& aTag);
-    void updateGeometryRecursive(Tag& aTag, const core::TimeInfo& aTime);
-    QRectF getNodeRectF(core::ObjectNode& aNode, const core::TimeInfo& aInfo) const;
-    bool updateIntersection(Tag& aTag, const core::CameraInfo& aCamera, const QPointF& aPos);
+    void setGeometryRecursive(Tag& aTag);
+    QRectF getNodeRectF(core::ObjectNode& aNode) const;
+    bool updateIntersection(Tag& aTag, const QPointF& aPos);
     void renderOneNode(const Tag& aTag, QPixmap& aIconPix, int aColorType,
                        const core::RenderInfo& aInfo, QPainter& aPainter);
+    Tag* findVisibleTag(const core::ObjectNode& aNode) const;
 
     const GraphicStyle& mGraphicStyle;
     core::ObjectNode& mTopNode;
@@ -58,6 +62,7 @@ private:
     Tag* mCurrentSelect;
     bool mIconFocused;
     bool mFocusChanged;
+    std::vector<Tag*> mSortVector;
 };
 
 } // namespace bone

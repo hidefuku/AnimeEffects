@@ -27,49 +27,51 @@ BindNodesMode::BindNodesMode(Project& aProject, const Target& aTarget,
     mFocuser.setTargetMatrix(mTargetMtx);
     mFocuser.setFocusConnector(true);
 
-
-    mNodeSelector.updateGeometry(mProject.currentTimeInfo());
+    mNodeSelector.initGeometries();
 }
 
 bool BindNodesMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCursor)
 {
     auto boneFocus = mFocuser.update(aCamera, aCursor.screenPos());
+    mNodeSelector.sortCurrentGeometries(aCamera);
     mNodeSelector.updateFocus(aCamera, aCursor.screenPos());
 
     bool updated = mFocuser.focusChanged() || mNodeSelector.focusChanged();
 
-
-    if (aCursor.isLeftPressState())
+    if (!mKeyOwner.owns())
     {
-        mFocuser.clearFocus();
-        auto newSelectNode = mNodeSelector.click();
+        if (aCursor.isLeftPressState())
+        {
+            mFocuser.clearFocus();
+            auto newSelectNode = mNodeSelector.click(aCamera);
 
-        if (newSelectNode)
-        {
-            unbindNode(*newSelectNode);
-        }
-        else if (boneFocus)
-        {
-            mFocuser.clearSelection();
-            mFocuser.select(*boneFocus);
-        }
+            if (newSelectNode)
+            {
+                unbindNode(*newSelectNode);
+            }
+            else if (boneFocus)
+            {
+                mFocuser.clearSelection();
+                mFocuser.select(*boneFocus);
+            }
 
-        auto selectNode = mNodeSelector.selectingNode();
-        auto selectBone = mFocuser.selectingBone();
-        if (selectNode && selectBone)
-        {
-            bindNode(*selectBone, *selectNode);
-            mFocuser.clearSelection();
-            mNodeSelector.clearSelection();
+            auto selectNode = mNodeSelector.selectingNode();
+            auto selectBone = mFocuser.selectingBone();
+            if (selectNode && selectBone)
+            {
+                bindNode(*selectBone, *selectNode);
+                mFocuser.clearSelection();
+                mNodeSelector.clearSelection();
+            }
+            updated = true;
         }
-        updated = true;
-    }
-    else if (aCursor.isLeftMoveState())
-    {
-    }
-    else if (aCursor.isLeftReleaseState())
-    {
-        updated = true;
+        else if (aCursor.isLeftMoveState())
+        {
+        }
+        else if (aCursor.isLeftReleaseState())
+        {
+            updated = true;
+        }
     }
 
     return updated;
@@ -125,106 +127,23 @@ void BindNodesMode::renderQt(const RenderInfo& aInfo, QPainter& aPainter)
     renderer.setTargetMatrix(mTargetMtx);
     renderer.setFocusConnector(true);
 
-    /*
-    for (auto topBone : mKeyOwner.key->data().topBones())
+    mNodeSelector.sortCurrentGeometries(aInfo.camera);
+
+    if (!mKeyOwner.owns())
     {
-        Bone2::ConstIterator itr(topBone);
-        while (itr.hasNext())
+        for (auto topBone : mKeyOwner.key->data().topBones())
         {
-            auto bone = itr.next();
-            const QPointF bpos = getScreenPointF(bone->worldPos());
-
-            for (auto node : bone->bindingNodes())
-            {
-                worldMatrix = aExpans.srt().worldMatrix();
-                worldMatrix.translate(-ObjectNodeUtil::getCenterOffset3D(aExpans.srt()));
-                auto npos = getScreenPointF((worldMatrix * QVector3D(0, 0, 0)).toVector2D());
-            }
+            mNodeSelector.renderBindings(aInfo, aPainter, mTargetMtx, topBone);
         }
-    }
-    */
-    for (auto topBone : mKeyOwner.key->data().topBones())
-    {
-        mNodeSelector.renderBindings(aInfo, aPainter, mTargetMtx, topBone);
-    }
 
-    for (auto topBone : mKeyOwner.key->data().topBones())
-    {
-        renderer.renderBones(topBone);
+        for (auto topBone : mKeyOwner.key->data().topBones())
+        {
+            renderer.renderBones(topBone);
+        }
     }
 
     mNodeSelector.renderTags(aInfo, aPainter);
 }
-
-#if 0
-void BindNodesMode::renderChildNodes(const core::RenderInfo& aInfo, QPainter& aPainter)
-{
-    static const int kRowHeight = 16;
-    static const int kMargin = 2;
-    static const int kLetterPixelSize = kRowHeight - 2 * kMargin;
-    const int kIconWidth = kRowHeight;
-    const QSize kIconSize(kIconWidth, kIconWidth);
-    const QPoint kIconOffset(-kIconWidth - 2, 0);
-    const QColor backColor(0, 0, 0, 200);
-    const QColor textColor(255, 255, 255, 255);
-    const QBrush textBrush(textColor);
-    const QBrush backBrush(backColor);
-
-    QPixmap iconOpen = mGraphicStyle.icon("dooropen").pixmap(kIconSize);
-
-    QFont font = aPainter.font();
-    font.setPixelSize(kLetterPixelSize);
-    //font.setPointSize(10);
-    //font.setFamily("Courier New");
-    //font.setFamily("Meiryo");
-    font.setStyleStrategy(QFont::StyleStrategy(
-                              QFont::PreferOutline |
-                              QFont::PreferAntialias |
-                              QFont::PreferQuality));
-    ///@note In windows, the font antialiasing doesn't work. (seems like a bug?)
-    /// The cause is unknown but it's probably avoidable by bold setting.
-    font.setBold(true);
-    //font.setFixedPitch(false);
-    //font.setStretch(QFont::UltraExpanded);
-    //font.setLetterSpacing(QFont::PercentageSpacing, 105);
-    aPainter.setFont(font);
-
-#if 1
-    //aPainter.setRenderHint(QPainter::HighQualityAntialiasing, true);
-    //aPainter.setRenderHint(QPainter::SmoothPixmapTransform, true);
-    aPainter.setRenderHint(QPainter::Antialiasing, true);
-    aPainter.setRenderHint(QPainter::TextAntialiasing, true);
-#endif
-
-    for (auto node : mTarget.children())
-    {
-        auto nodeName = node->name();
-
-        ///@todo Is this safe to get(calculate if necessary) current position in rendering?
-        auto mtx = TimeKeyBlender::getWorldMatrix(*node, mProject.currentTimeInfo());
-        auto pos = mtx.column(3).toVector3D();
-
-        aPainter.setPen(Qt::NoPen);
-        aPainter.setBrush(backBrush);
-
-        QRect boundingRect = aPainter.fontMetrics().boundingRect(nodeName);
-
-        auto scrPos = aInfo.camera.toScreenPos(pos.toPointF());
-        const QRect scrRect(scrPos.toPoint(), boundingRect.size());
-
-        // background
-        aPainter.drawRect(scrRect.marginsAdded(QMargins(kMargin, kMargin, kMargin, kMargin)));
-
-        // text
-        aPainter.setPen(QPen(textBrush, 1.0f));
-        aPainter.drawText(scrRect, Qt::AlignCenter, nodeName);
-
-        // icon
-        const QRect iconRect(scrRect.topLeft() + kIconOffset, kIconSize);
-        aPainter.drawPixmap(iconRect, iconOpen);
-    }
-}
-#endif
 
 } // namespace bone
 } // namespace ctrl
