@@ -19,8 +19,9 @@ public:
     int row(int aDepth) const { return mRows.at(aDepth); }
     int tailRow() const { return depth() > 0 ? mRows[depth() - 1] : 0; }
     const std::vector<int>& rows() const { return mRows; }
-    bool operator==(const TreePos& aRhs) const;
     bool contains(const TreePos& aRhs) const;
+    bool operator==(const TreePos& aRhs) const;
+    bool operator!=(const TreePos& aRhs) const { return !(*this == aRhs); }
 
     void updateByRemove(const TreePos& aRemovePos);
     void updateByInsert(const TreePos& aInsertPos);

@@ -17,7 +17,7 @@ public:
     void updateGeometry(const core::TimeInfo& aTime);
     core::ObjectNode* updateFocus(const core::CameraInfo& aCamera, const QVector2D& aPos);
 
-    void select();
+    core::ObjectNode* click();
 
     void clearFocus();
     bool focusChanged() const;
@@ -25,7 +25,9 @@ public:
     core::ObjectNode* selectingNode();
     void clearSelection();
 
-    void render(const core::RenderInfo& aInfo, QPainter& aPainter);
+    void renderBindings(const core::RenderInfo& aInfo, QPainter& aPainter,
+                        const QMatrix4x4& aTargetMtx, const core::Bone2* aTopBone);
+    void renderTags(const core::RenderInfo& aInfo, QPainter& aPainter);
 
 private:
     class Tag

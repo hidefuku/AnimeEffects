@@ -123,39 +123,45 @@ bool NodeSelector::updateIntersection(
 
 QRectF NodeSelector::getNodeRectF(ObjectNode& aNode, const TimeInfo& aInfo) const
 {
-    auto mtx = TimeKeyBlender::getWorldMatrix(aNode, aInfo);
+    (void)aInfo;
+    XC_PTR_ASSERT(aNode.timeLine());
+    auto mtx = aNode.timeLine()->current().srt().worldMatrix();
     auto pos = mtx.column(3).toVector3D();
 
     const QRect bb = mGraphicStyle.boundingRect(aNode.name());
     return QRectF(pos.toPointF(), QSizeF(bb.size()));
 }
 
-void NodeSelector::select()
+ObjectNode* NodeSelector::click()
 {
-    if (mCurrentFocus && mIconFocused)
+    if (mCurrentFocus)
     {
-        if (mCurrentFocus->isOpened)
+        if (mIconFocused)
         {
-            auto parentNode = mCurrentFocus->node->parent();
-            XC_PTR_ASSERT(parentNode);
-            mCurrentTopTag = mCurrentFocus->parent;
-            mCurrentFocus->isOpened = false;
+            if (mCurrentFocus->isOpened)
+            {
+                auto parentNode = mCurrentFocus->node->parent();
+                XC_PTR_ASSERT(parentNode);
+                mCurrentTopTag = mCurrentFocus->parent;
+                mCurrentFocus->isOpened = false;
+            }
+            else
+            {
+                mCurrentTopTag = mCurrentFocus;
+                mCurrentTopTag->isOpened = true;
+            }
+            mCurrentFocus = nullptr;
+            mIconFocused = false;
+            return nullptr;
         }
         else
         {
-            mCurrentTopTag = mCurrentFocus;
-            mCurrentTopTag->isOpened = true;
+            mCurrentSelect = mCurrentFocus;
+            mCurrentFocus = nullptr;
+            return mCurrentSelect->node;
         }
-        mCurrentFocus = nullptr;
-        mCurrentSelect = nullptr;
-        mIconFocused = false;
     }
-    else
-    {
-        mCurrentSelect = mCurrentFocus;
-        mCurrentFocus = nullptr;
-        mIconFocused = false;
-    }
+    return nullptr;
 }
 
 void NodeSelector::clearFocus()
@@ -180,7 +186,30 @@ void NodeSelector::clearSelection()
     mCurrentSelect = nullptr;
 }
 
-void NodeSelector::render(const core::RenderInfo& aInfo, QPainter& aPainter)
+
+void NodeSelector::renderBindings(const RenderInfo& aInfo, QPainter& aPainter,
+                                  const QMatrix4x4& aTargetMtx, const Bone2* aTopBone)
+{
+    Bone2::ConstIterator itr(aTopBone);
+    while (itr.hasNext())
+    {
+        auto bone = itr.next();
+        auto bpos = aInfo.camera.toScreenPos(aTargetMtx * QVector3D(bone->worldPos())).toPointF();
+
+        aPainter.setBrush(Qt::NoBrush);
+        aPainter.setPen(QPen(QBrush(QColor(255, 255, 255, 128)), 1.5f, Qt::DotLine));
+
+        for (auto node : bone->bindingNodes())
+        {
+            if (!node->timeLine()) continue;
+            auto worldMatrix = node->timeLine()->current().srt().worldMatrix();
+            auto npos = aInfo.camera.toScreenPos((worldMatrix * QVector3D(0, 0, 0)).toVector2D());
+            aPainter.drawLine(bpos, npos.toPointF());
+        }
+    }
+}
+
+void NodeSelector::renderTags(const core::RenderInfo& aInfo, QPainter& aPainter)
 {
     auto tagHeight = mCurrentTopTag->rect.height();
     QPixmap iconPix = mGraphicStyle.icon("dooropen").pixmap(tagHeight);

@@ -1,4 +1,5 @@
 #include "cmnd/ScopedMacro.h"
+#include "cmnd/BasicCommands.h"
 #include "core/TimeKeyBlender.h"
 #include "ctrl/TimeLineUtil.h"
 #include "ctrl/bone/bone_BindNodesMode.h"
@@ -32,7 +33,7 @@ BindNodesMode::BindNodesMode(Project& aProject, const Target& aTarget,
 
 bool BindNodesMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCursor)
 {
-    auto focus = mFocuser.update(aCamera, aCursor.screenPos());
+    auto boneFocus = mFocuser.update(aCamera, aCursor.screenPos());
     mNodeSelector.updateFocus(aCamera, aCursor.screenPos());
 
     bool updated = mFocuser.focusChanged() || mNodeSelector.focusChanged();
@@ -40,13 +41,26 @@ bool BindNodesMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor
 
     if (aCursor.isLeftPressState())
     {
-        mNodeSelector.select();
-
         mFocuser.clearFocus();
-        mFocuser.clearSelection();
-        if (focus)
+        auto newSelectNode = mNodeSelector.click();
+
+        if (newSelectNode)
         {
-            mFocuser.select(*focus);
+            unbindNode(*newSelectNode);
+        }
+        else if (boneFocus)
+        {
+            mFocuser.clearSelection();
+            mFocuser.select(*boneFocus);
+        }
+
+        auto selectNode = mNodeSelector.selectingNode();
+        auto selectBone = mFocuser.selectingBone();
+        if (selectNode && selectBone)
+        {
+            bindNode(*selectBone, *selectNode);
+            mFocuser.clearSelection();
+            mNodeSelector.clearSelection();
         }
         updated = true;
     }
@@ -55,11 +69,53 @@ bool BindNodesMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor
     }
     else if (aCursor.isLeftReleaseState())
     {
-        mFocuser.clearSelection();
         updated = true;
     }
 
     return updated;
+}
+
+void BindNodesMode::bindNode(Bone2& aBone, ObjectNode& aNode)
+{
+    XC_ASSERT(!mKeyOwner.owns());
+    if (aBone.isBinding(aNode)) return; // the node was already bound
+
+    cmnd::Stack& stack = mProject.commandStack();
+    cmnd::ScopedMacro macro(stack, "bind a node to a bone");
+    macro.grabListener(new Notifier(mProject, mTarget, *mKeyOwner.key,
+                                    TimeLineEvent::Type_ChangeKeyValue));
+
+    stack.push(new cmnd::PushBackList<ObjectNode*>(&aBone.bindingNodes(), &aNode));
+}
+
+void BindNodesMode::unbindNode(ObjectNode& aNode)
+{
+    XC_ASSERT(!mKeyOwner.owns());
+
+    typedef std::pair<Bone2*, ObjectNode*> BindPair;
+    QList<BindPair> pairs;
+    for (auto topBone : mKeyOwner.key->data().topBones())
+    {
+        Bone2::Iterator itr(topBone);
+        while (itr.hasNext())
+        {
+            auto bone = itr.next();
+            if (bone->isBinding(aNode))
+            {
+                pairs.push_back(BindPair(bone, &aNode));
+            }
+        }
+    }
+
+    cmnd::Stack& stack = mProject.commandStack();
+    cmnd::ScopedMacro macro(stack, "unbind a node from bones");
+    macro.grabListener(new Notifier(mProject, mTarget, *mKeyOwner.key,
+                                    TimeLineEvent::Type_ChangeKeyValue));
+
+    for (auto pair : pairs)
+    {
+        stack.push(new cmnd::RemoveListByObj<ObjectNode*>(&(pair.first->bindingNodes()), pair.second));
+    }
 }
 
 void BindNodesMode::renderQt(const RenderInfo& aInfo, QPainter& aPainter)
@@ -69,15 +125,38 @@ void BindNodesMode::renderQt(const RenderInfo& aInfo, QPainter& aPainter)
     renderer.setTargetMatrix(mTargetMtx);
     renderer.setFocusConnector(true);
 
-    for (auto bone : mKeyOwner.key->data().topBones())
+    /*
+    for (auto topBone : mKeyOwner.key->data().topBones())
     {
-        renderer.renderBones(bone);
+        Bone2::ConstIterator itr(topBone);
+        while (itr.hasNext())
+        {
+            auto bone = itr.next();
+            const QPointF bpos = getScreenPointF(bone->worldPos());
+
+            for (auto node : bone->bindingNodes())
+            {
+                worldMatrix = aExpans.srt().worldMatrix();
+                worldMatrix.translate(-ObjectNodeUtil::getCenterOffset3D(aExpans.srt()));
+                auto npos = getScreenPointF((worldMatrix * QVector3D(0, 0, 0)).toVector2D());
+            }
+        }
+    }
+    */
+    for (auto topBone : mKeyOwner.key->data().topBones())
+    {
+        mNodeSelector.renderBindings(aInfo, aPainter, mTargetMtx, topBone);
     }
 
-    //renderChildNodes(aInfo, aPainter);
-    mNodeSelector.render(aInfo, aPainter);
+    for (auto topBone : mKeyOwner.key->data().topBones())
+    {
+        renderer.renderBones(topBone);
+    }
+
+    mNodeSelector.renderTags(aInfo, aPainter);
 }
 
+#if 0
 void BindNodesMode::renderChildNodes(const core::RenderInfo& aInfo, QPainter& aPainter)
 {
     static const int kRowHeight = 16;
@@ -145,6 +224,7 @@ void BindNodesMode::renderChildNodes(const core::RenderInfo& aInfo, QPainter& aP
         aPainter.drawPixmap(iconRect, iconOpen);
     }
 }
+#endif
 
 } // namespace bone
 } // namespace ctrl

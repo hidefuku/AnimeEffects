@@ -266,11 +266,11 @@ QColor Renderer::boneColor(bool aIsSelected, bool aIsFocused) const
 
     if (aIsSelected)
     {
-        color = QColor(150, 150, 255, 255);
+        color = QColor(200, 130, 255, 255);
     }
     else if (aIsFocused)
     {
-        color = QColor(200, 200, 240, 240);
+        color = QColor(200, 200, 255, 240);
     }
 
     if (mIsShadow)

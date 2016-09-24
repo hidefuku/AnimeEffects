@@ -245,7 +245,7 @@ cmnd::Base* BoneKeyUpdater::createNodeUnbinderForMove(
                 if (!node->timeLine()) continue;
 
                 auto currentPos = util::TreeUtil::getTreePos(node);
-                if (currentPos.contains(mTo)) break;
+                if (currentPos != mTo && currentPos.contains(mTo)) break;
 
                 auto& map = node->timeLine()->map(TimeKeyType_Bone);
 
