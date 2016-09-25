@@ -114,6 +114,7 @@ void NodeSelector::sortCurrentGeometries(const core::CameraInfo& aCamera)
 
 ObjectNode* NodeSelector::updateFocus(const CameraInfo& aCamera, const QVector2D& aPos)
 {
+    (void)aCamera;
     const QPointF scrPointF = aPos.toPointF();
 
     mFocusChanged = false;

@@ -142,6 +142,33 @@ LayerMesh* TimeKeyBlender::getAreaMesh(
     return aNode.gridMesh();
 }
 
+BoneKey* TimeKeyBlender::getAreaBone(
+        ObjectNode& aNode, const TimeInfo& aTime)
+{
+    if (aNode.timeLine())
+    {
+        auto& map = aNode.timeLine()->map(TimeKeyType_Bone);
+        TimeKey* key = TimeKeyGatherer::findLastKey(map, aTime.frame);
+        if (key)
+        {
+            XC_ASSERT(key->type() == TimeKeyType_Bone);
+            return (BoneKey*)key;
+        }
+    }
+    return nullptr;
+}
+
+BoneKey* TimeKeyBlender::getNearestInfluencerBone(
+        ObjectNode& aNode, const TimeInfo& aTime)
+{
+    for (ObjectNode* node = &aNode; node; node = node->parent())
+    {
+        auto areaBone = getAreaBone(aNode, aTime);
+        if (areaBone) return areaBone;
+    }
+    return nullptr;
+}
+
 //-------------------------------------------------------------------------------------------------
 TimeKeyBlender::TimeKeyBlender(ObjectTree& aTree)
     : mSeeker()
@@ -716,9 +743,18 @@ void TimeKeyBlender::buildPosePalette(ObjectNode& aNode, PosePalette::KeyPairs& 
             aPairs.push_back(pair);
             pushed = true;
         }
+        /// @todo
+        /// poseParent() will has null pointer, when no pose key exists.
+        /// But the nearestPair should update if a nearer bone key exists,
+        /// no matter whether a pose key was exists or not.
 
-        // build
-        expans.posePalette().build(aPairs);
+        // build by nearest pair
+        PosePalette::KeyPairs nearestPair;
+        if (!aPairs.empty())
+        {
+            nearestPair.push_back(aPairs.back());
+        }
+        expans.posePalette().build(nearestPair);
     }
 
     // iterate children

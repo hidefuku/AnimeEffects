@@ -40,6 +40,7 @@ void BoneEditor::setTarget(core::ObjectNode* aTarget)
 
     if (!aTarget || !aTarget->timeLine()) return;
 
+#if 0
     // ignore a node which was already bound by bone
     /// @todo this condition should update by resetCurrentTarget
     {
@@ -64,6 +65,7 @@ void BoneEditor::setTarget(core::ObjectNode* aTarget)
             }
         }
     }
+#endif
 
     mTarget.node = aTarget;
     resetCurrentTarget();

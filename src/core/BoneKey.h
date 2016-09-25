@@ -30,6 +30,7 @@ public:
         const QList<Bone2*>& topBones() const;
         void deleteAll();
         bool isBinding(const ObjectNode& aNode) const;
+        Bone2* findBinderBone(const ObjectNode& aNode);
     };
 
     class Cache
@@ -73,6 +74,7 @@ public:
     virtual bool deserialize(Deserializer& aIn);
 
 private:
+    void resetCacheListRecursive(const TimeInfo& aTime, ObjectNode& aNode, CacheList& aNewList);
     void updateCaches(Project& aProject, const QList<Cache*>& aTargets);
     Cache* popCache(ObjectNode& aNode);
     Cache* findCache(ObjectNode& aNode);

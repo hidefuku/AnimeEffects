@@ -32,7 +32,8 @@ private:
             Project& aProject, ObjectNode& aNode,
             const QVector<ObjectNode*>& aUniqueRoots);
 
-    static void resetInfluenceCaches(Project& aProject, ObjectNode& aRoot);
+    static void resetInfluenceCachesOfChildren(Project& aProject, ObjectNode& aRoot);
+    static void resetInfluenceCachesOfOneNode(Project& aProject, ObjectNode& aNode);
 };
 
 } // namespace core

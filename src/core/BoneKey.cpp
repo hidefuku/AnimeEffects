@@ -67,6 +67,20 @@ bool BoneKey::Data::isBinding(const ObjectNode& aNode) const
     return false;
 }
 
+Bone2* BoneKey::Data::findBinderBone(const ObjectNode& aNode)
+{
+    for (auto topBone : mTopBones)
+    {
+        Bone2::Iterator itr(topBone);
+        while (itr.hasNext())
+        {
+            auto bone = itr.next();
+            if (bone->isBinding(aNode)) return bone;
+        }
+    }
+    return nullptr;
+}
+
 //-------------------------------------------------------------------------------------------------
 BoneKey::Cache::Cache()
     : mInfluence()
@@ -103,6 +117,9 @@ void BoneKey::updateCaches(Project& aProject, const QList<Cache*>& aTargets)
     auto owner = mCacheOwner.get();
     XC_PTR_ASSERT(owner);
 
+    auto time = aProject.currentTimeInfo();
+    time.frame.set(this->frame());
+
     QWriteLocker lock(&aProject.objectTree().timeCacheLock().working);
 
     // update bone influence map
@@ -110,8 +127,6 @@ void BoneKey::updateCaches(Project& aProject, const QList<Cache*>& aTargets)
     {
         XC_PTR_ASSERT(cache->node());
         auto& node = *cache->node();
-        auto time = aProject.currentTimeInfo();
-        time.frame.set(this->frame());
 
         const LayerMesh* mesh = TimeKeyBlender::getAreaMesh(node, time);
         cache->setFrameSign(mesh->frameSign());
@@ -172,8 +187,48 @@ void BoneKey::updateCaches(Project& aProject, ObjectNode& aOwner, const QVector<
     updateCaches(aProject, caches);
 }
 
+void BoneKey::resetCacheListRecursive(const TimeInfo& aTime, ObjectNode& aNode, CacheList& aNewList)
+{
+    bool useMe = true;
+
+    /// @todo The node which has zero vertex mesh should contain to cache list,
+    /// otherwise the timeline modifier should call resetCaches instead of updateCaches.
+    {
+        const LayerMesh* mesh = TimeKeyBlender::getAreaMesh(aNode, aTime);
+        if (!mesh || mesh->vertexCount() <= 0) useMe = false;
+    }
+
+    {
+        const BoneKey* areaBone = TimeKeyBlender::getAreaBone(aNode, aTime);
+        // there are more local bone keys.
+        if (areaBone && areaBone != this) return;
+    }
+
+    if (useMe)
+    {
+        // find a cache from old list
+        Cache* cache = popCache(aNode);
+
+        // create new cache
+        if (!cache)
+        {
+            cache = new Cache();
+            // set node
+            cache->setNode(aNode);
+        }
+
+        aNewList.push_back(cache);
+    }
+
+    for (auto child : aNode.children())
+    {
+        resetCacheListRecursive(aTime, *child, aNewList);
+    }
+}
+
 void BoneKey::resetCaches(Project& aProject, ObjectNode& aOwner)
 {
+#if 0
     // temp list
     CacheList newCaches;
 
@@ -183,6 +238,8 @@ void BoneKey::resetCaches(Project& aProject, ObjectNode& aOwner)
         ObjectNode* node = itr.next();
         XC_PTR_ASSERT(node);
 
+        /// @todo The node which has zero vertex mesh should contain to cache list,
+        /// otherwise the timeline modifier should call resetCaches instead of updateCaches.
         {
             auto time = aProject.currentTimeInfo();
             time.frame.set(this->frame());
@@ -203,6 +260,16 @@ void BoneKey::resetCaches(Project& aProject, ObjectNode& aOwner)
 
         newCaches.push_back(cache);
     }
+#else
+    // temp list
+    CacheList newCaches;
+    // make new cache list (recycle old cache)
+    {
+        auto time = aProject.currentTimeInfo();
+        time.frame.set(this->frame());
+        resetCacheListRecursive(time, aOwner, newCaches);
+    }
+#endif
 
     // destroy unuse caches
     destroyCaches();

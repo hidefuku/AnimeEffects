@@ -50,19 +50,11 @@ void ObjectTreeNotifier::onExecuted()
             auto checkpos = util::TreeUtil::getTreePos(check);
             XC_ASSERT(checkpos.isValid());
 
-            if (checkpos.depth() <= nodepos.depth())
+            if (checkpos.contains(nodepos))
             {
                 remove = true;
-                for (int i = 0; i < checkpos.depth(); ++i)
-                {
-                    if (checkpos.row(i) != nodepos.row(i))
-                    {
-                        remove = false;
-                        break;
-                    }
-                }
+                break;
             }
-            if (remove) break;
         }
 
         itr = remove ? roots.erase(itr) : (itr + 1);

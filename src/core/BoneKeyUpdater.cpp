@@ -9,7 +9,7 @@ namespace core
 
 void BoneKeyUpdater::onTimeLineModified(TimeLineEvent& aEvent)
 {
-    // pass only srt key updating
+    // pass only srt and mesh key(which affect to influence map)
     QVector<ObjectNode*> targets;
     for (auto t : aEvent.targets())
     {
@@ -50,35 +50,54 @@ void BoneKeyUpdater::onTimeLineModified(
 
 void BoneKeyUpdater::onTreeRestructured(ObjectTreeEvent& aEvent)
 {
+    QVector<ObjectNode*> parents;
+
     for (ObjectNode* root : aEvent.roots())
     {
         XC_PTR_ASSERT(root);
         XC_ASSERT(root->canHoldChild());
-        resetInfluenceCaches(aEvent.project(), *root);
+        resetInfluenceCachesOfChildren(aEvent.project(), *root);
+
+        for (ObjectNode* parent = root->parent(); parent; parent = parent->parent())
+        {
+            if (!parents.contains(parent))
+            {
+                parents.push_back(parent);
+            }
+        }
+    }
+
+    for (auto p : parents)
+    {
+        resetInfluenceCachesOfOneNode(aEvent.project(), *p);
     }
 }
 
-void BoneKeyUpdater::resetInfluenceCaches(Project& aProject, ObjectNode& aRoot)
+void BoneKeyUpdater::resetInfluenceCachesOfOneNode(Project& aProject, ObjectNode& aNode)
+{
+    if (aNode.timeLine())
+    {
+        auto& map = aNode.timeLine()->map(TimeKeyType_Bone);
+
+        // update bone cache
+        for (auto itr = map.begin(); itr != map.end(); ++itr)
+        {
+            TimeKey* key = itr.value();
+            XC_PTR_ASSERT(key);
+            XC_ASSERT(key->type() == TimeKeyType_Bone);
+            ((BoneKey*)key)->resetCaches(aProject, aNode);
+        }
+    }
+}
+
+void BoneKeyUpdater::resetInfluenceCachesOfChildren(Project& aProject, ObjectNode& aRoot)
 {
     ObjectNode::Iterator itr(&aRoot);
     while (itr.hasNext())
     {
         auto node = itr.next();
         XC_PTR_ASSERT(node);
-
-        if (node->timeLine())
-        {
-            auto& map = node->timeLine()->map(TimeKeyType_Bone);
-
-            // update bone cache
-            for (auto itr = map.begin(); itr != map.end(); ++itr)
-            {
-                TimeKey* key = itr.value();
-                XC_PTR_ASSERT(key);
-                XC_ASSERT(key->type() == TimeKeyType_Bone);
-                ((BoneKey*)key)->resetCaches(aProject, *node);
-            }
-        }
+        resetInfluenceCachesOfOneNode(aProject, *node);
     }
 }
 
@@ -87,7 +106,7 @@ void BoneKeyUpdater::onResourceModified(ResourceEvent& aEvent)
     auto topNode = aEvent.project().objectTree().topNode();
     if (topNode)
     {
-        resetInfluenceCaches(aEvent.project(), *topNode);
+        resetInfluenceCachesOfChildren(aEvent.project(), *topNode);
     }
 }
 
@@ -99,7 +118,7 @@ void BoneKeyUpdater::onProjectAttributeModified(ProjectEvent& aEvent)
         if (aEvent.type() == ProjectEvent::Type_ChangeMaxFrame ||
             aEvent.type() == ProjectEvent::Type_ChangeLoop)
         {
-            resetInfluenceCaches(aEvent.project(), *topNode);
+            resetInfluenceCachesOfChildren(aEvent.project(), *topNode);
         }
     }
 }
