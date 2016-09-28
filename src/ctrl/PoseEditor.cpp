@@ -1,4 +1,5 @@
 #include "core/TimeKeyExpans.h"
+#include "core/ObjectNodeUtil.h"
 #include "ctrl/PoseEditor.h"
 #include "ctrl/bone/bone_Renderer.h"
 #include "ctrl/pose/pose_TransBoneMode.h"
@@ -82,9 +83,21 @@ void PoseEditor::resetCurrentTarget()
     if (mTarget)
     {
         XC_PTR_ASSERT(mTarget->timeLine());
+        auto& current = mTarget->timeLine()->current();
 
         bool success = false;
-        mTarget.mtx = mTarget->timeLine()->current().srt().worldMatrix();
+
+        if (current.isAffectedByBinding())
+        {
+            mTarget.mtx = current.outerMatrix() * current.innerMatrix();
+            mTarget.mtx.translate(ObjectNodeUtil::getCenterOffset3D(current.srt()));
+
+        }
+        else
+        {
+            mTarget.mtx = current.srt().worldMatrix();
+        }
+        //mTarget.mtx = mTarget->timeLine()->current().srt().worldMatrix();
         mTarget.invMtx = mTarget.mtx.inverted(&success);
         if (!success)
         {
