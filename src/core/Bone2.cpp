@@ -167,6 +167,35 @@ float Bone2::worldAngle() const
     return mWorldAngle;
 }
 
+QMatrix4x4 Bone2::transformationMatrix(const QVector2D& aToPos, float aToAngle) const
+{
+    static const QVector3D kRotateAxis(0.0f, 0.0f, 1.0f);
+    const float rotate = util::MathUtil::getDegreeFromRadian(aToAngle - worldAngle());
+
+    QMatrix4x4 mtx;
+    mtx.translate(aToPos);
+    mtx.rotate(rotate, kRotateAxis);
+    mtx.translate(-worldPos());
+    return mtx;
+}
+
+QMatrix4x4 Bone2::transformationMatrix(const Bone2& aTo) const
+{
+    return transformationMatrix(aTo.worldPos(), aTo.worldAngle());
+}
+
+QMatrix4x4 Bone2::transformationMatrix(const QMatrix4x4& aToMtx) const
+{
+    QMatrix4x4 myInvMtx;
+    {
+        static const QVector3D kRotateAxis(0.0f, 0.0f, 1.0f);
+        myInvMtx.rotate(-util::MathUtil::getDegreeFromRadian(worldAngle()), kRotateAxis);
+        myInvMtx.translate(-worldPos());
+    }
+
+    return aToMtx * myInvMtx;
+}
+
 Bone2* Bone2::createShadow() const
 {
     if (mOrigin)

@@ -22,7 +22,7 @@ public:
         const ObjectNode* objNode;
         TimeKeyExpans* expans;
     };
-    typedef util::ITreeSeeker<SeekData> SeekerType;
+    typedef util::ITreeSeeker<SeekData, ObjectNode*> SeekerType;
     typedef SeekerType::Position PositionType;
 
     static SRTExpans getSRTExpans(
@@ -65,9 +65,13 @@ private:
     void blendPoseKey(PositionType aPos, const TimeInfo& aTime);
     void blendMeshKey(PositionType aPos, const TimeInfo& aTime);
     void blendFFDKey(PositionType aPos, const TimeInfo& aTime);
-    void buildPosePalette(ObjectNode& aNode, PosePalette::KeyPairs& aPairs);
+    //void buildPosePalette(ObjectNode& aNode, PosePalette::KeyPairs& aPairs);
+    void buildPosePalette(ObjectNode& aNode, PosePalette::KeyPair aPair);
     void setBoneInfluenceMaps(ObjectNode& aNode, const BoneKey* aKey,
                               const TimeInfo& aTime);
+    void setBinderBones(ObjectNode& aRootNode);
+    void setBindingMatrices(ObjectNode& aNode, bool aAffectedByBinding,
+                            bool aUnderOfBinding, QMatrix4x4 aBindingMtx);
 
     SeekerType* mSeeker;
     SeekerType::Position mRoot;

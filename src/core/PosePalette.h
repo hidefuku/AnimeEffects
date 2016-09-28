@@ -32,6 +32,8 @@ public:
         const GLfloat* data() const { return (const GLfloat*)(this); }
     };
 
+    static int getBoneIndex(const BoneKey::Data& aData, const Bone2& aBone);
+
     PosePalette();
 
     void build(const KeyPairs& aKeyPairs);

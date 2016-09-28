@@ -4,12 +4,13 @@
 #include "core/TimeKeyExpans.h"
 #include "core/TimeKeyBlender.h"
 #include "core/LayerMesh.h"
+#include "core/ObjectNodeUtil.h"
 
 namespace core
 {
 
 //-------------------------------------------------------------------------------------------------
-class ObjectTreeSeeker : public util::ITreeSeeker<TimeKeyBlender::SeekData>
+class ObjectTreeSeeker : public util::ITreeSeeker<TimeKeyBlender::SeekData, ObjectNode*>
 {
     bool mUseCache;
 public:
@@ -18,7 +19,7 @@ public:
     {
     }
 
-    Position position(ObjectNode* aNode) const
+    virtual Position position(ObjectNode* aNode) const
     {
         return aNode;
     }
@@ -206,7 +207,7 @@ TimeKeyBlender::TimeKeyBlender(SeekerType& aSeeker, PositionType aRoot)
 void TimeKeyBlender::updateCurrents(ObjectNode* aRootNode, const TimeInfo& aTime)
 {
     {
-        util::TreeSeekIterator<SeekData> itr(*mSeeker, mRoot);
+        util::TreeSeekIterator<SeekData, ObjectNode*> itr(*mSeeker, mRoot);
 
         while (itr.hasNext())
         {
@@ -237,15 +238,22 @@ void TimeKeyBlender::updateCurrents(ObjectNode* aRootNode, const TimeInfo& aTime
     if (aRootNode)
     {
         // palette
+#if 0
         PosePalette::KeyPairs pairs;
         buildPosePalette(*aRootNode, pairs);
+#else
+        PosePalette::KeyPair pair = {};
+        buildPosePalette(*aRootNode, pair);
+#endif
         // set map
         setBoneInfluenceMaps(*aRootNode, nullptr, aTime);
+        // set binder
+        setBinderBones(*aRootNode);
     }
 
     // set master cache
     {
-        util::TreeSeekIterator<SeekData> itr(*mSeeker, mRoot);
+        util::TreeSeekIterator<SeekData, ObjectNode*> itr(*mSeeker, mRoot);
 
         while (itr.hasNext())
         {
@@ -726,6 +734,7 @@ void TimeKeyBlender::blendFFDKey(PositionType aPos, const TimeInfo& aTime)
     }
 }
 
+#if 0
 void TimeKeyBlender::buildPosePalette(ObjectNode& aNode, PosePalette::KeyPairs& aPairs)
 {
     bool pushed = false;
@@ -769,6 +778,45 @@ void TimeKeyBlender::buildPosePalette(ObjectNode& aNode, PosePalette::KeyPairs& 
         aPairs.pop_back();
     }
 }
+#else
+void TimeKeyBlender::buildPosePalette(ObjectNode& aNode, PosePalette::KeyPair aPair)
+{
+    if (aNode.timeLine())
+    {
+        XC_PTR_ASSERT(mSeeker->data(&aNode).expans);
+        auto& expans = *(mSeeker->data(&aNode).expans);
+
+        if (expans.poseParent())
+        {
+            PosePalette::KeyPair pair = { &expans.poseParent()->data(), &expans.pose() };
+            aPair = pair;
+        }
+        else if (expans.areaBone())
+        {
+            PosePalette::KeyPair pair = {};
+            aPair = pair;
+        }
+        // build
+        if (aPair.origin && aPair.pose)
+        {
+            PosePalette::KeyPairs pairs;
+            pairs.push_back(aPair);
+            expans.posePalette().build(pairs);
+        }
+        else
+        {
+            expans.posePalette().clear();
+        }
+    }
+
+    // iterate children
+    for (auto child : aNode.children())
+    {
+        XC_PTR_ASSERT(child);
+        buildPosePalette(*child, aPair);
+    }
+}
+#endif
 
 void TimeKeyBlender::setBoneInfluenceMaps(
         ObjectNode& aNode, const BoneKey* aKey, const TimeInfo& aTime)
@@ -791,18 +839,15 @@ void TimeKeyBlender::setBoneInfluenceMaps(
 
         if (key && isDefaultMesh)
         {
-            for (auto cache : key->caches())
+            auto cache = key->findCache(aNode);
+            if (cache)
             {
-                if (cache->node() == static_cast<const ObjectNode*>(&aNode))
-                {
-                    //qDebug() << "infl" << cache->node() << (&aNode) << cache->influence().vertexCount();
-                    mesh = TimeKeyBlender::getAreaMesh(aNode, aTime);
-                    XC_ASSERT(cache->frameSign() == mesh->frameSign());
+                //qDebug() << "infl" << cache->node() << (&aNode) << cache->influence().vertexCount();
+                mesh = TimeKeyBlender::getAreaMesh(aNode, aTime);
+                XC_ASSERT(cache->frameSign() == mesh->frameSign());
 
-                    influence = &cache->influence();
-                    innerMtx = cache->innerMatrix();
-                    break;
-                }
+                influence = &cache->influence();
+                innerMtx = cache->innerMatrix();
             }
 
             auto cacheOwner = key->cacheOwner();
@@ -824,6 +869,123 @@ void TimeKeyBlender::setBoneInfluenceMaps(
     for (auto child : aNode.children())
     {
         setBoneInfluenceMaps(*child, key, aTime);
+    }
+}
+
+void TimeKeyBlender::setBinderBones(ObjectNode& aRootNode)
+{
+    // reset binding references
+    {
+        ObjectNode::Iterator itr(&aRootNode);
+        while (itr.hasNext())
+        {
+            auto seekData = mSeeker->data(mSeeker->position(itr.next()));
+            if (!seekData.expans) continue;
+            seekData.expans->setBinderBoneIndex(-1);
+        }
+    }
+    // update binding references
+    {
+        ObjectNode::Iterator itr(&aRootNode);
+        while (itr.hasNext())
+        {
+            auto node = itr.next();
+            auto seekData = mSeeker->data(mSeeker->position(node));
+            if (!seekData.objNode || !seekData.expans) continue;
+
+            auto boneKey = seekData.expans->areaBone();
+            if (!boneKey) continue;
+
+            for (auto bindingCache : boneKey->bindingCaches())
+            {
+                auto bound = mSeeker->data(mSeeker->position(bindingCache.node));
+                if (bound.expans)
+                {
+                    bound.expans->setBinderBoneIndex(bindingCache.boneIndex);
+                    bound.expans->setBindingRoot(node);
+                    bound.expans->setBindingMatrix(bindingCache.innerMtx);
+                }
+            }
+        }
+    }
+
+    // set binding parameters
+    {
+        auto root = mSeeker->data(mSeeker->position(&aRootNode));
+        if (root.expans)
+        {
+            setBindingMatrices(aRootNode, root.expans->isAffectedByBinding(),
+                               root.expans->isUnderOfBinding(), root.expans->outerMatrix());
+        }
+        else
+        {
+            setBindingMatrices(aRootNode, false, false, QMatrix4x4());
+        }
+    }
+}
+
+void TimeKeyBlender::setBindingMatrices(
+        ObjectNode& aNode, bool aAffectedByBinding, bool aUnderOfBinding, QMatrix4x4 aBindingMtx)
+{
+    auto seekData = mSeeker->data(mSeeker->position(&aNode));
+    if (seekData.objNode && seekData.expans)
+    {
+        auto& expans = *seekData.expans;
+
+        if (aUnderOfBinding)
+        {
+            if (aAffectedByBinding)
+            {
+                aBindingMtx = aBindingMtx * expans.srt().data().localMatrix();
+                expans.setOuterMatrix(aBindingMtx);
+                QMatrix4x4 innerMtx;
+                innerMtx.translate(-ObjectNodeUtil::getCenterOffset3D(aNode));
+                expans.setInnerMatrix(innerMtx);
+            }
+            else
+            {
+                expans.setOuterMatrix(aBindingMtx);
+            }
+        }
+
+        if (expans.isBoundByBone())
+        {
+            //qDebug() << "bound by bone";
+            aAffectedByBinding = true;
+            aUnderOfBinding = true;
+            XC_PTR_ASSERT(expans.bindingRoot());
+            auto root = mSeeker->data(mSeeker->position(expans.bindingRoot()));
+            if (root.expans)
+            {
+                auto boneIndex = expans.binderBoneIndex();
+                XC_ASSERT(boneIndex >= 0);
+                if (boneIndex < PosePalette::kMaxCount)
+                {
+                    auto transform = root.expans->posePalette().matrices()[boneIndex];
+                    aBindingMtx = root.expans->outerMatrix() * transform * expans.bindingMatrix();
+                    expans.setOuterMatrix(aBindingMtx);
+                    QMatrix4x4 innerMtx;
+                    innerMtx.translate(-ObjectNodeUtil::getCenterOffset3D(aNode));
+                    expans.setInnerMatrix(innerMtx);
+                    //qDebug() << "transform bound by bone";
+                }
+            }
+        }
+
+        expans.setIsUnderOfBinding(aUnderOfBinding);
+        expans.setIsAffectedByBinding(aAffectedByBinding);
+
+        if (expans.areaBone())
+        {
+            aAffectedByBinding = false;
+            aBindingMtx = expans.outerMatrix();
+        }
+    }
+
+    // recursive call
+    for (auto child : aNode.children())
+    {
+        setBindingMatrices(*child, aAffectedByBinding, aUnderOfBinding, aBindingMtx);
     }
 }
 

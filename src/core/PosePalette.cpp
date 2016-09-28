@@ -5,6 +5,23 @@
 namespace core
 {
 
+int PosePalette::getBoneIndex(const BoneKey::Data& aData, const Bone2& aBone)
+{
+    int count = 0;
+    for (auto topBone : aData.topBones())
+    {
+        Bone2::ConstIterator itr(topBone);
+        while (itr.hasNext())
+        {
+            const Bone2* bone = itr.next();
+            XC_PTR_ASSERT(bone);
+            if (bone == &aBone) return count;
+            ++count;
+        }
+    }
+    return -1;
+}
+
 PosePalette::PosePalette()
     : mData()
     , mIsUnit(true)
@@ -58,7 +75,6 @@ int PosePalette::makeBonePoses(const KeyPairs& aSrc, BonePairs& aDst)
 
 void PosePalette::build(const KeyPairs& aKeyPairs)
 {
-    const QVector3D kRotateAxis(0.0f, 0.0f, 1.0f);
     mIsUnit = false;
 
     BonePairs bonePairs;
@@ -69,22 +85,29 @@ void PosePalette::build(const KeyPairs& aKeyPairs)
 
     for (int i = 0; i < count; ++i)
     {
-        const float rotate = util::MathUtil::getDegreeFromRadian(
-                    bonePairs[i].pose->worldAngle() - bonePairs[i].origin->worldAngle());
+        auto orgn = bonePairs[i].origin;
+        auto pose = bonePairs[i].pose;
 
-        mData[i] = QMatrix4x4();
-        mData[i].translate(bonePairs[i].pose->worldPos());
-        mData[i].rotate(rotate, kRotateAxis);
-        mData[i].translate(-bonePairs[i].origin->worldPos());
+        static const QVector3D kRotateAxis(0.0f, 0.0f, 1.0f);
+        const float rotate = util::MathUtil::getDegreeFromRadian(
+                    pose->worldAngle() - orgn->worldAngle());
+
+        // srt matrix
+        {
+            QMatrix4x4 mtx;
+            mtx.translate(pose->worldPos());
+            mtx.rotate(rotate, kRotateAxis);
+            mtx.translate(-orgn->worldPos());
+            mData[i] = mtx;
+        }
 
         // dual quaternion
         {
             QMatrix4x4 rotMtx;
             rotMtx.rotate(rotate, kRotateAxis);
-            const QVector2D originPos =
-                    (rotMtx * QVector3D(bonePairs[i].origin->worldPos())).toVector2D();
+            const QVector2D originPos = (rotMtx * QVector3D(orgn->worldPos())).toVector2D();
 
-            const QVector3D trans = bonePairs[i].pose->worldPos() - originPos;
+            const QVector3D trans = pose->worldPos() - originPos;
             auto quat = QQuaternion::fromAxisAndAngle(kRotateAxis, rotate);
             mDualQuats[i] = makeDualQuaternion(quat, trans);
         }
@@ -92,6 +115,8 @@ void PosePalette::build(const KeyPairs& aKeyPairs)
     for (int i = count; i < kMaxCount; ++i)
     {
         mData[i] = QMatrix4x4();
+        mDualQuats[i].real.set(1.0f, 0.0f, 0.0f, 0.0f);
+        mDualQuats[i].dual.set(0.0f, 0.0f, 0.0f, 0.0f);
     }
 }
 

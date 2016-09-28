@@ -49,6 +49,18 @@ public:
     void setBoneParent(const LayerMesh* aMesh) { mBoneParent = aMesh; }
     const LayerMesh* boneParent() const { return mBoneParent; }
 
+    void setBindingRoot(ObjectNode* aRoot) { mBindingRoot = aRoot; }
+    ObjectNode* bindingRoot() const { return mBindingRoot; }
+    void setBinderBoneIndex(int aIndex) { mBinderBoneIndex = aIndex; }
+    int binderBoneIndex() const { return mBinderBoneIndex; }
+    void setBindingMatrix(const QMatrix4x4& aMtx) { mBindingMtx = aMtx; }
+    const QMatrix4x4& bindingMatrix() const { return mBindingMtx; }
+    bool isBoundByBone() const { return mBinderBoneIndex >= 0; }
+    void setIsUnderOfBinding(bool aFlag) { mIsUnderOfBinding = aFlag; }
+    bool isUnderOfBinding() const { return mIsUnderOfBinding; }
+    void setIsAffectedByBinding(bool aFlag) { mIsAffectedByBinding = aFlag; }
+    bool isAffectedByBinding() const { return mIsAffectedByBinding; }
+
     PoseKey::Data& pose() { return mPose; }
     const PoseKey::Data& pose() const { return mPose; }
     void setPoseParent(BoneKey* aKey) { mPoseParent = aKey; }
@@ -74,6 +86,11 @@ private:
     QMatrix4x4 mOuterMtx;
     QMatrix4x4 mInnerMtx;
     const LayerMesh* mBoneParent;
+    ObjectNode* mBindingRoot;
+    int mBinderBoneIndex;
+    QMatrix4x4 mBindingMtx;
+    bool mIsUnderOfBinding;
+    bool mIsAffectedByBinding;
     PoseKey::Data mPose;
     BoneKey* mPoseParent;
     PosePalette mPosePalette;

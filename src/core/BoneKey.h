@@ -38,7 +38,7 @@ public:
         BoneInfluenceMap mInfluence;
         util::LinkPointer<ObjectNode> mNode;
         QMatrix4x4 mInnerMtx;
-        Frame mFrameSign; // to debug that the cache updating be forgotten
+        Frame mFrameSign; // for debug that the cache updating be forgotten
     public:
         Cache();
         void setNode(ObjectNode& aNode);
@@ -53,6 +53,16 @@ public:
     };
     typedef QList<Cache*> CacheList;
 
+    class BindingCache
+    {
+    public:
+        BindingCache();
+        ObjectNode* node;
+        int boneIndex;
+        QMatrix4x4 innerMtx;
+    };
+    typedef QList<BindingCache> BindingCacheList;
+
     BoneKey();
     ~BoneKey();
 
@@ -61,6 +71,8 @@ public:
 
     ObjectNode* cacheOwner() const { return mCacheOwner.get(); }
     const CacheList& caches() const { return mCaches; }
+    Cache* findCache(const ObjectNode& aNode) const;
+    const BindingCacheList& bindingCaches() const { return mBindingCaches; }
 
     // reset cache list and rewrite influences
     void resetCaches(Project& aProject, ObjectNode& aOwner);
@@ -77,7 +89,6 @@ private:
     void resetCacheListRecursive(const TimeInfo& aTime, ObjectNode& aNode, CacheList& aNewList);
     void updateCaches(Project& aProject, const QList<Cache*>& aTargets);
     Cache* popCache(ObjectNode& aNode);
-    Cache* findCache(ObjectNode& aNode);
     void destroyCaches();
     bool serializeBone(Serializer& aOut, const Bone2* aBone) const;
     bool deserializeBone(Deserializer& aIn, Bone2* aBone);
@@ -85,6 +96,7 @@ private:
     Data mData;
     CacheList mCaches;
     util::LinkPointer<ObjectNode> mCacheOwner;
+    BindingCacheList mBindingCaches;
 };
 
 } // namespace core

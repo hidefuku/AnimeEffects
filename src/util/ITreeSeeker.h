@@ -4,7 +4,7 @@
 namespace util
 {
 
-template <typename tData>
+template <typename tData, typename tAddress>
 class ITreeSeeker
 {
 public:
@@ -14,6 +14,7 @@ public:
     ITreeSeeker() {}
     virtual ~ITreeSeeker() {}
 
+    virtual Position position(tAddress) const = 0;
     virtual Data data(Position) const = 0;
     virtual Position parent(Position) const = 0;
     virtual Position child(Position) const = 0;

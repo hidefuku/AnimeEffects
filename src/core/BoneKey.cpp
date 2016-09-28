@@ -98,10 +98,19 @@ void BoneKey::Cache::setNode(ObjectNode& aNode)
 }
 
 //-------------------------------------------------------------------------------------------------
+BoneKey::BindingCache::BindingCache()
+    : node()
+    , boneIndex()
+    , innerMtx()
+{
+}
+
+//-------------------------------------------------------------------------------------------------
 BoneKey::BoneKey()
     : mData()
     , mCaches()
     , mCacheOwner()
+    , mBindingCaches()
 {
 }
 
@@ -153,6 +162,30 @@ void BoneKey::updateCaches(Project& aProject, const QList<Cache*>& aTargets)
     // wake all worker threads
     aProject.paralleler().wakeAll();
 #endif
+
+    // update binding caches
+    {
+        mBindingCaches.clear();
+        for (auto topBone : mData.topBones())
+        {
+            Bone2::Iterator itr(topBone);
+            while (itr.hasNext())
+            {
+                auto bone = itr.next();
+                for (auto node : bone->bindingNodes())
+                {
+                    BindingCache bc;
+                    bc.node = node;
+                    bc.boneIndex = PosePalette::getBoneIndex(mData, *bone);
+                    XC_ASSERT(bc.boneIndex >= 0);
+                    auto innerMtx = TimeKeyBlender::getRelativeMatrix(*node, time, owner);
+                    //innerMtx.translate(-ObjectNodeUtil::getCenterOffset3D(*node));
+                    bc.innerMtx = innerMtx;
+                    mBindingCaches.push_back(bc);
+                }
+            }
+        }
+    }
 }
 
 void BoneKey::updateCaches(Project& aProject, ObjectNode& aOwner, const QVector<ObjectNode*>& aUniqueRoots)
@@ -198,11 +231,14 @@ void BoneKey::resetCacheListRecursive(const TimeInfo& aTime, ObjectNode& aNode, 
         if (!mesh || mesh->vertexCount() <= 0) useMe = false;
     }
 
+    // ignore
     {
         const BoneKey* areaBone = TimeKeyBlender::getAreaBone(aNode, aTime);
         // there are more local bone keys.
         if (areaBone && areaBone != this) return;
     }
+    // ignore
+    if (mData.isBinding(aNode)) return;
 
     if (useMe)
     {
@@ -300,7 +336,7 @@ BoneKey::Cache* BoneKey::popCache(ObjectNode& aNode)
     return nullptr;
 }
 
-BoneKey::Cache* BoneKey::findCache(ObjectNode& aNode)
+BoneKey::Cache* BoneKey::findCache(const ObjectNode& aNode) const
 {
     for (auto itr = mCaches.begin(); itr != mCaches.end(); ++itr)
     {

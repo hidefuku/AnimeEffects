@@ -7,11 +7,11 @@
 namespace util
 {
 
-template <typename tData>
+template <typename tData, typename tAddress>
 class TreeSeekIterator
 {
 public:
-    typedef ITreeSeeker<tData> SeekerType;
+    typedef ITreeSeeker<tData, tAddress> SeekerType;
     typedef typename SeekerType::Data DataType;
     typedef typename SeekerType::Position PositionType;
 

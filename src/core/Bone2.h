@@ -3,6 +3,7 @@
 
 #include <array>
 #include <QVector2D>
+#include <QMatrix4x4>
 #include "util/LifeLink.h"
 #include "util/TreeNodeBase.h"
 #include "util/TreeIterator.h"
@@ -52,6 +53,9 @@ public:
     void updateWorldTransform();
     const QVector2D& worldPos() const;
     float worldAngle() const;
+    QMatrix4x4 transformationMatrix(const QVector2D& aToPos, float aToAngle) const;
+    QMatrix4x4 transformationMatrix(const Bone2& aTo) const;
+    QMatrix4x4 transformationMatrix(const QMatrix4x4& aToMtx) const;
 
     // focus
     bool isFocused() const { return mFocus.isLinking(); }
