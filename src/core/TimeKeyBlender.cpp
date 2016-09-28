@@ -796,6 +796,7 @@ void TimeKeyBlender::buildPosePalette(ObjectNode& aNode, PosePalette::KeyPair aP
             PosePalette::KeyPair pair = {};
             aPair = pair;
         }
+
         // build
         if (aPair.origin && aPair.pose)
         {
@@ -828,7 +829,8 @@ void TimeKeyBlender::setBoneInfluenceMaps(
         XC_PTR_ASSERT(mSeeker->data(&aNode).expans);
         auto& expans = *(mSeeker->data(&aNode).expans);
 
-        auto parent = expans.poseParent();
+        //auto parent = expans.poseParent();
+        auto parent = expans.areaBone();
         if (parent) key = parent;
 
         const LayerMesh* mesh = nullptr;
