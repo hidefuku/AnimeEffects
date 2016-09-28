@@ -42,7 +42,7 @@ void BonePanel::createMode()
                          mResources.icon("plus") <<
                          mResources.icon("minus") <<
                          mResources.icon("move") <<
-                         mResources.icon("plus") <<
+                         mResources.icon("bind") <<
                          mResources.icon("influence") <<
                          mResources.icon("pencil") <<
                          mResources.icon("eraser"));
