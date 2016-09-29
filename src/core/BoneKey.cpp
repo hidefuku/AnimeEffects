@@ -390,6 +390,17 @@ bool BoneKey::serialize(Serializer& aOut) const
         }
     }
 
+    // binding cache count
+    aOut.write(mBindingCaches.count());
+
+    // each binding caches
+    for (auto& cache : mBindingCaches)
+    {
+        aOut.writeID(cache.node);
+        aOut.write(cache.boneIndex);
+        aOut.write(cache.innerMtx);
+    }
+
     return aOut.checkStream();
 }
 
@@ -422,6 +433,7 @@ bool BoneKey::deserialize(Deserializer& aIn)
 {
     mData.deleteAll();
     destroyCaches();
+    mBindingCaches.clear();
 
     aIn.pushLogScope("BoneKey");
 
@@ -497,6 +509,44 @@ bool BoneKey::deserialize(Deserializer& aIn)
         if (!cache->influence().deserialize(aIn))
         {
             return false;
+        }
+    }
+
+    // binding cache count
+    int bindingCacheCount = 0;
+    aIn.read(bindingCacheCount);
+    if (bindingCacheCount < 0)
+    {
+        return aIn.errored("invalid binding cache count");
+    }
+
+    // each binding caches
+    for (int i = 0; i < bindingCacheCount; ++i)
+    {
+        mBindingCaches.push_back(BindingCache());
+        BindingCache* cache = &(mBindingCaches.back());
+
+        // node
+        {
+            auto solver = [=](void* aPtr) {
+                ObjectNode* node = static_cast<ObjectNode*>(aPtr);
+                if (node) cache->node = node;
+            };
+            if (!aIn.orderIDData(solver))
+            {
+                return aIn.errored("invalid binding cache reference id");
+            }
+        }
+
+        // bone index
+        aIn.read(cache->boneIndex);
+
+        // inner matrix
+        aIn.read(cache->innerMtx);
+
+        if (aIn.failure())
+        {
+            return aIn.errored("stream error");
         }
     }
 

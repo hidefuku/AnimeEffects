@@ -290,6 +290,11 @@ bool Bone2::deserialize(Deserializer& aIn)
             {
                 return aIn.errored("invalid reference id");
             }
+
+            if (aIn.failure())
+            {
+                return aIn.errored("stream error");
+            }
         }
     }
 
