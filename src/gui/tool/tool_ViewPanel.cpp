@@ -8,7 +8,7 @@ static const int kButtonSize = 26;
 namespace gui {
 namespace tool {
 
-ViewPanel::ViewPanel(QWidget* aParent, GUIResourceSet& aResources)
+ViewPanel::ViewPanel(QWidget* aParent, GUIResources& aResources)
     : QGroupBox(aParent)
     , mResources(aResources)
     , mButtons()

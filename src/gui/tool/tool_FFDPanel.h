@@ -9,7 +9,7 @@
 #include <QButtonGroup>
 #include "util/Signaler.h"
 #include "ctrl/FFDParam.h"
-#include "gui/GUIResourceSet.h"
+#include "gui/GUIResources.h"
 #include "gui/tool/tool_Items.h"
 
 namespace gui {
@@ -18,7 +18,7 @@ namespace tool {
 class FFDPanel : public QGroupBox
 {
 public:
-    FFDPanel(QWidget* aParent, GUIResourceSet& aResources);
+    FFDPanel(QWidget* aParent, GUIResources& aResources);
 
     int updateGeometry(const QPoint& aPos, int aWidth);
 
@@ -31,7 +31,7 @@ private:
     void createBrush();
     void updateTypeParam(int aType);
 
-    GUIResourceSet& mResources;
+    GUIResources& mResources;
     ctrl::FFDParam mParam;
     QScopedPointer<SingleOutItem> mTypeGroup;
     QScopedPointer<SingleOutItem> mHardnessGroup;

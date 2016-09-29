@@ -4,8 +4,10 @@
 #include "util/LinkPointer.h"
 #include "util/Signaler.h"
 #include "core/Project.h"
+#include "ctrl/System.h"
 #include "ctrl/Driver.h"
 #include "ctrl/ToolType.h"
+#include "ctrl/DriverResources.h"
 #include "ctrl/GraphicStyle.h"
 
 namespace gui
@@ -36,6 +38,7 @@ public:
 
 private:
 
+    ctrl::DriverResources mDriverResources;
     QScopedPointer<ctrl::Driver> mDriver;
     util::LinkPointer<core::Project> mProject;
     util::SlotId mTimeLineSlot;

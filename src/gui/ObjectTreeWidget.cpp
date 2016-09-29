@@ -32,10 +32,10 @@ namespace gui
 {
 
 //-------------------------------------------------------------------------------------------------
-ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResourceSet& aResources, QWidget* aParent)
+ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources, QWidget* aParent)
     : QTreeWidget(aParent)
     , mViaPoint(aViaPoint)
-    , mResourceSet(aResources)
+    , mResources(aResources)
     , mProject()
     , mTimeLineSlot()
     , mStoreInsert(false)
@@ -219,7 +219,7 @@ obj::Item* ObjectTreeWidget::createFolderItem(core::ObjectNode& aNode)
     obj::Item* item = new obj::Item(*this, aNode);
     item->setSizeHint(kItemColumn, QSize(kItemSize, itemHeight(aNode)));
     item->setBackgroundColor(kItemColumn, QColor(235, 235, 235, 255));
-    item->setIcon(kItemColumn, mResourceSet.icon("folder"));
+    item->setIcon(kItemColumn, mResources.icon("folder"));
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(kItemColumn, aNode.isVisible() ? Qt::Checked : Qt::Unchecked);
     return item;
@@ -229,7 +229,7 @@ obj::Item* ObjectTreeWidget::createFileItem(core::ObjectNode& aNode)
 {
     obj::Item* item = new obj::Item(*this, aNode);
     item->setSizeHint(kItemColumn, QSize(kItemSize, itemHeight(aNode)));
-    item->setIcon(kItemColumn, mResourceSet.icon("filew"));
+    item->setIcon(kItemColumn, mResources.icon("filew"));
     item->setFlags(item->flags() & ~Qt::ItemIsDropEnabled);
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(kItemColumn, aNode.isVisible() ? Qt::Checked : Qt::Unchecked);

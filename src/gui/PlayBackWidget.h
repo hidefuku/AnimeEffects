@@ -5,7 +5,7 @@
 #include <functional>
 #include <QWidget>
 #include <QPushButton>
-#include "gui/GUIResourceSet.h"
+#include "gui/GUIResources.h"
 
 namespace gui
 {
@@ -26,7 +26,7 @@ public:
     };
     typedef std::function<void(PushType)> PushDelegate;
 
-    PlayBackWidget(GUIResourceSet& aResources, QWidget* aParent);
+    PlayBackWidget(GUIResources& aResources, QWidget* aParent);
 
     void setPushDelegate(const PushDelegate& aDelegate);
     int constantWidth() const;
@@ -36,7 +36,7 @@ private:
     QPushButton* createButton(
             const QString& aName, bool aIsCheckable,
             int aColumn, const QString& aToolTip);
-    GUIResourceSet& mResources;
+    GUIResources& mResources;
     std::vector<QPushButton*> mButtons;
     PushDelegate mPushDelegate;
 };

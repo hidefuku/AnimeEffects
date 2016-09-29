@@ -85,7 +85,8 @@ SOURCES += \
     TimeCacheAccessor.cpp \
     TimeLineEvent.cpp \
     MeshKeyUtil.cpp \
-    ProjectEvent.cpp
+    ProjectEvent.cpp \
+    MeshTransformerResource.cpp
 
 HEADERS += \
     AbstractCursor.h \
@@ -142,4 +143,5 @@ HEADERS += \
     TimeCacheAccessor.h \
     Frame.h \
     MeshKeyUtil.h \
-    ProjectEvent.h
+    ProjectEvent.h \
+    MeshTransformerResource.h

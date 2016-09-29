@@ -15,6 +15,7 @@
 #include "ctrl/PoseEditor.h"
 #include "ctrl/MeshEditor.h"
 #include "ctrl/GraphicStyle.h"
+#include "ctrl/DriverResources.h"
 
 namespace ctrl
 {
@@ -22,7 +23,7 @@ namespace ctrl
 class Driver
 {
 public:
-    Driver(core::Project& aProject, GraphicStyle& aGraphicStyle);
+    Driver(core::Project& aProject, DriverResources& aResources, GraphicStyle& aGraphicStyle);
 
     void setTarget(core::ObjectNode* aNode);
     core::ObjectNode* currentTarget() const { return mCurrentNode; }
@@ -46,6 +47,7 @@ private:
     void drawOutline(const core::RenderInfo& aRenderInfo, QPainter& aPainter);
 
     core::Project& mProject;
+    DriverResources& mResources;
     GraphicStyle& mGraphicStyle;
     ToolType mToolType;
     core::TimeKeyBlender mBlender;

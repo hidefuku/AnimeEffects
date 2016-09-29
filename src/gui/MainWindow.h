@@ -13,7 +13,7 @@
 #include "gui/PropertyWidget.h"
 #include "gui/ToolWidget.h"
 #include "gui/DriverHolder.h"
-#include "gui/GUIResourceSet.h"
+#include "gui/GUIResources.h"
 #include "gui/ViaPoint.h"
 #include "gui/ProjectTabBar.h"
 
@@ -25,7 +25,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget* aParent, ctrl::System* aSystem, GUIResourceSet* aResources);
+    MainWindow(ctrl::System& aSystem, GUIResources& aResources);
     ~MainWindow();
 
     void testNewProject(const QString& aFilePath);
@@ -46,8 +46,8 @@ private:
     //virtual void keyPressEvent(QKeyEvent* aEvent);
     void onProjectTabChanged(core::Project&);
 
-    ctrl::System* mSystem;
-    GUIResourceSet* mResourceSet;
+    ctrl::System& mSystem;
+    GUIResources& mResources;
     ViaPoint mViaPoint;
     MainMenuBar* mMainMenuBar;
     QScopedPointer<MainDisplayStyle> mMainDisplayStyle;

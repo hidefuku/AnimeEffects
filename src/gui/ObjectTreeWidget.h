@@ -13,7 +13,7 @@
 #include "core/Project.h"
 #include "core/ObjectTree.h"
 #include "core/ObjectTreeNotifier.h"
-#include "gui/GUIResourceSet.h"
+#include "gui/GUIResources.h"
 #include "gui/ViaPoint.h"
 #include "gui/obj/obj_Item.h"
 
@@ -27,7 +27,7 @@ public:
     enum { kItemColumn = 0 };
     enum { kColumnCount = 1 };
 
-    ObjectTreeWidget(ViaPoint& aViaPoint, GUIResourceSet& aResources, QWidget* aParent);
+    ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources, QWidget* aParent);
 
     void setProject(core::Project* aProject);
     core::ObjectNode* findSelectingRepresentNode();
@@ -91,7 +91,7 @@ private:
     void onDeleteActionTriggered(bool aIsTriggered);
 
     ViaPoint& mViaPoint;
-    GUIResourceSet& mResourceSet;
+    GUIResources& mResources;
     util::LinkPointer<core::Project> mProject;
     util::SlotId mTimeLineSlot;
 

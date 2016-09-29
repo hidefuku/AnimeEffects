@@ -9,8 +9,9 @@
 #include "core/CameraInfo.h"
 #include "core/AbstractCursor.h"
 #include "core/LayerMesh.h"
-#include "ctrl/FFDParam.h"
 #include "ctrl/IEditor.h"
+#include "ctrl/DriverResources.h"
+#include "ctrl/FFDParam.h"
 #include "ctrl/ffd/ffd_KeyOwner.h"
 #include "ctrl/ffd/ffd_MoveVertices.h"
 #include "ctrl/ffd/ffd_Task.h"
@@ -21,7 +22,7 @@ namespace ctrl
 class FFDEditor : public IEditor
 {
 public:
-    FFDEditor(core::Project& aProject);
+    FFDEditor(core::Project& aProject, DriverResources& aDriverResources);
     ~FFDEditor();
 
     virtual void setTarget(core::ObjectNode* aTarget);
@@ -71,7 +72,7 @@ private:
     bool executeDrawTask(const QVector2D& aCenter, const QVector2D& aMove);
 
     core::Project& mProject;
-    ffd::Task::Resource mTaskResource;
+    DriverResources& mDriverResources;
     FFDParam mParam;
 
     // target info

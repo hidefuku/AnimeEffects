@@ -10,7 +10,7 @@ static const int kButtonSpace = kButtonSize;
 namespace gui {
 namespace tool {
 
-SRTPanel::SRTPanel(QWidget* aParent, GUIResourceSet& aResources)
+SRTPanel::SRTPanel(QWidget* aParent, GUIResources& aResources)
     : QGroupBox(aParent)
     , mResources(aResources)
     , mParam()

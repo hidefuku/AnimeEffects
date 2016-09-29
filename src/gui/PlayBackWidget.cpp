@@ -13,7 +13,7 @@ static const int kButtonCount = 5;
 namespace gui
 {
 
-PlayBackWidget::PlayBackWidget(GUIResourceSet& aResources, QWidget* aParent)
+PlayBackWidget::PlayBackWidget(GUIResources& aResources, QWidget* aParent)
     : QWidget(aParent)
     , mResources(aResources)
     , mButtons()

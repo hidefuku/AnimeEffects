@@ -7,7 +7,7 @@
 #include <QPushButton>
 #include <QButtonGroup>
 #include "ctrl/ToolType.h"
-#include "gui/GUIResourceSet.h"
+#include "gui/GUIResources.h"
 #include "gui/tool/tool_FlowLayout.h"
 
 namespace gui {
@@ -18,7 +18,7 @@ class ModePanel : public QGroupBox
 public:
     typedef std::function<void(ctrl::ToolType, bool)> PushDelegate;
 
-    ModePanel(QWidget* aParent, GUIResourceSet& aResources);
+    ModePanel(QWidget* aParent, GUIResources& aResources);
 
     void addButton(ctrl::ToolType aType, const QString& aIconName,
                    const PushDelegate& aDelegate, const QString& aToolTip);
@@ -28,7 +28,7 @@ public:
     const QPushButton* button(int aId) const { return mButtons[aId]; }
 
 private:
-    GUIResourceSet& mResources;
+    GUIResources& mResources;
     QButtonGroup* mGroup;
     std::vector<QPushButton*> mButtons;
     FlowLayout mLayout;

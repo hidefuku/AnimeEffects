@@ -8,12 +8,12 @@
 #include "gl/Vector3.h"
 #include "gl/Task.h"
 #include "gl/BufferObject.h"
-#include "gl/EasyShaderProgram.h"
 #include "gl/ComputeTexture1D.h"
 #include "core/TimeKeyExpans.h"
 #include "core/MeshTransformer.h"
 #include "core/LayerMesh.h"
 #include "ctrl/FFDParam.h"
+#include "ctrl/ffd/ffd_TaskResource.h"
 
 namespace ctrl {
 namespace ffd {
@@ -22,34 +22,8 @@ namespace ffd {
 class Task : public gl::Task
 {
 public:
-    struct Resource
-    {
-        enum { kType = 2, kHardness = 3, kVariation = 6 };
 
-        Resource();
-
-        void setup(const QString& aBrushPath,
-                   const QString& aEraserPath,
-                   const QString& aBlurPath);
-        gl::EasyShaderProgram& program(int aType, int aHard);
-        const gl::EasyShaderProgram& program(int aType, int aHard) const;
-
-        gl::EasyShaderProgram& blurProgram() { return mBlurProgram; }
-        const gl::EasyShaderProgram& blurProgram() const { return mBlurProgram; }
-
-    private:
-        void loadFile(const QString& aPath, QString& aDstCode);
-        void buildShader(
-                gl::EasyShaderProgram& aProgram, const QString& aCode,
-                int aType, int aHard);
-        void buildBlurShader(
-                gl::EasyShaderProgram& aProgram, const QString& aCode);
-
-        gl::EasyShaderProgram mProgram[kVariation];
-        gl::EasyShaderProgram mBlurProgram;
-    };
-
-    Task(Resource& aResource);
+    Task(TaskResource& aResource, core::MeshTransformerResource& aMeshRes);
 
     void resetDst(int aVtxCount);
     void writeSrc(
@@ -72,7 +46,7 @@ private:
     virtual void onFinished();
     void requestBlur();
 
-    Resource& mResource;
+    TaskResource& mResource;
 
     core::MeshTransformer mMeshTransformer;
     core::LayerMesh::MeshBuffer mMeshBuffer;

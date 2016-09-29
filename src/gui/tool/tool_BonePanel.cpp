@@ -10,7 +10,7 @@ static const int kButtonSpace = kButtonSize;
 namespace gui {
 namespace tool {
 
-BonePanel::BonePanel(QWidget* aParent, GUIResourceSet& aResources)
+BonePanel::BonePanel(QWidget* aParent, GUIResources& aResources)
     : QGroupBox(aParent)
     , mResources(aResources)
     , mParam()

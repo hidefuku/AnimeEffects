@@ -15,8 +15,9 @@ struct ScopeCounter
 namespace ctrl
 {
 
-Driver::Driver(core::Project& aProject, GraphicStyle& aGraphicStyle)
+Driver::Driver(core::Project& aProject, DriverResources& aResources, GraphicStyle& aGraphicStyle)
     : mProject(aProject)
+    , mResources(aResources)
     , mGraphicStyle(aGraphicStyle)
     , mToolType(ToolType_TERM)
     , mBlender(aProject.objectTree())
@@ -68,7 +69,7 @@ void Driver::setTool(ToolType aType)
     }
     else if (mToolType == ToolType_FFD)
     {
-        mEditor.reset(new FFDEditor(mProject));
+        mEditor.reset(new FFDEditor(mProject, mResources));
     }
 
     setTarget(mCurrentNode);

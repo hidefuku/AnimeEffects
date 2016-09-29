@@ -4,7 +4,7 @@
 #include <QSplitter>
 #include "gui/ObjectTreeWidget.h"
 #include "gui/TimeLineWidget.h"
-#include "gui/GUIResourceSet.h"
+#include "gui/GUIResources.h"
 #include "gui/PlayBackWidget.h"
 #include "gui/ViaPoint.h"
 #include "core/Project.h"
@@ -18,7 +18,7 @@ class TargetWidget
         , public core::Animator
 {
 public:
-    TargetWidget(ViaPoint& aViaPoint, GUIResourceSet& aResources, QWidget* aParent, const QSize& aSizeHint);
+    TargetWidget(ViaPoint& aViaPoint, GUIResources& aResources, QWidget* aParent, const QSize& aSizeHint);
     void setProject(core::Project* aProject);
 
     ObjectTreeWidget& objectTreeWidget() { return *mObjTree; }
@@ -44,7 +44,7 @@ private:
     void onPlayBackButtonPushed(PlayBackWidget::PushType aType);
 
     core::Project* mProject;
-    GUIResourceSet& mResourceSet;
+    GUIResources& mResources;
     const QSize mSizeHint;
     ObjectTreeWidget* mObjTree;
     TimeLineWidget* mTimeLine;

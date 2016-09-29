@@ -10,7 +10,7 @@ static const int kButtonSpace = kButtonSize;
 namespace gui {
 namespace tool {
 
-FFDPanel::FFDPanel(QWidget* aParent, GUIResourceSet& aResources)
+FFDPanel::FFDPanel(QWidget* aParent, GUIResources& aResources)
     : QGroupBox(aParent)
     , mResources(aResources)
     , mParam()

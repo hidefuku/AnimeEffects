@@ -8,7 +8,7 @@ static const int kButtonSize = 26;
 namespace gui {
 namespace tool {
 
-ModePanel::ModePanel(QWidget* aParent, GUIResourceSet& aResources)
+ModePanel::ModePanel(QWidget* aParent, GUIResources& aResources)
     : QGroupBox(aParent)
     , mResources(aResources)
     , mGroup(new QButtonGroup(this))

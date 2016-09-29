@@ -1,5 +1,5 @@
-#ifndef GUI_GUIRESOURCESET_H
-#define GUI_GUIRESOURCESET_H
+#ifndef GUI_GUIRESOURCES_H
+#define GUI_GUIRESOURCES_H
 
 #include <QString>
 #include <QIcon>
@@ -10,11 +10,11 @@
 namespace gui
 {
 
-class GUIResourceSet : private util::NonCopyable
+class GUIResources : private util::NonCopyable
 {
 public:
-    GUIResourceSet(const QString& aResourceDir);
-    ~GUIResourceSet();
+    GUIResources(const QString& aResourceDir);
+    ~GUIResources();
 
     QIcon icon(const QString& aName) const;
 
@@ -30,4 +30,4 @@ private:
 
 } // namespace gui
 
-#endif // GUI_GUIRESOURCESET_H
+#endif // GUI_GUIRESOURCES_H

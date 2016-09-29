@@ -5,7 +5,7 @@
 #include <functional>
 #include <QGroupBox>
 #include <QPushButton>
-#include "gui/GUIResourceSet.h"
+#include "gui/GUIResources.h"
 #include "gui/tool/tool_FlowLayout.h"
 
 namespace gui {
@@ -16,7 +16,7 @@ class ViewPanel : public QGroupBox
 public:
     typedef std::function<void(bool)> PushDelegate;
 
-    ViewPanel(QWidget* aParent, GUIResourceSet& aResources);
+    ViewPanel(QWidget* aParent, GUIResources& aResources);
 
     void addButton(const QString& aIconName, bool aCheckable,
                    const QString& aToolTip, const PushDelegate& aDelegate);
@@ -26,7 +26,7 @@ public:
     const QPushButton* button(int aId) const { return mButtons[aId]; }
 
 private:
-    GUIResourceSet& mResources;
+    GUIResources& mResources;
     std::vector<QPushButton*> mButtons;
     FlowLayout mLayout;
 };

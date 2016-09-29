@@ -1,6 +1,7 @@
 #include "cmnd/ScopedMacro.h"
 #include "cmnd/BasicCommands.h"
 #include "gl/Global.h"
+#include "core/MeshTransformerResource.h"
 #include "ctrl/FFDEditor.h"
 #include "ctrl/TimeLineUtil.h"
 
@@ -60,9 +61,9 @@ FFDEditor::Target::~Target()
 }
 
 //-------------------------------------------------------------------------------------------------
-FFDEditor::FFDEditor(Project& aProject)
+FFDEditor::FFDEditor(Project& aProject, DriverResources& aDriverResources)
     : mProject(aProject)
-    , mTaskResource()
+    , mDriverResources(aDriverResources)
     , mParam()
     , mRootTarget()
     , mTargets()
@@ -71,11 +72,21 @@ FFDEditor::FFDEditor(Project& aProject)
     mStatus.brush.setRadius(mParam.radius);
 
     // setup shader
-    gl::Global::makeCurrent();
-    mTaskResource.setup(
-                "./data/shader/FreeFormDeform.glslex",
-                "./data/shader/FFDErase.glslex",
-                "./data/shader/FFDBlur.glslex");
+    if (!mDriverResources.meshTransformerResource())
+    {
+        gl::Global::makeCurrent();
+        mDriverResources.grabMeshTransformerResoure(new core::MeshTransformerResource());
+        mDriverResources.meshTransformerResource()->setup("./data/shader/MeshTransform.glslex");
+    }
+    if (!mDriverResources.ffdTaskResource())
+    {
+        gl::Global::makeCurrent();
+        mDriverResources.grabFFDTaskResource(new ffd::TaskResource());
+        mDriverResources.ffdTaskResource()->setup(
+                    "./data/shader/FreeFormDeform.glslex",
+                    "./data/shader/FFDErase.glslex",
+                    "./data/shader/FFDBlur.glslex");
+    }
 
 #if 0
     gl::Global::Functions& ggl = gl::Global::functions();
@@ -309,7 +320,7 @@ bool FFDEditor::resetCurrentTarget()
         XC_PTR_ASSERT(node);
         LayerMesh* areaMesh = getCurrentAreaMesh(*node);
 
-        if (node && node->timeLine() && areaMesh && areaMesh->vertexCount() > 0)
+        if (node->timeLine() && areaMesh && areaMesh->vertexCount() > 0)
         {
             bool found = false;
             for (auto prev : prevTargets)
@@ -327,7 +338,10 @@ bool FFDEditor::resetCurrentTarget()
                 // push target
                 mTargets.push_back(new Target(node));
                 // create task
-                mTargets.back()->task.reset(new ffd::Task(mTaskResource));
+                mTargets.back()->task.reset(
+                            new ffd::Task(
+                                *mDriverResources.ffdTaskResource(),
+                                *mDriverResources.meshTransformerResource()));
             }
             mTargets.back()->task->resetDst(areaMesh->vertexCount());
         }

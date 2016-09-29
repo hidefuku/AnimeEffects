@@ -6,7 +6,7 @@
 #include "util/Signaler.h"
 #include "ctrl/Driver.h"
 #include "ctrl/FFDParam.h"
-#include "gui/GUIResourceSet.h"
+#include "gui/GUIResources.h"
 #include "gui/MainDisplayMode.h"
 #include "gui/MainViewSetting.h"
 #include "gui/tool/tool_ViewPanel.h"
@@ -22,7 +22,7 @@ namespace gui
 class ToolWidget : public QWidget
 {
 public:
-    ToolWidget(QWidget* aParent, GUIResourceSet& aResources, const QSize& aSizeHint);
+    ToolWidget(QWidget* aParent, GUIResources& aResources, const QSize& aSizeHint);
 
     void setDriver(ctrl::Driver* aDriver);
 
@@ -42,7 +42,7 @@ private:
     void onModePanelPushed(ctrl::ToolType, bool);
     void onParamUpdated(bool aLayoutChanged);
 
-    GUIResourceSet& mResourceSet;
+    GUIResources& mResources;
     const QSize mSizeHint;
     tool::ViewPanel* mViewPanel;
     tool::ModePanel* mModePanel;

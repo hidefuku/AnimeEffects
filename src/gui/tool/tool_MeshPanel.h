@@ -6,7 +6,7 @@
 #include <QButtonGroup>
 #include "util/Signaler.h"
 #include "ctrl/MeshParam.h"
-#include "gui/GUIResourceSet.h"
+#include "gui/GUIResources.h"
 #include "gui/tool/tool_Items.h"
 
 namespace gui {
@@ -15,7 +15,7 @@ namespace tool {
 class MeshPanel : public QGroupBox
 {
 public:
-    MeshPanel(QWidget* aParent, GUIResourceSet& aResources);
+    MeshPanel(QWidget* aParent, GUIResources& aResources);
 
     int updateGeometry(const QPoint& aPos, int aWidth);
 
@@ -27,7 +27,7 @@ public:
 private:
     void createMode();
 
-    GUIResourceSet& mResources;
+    GUIResources& mResources;
     ctrl::MeshParam mParam;
     QScopedPointer<SingleOutItem> mTypeGroup;
 };

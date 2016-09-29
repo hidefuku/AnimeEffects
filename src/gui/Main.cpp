@@ -285,7 +285,7 @@ void operator delete[](void* aPtr)
 #include "gl/Global.h"
 #include "ctrl/System.h"
 #include "gui/MainWindow.h"
-#include "gui/GUIResourceSet.h"
+#include "gui/GUIResources.h"
 
 #if defined(USE_MSVC_MEMORYLEAK_DEBUG)
 #include <Windows.h>
@@ -523,13 +523,13 @@ int entryPoint(int argc, char *argv[])
 
     {
         // load constant gui resources
-        QScopedPointer<gui::GUIResourceSet> resources(new gui::GUIResourceSet(resourceDir));
+        QScopedPointer<gui::GUIResources> resources(new gui::GUIResources(resourceDir));
 
         // create system logic core
         QScopedPointer<ctrl::System> system(new ctrl::System(resourceDir, cacheDir));
 
         // create main window
-        QScopedPointer<gui::MainWindow> mainWindow(new gui::MainWindow(nullptr, system.data(), resources.data()));
+        QScopedPointer<gui::MainWindow> mainWindow(new gui::MainWindow(*system, *resources));
 
         qDebug() << "show main window";
         // show main window

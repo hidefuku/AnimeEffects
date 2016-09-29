@@ -4,7 +4,7 @@
 #include <QWidget>
 #include "util/NonCopyable.h"
 #include "ctrl/GraphicStyle.h"
-#include "gui/GUIResourceSet.h"
+#include "gui/GUIResources.h"
 
 namespace gui
 {
@@ -14,7 +14,7 @@ class MainDisplayStyle
         , private util::NonCopyable
 {
 public:
-    MainDisplayStyle(QWidget& aWidget, GUIResourceSet& aResources)
+    MainDisplayStyle(QWidget& aWidget, GUIResources& aResources)
         : mWidget(aWidget)
         , mResources(aResources)
     {
@@ -37,7 +37,7 @@ public:
 
 private:
     QWidget& mWidget;
-    GUIResourceSet& mResources;
+    GUIResources& mResources;
 };
 
 }

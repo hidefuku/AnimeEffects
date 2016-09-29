@@ -95,7 +95,9 @@ SOURCES += \
     bone/bone_DeleteBone.cpp \
     mesh/mesh_SplitMode.cpp \
     bone/bone_BindNodesMode.cpp \
-    bone/bone_NodeSelector.cpp
+    bone/bone_NodeSelector.cpp \
+    ffd/ffd_TaskResource.cpp \
+    DriverResources.cpp
 
 HEADERS += \
     Driver.h \
@@ -168,4 +170,6 @@ HEADERS += \
     mesh/mesh_SplitMode.h \
     bone/bone_BindNodesMode.h \
     GraphicStyle.h \
-    bone/bone_NodeSelector.h
+    bone/bone_NodeSelector.h \
+    ffd/ffd_TaskResource.h \
+    DriverResources.h

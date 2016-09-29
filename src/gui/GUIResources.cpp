@@ -1,4 +1,4 @@
-#include "gui/GUIResourceSet.h"
+#include "gui/GUIResources.h"
 #include <QPainter>
 #include <QColor>
 #include <QDirIterator>
@@ -8,7 +8,7 @@
 namespace gui
 {
 
-GUIResourceSet::GUIResourceSet(const QString& aResourceDir)
+GUIResources::GUIResources(const QString& aResourceDir)
     : mResourceDir(aResourceDir)
     , mIconMap()
 {
@@ -24,7 +24,7 @@ GUIResourceSet::GUIResourceSet(const QString& aResourceDir)
     }
 }
 
-GUIResourceSet::~GUIResourceSet()
+GUIResources::~GUIResources()
 {
     for (IconMap::iterator itr = mIconMap.begin(); itr != mIconMap.end(); ++itr)
     {
@@ -33,7 +33,7 @@ GUIResourceSet::~GUIResourceSet()
     }
 }
 
-QIcon GUIResourceSet::icon(const QString& aName) const
+QIcon GUIResources::icon(const QString& aName) const
 {
     QIcon* icon = mIconMap[aName];
     if (icon)
@@ -47,12 +47,12 @@ QIcon GUIResourceSet::icon(const QString& aName) const
     }
 }
 
-QString GUIResourceSet::iconPath(const QString& aName) const
+QString GUIResources::iconPath(const QString& aName) const
 {
     return mResourceDir + "/icon/" + aName + ".png";
 }
 
-void GUIResourceSet::loadIcon(const QString& aPath)
+void GUIResources::loadIcon(const QString& aPath)
 {
     QString name = QFileInfo(aPath).baseName();
     QPixmap source(aPath);

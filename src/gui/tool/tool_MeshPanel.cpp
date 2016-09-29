@@ -10,7 +10,7 @@ static const int kButtonSpace = kButtonSize;
 namespace gui {
 namespace tool {
 
-MeshPanel::MeshPanel(QWidget* aParent, GUIResourceSet& aResources)
+MeshPanel::MeshPanel(QWidget* aParent, GUIResources& aResources)
     : QGroupBox(aParent)
     , mResources(aResources)
     , mParam()

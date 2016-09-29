@@ -32,11 +32,10 @@ public:
 namespace gui
 {
 
-MainWindow::MainWindow(
-        QWidget* aParent, ctrl::System* aSystem, GUIResourceSet* aResources)
-    : QMainWindow(aParent)
+MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
+    : QMainWindow(nullptr)
     , mSystem(aSystem)
-    , mResourceSet(aResources)
+    , mResources(aResources)
     , mViaPoint(this)
     , mMainMenuBar()
     , mMainDisplayStyle()
@@ -81,7 +80,7 @@ MainWindow::MainWindow(
     }
 
     {
-        mMainDisplayStyle.reset(new MainDisplayStyle(*this, *mResourceSet));
+        mMainDisplayStyle.reset(new MainDisplayStyle(*this, mResources));
         mMainDisplay = new MainDisplayWidget(mViaPoint, this);
         this->setCentralWidget(mMainDisplay);
 
@@ -97,7 +96,7 @@ MainWindow::MainWindow(
         dockWidget->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
         this->addDockWidget(Qt::BottomDockWidgetArea, dockWidget);
 
-        mTarget = new TargetWidget(mViaPoint, *mResourceSet, dockWidget, QSize(256, 256));
+        mTarget = new TargetWidget(mViaPoint, mResources, dockWidget, QSize(256, 256));
         dockWidget->setWidget(mTarget);
     }
 
@@ -152,7 +151,7 @@ MainWindow::MainWindow(
         {
             dockWidget->setStyleSheet(QTextStream(&stylesheet).readAll());
         }
-        mTool = new ToolWidget(dockWidget, *mResourceSet, QSize(192, 136));
+        mTool = new ToolWidget(dockWidget, mResources, QSize(192, 136));
         dockWidget->setWidget(mTool);
     }
 
@@ -197,7 +196,7 @@ MainWindow::MainWindow(
         menu.onProjectAttributeUpdated.connect(&timeLine, &TimeLineWidget::onProjectAttributeUpdated);
         menu.onProjectAttributeUpdated.connect(&driver, &DriverHolder::onProjectAttributeUpdated);
 
-        mSystem->setAnimator(*mTarget);
+        mSystem.setAnimator(*mTarget);
     }
 
     this->setFocusPolicy(Qt::StrongFocus);
@@ -222,32 +221,25 @@ MainWindow::~MainWindow()
 
 void MainWindow::testNewProject(const QString& aFilePath)
 {
-    if (mSystem)
+    resetProjectRefs(nullptr);
+
+    menu::ProgressReporter progress(false, this);
+
+    core::Project::Attribute attribute;
+    auto project = mSystem.newProject(aFilePath, attribute, new ProjectHook(), progress);
+
+    if (project)
     {
-        resetProjectRefs(nullptr);
-
-        menu::ProgressReporter progress(false, this);
-
-        core::Project::Attribute attribute;
-        auto project = mSystem->newProject(
-                    aFilePath, attribute, new ProjectHook(), progress);
-
-        if (project)
-        {
-            resetProjectRefs(project);
-            mProjectTabBar->pushProject(*project);
-        }
+        resetProjectRefs(project);
+        mProjectTabBar->pushProject(*project);
     }
 }
 
 void MainWindow::closeAllProjects()
 {
-    if (mSystem)
-    {
-        mProjectTabBar->removeAllProject();
-        resetProjectRefs(nullptr);
-        mSystem->closeAllProjects();
-    }
+    mProjectTabBar->removeAllProject();
+    resetProjectRefs(nullptr);
+    mSystem.closeAllProjects();
 }
 
 void MainWindow::resetProjectRefs(core::Project* aProject)
@@ -286,7 +278,7 @@ void MainWindow::keyPressEvent(QKeyEvent* aEvent)
     //qDebug() << "mainwindow: input key =" << aEvent->key() << "text =" << aEvent->text();
     bool shouldUpdate = false;
 
-    if (mSystem && mSystem->project())
+    if (mSystem.project())
     {        
         if(aEvent->key() == Qt::Key_Z)
         {
@@ -294,13 +286,13 @@ void MainWindow::keyPressEvent(QKeyEvent* aEvent)
             {
                 if (aEvent->modifiers().testFlag(Qt::ShiftModifier))
                 {
-                    mSystem->project()->commandStack().redo();
+                    mSystem.project()->commandStack().redo();
                     shouldUpdate = true;
                     qDebug() << "redo";
                 }
                 else
                 {
-                    mSystem->project()->commandStack().undo();
+                    mSystem.project()->commandStack().undo();
                     shouldUpdate = true;
                     qDebug() << "undo";
                 }
@@ -323,7 +315,7 @@ void MainWindow::keyPressEvent(QKeyEvent* aEvent)
 
 void MainWindow::onUndoTriggered()
 {
-    if (mSystem && mCurrent)
+    if (mCurrent)
     {
         auto ret = mCurrent->commandStack().undo();
         qDebug() << "undone:" << ret;
@@ -334,7 +326,7 @@ void MainWindow::onUndoTriggered()
 
 void MainWindow::onRedoTriggered()
 {
-    if (mSystem && mCurrent)
+    if (mCurrent)
     {
         auto ret = mCurrent->commandStack().redo();
         qDebug() << "redone:" << ret;
@@ -345,87 +337,80 @@ void MainWindow::onRedoTriggered()
 
 void MainWindow::onNewProjectTriggered()
 {
-    if (mSystem)
+    // stop animation and main display rendering
+    EventSuspender suspender(*mMainDisplay, *mTarget);
+
+    QString fileName = QFileDialog::getOpenFileName(this, "Open File", "", "ImageFile (*.psd)");
+    if (fileName.isEmpty()) return;
+
+    // input attribute
+    core::Project::Attribute attribute;
     {
-        // stop animation and main display rendering
-        EventSuspender suspender(*mMainDisplay, *mTarget);
+        QScopedPointer<NewProjectDialog> dialog(
+                    new NewProjectDialog(fileName, this));
 
-        QString fileName = QFileDialog::getOpenFileName(this, "Open File", "", "ImageFile (*.psd)");
-        if (fileName.isEmpty()) return;
-
-        // input attribute
-        core::Project::Attribute attribute;
+        dialog->exec();
+        if (dialog->result() != QDialog::Accepted)
         {
-            QScopedPointer<NewProjectDialog> dialog(
-                        new NewProjectDialog(fileName, this));
-
-            dialog->exec();
-            if (dialog->result() != QDialog::Accepted)
-            {
-                return;
-            }
-            attribute = dialog->attribute();
+            return;
         }
+        attribute = dialog->attribute();
+    }
 
-        // clear old project
-        resetProjectRefs(nullptr);
+    // clear old project
+    resetProjectRefs(nullptr);
 
-        menu::ProgressReporter progress(false, this);
+    menu::ProgressReporter progress(false, this);
 
-        // create
-        auto project = mSystem->newProject(
-                    fileName, attribute, new ProjectHook(), progress);
+    // create
+    auto project = mSystem.newProject(fileName, attribute, new ProjectHook(), progress);
 
-        if (project)
+    if (project)
+    {
+        resetProjectRefs(project);
+        mProjectTabBar->pushProject(*project);
+    }
+    else
+    {
+        if (mProjectTabBar->currentProject())
         {
-            resetProjectRefs(project);
-            mProjectTabBar->pushProject(*project);
-        }
-        else
-        {
-            if (mProjectTabBar->currentProject())
-            {
-                resetProjectRefs(mProjectTabBar->currentProject());
-            }
+            resetProjectRefs(mProjectTabBar->currentProject());
         }
     }
 }
 
 void MainWindow::onOpenProjectTriggered()
 {
-    if (mSystem)
+    // stop animation and main display rendering
+    EventSuspender suspender(*mMainDisplay, *mTarget);
+
+    QString fileName = QFileDialog::getOpenFileName(this, "Open File", "", "ProjectFile (*.anie)");
+    if (fileName.isEmpty()) return;
+
+    // clear old project
+    resetProjectRefs(nullptr);
+
+    menu::ProgressReporter progress(false, this);
+
+    // open
+    auto project = mSystem.openProject(fileName, new ProjectHook(), progress);
+    if (project)
     {
-        // stop animation and main display rendering
-        EventSuspender suspender(*mMainDisplay, *mTarget);
-
-        QString fileName = QFileDialog::getOpenFileName(this, "Open File", "", "ProjectFile (*.anie)");
-        if (fileName.isEmpty()) return;
-
-        // clear old project
-        resetProjectRefs(nullptr);
-
-        menu::ProgressReporter progress(false, this);
-
-        // open
-        auto project = mSystem->openProject(fileName, new ProjectHook(), progress);
-        if (project)
+        resetProjectRefs(project);
+        mProjectTabBar->pushProject(*project);
+    }
+    else
+    {
+        if (mProjectTabBar->currentProject())
         {
-            resetProjectRefs(project);
-            mProjectTabBar->pushProject(*project);
-        }
-        else
-        {
-            if (mProjectTabBar->currentProject())
-            {
-                resetProjectRefs(mProjectTabBar->currentProject());
-            }
+            resetProjectRefs(mProjectTabBar->currentProject());
         }
     }
 }
 
 void MainWindow::onSaveProjectTriggered()
 {
-    if (mSystem && mCurrent)
+    if (mCurrent)
     {
         // stop animation and main display rendering
         EventSuspender suspender(*mMainDisplay, *mTarget);
@@ -437,7 +422,7 @@ void MainWindow::onSaveProjectTriggered()
 
             mCurrent->setFileName(fileName);
         }
-        mSystem->saveProject(*mCurrent);
+        mSystem.saveProject(*mCurrent);
 
         mProjectTabBar->updateTabNames();
     }
@@ -445,11 +430,11 @@ void MainWindow::onSaveProjectTriggered()
 
 void MainWindow::onCloseProjectTriggered()
 {
-    if (mSystem && mCurrent)
+    if (mCurrent)
     {        
         mProjectTabBar->removeProject(*mCurrent);
         resetProjectRefs(nullptr);
-        mSystem->closeProject(*mCurrent);
+        mSystem.closeProject(*mCurrent);
 
         if (mProjectTabBar->currentProject())
         {
@@ -460,10 +445,8 @@ void MainWindow::onCloseProjectTriggered()
 
 void MainWindow::onExportPngSeqTriggered()
 {
-    if (!mSystem || !mCurrent)
-    {
-        return;
-    }
+    if (!mCurrent) return;
+
     // stop animation and main display rendering
     EventSuspender suspender(*mMainDisplay, *mTarget);
 
@@ -513,10 +496,8 @@ void MainWindow::onExportPngSeqTriggered()
 }
 void MainWindow::onExportVideoTriggered()
 {
-    if (!mSystem || !mCurrent)
-    {
-        return;
-    }
+    if (!mCurrent) return;
+
     // stop animation and main display rendering
     EventSuspender suspender(*mMainDisplay, *mTarget);
 

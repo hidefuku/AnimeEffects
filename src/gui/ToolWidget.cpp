@@ -4,9 +4,9 @@
 namespace gui
 {
 
-ToolWidget::ToolWidget(QWidget* aParent, GUIResourceSet& aResources, const QSize& aSizeHint)
+ToolWidget::ToolWidget(QWidget* aParent, GUIResources& aResources, const QSize& aSizeHint)
     : QWidget(aParent)
-    , mResourceSet(aResources)
+    , mResources(aResources)
     , mSizeHint(aSizeHint)
     , mViewPanel()
     , mModePanel()
@@ -23,19 +23,19 @@ ToolWidget::ToolWidget(QWidget* aParent, GUIResourceSet& aResources, const QSize
     createModePanel();
     setPanelActivity(false);
 
-    mSRTPanel = new tool::SRTPanel(this, mResourceSet);
+    mSRTPanel = new tool::SRTPanel(this, mResources);
     mSRTPanel->onParamUpdated.connect(this, &ToolWidget::onParamUpdated);
     mSRTPanel->hide();
 
-    mFFDPanel = new tool::FFDPanel(this, mResourceSet);
+    mFFDPanel = new tool::FFDPanel(this, mResources);
     mFFDPanel->onParamUpdated.connect(this, &ToolWidget::onParamUpdated);
     mFFDPanel->hide();
 
-    mBonePanel = new tool::BonePanel(this, mResourceSet);
+    mBonePanel = new tool::BonePanel(this, mResources);
     mBonePanel->onParamUpdated.connect(this, &ToolWidget::onParamUpdated);
     mBonePanel->hide();
 
-    mMeshPanel = new tool::MeshPanel(this, mResourceSet);
+    mMeshPanel = new tool::MeshPanel(this, mResources);
     mMeshPanel->onParamUpdated.connect(this, &ToolWidget::onParamUpdated);
     mMeshPanel->hide();
 
@@ -60,7 +60,7 @@ void ToolWidget::setDriver(ctrl::Driver* aDriver)
 void ToolWidget::createViewPanel()
 {
     if (mViewPanel) delete mViewPanel;
-    mViewPanel = new tool::ViewPanel(this, mResourceSet);
+    mViewPanel = new tool::ViewPanel(this, mResources);
 
     mViewPanel->addButton("showmesh", true, "Show Layer Mesh", [=](bool aChecked)
     {
@@ -96,7 +96,7 @@ void ToolWidget::createViewPanel()
 void ToolWidget::createModePanel()
 {
     if (mModePanel) delete mModePanel;
-    mModePanel = new tool::ModePanel(this, mResourceSet);
+    mModePanel = new tool::ModePanel(this, mResources);
 
     auto delegate = [=](ctrl::ToolType aType, bool aChecked)
     {

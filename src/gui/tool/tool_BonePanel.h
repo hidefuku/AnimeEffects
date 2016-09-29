@@ -6,7 +6,7 @@
 #include <QButtonGroup>
 #include "util/Signaler.h"
 #include "ctrl/BoneParam.h"
-#include "gui/GUIResourceSet.h"
+#include "gui/GUIResources.h"
 #include "gui/tool/tool_Items.h"
 
 namespace gui {
@@ -15,7 +15,7 @@ namespace tool {
 class BonePanel : public QGroupBox
 {
 public:
-    BonePanel(QWidget* aParent, GUIResourceSet& aResources);
+    BonePanel(QWidget* aParent, GUIResources& aResources);
 
     int updateGeometry(const QPoint& aPos, int aWidth);
 
@@ -28,7 +28,7 @@ private:
     void createMode();
     void updateTypeParam(ctrl::BoneEditMode aType);
 
-    GUIResourceSet& mResources;
+    GUIResources& mResources;
     ctrl::BoneParam mParam;
     QScopedPointer<SingleOutItem> mTypeGroup;
     QScopedPointer<SliderItem> mPIRadius;

@@ -1,19 +1,11 @@
-#include <QFile>
 #include <QElapsedTimer>
 #include "XC.h"
 #include "gl/Global.h"
 #include "gl/Util.h"
 #include "gl/Vector2I.h"
 #include "gl/Vector3.h"
-#include "gl/ExtendShader.h"
 #include "core/Constant.h"
 #include "ctrl/ffd/ffd_Task.h"
-
-namespace
-{
-static const int kTypeDeformer = 0;
-static const int kTypeEraser = 1;
-}
 
 using namespace core;
 
@@ -21,163 +13,9 @@ namespace ctrl {
 namespace ffd {
 
 //-------------------------------------------------------------------------------------------------
-Task::Resource::Resource()
-{
-    XC_ASSERT(kType * kHardness == kVariation);
-}
-
-void Task::Resource::setup(
-        const QString& aBrushPath, const QString& aEraserPath, const QString& aBlurPath)
-{
-    // load brush shader
-    {
-        QString code;
-        loadFile(aBrushPath, code);
-
-        for (int hard = 0; hard < kHardness; ++hard)
-        {
-            buildShader(mProgram[kTypeDeformer * kHardness + hard], code, kTypeDeformer, hard);
-        }
-    }
-
-    // load eraser shader
-    {
-        QString code;
-        loadFile(aEraserPath, code);
-
-        for (int hard = 0; hard < kHardness; ++hard)
-        {
-            buildShader(mProgram[kTypeEraser * kHardness + hard], code, kTypeEraser, hard);
-        }
-    }
-
-    // load blur path
-    {
-        QString code;
-        loadFile(aBlurPath, code);
-        buildBlurShader(mBlurProgram, code);
-    }
-}
-
-gl::EasyShaderProgram& Task::Resource::program(int aType, int aHard)
-{
-    XC_ASSERT(aType < kType && aHard < kHardness);
-    return mProgram[aType * kHardness + aHard];
-}
-
-const gl::EasyShaderProgram& Task::Resource::program(int aType, int aHard) const
-{
-    XC_ASSERT(aType < kType && aHard < kHardness);
-    return mProgram[aType * kHardness + aHard];
-}
-
-void Task::Resource::loadFile(const QString& aPath, QString& aDstCode)
-{
-    QFile file(aPath);
-
-    if (!file.open(QIODevice::ReadOnly))
-    {
-        XC_FATAL_ERROR("FileIO Error", file.errorString(), aPath);
-    }
-    QTextStream in(&file);
-    aDstCode = in.readAll();
-}
-
-void Task::Resource::buildShader(
-        gl::EasyShaderProgram& aProgram, const QString& aCode,
-        int aType, int aHard)
-{
-    gl::Global::Functions& ggl = gl::Global::functions();
-
-    gl::ExtendShader source;
-
-    // parse shader source
-    source.openFromText(aCode);
-
-    // set variation
-    source.setVariationValue("HARDNESS", QString::number(aHard));
-
-    // resolve variation
-    if (!source.resolveVariation())
-    {
-        XC_FATAL_ERROR("OpenGL Error", "Failed to resolve shader variation.",
-                       source.log());
-    }
-
-    // set shader source
-    if (!aProgram.setVertexSource(source))
-    {
-        XC_FATAL_ERROR("OpenGL Error", "Failed to compile vertex shader.",
-                       aProgram.log());
-    }
-
-    // feedback
-    if (aType == kTypeDeformer)
-    {
-        static const GLchar* kVaryings[] = {
-            "outPosition", "outWeight"
-        };
-        ggl.glTransformFeedbackVaryings(aProgram.id(), 2, kVaryings, GL_SEPARATE_ATTRIBS);
-    }
-    else
-    {
-        static const GLchar* kVaryings[] = {
-            "outPosition"
-        };
-        ggl.glTransformFeedbackVaryings(aProgram.id(), 1, kVaryings, GL_SEPARATE_ATTRIBS);
-    }
-
-    // link shader
-    if (!aProgram.link())
-    {
-        XC_FATAL_ERROR("OpenGL Error", "Failed to link shader.", aProgram.log());
-    }
-    XC_ASSERT(ggl.glGetError() == GL_NO_ERROR);
-}
-
-void Task::Resource::buildBlurShader(
-        gl::EasyShaderProgram& aProgram, const QString& aCode)
-{
-    gl::Global::Functions& ggl = gl::Global::functions();
-
-    gl::ExtendShader source;
-
-    // parse shader source
-    source.openFromText(aCode);
-
-    // resolve variation
-    if (!source.resolveVariation())
-    {
-        XC_FATAL_ERROR("OpenGL Error", "Failed to resolve shader variation.",
-                       source.log());
-    }
-
-    // set shader source
-    if (!aProgram.setVertexSource(source))
-    {
-        XC_FATAL_ERROR("OpenGL Error", "Failed to compile vertex shader.",
-                       aProgram.log());
-    }
-
-    // feedback
-    static const GLchar* kVaryings[] = {
-        "outPosition"
-    };
-    ggl.glTransformFeedbackVaryings(aProgram.id(), 1, kVaryings, GL_SEPARATE_ATTRIBS);
-
-    // link shader
-    if (!aProgram.link())
-    {
-        XC_FATAL_ERROR("OpenGL Error", "Failed to link shader.",
-                       aProgram.log());
-    }
-    XC_ASSERT(ggl.glGetError() == GL_NO_ERROR);
-}
-
-//-------------------------------------------------------------------------------------------------
-Task::Task(Resource& aResource)
+Task::Task(TaskResource& aResource, core::MeshTransformerResource& aMeshRes)
     : mResource(aResource)
-    , mMeshTransformer("./data/shader/MeshTransform.glslex")
+    , mMeshTransformer(aMeshRes)
     , mMeshBuffer()
     , mSrcExpans()
     , mArrayedConnectionList()
@@ -233,7 +71,7 @@ void Task::writeSrc(
     mParam = aParam;
     mOriginMesh = aOriginMesh.positions();
 
-    mUseBlur = aParam.type == kTypeDeformer && aParam.blur > 0.0f;
+    mUseBlur = aParam.type == TaskResource::kTypeDeformer && aParam.blur > 0.0f;
     if (mUseBlur)
     {
         mWorkInMesh.resetData<gl::Vector3>(vtxCount, GL_STREAM_COPY);
@@ -284,7 +122,7 @@ void Task::onRequested()
     {
         program.bind();
 
-        if (mParam.type == kTypeDeformer)
+        if (mParam.type == TaskResource::kTypeDeformer)
         {
             program.setAttributeArray("inPosition", mSrcMesh.array(), srcVtxCount);
             program.setAttributeBuffer("inWorldPosition", mMeshTransformer.positions(), GL_FLOAT, 3);

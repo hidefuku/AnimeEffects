@@ -9,7 +9,7 @@
 #include <QButtonGroup>
 #include "util/Signaler.h"
 #include "ctrl/SRTParam.h"
-#include "gui/GUIResourceSet.h"
+#include "gui/GUIResources.h"
 #include "gui/tool/tool_Items.h"
 
 namespace gui {
@@ -18,7 +18,7 @@ namespace tool {
 class SRTPanel : public QGroupBox
 {
 public:
-    SRTPanel(QWidget* aParent, GUIResourceSet& aResources);
+    SRTPanel(QWidget* aParent, GUIResources& aResources);
 
     int updateGeometry(const QPoint& aPos, int aWidth);
 
@@ -31,7 +31,7 @@ private:
     void createMode();
     void updateTypeParam(int aType);
 
-    GUIResourceSet& mResources;
+    GUIResources& mResources;
     ctrl::SRTParam mParam;
     QScopedPointer<SingleOutItem> mTypeGroup;
 };

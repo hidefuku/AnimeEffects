@@ -3,10 +3,10 @@
 namespace gui
 {
 
-TargetWidget::TargetWidget(ViaPoint& aViaPoint, GUIResourceSet& aResources, QWidget* aParent, const QSize& aSizeHint)
+TargetWidget::TargetWidget(ViaPoint& aViaPoint, GUIResources& aResources, QWidget* aParent, const QSize& aSizeHint)
     : QSplitter(aParent)
     , mProject()
-    , mResourceSet(aResources)
+    , mResources(aResources)
     , mSizeHint(aSizeHint)
     , mIsFirstTime(true)
     , mSuspendCount(0)

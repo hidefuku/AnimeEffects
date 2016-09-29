@@ -53,7 +53,6 @@ DEPENDPATH  += ..
 
 SOURCES += \
     Main.cpp \
-    GUIResourceSet.cpp \
     MainDisplayWidget.cpp \
     MainWindow.cpp \
     ObjectTreeWidget.cpp \
@@ -98,10 +97,10 @@ SOURCES += \
     EasyDialog.cpp \
     menu/menu_ProgressReporter.cpp \
     tool/tool_ViewPanel.cpp \
-    tool/tool_FlowLayout.cpp
+    tool/tool_FlowLayout.cpp \
+    GUIResources.cpp
 
 HEADERS += \
-    GUIResourceSet.h \
     MainDisplayMode.h \
     MainDisplayWidget.h \
     MainWindow.h \
@@ -151,7 +150,8 @@ HEADERS += \
     tool/tool_ViewPanel.h \
     tool/tool_FlowLayout.h \
     MainViewSetting.h \
-    MainDisplayStyle.h
+    MainDisplayStyle.h \
+    GUIResources.h
 
 FORMS +=
 
