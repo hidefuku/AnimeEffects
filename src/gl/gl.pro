@@ -38,7 +38,9 @@ SOURCES += \
     VertexArrayObject.cpp \
     Root.cpp \
     PrimitiveDrawer.cpp \
-    Triangulator.cpp
+    Triangulator.cpp \
+    FontDrawer.cpp \
+    TextObject.cpp
 
 HEADERS += \
     EasyShaderProgram.h \
@@ -60,4 +62,6 @@ HEADERS += \
     VertexArrayObject.h \
     Root.h \
     PrimitiveDrawer.h \
-    Triangulator.h
+    Triangulator.h \
+    FontDrawer.h \
+    TextObject.h

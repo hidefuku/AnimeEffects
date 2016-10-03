@@ -65,6 +65,9 @@ public:
     void setAttributeArray(const char* aName, const gl::Vector2I* aArray, int aCount);
     void setAttributeArray(const char* aName, const gl::Vector4I* aArray, int aCount);
     void setAttributeArray(int aLocation, const GLfloat* aArray, int aCount);
+    void setAttributeArray(int aLocation, const gl::Vector2* aArray, int aCount);
+    void setAttributeArray(int aLocation, const gl::Vector3* aArray, int aCount);
+    void setAttributeArray(int aLocation, const gl::Vector4* aArray, int aCount);
     void setAttributeArray(int aLocation, const GLubyte* aArray, int aCount);
 
     int uniformLocation(const char* aName) const;

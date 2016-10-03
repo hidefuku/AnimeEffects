@@ -35,11 +35,13 @@ bool EasyTextureDrawer::init()
     {
         XC_FATAL_ERROR("OpenGL Error", "Failed to compile vertex shader.",
                        mShader.log());
+        return false;
     }
     if (!mShader.setFragmentSource(QString(kFragmentShaderText)))
     {
         XC_FATAL_ERROR("OpenGL Error", "Failed to compile fragment shader.",
                        mShader.log());
+        return false;
     }
     if (!mShader.link())
     {

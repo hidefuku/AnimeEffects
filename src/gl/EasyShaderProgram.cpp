@@ -205,6 +205,21 @@ void EasyShaderProgram::setAttributeArray(int aLocation, const GLfloat* aArray, 
     setRawAttributeArray(aLocation, GL_FLOAT, 4, aArray, aCount, 1);
 }
 
+void EasyShaderProgram::setAttributeArray(int aLocation, const gl::Vector2* aArray, int aCount)
+{
+    setRawAttributeArray(aLocation, GL_FLOAT, 4, aArray, aCount, 2);
+}
+
+void EasyShaderProgram::setAttributeArray(int aLocation, const gl::Vector3* aArray, int aCount)
+{
+    setRawAttributeArray(aLocation, GL_FLOAT, 4, aArray, aCount, 3);
+}
+
+void EasyShaderProgram::setAttributeArray(int aLocation, const gl::Vector4* aArray, int aCount)
+{
+    setRawAttributeArray(aLocation, GL_FLOAT, 4, aArray, aCount, 4);
+}
+
 void EasyShaderProgram::setAttributeArray(int aLocation, const GLubyte* aArray, int aCount)
 {
     setRawAttributeArray(aLocation, GL_UNSIGNED_BYTE, 1, aArray, aCount, 1);

@@ -328,11 +328,19 @@ void PrimitiveDrawer::drawTexture(const QRectF& aRect, GLuint aTexture)
             gl::Vector2::make(aRect.right(), aRect.top()   ),
             gl::Vector2::make(aRect.right(), aRect.bottom())
         };
+        /*
         gl::Vector2 texCoords[4] = {
             gl::Vector2::make(0.0f, 0.0f),
             gl::Vector2::make(0.0f, 1.0f),
             gl::Vector2::make(1.0f, 0.0f),
             gl::Vector2::make(1.0f, 1.0f)
+        };
+        */
+        gl::Vector2 texCoords[4] = {
+            gl::Vector2::make(0.0f, 1.0f),
+            gl::Vector2::make(0.0f, 0.0f),
+            gl::Vector2::make(1.0f, 1.0f),
+            gl::Vector2::make(1.0f, 0.0f)
         };
         pushDrawCommand(command, positions, texCoords);
     }
