@@ -5,7 +5,7 @@
 
 namespace
 {
-static const int kMinSlotSize = 32;
+static const int kMinVtxCountOfSlot = 32;
 }
 
 namespace gl
@@ -65,51 +65,7 @@ bool PrimitiveDrawer::State::hasDifferentValueWith(const Command& aCommand) cons
 }
 
 //-------------------------------------------------------------------------------------------------
-PrimitiveDrawer::PrimitiveDrawer(int aSlotSize, int aSlotCount)
-    : mShader()
-    , mLocationOfPos(-1)
-    , mLocationOfViewMtx(-1)
-    , mLocationOfColor(-1)
-    , mSlotSize(aSlotSize > kMinSlotSize ? aSlotSize : kMinSlotSize)
-    , mSlotCount(aSlotCount > 1 ? aSlotCount : 1)
-    , mSlotIds()
-    , mCurrentSlotIndex(0)
-    , mCurrentSlotSize(0)
-    , mViewMtx()
-    , mBufferingCommands()
-    , mCurrentState()
-    , mBufferingState()
-    , mInDrawing(false)
-{
-    // create shader
-    initShader();
-
-    // create buffer
-    {
-        Global::Functions& ggl = Global::functions();
-
-        mSlotIds.resize(mSlotCount);
-        ggl.glGenBuffers(mSlotCount, mSlotIds.data());
-
-        auto bufferSize = (GLsizeiptr)(sizeof(gl::Vector2) * mSlotSize);
-        for (int i = 0; i < mSlotCount; ++i)
-        {
-            ggl.glBindBuffer(GL_ARRAY_BUFFER, mSlotIds[i]);
-            ggl.glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
-        }
-        ggl.glBindBuffer(GL_ARRAY_BUFFER, 0);
-        GL_CHECK_ERROR();
-    }
-}
-
-PrimitiveDrawer::~PrimitiveDrawer()
-{
-    // delete buffer
-    Global::functions().glDeleteBuffers(mSlotCount, mSlotIds.data());
-    GL_CHECK_ERROR();
-}
-
-bool PrimitiveDrawer::initShader()
+bool PrimitiveDrawer::PlaneShader::init()
 {
     static const char* kVertexShaderText =
             "#version 330 \n"
@@ -126,31 +82,133 @@ bool PrimitiveDrawer::initShader()
             "  oFragColor = uColor;"
             "}";
 
-    if (!mShader.setVertexSource(QString(kVertexShaderText)))
+    if (!program.setVertexSource(QString(kVertexShaderText)))
     {
         XC_FATAL_ERROR("OpenGL Error", "Failed to compile vertex shader.",
-                       mShader.log());
+                       program.log());
         return false;
     }
-    if (!mShader.setFragmentSource(QString(kFragmentShaderText)))
+    if (!program.setFragmentSource(QString(kFragmentShaderText)))
     {
         XC_FATAL_ERROR("OpenGL Error", "Failed to compile fragment shader.",
-                       mShader.log());
+                       program.log());
         return false;
     }
-    if (!mShader.link())
+    if (!program.link())
     {
         XC_FATAL_ERROR("OpenGL Error", "Failed to link shader.",
-                       mShader.log());
+                       program.log());
         return false;
     }
 
-    mLocationOfPos = mShader.attributeLocation("inPosition");
-    mLocationOfViewMtx = mShader.uniformLocation("uViewMtx");
-    mLocationOfColor = mShader.uniformLocation("uColor");
+    locPosition = program.attributeLocation("inPosition");
+    locViewMtx = program.uniformLocation("uViewMtx");
+    locColor = program.uniformLocation("uColor");
 
     GL_CHECK_ERROR();
     return true;
+}
+
+//-------------------------------------------------------------------------------------------------
+bool PrimitiveDrawer::TextureShader::init()
+{
+    static const char* kVertexShaderText =
+            "#version 330 \n"
+            "in vec2 inPosition;"
+            "in vec2 inTexCoord;"
+            "out vec2 vTexCoord;"
+            "uniform mat4 uViewMtx;"
+            "void main(void){"
+            "  gl_Position = uViewMtx * vec4(inPosition, 0.0, 1.0);"
+            "  vTexCoord = inTexCoord;"
+            "}";
+    static const char* kFragmentShaderText =
+            "#version 330 \n"
+            "in vec2 vTexCoord;"
+            "uniform vec4 uColor;"
+            "uniform sampler2D uTexture;"
+            "layout(location = 0, index = 0) out vec4 oFragColor;"
+            "void main(void){"
+            "  oFragColor = uColor * texture2D(uTexture, vTexCoord);"
+            "}";
+
+    if (!program.setVertexSource(QString(kVertexShaderText)))
+    {
+        XC_FATAL_ERROR("OpenGL Error", "Failed to compile vertex shader.",
+                       program.log());
+        return false;
+    }
+    if (!program.setFragmentSource(QString(kFragmentShaderText)))
+    {
+        XC_FATAL_ERROR("OpenGL Error", "Failed to compile fragment shader.",
+                       program.log());
+        return false;
+    }
+    if (!program.link())
+    {
+        XC_FATAL_ERROR("OpenGL Error", "Failed to link shader.",
+                       program.log());
+        return false;
+    }
+
+    locPosition = program.attributeLocation("inPosition");
+    locTexCoord = program.attributeLocation("inTexCoord");
+    locViewMtx = program.uniformLocation("uViewMtx");
+    locColor = program.uniformLocation("uColor");
+    locTexture = program.uniformLocation("uTexture");
+
+    GL_CHECK_ERROR();
+    return true;
+}
+
+//-------------------------------------------------------------------------------------------------
+PrimitiveDrawer::PrimitiveDrawer(int aVtxCountOfSlot, int aSlotCount)
+    : mPlaneShader()
+    , mTextureShader()
+    , mVtxCountOfSlot(std::max(aVtxCountOfSlot, kMinVtxCountOfSlot))
+    , mSlotCount(std::max(aSlotCount, 1))
+    , mPosSlotIds()
+    , mTexSlotIds()
+    , mCurrentSlotIndex(0)
+    , mCurrentSlotSize(0)
+    , mViewMtx()
+    , mBufferingCommands()
+    , mCurrentState()
+    , mBufferingState()
+    , mInDrawing(false)
+{
+    // create shader
+    mPlaneShader.init();
+    mTextureShader.init();
+
+    // create buffer
+    {
+        Global::Functions& ggl = Global::functions();
+
+        mPosSlotIds.resize(mSlotCount);
+        mTexSlotIds.resize(mSlotCount);
+        ggl.glGenBuffers(mSlotCount, mPosSlotIds.data());
+        ggl.glGenBuffers(mSlotCount, mTexSlotIds.data());
+
+        auto bufferSize = (GLsizeiptr)(sizeof(gl::Vector2) * mVtxCountOfSlot);
+        for (int i = 0; i < mSlotCount; ++i)
+        {
+            ggl.glBindBuffer(GL_ARRAY_BUFFER, mPosSlotIds[i]);
+            ggl.glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
+            ggl.glBindBuffer(GL_ARRAY_BUFFER, mTexSlotIds[i]);
+            ggl.glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
+        }
+        ggl.glBindBuffer(GL_ARRAY_BUFFER, 0);
+        GL_CHECK_ERROR();
+    }
+}
+
+PrimitiveDrawer::~PrimitiveDrawer()
+{
+    // delete buffer
+    Global::functions().glDeleteBuffers(mSlotCount, mPosSlotIds.data());
+    Global::functions().glDeleteBuffers(mSlotCount, mTexSlotIds.data());
+    GL_CHECK_ERROR();
 }
 
 void PrimitiveDrawer::begin()
@@ -247,6 +305,45 @@ void PrimitiveDrawer::drawLine(const QPointF& aFrom, const QPointF& aTo)
     pushDrawCommand(command, positions);
 }
 
+void PrimitiveDrawer::drawTexture(const QRectF& aRect, gl::Texture& aTexture)
+{
+    drawTexture(aRect, aTexture.id());
+}
+
+void PrimitiveDrawer::drawTexture(const QRectF& aRect, GLuint aTexture)
+{
+    {
+        Command command = { Type_Texture };
+        command.attr.texture.id = aTexture;
+        pushStateCommand(command);
+    }
+
+    {
+        Command command = { Type_Draw };
+        command.attr.draw.prim = GL_TRIANGLE_STRIP;
+        command.attr.draw.count = 4;
+        gl::Vector2 positions[4] = {
+            gl::Vector2::make(aRect.left() , aRect.top()   ),
+            gl::Vector2::make(aRect.left() , aRect.bottom()),
+            gl::Vector2::make(aRect.right(), aRect.top()   ),
+            gl::Vector2::make(aRect.right(), aRect.bottom())
+        };
+        gl::Vector2 texCoords[4] = {
+            gl::Vector2::make(0.0f, 0.0f),
+            gl::Vector2::make(0.0f, 1.0f),
+            gl::Vector2::make(1.0f, 0.0f),
+            gl::Vector2::make(1.0f, 1.0f)
+        };
+        pushDrawCommand(command, positions, texCoords);
+    }
+
+    {
+        Command command = { Type_Texture };
+        command.attr.texture.id = 0;
+        pushStateCommand(command);
+    }
+}
+
 #if 0
 void PrimitiveDrawer::drawText(const QPointF& aPos, const QFont& aFont, const QString& aText)
 {
@@ -323,27 +420,35 @@ void PrimitiveDrawer::pushStateCommand(const Command& aCommand)
     }
 }
 
-void PrimitiveDrawer::pushDrawCommand(const Command& aCommand, gl::Vector2* aPositions)
+void PrimitiveDrawer::pushDrawCommand(const Command& aCommand, gl::Vector2* aPositions, gl::Vector2* aTexCoords)
 {
     XC_ASSERT(aCommand.type == Type_Draw);
     const int vtxCount = aCommand.attr.draw.count;
 
     if (!mInDrawing) return;
-    if (vtxCount <= 0 || mSlotSize < vtxCount) return;
+    if (vtxCount <= 0 || mVtxCountOfSlot < vtxCount) return;
 
-    if (mSlotSize < mCurrentSlotSize + vtxCount)
+    if (mVtxCountOfSlot < mCurrentSlotSize + vtxCount)
     {
         flushCommands();
     }
 
     Global::Functions& ggl = Global::functions();
-    ggl.glBindBuffer(GL_ARRAY_BUFFER, mSlotIds[mCurrentSlotIndex]);
-    ggl.glBufferSubData(GL_ARRAY_BUFFER,
-                        sizeof(gl::Vector2) * mCurrentSlotSize,
-                        (GLsizeiptr)(sizeof(gl::Vector2) * vtxCount),
-                        aPositions);
+    if (aPositions)
+    {
+        ggl.glBindBuffer(GL_ARRAY_BUFFER, mPosSlotIds[mCurrentSlotIndex]);
+        ggl.glBufferSubData(GL_ARRAY_BUFFER, sizeof(gl::Vector2) * mCurrentSlotSize,
+                            (GLsizeiptr)(sizeof(gl::Vector2) * vtxCount), aPositions);
+        GL_CHECK_ERROR();
+    }
+    if (aTexCoords)
+    {
+        ggl.glBindBuffer(GL_ARRAY_BUFFER, mTexSlotIds[mCurrentSlotIndex]);
+        ggl.glBufferSubData(GL_ARRAY_BUFFER, sizeof(gl::Vector2) * mCurrentSlotSize,
+                            (GLsizeiptr)(sizeof(gl::Vector2) * vtxCount), aTexCoords);
+        GL_CHECK_ERROR();
+    }
     ggl.glBindBuffer(GL_ARRAY_BUFFER, 0);
-    GL_CHECK_ERROR();
 
     mBufferingCommands.push_back(aCommand);
     mCurrentSlotSize += vtxCount;
@@ -362,11 +467,7 @@ void PrimitiveDrawer::flushCommands()
 
     Global::Functions& ggl = Global::functions();
 
-    mShader.bind();
-
-    ggl.glBindBuffer(GL_ARRAY_BUFFER, mSlotIds[index]);
-    mShader.setAttributeBuffer(mLocationOfPos, GL_FLOAT, 2);
-    mShader.setUniformValue(mLocationOfViewMtx, mViewMtx);
+    bindAppositeShader(index);
 
     GLint offset = 0;
     for (auto& command : mBufferingCommands)
@@ -375,12 +476,8 @@ void PrimitiveDrawer::flushCommands()
         {
         case Type_Draw:
         {
-            const QColor color = QColor::fromRgba(mCurrentState.color);
-            const QVector4D colorVec(color.redF(), color.greenF(), color.blueF(), color.alphaF());
-            {
-                mShader.setUniformValue(mLocationOfColor, colorVec);
-                ggl.glDrawArrays(command.attr.draw.prim, offset, command.attr.draw.count);
-            }
+            setColorToCurrentShader(QColor::fromRgba(mCurrentState.color));
+            ggl.glDrawArrays(command.attr.draw.prim, offset, command.attr.draw.count);
             offset += command.attr.draw.count;
         } break;
 
@@ -389,6 +486,7 @@ void PrimitiveDrawer::flushCommands()
             break;
         case Type_Texture:
             mCurrentState.set(command);
+            bindAppositeShader(index);
             break;
         case Type_MSAA:
             Util::setAbility(GL_MULTISAMPLE, command.attr.msaa.use);
@@ -399,10 +497,67 @@ void PrimitiveDrawer::flushCommands()
         }
     }
     ggl.glBindBuffer(GL_ARRAY_BUFFER, 0);
-    mShader.release();
+    unbindCurrentShader();
     GL_CHECK_ERROR();
 
     mBufferingCommands.clear();
+}
+
+void PrimitiveDrawer::bindAppositeShader(int aSlotIndex)
+{
+    Global::Functions& ggl = Global::functions();
+
+    unbindCurrentShader();
+
+    if (mCurrentState.texture == 0)
+    {
+        ggl.glActiveTexture(GL_TEXTURE0);
+        ggl.glBindTexture(GL_TEXTURE_2D, 0);
+
+        mPlaneShader.program.bind();
+        ggl.glBindBuffer(GL_ARRAY_BUFFER, mPosSlotIds[aSlotIndex]);
+        mPlaneShader.program.setAttributeBuffer(mPlaneShader.locPosition, GL_FLOAT, 2);
+        mPlaneShader.program.setUniformValue(mPlaneShader.locViewMtx, mViewMtx);
+    }
+    else
+    {
+        ggl.glActiveTexture(GL_TEXTURE0);
+        ggl.glBindTexture(GL_TEXTURE_2D, mCurrentState.texture);
+
+        mTextureShader.program.bind();
+        ggl.glBindBuffer(GL_ARRAY_BUFFER, mPosSlotIds[aSlotIndex]);
+        mTextureShader.program.setAttributeBuffer(mTextureShader.locPosition, GL_FLOAT, 2);
+        ggl.glBindBuffer(GL_ARRAY_BUFFER, mTexSlotIds[aSlotIndex]);
+        mTextureShader.program.setAttributeBuffer(mTextureShader.locTexCoord, GL_FLOAT, 2);
+        mTextureShader.program.setUniformValue(mTextureShader.locViewMtx, mViewMtx);
+        mTextureShader.program.setUniformValue(mTextureShader.locTexture, 0);
+    }
+
+}
+
+void PrimitiveDrawer::setColorToCurrentShader(const QColor& aColor)
+{
+    const QVector4D colorVec(aColor.redF(), aColor.greenF(), aColor.blueF(), aColor.alphaF());
+    {
+        if (mCurrentState.texture == 0)
+        {
+            mPlaneShader.program.setUniformValue(mPlaneShader.locColor, colorVec);
+        }
+        else
+        {
+            mTextureShader.program.setUniformValue(mTextureShader.locColor, colorVec);
+        }
+    }
+}
+
+void PrimitiveDrawer::unbindCurrentShader()
+{
+    mPlaneShader.program.release();
+    mTextureShader.program.release();
+
+    Global::Functions& ggl = Global::functions();
+    ggl.glActiveTexture(GL_TEXTURE0);
+    ggl.glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 } // namespace gl

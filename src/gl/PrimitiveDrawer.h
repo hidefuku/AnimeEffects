@@ -4,6 +4,7 @@
 #include <vector>
 #include "gl/BufferObject.h"
 #include "gl/EasyShaderProgram.h"
+#include "gl/Texture.h"
 
 namespace gl
 {
@@ -11,7 +12,7 @@ namespace gl
 class PrimitiveDrawer
 {
 public:
-    PrimitiveDrawer(int aSlotSize = 512, int aSlotCount = 8);
+    PrimitiveDrawer(int aVtxCountOfSlot = 512, int aSlotCount = 8);
     virtual ~PrimitiveDrawer();
 
     void setViewMtx(const QMatrix4x4& aViewMtx);
@@ -29,6 +30,9 @@ public:
     void drawCircle(const QPointF& aCenter, float aRadius);
 
     void drawLine(const QPointF& aFrom, const QPointF& aTo);
+
+    void drawTexture(const QRectF& aRect, gl::Texture& aTexture);
+    void drawTexture(const QRectF& aRect, GLuint aTexture);
 
     //void drawText(const QPointF& aPos, const QFont& aFont, const QString& aText);
 
@@ -82,19 +86,40 @@ private:
         bool useMSAA;
     };
 
-    bool initShader();
+    struct PlaneShader
+    {
+        bool init();
+        gl::EasyShaderProgram program;
+        int locPosition;
+        int locViewMtx;
+        int locColor;
+    };
+    struct TextureShader
+    {
+        bool init();
+        gl::EasyShaderProgram program;
+        int locPosition;
+        int locTexCoord;
+        int locViewMtx;
+        int locColor;
+        int locTexture;
+    };
+
     void pushStateCommand(const Command& aCommand);
-    void pushDrawCommand(const Command& aCommand, gl::Vector2* aPositions);
+    void pushDrawCommand(const Command& aCommand, gl::Vector2* aPositions, gl::Vector2* aTexCoords = nullptr);
     void flushCommands();
 
-    gl::EasyShaderProgram mShader;
-    int mLocationOfPos;
-    int mLocationOfViewMtx;
-    int mLocationOfColor;
+    void bindAppositeShader(int aSlotIndex);
+    void setColorToCurrentShader(const QColor& aColor);
+    void unbindCurrentShader();
 
-    int mSlotSize;
+    PlaneShader mPlaneShader;
+    TextureShader mTextureShader;
+
+    int mVtxCountOfSlot;
     int mSlotCount;
-    std::vector<GLuint> mSlotIds;
+    std::vector<GLuint> mPosSlotIds;
+    std::vector<GLuint> mTexSlotIds;
     int mCurrentSlotIndex;
     int mCurrentSlotSize;
 
