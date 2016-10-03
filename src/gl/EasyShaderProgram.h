@@ -38,6 +38,9 @@ public:
             const char* aName, BufferObject& aObj,
             GLenum aType, int aTuple, int aOffset = 0);
 
+    void setAttributeBuffer(
+            int aLocation, GLenum aType, int aTuple, int aOffset = 0);
+
     void setRawAttributeArray(
             const char* aName, GLenum aType, GLsizeiptr aTypeSize,
             const void* aArray, int aCount, int aTuple, int aStride = 0);
@@ -70,6 +73,11 @@ public:
     void setUniformValue(const char* aName, const tType& aValue)
     {
         mImpl.setUniformValue(aName, aValue);
+    }
+    template<typename tType>
+    void setUniformValue(int aLocation, const tType& aValue)
+    {
+        mImpl.setUniformValue(aLocation, aValue);
     }
 
     template<typename tType>

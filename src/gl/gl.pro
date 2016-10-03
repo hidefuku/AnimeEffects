@@ -36,7 +36,9 @@ SOURCES += \
     Framebuffer.cpp \
     EasyTextureDrawer.cpp \
     VertexArrayObject.cpp \
-    Root.cpp
+    Root.cpp \
+    PrimitiveDrawer.cpp \
+    Triangulator.cpp
 
 HEADERS += \
     EasyShaderProgram.h \
@@ -56,4 +58,6 @@ HEADERS += \
     Framebuffer.h \
     EasyTextureDrawer.h \
     VertexArrayObject.h \
-    Root.h
+    Root.h \
+    PrimitiveDrawer.h \
+    Triangulator.h

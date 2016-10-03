@@ -57,6 +57,18 @@ void Util::resetRenderState()
     //ggl.glDisableClientState(GL_COLOR_ARRAY);
 }
 
+void Util::setAbility(GLenum aState, bool aIsEnable)
+{
+    if (aIsEnable)
+    {
+        Global::functions().glEnable(aState);
+    }
+    else
+    {
+        Global::functions().glDisable(aState);
+    }
+}
+
 GLuint Util::findTextureFromColorAttachment0()
 {
     static const GLenum kTarget = GL_FRAMEBUFFER;

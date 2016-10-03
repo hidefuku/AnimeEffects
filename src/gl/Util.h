@@ -13,6 +13,7 @@ public:
     static void clearColorBuffer(GLclampf r, GLclampf g, GLclampf b, GLclampf a);
     static void setViewportAsActualPixels(const QSize& aSize);
     static void resetRenderState();
+    static void setAbility(GLenum aState, bool aIsEnable);
     static GLuint findTextureFromColorAttachment0();
 
 private:

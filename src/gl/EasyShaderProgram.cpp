@@ -99,6 +99,16 @@ void EasyShaderProgram::setAttributeBuffer(
     }
 }
 
+void EasyShaderProgram::setAttributeBuffer(int aLocation, GLenum aType, int aTuple, int aOffset)
+{
+    if (aLocation != -1)
+    {
+        mImpl.enableAttributeArray(aLocation);
+        mImpl.setAttributeBuffer(aLocation, aType, aOffset, aTuple);
+        mAttributeLocations.push_back(aLocation);
+    }
+}
+
 void EasyShaderProgram::makeSureVBO(
         int aLocation, GLsizeiptr aTypeSize, const void* aArray, int aCount)
 {
