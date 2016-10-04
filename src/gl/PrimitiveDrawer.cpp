@@ -130,7 +130,7 @@ bool PrimitiveDrawer::TextureShader::init()
             "uniform sampler2D uTexture;"
             "layout(location = 0, index = 0) out vec4 oFragColor;"
             "void main(void){"
-            "  oFragColor = uColor * texture2D(uTexture, vTexCoord);"
+            "  oFragColor = uColor * texture(uTexture, vTexCoord);"
             "}";
 
     if (!program.setVertexSource(QString(kVertexShaderText)))

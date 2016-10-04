@@ -96,8 +96,8 @@ vec4 blendColor(const vec4 src, const vec4 dst)
 
 void main(void)
 {
-    vec4 color = uColor * texture2D(uTexture, vTexCoord);
-    vec4 destColor = texture2D(uDestTexture, vDestCoord);
+    vec4 color = uColor * texture(uTexture, vTexCoord);
+    vec4 destColor = texture(uDestTexture, vDestCoord);
 
 #if IS_CLIPPEE
     uvec2 clippingData = texture(uClippingTexture, vDestCoord).xy;

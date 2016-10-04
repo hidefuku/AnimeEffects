@@ -41,7 +41,7 @@ out uvec2 oClip;
 
 void main(void)
 {
-    vec4 color = uColor * texture2D(uTexture, vTexCoord);
+    vec4 color = uColor * texture(uTexture, vTexCoord);
     uvec2 destData = texture(uDestTexture, vDestCoord).xy;
 
 #if IS_CLIPPEE
