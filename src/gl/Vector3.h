@@ -13,6 +13,7 @@ namespace gl
 struct Vector3
 {
     static Vector3 make(GLfloat aX, GLfloat aY, GLfloat aZ) { Vector3 r; r.set(aX, aY, aZ); return r; }
+    static Vector3 make(const QVector3D& aV) { Vector3 r; r.set(aV.x(), aV.y(), aV.z()); return r; }
     inline void setZero() { x = 0.0f; y = 0.0f; z = 0.0f; }
     inline void set(GLfloat aX, GLfloat aY, GLfloat aZ) { x = aX; y = aY; z = aZ; }
     inline void set(const QVector3D& aV) { x = aV.x(); y = aV.y(); z = aV.z(); }

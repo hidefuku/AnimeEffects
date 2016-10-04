@@ -10,7 +10,7 @@
 
 namespace util
 {
-
+// north east coordinate
 class MathUtil
 {
 public:

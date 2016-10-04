@@ -1,6 +1,8 @@
 #ifndef UTIL_DEALTLIST_H
 #define UTIL_DEALTLIST_H
 
+#include "XC.h"
+
 namespace util
 {
 
@@ -14,13 +16,20 @@ class DealtListNode
 public:
     DealtListNode()
         : obj()
-        , prev(0)
-        , next(0)
+        , mPrev(0)
+        , mNext(0)
 	{
 	}
     tObj obj;
-    DealtListNode<tObj>* prev;
-    DealtListNode<tObj>* next;
+
+    DealtListNode<tObj>* prev() const { return mPrev; }
+    DealtListNode<tObj>* next() const { return mNext; }
+
+private:
+    friend class DealtList<tObj>;
+
+    DealtListNode<tObj>* mPrev;
+    DealtListNode<tObj>* mNext;
 };
 
 //-----------------------------------------------------------------
@@ -51,9 +60,9 @@ public:
 
         tObj next()
 		{
-			VISCUM_ASSERT(mNext);
+            XC_PTR_ASSERT(mNext);
 			NodeType* now = mNext;
-            mNext = now->next;
+            mNext = now->mNext;
             return now->obj;
 		}
 
@@ -77,9 +86,9 @@ public:
 		NodeType* next = mFirst;
 		while (next) {
 			NodeType* now = next;
-            next = now->next;
-            now->prev = 0;
-            now->next = 0;
+            next = now->mNext;
+            now->mPrev = 0;
+            now->mNext = 0;
 		}
 		mFirst = 0;
 		mLast = 0;
@@ -87,30 +96,30 @@ public:
 
 	void pushFront(NodeType& aNode)
 	{
-        aNode.prev = 0;
-        aNode.next = mFirst;
-        if (mFirst) mFirst->prev = &aNode;
+        aNode.mPrev = 0;
+        aNode.mNext = mFirst;
+        if (mFirst) mFirst->mPrev = &aNode;
 		if (!mLast) mLast = &aNode;
 		mFirst = &aNode;
 	}
 
 	void pushBack(NodeType& aNode)
 	{
-        aNode.prev = mLast;
-        aNode.next = 0;
-        if (mLast) mLast->next = &aNode;
+        aNode.mPrev = mLast;
+        aNode.mNext = 0;
+        if (mLast) mLast->mNext = &aNode;
 		if (!mFirst) mFirst = &aNode;
 		mLast = &aNode;
 	}
 
 	void remove(NodeType& aNode)
 	{
-        if (aNode.prev) (*aNode.prev).mNext = aNode.next;
-        if (aNode.next) (*aNode.next).mPrev = aNode.prev;
-        if (mFirst == &aNode) mFirst = aNode.next;
-        if (mLast == &aNode) mLast = aNode.prev;
-        aNode.prev = 0;
-        aNode.next = 0;
+        if (aNode.mPrev) (*aNode.mPrev).mNext = aNode.mNext;
+        if (aNode.mNext) (*aNode.mNext).mPrev = aNode.mPrev;
+        if (mFirst == &aNode) mFirst = aNode.mNext;
+        if (mLast == &aNode) mLast = aNode.mPrev;
+        aNode.mPrev = 0;
+        aNode.mNext = 0;
 	}
 
     Iterator iterator()

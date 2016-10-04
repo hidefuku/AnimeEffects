@@ -10,6 +10,7 @@ namespace gl
 struct Vector2
 {
     static Vector2 make(GLfloat aX, GLfloat aY) { Vector2 r; r.set(aX, aY); return r; }
+    static Vector2 make(const QVector2D& aV) { Vector2 r; r.set(aV.x(), aV.y()); return r; }
 
     inline void setZero() { x = 0.0f; y = 0.0f; }
     inline void set(GLfloat aX, GLfloat aY) { x = aX; y = aY; }

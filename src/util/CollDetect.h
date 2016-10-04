@@ -8,7 +8,7 @@
 
 namespace util
 {
-
+// north east coordinate
 class CollDetect
 {
 public:
