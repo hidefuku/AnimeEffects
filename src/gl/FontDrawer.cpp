@@ -114,14 +114,10 @@ void FontDrawer::draw(const QFont& aFont, TextObject& aTextObj)
         ggl.glDrawBuffers(1, attachments);
     }
 
+    // set viewport
+    gl::Util::setViewportAsActualPixels(workSize);
     // clear texture
-    {
-        const GLuint clearColorU[] = {
-            (GLuint)mColor.red(), (GLuint)mColor.green(), (GLuint)mColor.blue(), 0
-        };
-        gl::Util::setViewportAsActualPixels(workSize);
-        ggl.glClearBufferuiv(GL_COLOR, kAttachmentId, clearColorU);
-    }
+    gl::Util::clearColorBuffer(mColor.redF(), mColor.greenF(), mColor.blueF(), 0.0f);
 
     // make cascade polygons
     QVector<gl::Vector2> cascades;
