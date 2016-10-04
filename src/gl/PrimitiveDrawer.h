@@ -2,6 +2,7 @@
 #define GL_PRIMITIVEDRAWER_H
 
 #include <vector>
+#include <QPolygonF>
 #include "gl/BufferObject.h"
 #include "gl/EasyShaderProgram.h"
 #include "gl/Texture.h"
@@ -30,6 +31,8 @@ public:
     void drawCircle(const QPointF& aCenter, float aRadius);
 
     void drawLine(const QPointF& aFrom, const QPointF& aTo);
+
+    void drawPolygon(const QPolygonF& aPolygon);
 
     void drawTexture(const QRectF& aRect, gl::Texture& aTexture);
     void drawTexture(const QRectF& aRect, GLuint aTexture);
@@ -106,7 +109,9 @@ private:
     };
 
     void pushStateCommand(const Command& aCommand);
-    void pushDrawCommand(const Command& aCommand, gl::Vector2* aPositions, gl::Vector2* aTexCoords = nullptr);
+    void pushDrawCommand(const Command& aCommand,
+                         const gl::Vector2* aPositions,
+                         const gl::Vector2* aTexCoords = nullptr);
     void flushCommands();
 
     void bindAppositeShader(int aSlotIndex);

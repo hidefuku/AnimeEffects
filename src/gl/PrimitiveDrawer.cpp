@@ -1,6 +1,7 @@
 #include "util/MathUtil.h"
 #include "gl/Global.h"
 #include "gl/Util.h"
+#include "gl/Triangulator.h"
 #include "gl/PrimitiveDrawer.h"
 
 namespace
@@ -305,6 +306,26 @@ void PrimitiveDrawer::drawLine(const QPointF& aFrom, const QPointF& aTo)
     pushDrawCommand(command, positions);
 }
 
+void PrimitiveDrawer::drawPolygon(const QPolygonF& aPolygon)
+{
+    Triangulator tri(aPolygon);
+    if (!tri) return;
+
+    const gl::Vector2* ptr = tri.triangles().data();
+    int remainCount = tri.triangles().size();
+    while (remainCount > 0)
+    {
+        const int count = std::min(remainCount, mVtxCountOfSlot);
+        Command command = { Type_Draw };
+        command.attr.draw.prim = GL_TRIANGLES;
+        command.attr.draw.count = count;
+        pushDrawCommand(command, ptr);
+
+        remainCount -= count;
+        ptr += count;
+    }
+}
+
 void PrimitiveDrawer::drawTexture(const QRectF& aRect, gl::Texture& aTexture)
 {
     drawTexture(aRect, aTexture.id());
@@ -428,7 +449,8 @@ void PrimitiveDrawer::pushStateCommand(const Command& aCommand)
     }
 }
 
-void PrimitiveDrawer::pushDrawCommand(const Command& aCommand, gl::Vector2* aPositions, gl::Vector2* aTexCoords)
+void PrimitiveDrawer::pushDrawCommand(
+        const Command& aCommand, const gl::Vector2* aPositions, const gl::Vector2* aTexCoords)
 {
     XC_ASSERT(aCommand.type == Type_Draw);
     const int vtxCount = aCommand.attr.draw.count;
