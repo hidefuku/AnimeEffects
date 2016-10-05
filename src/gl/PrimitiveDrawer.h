@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <QPolygonF>
+#include <QBrush>
+#include <QPen>
 #include "gl/BufferObject.h"
 #include "gl/EasyShaderProgram.h"
 #include "gl/Texture.h"
@@ -13,6 +15,14 @@ namespace gl
 class PrimitiveDrawer
 {
 public:
+    enum PenStyle
+    {
+        PenStyle_Solid,
+        PenStyle_Dash,
+        PenStyle_Dot,
+        Style_TERM
+    };
+
     PrimitiveDrawer(int aVtxCountOfSlot = 512, int aSlotCount = 8);
     virtual ~PrimitiveDrawer();
 
@@ -21,7 +31,8 @@ public:
     void begin();
     void end();
 
-    void setColor(const QColor& aColor);
+    void setBrush(const QColor& aColor);
+    void setPen(const QColor& aColor, float aWidth = 1.0f, PenStyle = PenStyle_Solid);
     void setAntiAliasing(bool aIsEnable);
 
     void drawRect(const QRect& aRect);
@@ -43,10 +54,19 @@ private:
     enum Type
     {
         Type_Draw,
-        Type_Color,
+        Type_Brush,
+        Type_Pen,
         Type_Texture,
         Type_MSAA,
         Type_TERM
+    };
+
+    enum ShaderType
+    {
+        ShaderType_Plane,
+        ShaderType_Stipple,
+        ShaderType_Texture,
+        ShaderType_TERM
     };
 
     struct Command
@@ -58,12 +78,20 @@ private:
             {
                 GLenum prim;
                 int count;
+                bool usePen;
             }draw;
 
-            struct Color
+            struct Brush
             {
-                QRgb value;
-            }color;
+                QRgb color;
+            }brush;
+
+            struct Pen
+            {
+                QRgb color;
+                float width;
+                PenStyle style;
+            }pen;
 
             struct Texture
             {
@@ -74,6 +102,7 @@ private:
             {
                 bool use;
             }msaa;
+
         }attr;
     };
 
@@ -84,7 +113,10 @@ private:
         bool hasDifferentValueWith(const Command& aCommand) const;
         bool operator==(const State& aRhs) const;
         bool operator!=(const State& aRhs) const;
-        QRgb color;
+        QRgb brushColor;
+        QRgb penColor;
+        float penWidth;
+        PenStyle penStyle;
         GLuint texture;
         bool useMSAA;
     };
@@ -97,6 +129,19 @@ private:
         int locViewMtx;
         int locColor;
     };
+
+    struct StippleShader
+    {
+        bool init();
+        gl::EasyShaderProgram program;
+        int locPosition;
+        int locLength;
+        int locViewMtx;
+        int locScreenSize;
+        int locColor;
+        int locWave;
+    };
+
     struct TextureShader
     {
         bool init();
@@ -111,29 +156,33 @@ private:
     void pushStateCommand(const Command& aCommand);
     void pushDrawCommand(const Command& aCommand,
                          const gl::Vector2* aPositions,
-                         const gl::Vector2* aTexCoords = nullptr);
+                         const gl::Vector2* aSubCoords = nullptr);
     void flushCommands();
 
-    void bindAppositeShader(int aSlotIndex);
+    void bindAppositeShader(int aSlotIndex, bool aUsePen);
     void setColorToCurrentShader(const QColor& aColor);
     void unbindCurrentShader();
 
     PlaneShader mPlaneShader;
+    StippleShader mStippleShader;
     TextureShader mTextureShader;
+    ShaderType mCurrentShader;
 
     int mVtxCountOfSlot;
     int mSlotCount;
     std::vector<GLuint> mPosSlotIds;
-    std::vector<GLuint> mTexSlotIds;
+    std::vector<GLuint> mSubSlotIds;
     int mCurrentSlotIndex;
     int mCurrentSlotSize;
 
     QMatrix4x4 mViewMtx;
+    QSize mScreenSize;
+    float mPixelScale;
 
     QVector<Command> mBufferingCommands;
 
     bool mInDrawing;
-    State mCurrentState;
+    State mAppliedState;
     State mBufferingState;
 };
 
