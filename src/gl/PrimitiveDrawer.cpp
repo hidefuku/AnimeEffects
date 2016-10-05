@@ -290,7 +290,7 @@ void PrimitiveDrawer::end()
     mInDrawing = false;
 }
 
-void PrimitiveDrawer::setViewMtx(const QMatrix4x4& aViewMtx)
+void PrimitiveDrawer::setViewMatrix(const QMatrix4x4& aViewMtx)
 {
     mViewMtx = aViewMtx;
 
@@ -330,6 +330,44 @@ void PrimitiveDrawer::setAntiAliasing(bool aIsEnable)
     pushStateCommand(command);
 }
 
+void PrimitiveDrawer::drawPoint(const QPointF& aCenter)
+{
+    static const int kDivision = 8;
+    drawEllipseImpl(aCenter, 1.0f, 1.0f, kDivision);
+}
+
+void PrimitiveDrawer::drawLine(const QPointF& aFrom, const QPointF& aTo)
+{
+    Command command = { Type_Draw };
+    command.attr.draw.prim = GL_TRIANGLE_STRIP;
+    command.attr.draw.count = 4;
+
+    const bool usePen = mBufferingState.penStyle != PenStyle_None && mBufferingState.penWidth > 0.0f;
+    command.attr.draw.usePen = usePen;
+
+    const QVector2D dir(aTo - aFrom);
+    const float length = dir.length();
+    if (length < FLT_EPSILON) return;
+    const float width = usePen ? mBufferingState.penWidth * mPixelScale : 1.0f;
+    auto rside = util::MathUtil::getRotateVector90Deg(dir).normalized() * width * 0.5f;
+
+    gl::Vector2 positions[4] = {
+        gl::Vector2::make(aFrom.x() - rside.x(), aFrom.y() - rside.y()),
+        gl::Vector2::make(aFrom.x() + rside.x(), aFrom.y() + rside.y()),
+        gl::Vector2::make(aTo.x() - rside.x(), aTo.y() - rside.y()),
+        gl::Vector2::make(aTo.x() + rside.x(), aTo.y() + rside.y())
+    };
+    gl::Vector2 subCoords[4] = {
+        //positions[0],
+        //positions[0]
+        gl::Vector2::make(0.0f, 0.0f),
+        gl::Vector2::make(0.0f, 0.0f),
+        gl::Vector2::make(length, 0.0f),
+        gl::Vector2::make(length, 0.0f)
+    };
+    pushDrawCommand(command, positions, subCoords);
+}
+
 void PrimitiveDrawer::drawRect(const QRect& aRect)
 {
     drawRect(QRectF(aRect));
@@ -350,86 +388,46 @@ void PrimitiveDrawer::drawRect(const QRectF& aRect)
     pushDrawCommand(command, positions);
 }
 
+void PrimitiveDrawer::drawEllipse(const QPointF& aCenter, float aRadiusX, float aRadiusY)
+{
+    static const int kDivision = 30;
+    drawEllipseImpl(aCenter, aRadiusX, aRadiusY, kDivision);
+}
+
 void PrimitiveDrawer::drawCircle(const QPointF& aCenter, float aRadius)
 {
     static const int kDivision = 30;
-    static const int kVtxCount = kDivision + 2;
+    drawEllipseImpl(aCenter, aRadius, aRadius, kDivision);
+}
+
+void PrimitiveDrawer::drawEllipseImpl(const QPointF& aCenter, float aRadiusX, float aRadiusY, int aDivision)
+{
+    XC_ASSERT(aDivision <= 30);
+    const int kMaxVtxCount = 32;
+    const int vtxCount = aDivision + 2;
 
     Command command = { Type_Draw };
     command.attr.draw.prim = GL_TRIANGLE_FAN;
-    command.attr.draw.count = kVtxCount;
+    command.attr.draw.count = vtxCount;
     command.attr.draw.usePen = false;
 
-    gl::Vector2 positions[kVtxCount];
+    gl::Vector2 positions[kMaxVtxCount];
     positions[0].set(aCenter.x(), aCenter.y());
-    for (int i = 1; i < kVtxCount; ++i)
+    for (int i = 1; i < vtxCount; ++i)
     {
-        const float angleRad = (float)(2.0 * M_PI * (1.0 - (double)(i - 1) / kDivision));
-        auto pos = aCenter + util::MathUtil::getVectorFromPolarCoord(aRadius, angleRad).toPointF();
+        const float angleRad = (float)(2.0 * M_PI * (1.0 - (double)(i - 1) / aDivision));
+        auto vec = util::MathUtil::getVectorFromPolarCoord(1.0f, angleRad);
+        auto pos = aCenter + QPointF(vec.x() * aRadiusX, vec.y() * aRadiusY);
         positions[i].set(pos.x(), pos.y());
     }
     pushDrawCommand(command, positions);
 }
 
-#if 0
-void PrimitiveDrawer::drawLine(const QPointF& aFrom, const QPointF& aTo)
+void PrimitiveDrawer::drawPolygonImpl(const QVector<gl::Vector2>& aTriangles)
 {
-    Command command = { Type_Draw };
-    command.attr.draw.prim = GL_LINES;
-    command.attr.draw.count = 2;
-    command.attr.draw.usePen = true;
+    const gl::Vector2* ptr = aTriangles.data();
+    int remainCount = aTriangles.size();
 
-    gl::Vector2 positions[2] = {
-        gl::Vector2::make(aFrom.x(), aFrom.y()),
-        gl::Vector2::make(aTo.x()  , aTo.y()  )
-    };
-    gl::Vector2 subCoords[2] = {
-        //positions[0],
-        //positions[0]
-        gl::Vector2::make(0.0f, 0.0f),
-        gl::Vector2::make(QVector2D(aTo - aFrom).length(), 0.0f)
-    };
-    pushDrawCommand(command, positions, subCoords);
-}
-#else
-void PrimitiveDrawer::drawLine(const QPointF& aFrom, const QPointF& aTo)
-{
-    Command command = { Type_Draw };
-    command.attr.draw.prim = GL_TRIANGLE_STRIP;
-    command.attr.draw.count = 4;
-    command.attr.draw.usePen = true;
-
-    const QVector2D dir(aTo - aFrom);
-    const float length = dir.length();
-    if (length < FLT_EPSILON) return;
-    const float penWidth = mBufferingState.penWidth * mPixelScale;
-    auto rside = util::MathUtil::getRotateVector90Deg(dir).normalized() * penWidth * 0.5f;
-
-    gl::Vector2 positions[4] = {
-        gl::Vector2::make(aFrom.x() - rside.x(), aFrom.y() - rside.y()),
-        gl::Vector2::make(aFrom.x() + rside.x(), aFrom.y() + rside.y()),
-        gl::Vector2::make(aTo.x() - rside.x(), aTo.y() - rside.y()),
-        gl::Vector2::make(aTo.x() + rside.x(), aTo.y() + rside.y())
-    };
-    gl::Vector2 subCoords[4] = {
-        //positions[0],
-        //positions[0]
-        gl::Vector2::make(0.0f, 0.0f),
-        gl::Vector2::make(0.0f, 0.0f),
-        gl::Vector2::make(length, 0.0f),
-        gl::Vector2::make(length, 0.0f)
-    };
-    pushDrawCommand(command, positions, subCoords);
-}
-#endif
-
-void PrimitiveDrawer::drawPolygon(const QPolygonF& aPolygon)
-{
-    Triangulator tri(aPolygon);
-    if (!tri) return;
-
-    const gl::Vector2* ptr = tri.triangles().data();
-    int remainCount = tri.triangles().size();
     while (remainCount > 0)
     {
         const int count = std::min(remainCount, mVtxCountOfSlot);
@@ -442,6 +440,25 @@ void PrimitiveDrawer::drawPolygon(const QPolygonF& aPolygon)
         remainCount -= count;
         ptr += count;
     }
+}
+
+void PrimitiveDrawer::drawPolygon(const QPoint* aPoints, int aCount)
+{
+    Triangulator tri(aPoints, aCount);
+    if (!tri) return;
+    drawPolygonImpl(tri.triangles());
+}
+
+void PrimitiveDrawer::drawPolygon(const QPointF* aPoints, int aCount)
+{
+    Triangulator tri(aPoints, aCount);
+    if (!tri) return;
+    drawPolygonImpl(tri.triangles());
+}
+
+void PrimitiveDrawer::drawPolygon(const QPolygonF& aPolygon)
+{
+    drawPolygon(aPolygon.data(), aPolygon.size());
 }
 
 void PrimitiveDrawer::drawTexture(const QRectF& aRect, gl::Texture& aTexture)
@@ -676,7 +693,7 @@ void PrimitiveDrawer::bindAppositeShader(int aSlotIndex, bool aUsePen)
         mTextureShader.program.setUniformValue(mTextureShader.locTexture, 0);
         mCurrentShader = ShaderType_Texture;
     }
-    else if (aUsePen && mAppliedState.penStyle != PenStyle_Solid)
+    else if (aUsePen && mAppliedState.penStyle != PenStyle_None && mAppliedState.penStyle != PenStyle_Solid)
     {
         const QVector2D scrHalfSize(mScreenSize.width() / 2, mScreenSize.height() / 2);
         mStippleShader.program.bind();

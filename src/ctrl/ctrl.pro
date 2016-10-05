@@ -97,7 +97,8 @@ SOURCES += \
     bone/bone_BindNodesMode.cpp \
     bone/bone_NodeSelector.cpp \
     ffd/ffd_TaskResource.cpp \
-    DriverResources.cpp
+    DriverResources.cpp \
+    Painter.cpp
 
 HEADERS += \
     Driver.h \
@@ -172,4 +173,5 @@ HEADERS += \
     GraphicStyle.h \
     bone/bone_NodeSelector.h \
     ffd/ffd_TaskResource.h \
-    DriverResources.h
+    DriverResources.h \
+    Painter.h

@@ -4,35 +4,40 @@
 namespace gl
 {
 
+Triangulator::Triangulator(const QPoint* aPoints, int aCount)
+    : mPoints()
+    , mTriangles()
+    , mFirstPoint()
+    , mIsSuccess(false)
+{
+    if (aCount < 3) return;
+    makeRoundChain<QPoint>(aPoints, aCount);
+    mIsSuccess = triangulate();
+    if (!mIsSuccess) mTriangles.clear();
+}
+
+Triangulator::Triangulator(const QPointF* aPoints, int aCount)
+    : mPoints()
+    , mTriangles()
+    , mFirstPoint()
+    , mIsSuccess(false)
+{
+    if (aCount < 3) return;
+    makeRoundChain<QPointF>(aPoints, aCount);
+    mIsSuccess = triangulate();
+    if (!mIsSuccess) mTriangles.clear();
+}
+
 Triangulator::Triangulator(const QPolygonF& aPolygon)
     : mPoints()
     , mTriangles()
     , mFirstPoint()
     , mIsSuccess(false)
 {
-    const int count = aPolygon.size();
-
-    if (count >= 3)
-    {
-        mPoints.resize(count);
-
-        // make round chain
-        Point* prev = &(mPoints[count - 1]);
-        for (int i = 0; i < count; ++i)
-        {
-            auto& curr = mPoints[i];
-            curr.pos = QVector2D(aPolygon[i]);
-            prev->next = &curr;
-            curr.prev = prev;
-            prev = &curr;
-        }
-
-        mIsSuccess = triangulate();
-        if (!mIsSuccess)
-        {
-            mTriangles.clear();
-        }
-    }
+    if (aPolygon.size() < 3) return;
+    makeRoundChain<QPointF>(aPolygon.data(), aPolygon.size());
+    mIsSuccess = triangulate();
+    if (!mIsSuccess) mTriangles.clear();
 }
 
 bool Triangulator::triangulate()

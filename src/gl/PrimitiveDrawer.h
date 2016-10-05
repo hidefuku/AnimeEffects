@@ -17,6 +17,7 @@ class PrimitiveDrawer
 public:
     enum PenStyle
     {
+        PenStyle_None,
         PenStyle_Solid,
         PenStyle_Dash,
         PenStyle_Dot,
@@ -26,7 +27,7 @@ public:
     PrimitiveDrawer(int aVtxCountOfSlot = 512, int aSlotCount = 8);
     virtual ~PrimitiveDrawer();
 
-    void setViewMtx(const QMatrix4x4& aViewMtx);
+    void setViewMatrix(const QMatrix4x4& aViewMtx);
 
     void begin();
     void end();
@@ -35,14 +36,19 @@ public:
     void setPen(const QColor& aColor, float aWidth = 1.0f, PenStyle = PenStyle_Solid);
     void setAntiAliasing(bool aIsEnable);
 
+    void drawPoint(const QPointF& aCenter);
+
+    void drawLine(const QPointF& aFrom, const QPointF& aTo);
+    void drawLine(const QLineF& aLine) { drawLine(aLine.p1(), aLine.p2()); }
+
     void drawRect(const QRect& aRect);
     void drawRect(const QRectF& aRect);
 
-    //void drawEllipse(const QPointF& aCenter, float aRadX, float aRadY);
     void drawCircle(const QPointF& aCenter, float aRadius);
+    void drawEllipse(const QPointF& aCenter, float aRadiusX, float aRadiusY);
 
-    void drawLine(const QPointF& aFrom, const QPointF& aTo);
-
+    void drawPolygon(const QPoint* aPoints, int aCount);
+    void drawPolygon(const QPointF* aPoints, int aCount);
     void drawPolygon(const QPolygonF& aPolygon);
 
     void drawTexture(const QRectF& aRect, gl::Texture& aTexture);
@@ -152,6 +158,9 @@ private:
         int locColor;
         int locTexture;
     };
+
+    void drawPolygonImpl(const QVector<gl::Vector2>& aTriangles);
+    void drawEllipseImpl(const QPointF& aCenter, float aRadiusX, float aRadiusY, int aDivision);
 
     void pushStateCommand(const Command& aCommand);
     void pushDrawCommand(const Command& aCommand,
