@@ -130,7 +130,7 @@ void FontDrawer::draw(const QFont& aFont, TextObject& aTextObj)
         ggl.glBlendFuncSeparate(GL_ZERO, GL_ONE, GL_ONE_MINUS_DST_ALPHA, GL_ZERO);
 
         QMatrix4x4 viewMtx;
-        viewMtx.ortho(0.0f, workSize.width(), workSize.height(), 0.0f, -1.0f, 1.0f);
+        viewMtx.ortho(0.0f, textureSize.width(), textureSize.height(), 0.0f, -1.0f, 1.0f);
 
         mShader.bind();
         mShader.setAttributeArray(mLocPosition, cascades.data(), cascades.size());

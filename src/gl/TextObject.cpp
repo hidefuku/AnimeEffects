@@ -3,6 +3,13 @@
 namespace gl
 {
 
+TextObject::MapKey TextObject::getMapKey(const QString& aText)
+{
+    auto bytes = aText.toUtf8();
+    auto crc16 = qChecksum(bytes.data(), bytes.size());
+    return MapKey(crc16, aText);
+}
+
 TextObject::TextObject()
     : mText()
     , mCRC16()
@@ -25,6 +32,11 @@ void TextObject::setText(const QString& aText)
     mText = aText;
     auto bytes = mText.toUtf8();
     mCRC16 = qChecksum(bytes.data(), bytes.size());
+}
+
+int TextObject::pixelCount() const
+{
+    return mTexture.size().width() * mTexture.size().height();
 }
 
 } // namespace gl

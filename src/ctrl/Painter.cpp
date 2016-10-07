@@ -11,12 +11,18 @@ GLCorePaintEngine::GLCorePaintEngine()
                    QPaintEngine::ConstantOpacity |
                    QPaintEngine::PrimitiveTransform)
     , mDrawer()
+    , mFontDrawer()
+    , mTextureCaches()
+    , mTextCaches()
 {
 }
 
 bool GLCorePaintEngine::begin(QPaintDevice* aDevPtr)
 {
+    //qDebug() << "begin";
     (void)aDevPtr;
+    mTextureCaches.reduceByStorageSize();
+    mTextCaches.reduceByStorageSize();
     mDrawer.begin();
     return true;
 }
@@ -24,6 +30,8 @@ bool GLCorePaintEngine::begin(QPaintDevice* aDevPtr)
 bool GLCorePaintEngine::end()
 {
     mDrawer.end();
+    mTextureCaches.updateStorageSize();
+    mTextCaches.updateStorageSize();
     return true;
 }
 
@@ -31,16 +39,18 @@ void GLCorePaintEngine::updateState(const QPaintEngineState& aState)
 {
     if (aState.state() & QPaintEngine::DirtyBrush)
     {
+        mDrawer.setBrushEnable(aState.brush().style() != Qt::NoBrush);
         mDrawer.setBrush(aState.brush().color());
     }
-    else if (aState.state() & QPaintEngine::DirtyPen)
+
+    if (aState.state() & QPaintEngine::DirtyPen)
     {
         auto pen = aState.pen();
+        bool hasPen = true;
         gl::PrimitiveDrawer::PenStyle style;
+
         switch (pen.style())
         {
-        case Qt::NoPen:
-            style = gl::PrimitiveDrawer::PenStyle_None; break;
         case Qt::SolidLine:
             style = gl::PrimitiveDrawer::PenStyle_Solid; break;
         case Qt::DotLine:
@@ -51,11 +61,15 @@ void GLCorePaintEngine::updateState(const QPaintEngineState& aState)
         case Qt::CustomDashLine:
             style = gl::PrimitiveDrawer::PenStyle_Dash; break;
         default:
-            style = gl::PrimitiveDrawer::PenStyle_Solid; break;
+            hasPen = false; // Qt::NoPen will come here.
+            style = gl::PrimitiveDrawer::PenStyle_Solid;
+            break;
         }
+        mDrawer.setPenEnable(hasPen);
         mDrawer.setPen(pen.color(), pen.widthF(), style);
     }
-    else if (aState.state() & QPaintEngine::DirtyHints)
+
+    if (aState.state() & QPaintEngine::DirtyHints)
     {
         const bool useAA = aState.renderHints() & QPainter::Antialiasing;
         mDrawer.setAntiAliasing(useAA);
@@ -117,23 +131,71 @@ void GLCorePaintEngine::drawPolygon(const QPointF* aPoints, int aCount, PolygonD
 void GLCorePaintEngine::drawImage(
         const QRectF& aRect, const QImage& aImage, const QRectF& aSrcRect, Qt::ImageConversionFlags aFlags)
 {
-    (void)aRect;
-    (void)aImage;
-    (void)aSrcRect;
     (void)aFlags;
+    const QImage* ptr = &aImage;
+    const qint64 key = aImage.cacheKey();
+
+    auto texture = mTextureCaches.get(key, [=]()
+    {
+        auto cache = new TextureCaches::Cache();
+        cache->obj.reset(new QOpenGLTexture(ptr->mirrored()));
+        cache->key = key;
+        cache->size = (size_t)ptr->byteCount();
+
+        cache->obj->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+        cache->obj->setMagnificationFilter(QOpenGLTexture::Linear);
+
+        return cache;
+    });
+    mDrawer.drawTexture(aRect, texture->textureId(), QSize(texture->width(), texture->height()), aSrcRect);
 }
 
 void GLCorePaintEngine::drawPixmap(const QRectF& aRect, const QPixmap& aPixmap, const QRectF& aSrcRect)
 {
-    (void)aRect;
-    (void)aPixmap;
-    (void)aSrcRect;
+    if (aPixmap.paintEngine()->type() == QPaintEngine::Raster && !aPixmap.isQBitmap())
+    {
+        const QPixmap* ptr = &aPixmap;
+        const qint64 key = aPixmap.cacheKey();
+
+        auto texture = mTextureCaches.get(key, [=]()
+        {
+            auto cache = new TextureCaches::Cache();
+            auto image = ptr->toImage();
+            cache->obj.reset(new QOpenGLTexture(image.mirrored()));
+            cache->key = key;
+            cache->size = (size_t)image.byteCount();
+
+            cache->obj->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+            cache->obj->setMagnificationFilter(QOpenGLTexture::Linear);
+
+            return cache;
+        });
+        mDrawer.drawTexture(aRect, texture->textureId(), QSize(texture->width(), texture->height()), aSrcRect);
+    }
 }
 
 void GLCorePaintEngine::drawTextItem(const QPointF& aPos, const QTextItem& aTextItem)
 {
-    (void)aPos;
-    (void)aTextItem;
+    //mDrawer.end();
+    auto key = gl::TextObject::getMapKey(aTextItem.text());
+
+    auto textObj = mTextCaches.get(key, [&]()
+    {
+        auto obj = new gl::TextObject(aTextItem.text());
+
+        this->mFontDrawer.setColor(QColor(255, 255, 255, 255));
+        this->mFontDrawer.draw(aTextItem.font(), *obj);
+
+        auto cache = new TextCaches::Cache();
+        cache->obj.reset(obj);
+        cache->key = key;
+        cache->size = (size_t)obj->pixelCount();
+        return cache;
+    });
+    auto offs = QPointF(0.0f, -aTextItem.ascent());
+
+    //mDrawer.begin();
+    mDrawer.drawTexture(QRectF(aPos + offs, QSizeF(textObj->texture().size())), textObj->texture());
 }
 
 //-------------------------------------------------------------------------------------------------

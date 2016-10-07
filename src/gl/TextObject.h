@@ -10,7 +10,27 @@ namespace gl
 class TextObject
 {
 public:
+    struct MapKey
+    {
+        quint16 checksum;
+        QString text;
+
+        MapKey()
+            : checksum(), text() {}
+        MapKey(quint16 aChecksum, const QString& aText)
+            : checksum(aChecksum), text(aText) {}
+
+        bool operator <(const MapKey& aRhs) const
+        {
+            if (checksum < aRhs.checksum) { return true; }
+            else if (checksum == aRhs.checksum) { return text < aRhs.text; }
+            else { return false; }
+        }
+    };
+
     typedef std::shared_ptr<gl::Texture> WorkCache;
+
+    static MapKey getMapKey(const QString& aText);
 
     TextObject();
     explicit TextObject(const QString& aText);
@@ -19,6 +39,8 @@ public:
     const QString& text() const { return mText; }
 
     quint16 checksum() const { return mCRC16; }
+    MapKey mapKey() const { return MapKey(mCRC16, mText); }
+    int pixelCount() const;
 
     gl::Texture& texture() { return mTexture; }
     const gl::Texture& texture() const { return mTexture; }

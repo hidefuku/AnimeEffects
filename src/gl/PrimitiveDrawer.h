@@ -17,7 +17,6 @@ class PrimitiveDrawer
 public:
     enum PenStyle
     {
-        PenStyle_None,
         PenStyle_Solid,
         PenStyle_Dash,
         PenStyle_Dot,
@@ -34,6 +33,8 @@ public:
 
     void setBrush(const QColor& aColor);
     void setPen(const QColor& aColor, float aWidth = 1.0f, PenStyle = PenStyle_Solid);
+    void setBrushEnable(bool aIsEnable);
+    void setPenEnable(bool aIsEnable);
     void setAntiAliasing(bool aIsEnable);
 
     void drawPoint(const QPointF& aCenter);
@@ -52,9 +53,9 @@ public:
     void drawPolygon(const QPolygonF& aPolygon);
 
     void drawTexture(const QRectF& aRect, gl::Texture& aTexture);
+    void drawTexture(const QRectF& aRect, gl::Texture& aTexture, const QRectF& aSrcRect);
     void drawTexture(const QRectF& aRect, GLuint aTexture);
-
-    //void drawText(const QPointF& aPos, const QFont& aFont, const QString& aText);
+    void drawTexture(const QRectF& aRect, GLuint aTexture, const QSize& aTexSize, const QRectF& aSrcRect);
 
 private:
     enum Type
@@ -63,7 +64,7 @@ private:
         Type_Brush,
         Type_Pen,
         Type_Texture,
-        Type_MSAA,
+        Type_Ability,
         Type_TERM
     };
 
@@ -102,12 +103,15 @@ private:
             struct Texture
             {
                 GLuint id;
+                QRgb color;
             }texture;
 
-            struct MSAA
+            struct Ability
             {
-                bool use;
-            }msaa;
+                bool hasBrush;
+                bool hasPen;
+                bool hasMSAA;
+            }ability;
 
         }attr;
     };
@@ -124,7 +128,10 @@ private:
         float penWidth;
         PenStyle penStyle;
         GLuint texture;
-        bool useMSAA;
+        QRgb textureColor;
+        bool hasBrush;
+        bool hasPen;
+        bool hasMSAA;
     };
 
     struct PlaneShader
@@ -169,7 +176,7 @@ private:
     void flushCommands();
 
     void bindAppositeShader(int aSlotIndex, bool aUsePen);
-    void setColorToCurrentShader(const QColor& aColor);
+    void setColorToCurrentShader(bool aUsePen);
     void unbindCurrentShader();
 
     PlaneShader mPlaneShader;

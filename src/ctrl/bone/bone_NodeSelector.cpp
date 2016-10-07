@@ -286,33 +286,9 @@ void NodeSelector::renderTags(const core::RenderInfo& aInfo, QPainter& aPainter)
     auto tagHeight = mCurrentTopTag->sortedRect.height();
     QPixmap iconPix = mGraphicStyle.icon("dooropen").pixmap(tagHeight);
 
-#if 1
     QFont font = mGraphicStyle.font();
-#else
-    QFont font = aPainter.font();
-    font.setPixelSize(tagHeight);
-    //font.setPointSize(10);
-    //font.setFamily("Courier New");
-    //font.setFamily("Meiryo");
-    font.setStyleStrategy(QFont::StyleStrategy(
-                              QFont::PreferOutline |
-                              QFont::PreferAntialias |
-                              QFont::PreferQuality));
-    ///@note In windows, the font antialiasing doesn't work. (seems like a bug?)
-    /// The cause is unknown but it's probably avoidable by bold setting.
-    font.setBold(true);
-    //font.setFixedPitch(false);
-    //font.setStretch(QFont::UltraExpanded);
-    //font.setLetterSpacing(QFont::PercentageSpacing, 105);
-#endif
     aPainter.setFont(font);
-
-#if 1
-    //aPainter.setRenderHint(QPainter::HighQualityAntialiasing, true);
-    //aPainter.setRenderHint(QPainter::SmoothPixmapTransform, true);
-    aPainter.setRenderHint(QPainter::Antialiasing, true);
-    aPainter.setRenderHint(QPainter::TextAntialiasing, true);
-#endif
+    aPainter.setRenderHint(QPainter::Antialiasing);
 
     if (!mCurrentTopTag->invisibleTop())
     {
@@ -363,6 +339,7 @@ void NodeSelector::renderOneNode(const Tag& aTag, QPixmap& aIconPix, int aColorT
 
     // text
     aPainter.setPen(QPen(textBrush, 1.0f));
+    aPainter.setBrush(textBrush);
     aPainter.drawText(scrRect, Qt::AlignCenter, nodeName);
 
     // icon

@@ -40,7 +40,10 @@ PrimitiveDrawer::State::State()
     , penWidth(1.0f)
     , penStyle(PenStyle_Solid)
     , texture(0)
-    , useMSAA(false)
+    , textureColor(QColor(255, 255, 255, 255).rgba())
+    , hasBrush(true)
+    , hasPen(true)
+    , hasMSAA(false)
 {
 }
 
@@ -52,8 +55,12 @@ bool PrimitiveDrawer::State::operator==(const State& aRhs) const
             penWidth == aRhs.penWidth &&
             penStyle == aRhs.penStyle &&
             texture == aRhs.texture &&
-            useMSAA == aRhs.useMSAA;
+            textureColor == aRhs.textureColor &&
+            hasBrush == aRhs.hasBrush &&
+            hasPen == aRhs.hasPen &&
+            hasMSAA == aRhs.hasMSAA;
 }
+
 bool PrimitiveDrawer::State::operator!=(const State& aRhs) const
 {
     return !(*this == aRhs);
@@ -73,9 +80,12 @@ void PrimitiveDrawer::State::set(const Command& aCommand)
         break;
     case Type_Texture:
         texture = aCommand.attr.texture.id;
+        textureColor = aCommand.attr.texture.color;
         break;
-    case Type_MSAA:
-        useMSAA = aCommand.attr.msaa.use;
+    case Type_Ability:
+        hasBrush = aCommand.attr.ability.hasBrush;
+        hasPen = aCommand.attr.ability.hasPen;
+        hasMSAA = aCommand.attr.ability.hasMSAA;
         break;
     default:
         break;
@@ -93,9 +103,12 @@ bool PrimitiveDrawer::State::hasDifferentValueWith(const Command& aCommand) cons
                penWidth != aCommand.attr.pen.width ||
                penStyle != aCommand.attr.pen.style;
     case Type_Texture:
-        return texture != aCommand.attr.texture.id;
-    case Type_MSAA:
-        return useMSAA != aCommand.attr.msaa.use;
+        return texture != aCommand.attr.texture.id ||
+               textureColor != aCommand.attr.texture.color;
+    case Type_Ability:
+        return hasBrush != aCommand.attr.ability.hasBrush ||
+               hasPen != aCommand.attr.ability.hasPen ||
+               hasMSAA != aCommand.attr.ability.hasMSAA;
     default:
         XC_ASSERT(0);
         return false;
@@ -280,7 +293,7 @@ void PrimitiveDrawer::begin()
 
     //ggl.glEnable(GL_CULL_FACE);
     //ggl.glCullFace(GL_BACK);
-    Util::setAbility(GL_MULTISAMPLE, mAppliedState.useMSAA);
+    Util::setAbility(GL_MULTISAMPLE, mAppliedState.hasMSAA);
 }
 
 void PrimitiveDrawer::end()
@@ -323,10 +336,33 @@ void PrimitiveDrawer::setPen(const QColor& aColor, float aWidth, PenStyle aPenSt
     pushStateCommand(command);
 }
 
+void PrimitiveDrawer::setBrushEnable(bool aIsEnable)
+{
+    //if (mBufferingState.hasBrush == aIsEnable) return;
+    Command command = { Type_Ability };
+    command.attr.ability.hasBrush = aIsEnable;
+    command.attr.ability.hasPen = mBufferingState.hasPen;
+    command.attr.ability.hasMSAA = mBufferingState.hasMSAA;
+    pushStateCommand(command);
+}
+
+void PrimitiveDrawer::setPenEnable(bool aIsEnable)
+{
+    //if (mBufferingState.hasPen == aIsEnable) return;
+    Command command = { Type_Ability };
+    command.attr.ability.hasBrush = mBufferingState.hasBrush;
+    command.attr.ability.hasPen = aIsEnable;
+    command.attr.ability.hasMSAA = mBufferingState.hasMSAA;
+    pushStateCommand(command);
+}
+
 void PrimitiveDrawer::setAntiAliasing(bool aIsEnable)
 {
-    Command command = { Type_MSAA };
-    command.attr.msaa.use = aIsEnable;
+    //if (mBufferingState.hasMSAA == aIsEnable) return;
+    Command command = { Type_Ability };
+    command.attr.ability.hasBrush = mBufferingState.hasBrush;
+    command.attr.ability.hasPen = mBufferingState.hasPen;
+    command.attr.ability.hasMSAA = aIsEnable;
     pushStateCommand(command);
 }
 
@@ -338,17 +374,17 @@ void PrimitiveDrawer::drawPoint(const QPointF& aCenter)
 
 void PrimitiveDrawer::drawLine(const QPointF& aFrom, const QPointF& aTo)
 {
+    //if (!mBufferingState.hasPen) return;
+
     Command command = { Type_Draw };
     command.attr.draw.prim = GL_TRIANGLE_STRIP;
     command.attr.draw.count = 4;
-
-    const bool usePen = mBufferingState.penStyle != PenStyle_None && mBufferingState.penWidth > 0.0f;
-    command.attr.draw.usePen = usePen;
+    command.attr.draw.usePen = mBufferingState.hasPen;
 
     const QVector2D dir(aTo - aFrom);
     const float length = dir.length();
     if (length < FLT_EPSILON) return;
-    const float width = usePen ? mBufferingState.penWidth * mPixelScale : 1.0f;
+    const float width = command.attr.draw.usePen ? mBufferingState.penWidth * mPixelScale : 1.0f;
     auto rside = util::MathUtil::getRotateVector90Deg(dir).normalized() * width * 0.5f;
 
     gl::Vector2 positions[4] = {
@@ -466,11 +502,23 @@ void PrimitiveDrawer::drawTexture(const QRectF& aRect, gl::Texture& aTexture)
     drawTexture(aRect, aTexture.id());
 }
 
+void PrimitiveDrawer::drawTexture(const QRectF& aRect, gl::Texture& aTexture, const QRectF& aSrcRect)
+{
+    drawTexture(aRect, aTexture.id(), aTexture.size(), aSrcRect);
+}
+
 void PrimitiveDrawer::drawTexture(const QRectF& aRect, GLuint aTexture)
+{
+    drawTexture(aRect, aTexture, QSize(1, 1), QRectF(0.0f, 0.0f, 1.0f, 1.0f));
+}
+
+void PrimitiveDrawer::drawTexture(const QRectF& aRect, GLuint aTexture, const QSize& aTexSize, const QRectF& aSrcRect)
 {
     {
         Command command = { Type_Texture };
         command.attr.texture.id = aTexture;
+        //command.attr.texture.color = QColor(255, 255, 255, 255).rgba();
+        command.attr.texture.color = mBufferingState.brushColor;
         pushStateCommand(command);
     }
 
@@ -485,11 +533,14 @@ void PrimitiveDrawer::drawTexture(const QRectF& aRect, GLuint aTexture)
             gl::Vector2::make(aRect.right(), aRect.top()   ),
             gl::Vector2::make(aRect.right(), aRect.bottom())
         };
+        const float tl = aSrcRect.left() / aTexSize.width();
+        const float tt = 1.0f - aSrcRect.top() / aTexSize.height();
+        const float tr = aSrcRect.right() / aTexSize.width();
+        const float tb = 1.0f - aSrcRect.bottom() / aTexSize.height();
+
         gl::Vector2 texCoords[4] = {
-            gl::Vector2::make(0.0f, 1.0f),
-            gl::Vector2::make(0.0f, 0.0f),
-            gl::Vector2::make(1.0f, 1.0f),
-            gl::Vector2::make(1.0f, 0.0f)
+            gl::Vector2::make(tl, tt), gl::Vector2::make(tl, tb),
+            gl::Vector2::make(tr, tt), gl::Vector2::make(tr, tb)
         };
         pushDrawCommand(command, positions, texCoords);
     }
@@ -497,53 +548,10 @@ void PrimitiveDrawer::drawTexture(const QRectF& aRect, GLuint aTexture)
     {
         Command command = { Type_Texture };
         command.attr.texture.id = 0;
+        command.attr.texture.color = QColor(255, 255, 255, 255).rgba();
         pushStateCommand(command);
     }
 }
-
-#if 0
-void PrimitiveDrawer::drawText(const QPointF& aPos, const QFont& aFont, const QString& aText)
-{
-    //QFont thinFont = aFont;
-    //qDebug() << aFont.pi
-    //thinFont.setWeight(QFont::Thin);
-    QPainterPath path;
-    path.addText(aPos, aFont, aText);
-    auto polygons = path.toSubpathPolygons();
-
-    QVector<gl::Vector2> positions;
-
-    int k = 0;
-    for (auto& polygon : polygons)
-    {
-        auto count = polygon.size();
-        if (count <= 0) continue;
-        Command command = { Type_Draw };
-        command.attr.draw.prim = GL_LINE_STRIP;
-        command.attr.draw.count = count;
-        positions.resize(count);
-        for (int i = 0; i < count; ++i)
-        {
-            auto pos = polygon[i];
-            positions[i].set(pos.x(), pos.y());
-        }
-        k = k % 7;
-        switch (k)
-        {
-        case 0: setColor(QColor(0, 0, 0, 255)); break;
-        case 1: setColor(QColor(255, 0, 0, 255)); break;
-        case 2: setColor(QColor(0, 255, 0, 255)); break;
-        case 3: setColor(QColor(0, 0, 255, 255)); break;
-        case 4: setColor(QColor(255, 255, 0, 255)); break;
-        case 5: setColor(QColor(0, 255, 255, 255)); break;
-        case 6: setColor(QColor(255, 255, 255, 255)); break;
-        }
-        ++k;
-
-        pushDrawCommand(command, positions.data());
-    }
-}
-#endif
 
 void PrimitiveDrawer::pushStateCommand(const Command& aCommand)
 {
@@ -556,6 +564,7 @@ void PrimitiveDrawer::pushStateCommand(const Command& aCommand)
         return;
     }
 
+    bool push = true;
     for (auto itr = mBufferingCommands.rbegin(); itr != mBufferingCommands.rend(); ++itr)
     {
         auto& command = *itr;
@@ -566,14 +575,18 @@ void PrimitiveDrawer::pushStateCommand(const Command& aCommand)
         else if (command.type == aCommand.type)
         {
             command = aCommand;
-            return;
+            push = false;
+            break;
         }
     }
 
     if (mBufferingState.hasDifferentValueWith(aCommand))
     {
-        mBufferingCommands.push_back(aCommand);
         mBufferingState.set(aCommand);
+        if (push)
+        {
+            mBufferingCommands.push_back(aCommand);
+        }
     }
 }
 
@@ -581,6 +594,15 @@ void PrimitiveDrawer::pushDrawCommand(
         const Command& aCommand, const gl::Vector2* aPositions, const gl::Vector2* aSubCoords)
 {
     XC_ASSERT(aCommand.type == Type_Draw);
+
+#if 0
+    const bool usePen = aCommand.attr.draw.usePen;
+    if ((usePen && !mBufferingState.hasPen) || (!usePen && !mBufferingState.hasBrush))
+    {
+        return;
+    }
+#endif
+
     const int vtxCount = aCommand.attr.draw.count;
 
     if (!mInDrawing) return;
@@ -642,7 +664,7 @@ void PrimitiveDrawer::flushCommands()
                 bindAppositeShader(index, usePen);
             }
 
-            setColorToCurrentShader(QColor::fromRgba(usePen ? mAppliedState.penColor : mAppliedState.brushColor));
+            setColorToCurrentShader(usePen);
             ggl.glDrawArrays(command.attr.draw.prim, offset, command.attr.draw.count);
             offset += command.attr.draw.count;
         } break;
@@ -658,8 +680,13 @@ void PrimitiveDrawer::flushCommands()
             mAppliedState.set(command);
             bindAppositeShader(index, usePen);
             break;
-        case Type_MSAA:
-            Util::setAbility(GL_MULTISAMPLE, command.attr.msaa.use);
+        case Type_Ability:
+            if (mAppliedState.hasMSAA != command.attr.ability.hasMSAA)
+            {
+                unbindCurrentShader();
+                Util::setAbility(GL_MULTISAMPLE, command.attr.ability.hasMSAA);
+                bindAppositeShader(index, usePen);
+            }
             mAppliedState.set(command);
             break;
         default:
@@ -693,7 +720,7 @@ void PrimitiveDrawer::bindAppositeShader(int aSlotIndex, bool aUsePen)
         mTextureShader.program.setUniformValue(mTextureShader.locTexture, 0);
         mCurrentShader = ShaderType_Texture;
     }
-    else if (aUsePen && mAppliedState.penStyle != PenStyle_None && mAppliedState.penStyle != PenStyle_Solid)
+    else if (aUsePen && mAppliedState.penStyle != PenStyle_Solid)
     {
         const QVector2D scrHalfSize(mScreenSize.width() / 2, mScreenSize.height() / 2);
         mStippleShader.program.bind();
@@ -705,7 +732,7 @@ void PrimitiveDrawer::bindAppositeShader(int aSlotIndex, bool aUsePen)
         mStippleShader.program.setUniformValue(mStippleShader.locScreenSize, scrHalfSize);
         mStippleShader.program.setUniformValue(mStippleShader.locWave,
                                                (mAppliedState.penStyle == PenStyle_Dash) ?
-                                                   QVector2D(0.15f, 0.9f) : QVector2D(0.25f, -0.2f));
+                                                   QVector2D(0.15f, 0.9f) : QVector2D(0.3f, 0.2f));
         mCurrentShader = ShaderType_Stipple;
     }
     else
@@ -719,9 +746,10 @@ void PrimitiveDrawer::bindAppositeShader(int aSlotIndex, bool aUsePen)
 
 }
 
-void PrimitiveDrawer::setColorToCurrentShader(const QColor& aColor)
+void PrimitiveDrawer::setColorToCurrentShader(bool aUsePen)
 {
-    const QVector4D colorVec(aColor.redF(), aColor.greenF(), aColor.blueF(), aColor.alphaF());
+    auto color = QColor::fromRgba(aUsePen ? mAppliedState.penColor : mAppliedState.brushColor);
+    const QVector4D colorVec(color.redF(), color.greenF(), color.blueF(), color.alphaF());
 
     if (mCurrentShader == ShaderType_Plane)
     {
@@ -733,7 +761,9 @@ void PrimitiveDrawer::setColorToCurrentShader(const QColor& aColor)
     }
     else if (mCurrentShader == ShaderType_Texture)
     {
-        mTextureShader.program.setUniformValue(mTextureShader.locColor, colorVec);
+        auto texColor = QColor::fromRgba(mAppliedState.textureColor);
+        const QVector4D texColorVec(texColor.redF(), texColor.greenF(), texColor.blueF(), texColor.alphaF());
+        mTextureShader.program.setUniformValue(mTextureShader.locColor, texColorVec);
     }
 }
 
