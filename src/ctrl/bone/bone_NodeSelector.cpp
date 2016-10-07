@@ -200,6 +200,7 @@ ObjectNode* NodeSelector::click(const CameraInfo& aCamera)
                 mCurrentTopTag = mCurrentFocus;
                 mCurrentTopTag->isOpened = true;
             }
+            mCurrentSelect = nullptr;
             mCurrentFocus = nullptr;
             mIconFocused = false;
             sortCurrentGeometries(aCamera);
