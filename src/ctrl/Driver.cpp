@@ -233,12 +233,9 @@ void Driver::renderQt(const core::RenderInfo& aRenderInfo, QPainter& aPainter)
 
 void Driver::drawOutline(const core::RenderInfo& aRenderInfo, QPainter& aPainter)
 {
-    const QBrush brush(QColor(255, 255, 255, 128));
-    aPainter.setBrush(QBrush(QColor(0, 0, 0, 0)));
-    //aPainter.setPen(QPen(brush, 1.0f, Qt::SolidLine));
-    //aPainter.setPen(QPen(brush, 1.0f, Qt::DashDotDotLine));
+    aPainter.setBrush(Qt::NoBrush);
     {
-        QPen pen(brush, 1.0f, Qt::CustomDashLine);
+        QPen pen(QBrush(QColor(255, 255, 255, 128)), 1.0f, Qt::CustomDashLine);
         QVector<qreal> dashes;
         dashes << 4 << 4;
         pen.setDashPattern(dashes);

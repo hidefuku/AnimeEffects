@@ -240,9 +240,9 @@ PrimitiveDrawer::PrimitiveDrawer(int aVtxCountOfSlot, int aSlotCount)
     , mViewMtx()
     , mScreenSize()
     , mPixelScale(1.0f)
-    , mBufferingCommands()
+    , mScheduledCommands()
     , mAppliedState()
-    , mBufferingState()
+    , mScheduledState()
     , mInDrawing(false)
 {
     // create shader
@@ -338,30 +338,30 @@ void PrimitiveDrawer::setPen(const QColor& aColor, float aWidth, PenStyle aPenSt
 
 void PrimitiveDrawer::setBrushEnable(bool aIsEnable)
 {
-    //if (mBufferingState.hasBrush == aIsEnable) return;
+    if (mScheduledState.hasBrush == aIsEnable) return;
     Command command = { Type_Ability };
     command.attr.ability.hasBrush = aIsEnable;
-    command.attr.ability.hasPen = mBufferingState.hasPen;
-    command.attr.ability.hasMSAA = mBufferingState.hasMSAA;
+    command.attr.ability.hasPen = mScheduledState.hasPen;
+    command.attr.ability.hasMSAA = mScheduledState.hasMSAA;
     pushStateCommand(command);
 }
 
 void PrimitiveDrawer::setPenEnable(bool aIsEnable)
 {
-    //if (mBufferingState.hasPen == aIsEnable) return;
+    if (mScheduledState.hasPen == aIsEnable) return;
     Command command = { Type_Ability };
-    command.attr.ability.hasBrush = mBufferingState.hasBrush;
+    command.attr.ability.hasBrush = mScheduledState.hasBrush;
     command.attr.ability.hasPen = aIsEnable;
-    command.attr.ability.hasMSAA = mBufferingState.hasMSAA;
+    command.attr.ability.hasMSAA = mScheduledState.hasMSAA;
     pushStateCommand(command);
 }
 
 void PrimitiveDrawer::setAntiAliasing(bool aIsEnable)
 {
-    //if (mBufferingState.hasMSAA == aIsEnable) return;
+    if (mScheduledState.hasMSAA == aIsEnable) return;
     Command command = { Type_Ability };
-    command.attr.ability.hasBrush = mBufferingState.hasBrush;
-    command.attr.ability.hasPen = mBufferingState.hasPen;
+    command.attr.ability.hasBrush = mScheduledState.hasBrush;
+    command.attr.ability.hasPen = mScheduledState.hasPen;
     command.attr.ability.hasMSAA = aIsEnable;
     pushStateCommand(command);
 }
@@ -374,17 +374,17 @@ void PrimitiveDrawer::drawPoint(const QPointF& aCenter)
 
 void PrimitiveDrawer::drawLine(const QPointF& aFrom, const QPointF& aTo)
 {
-    //if (!mBufferingState.hasPen) return;
+    if (!mScheduledState.hasPen) return;
 
     Command command = { Type_Draw };
     command.attr.draw.prim = GL_TRIANGLE_STRIP;
     command.attr.draw.count = 4;
-    command.attr.draw.usePen = mBufferingState.hasPen;
+    command.attr.draw.usePen = true;
 
     const QVector2D dir(aTo - aFrom);
     const float length = dir.length();
     if (length < FLT_EPSILON) return;
-    const float width = command.attr.draw.usePen ? mBufferingState.penWidth * mPixelScale : 1.0f;
+    const float width = mScheduledState.penWidth * mPixelScale;
     auto rside = util::MathUtil::getRotateVector90Deg(dir).normalized() * width * 0.5f;
 
     gl::Vector2 positions[4] = {
@@ -518,7 +518,7 @@ void PrimitiveDrawer::drawTexture(const QRectF& aRect, GLuint aTexture, const QS
         Command command = { Type_Texture };
         command.attr.texture.id = aTexture;
         //command.attr.texture.color = QColor(255, 255, 255, 255).rgba();
-        command.attr.texture.color = mBufferingState.brushColor;
+        command.attr.texture.color = mScheduledState.brushColor;
         pushStateCommand(command);
     }
 
@@ -559,13 +559,13 @@ void PrimitiveDrawer::pushStateCommand(const Command& aCommand)
 
     if (!mInDrawing)
     {
-        mBufferingState.set(aCommand);
-        mAppliedState = mBufferingState;
+        mScheduledState.set(aCommand);
+        mAppliedState = mScheduledState;
         return;
     }
 
     bool push = true;
-    for (auto itr = mBufferingCommands.rbegin(); itr != mBufferingCommands.rend(); ++itr)
+    for (auto itr = mScheduledCommands.rbegin(); itr != mScheduledCommands.rend(); ++itr)
     {
         auto& command = *itr;
         if (command.type == Type_Draw)
@@ -580,12 +580,12 @@ void PrimitiveDrawer::pushStateCommand(const Command& aCommand)
         }
     }
 
-    if (mBufferingState.hasDifferentValueWith(aCommand))
+    if (mScheduledState.hasDifferentValueWith(aCommand))
     {
-        mBufferingState.set(aCommand);
+        mScheduledState.set(aCommand);
         if (push)
         {
-            mBufferingCommands.push_back(aCommand);
+            mScheduledCommands.push_back(aCommand);
         }
     }
 }
@@ -597,7 +597,7 @@ void PrimitiveDrawer::pushDrawCommand(
 
 #if 0
     const bool usePen = aCommand.attr.draw.usePen;
-    if ((usePen && !mBufferingState.hasPen) || (!usePen && !mBufferingState.hasBrush))
+    if ((usePen && !mScheduledState.hasPen) || (!usePen && !mScheduledState.hasBrush))
     {
         return;
     }
@@ -630,14 +630,14 @@ void PrimitiveDrawer::pushDrawCommand(
     }
     ggl.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    mBufferingCommands.push_back(aCommand);
+    mScheduledCommands.push_back(aCommand);
     mCurrentSlotSize += vtxCount;
 }
 
 void PrimitiveDrawer::flushCommands()
 {
     XC_ASSERT(mInDrawing);
-    if (mBufferingCommands.empty()) return;
+    if (mScheduledCommands.empty()) return;
 
     // get current buffer index
     const int index = mCurrentSlotIndex;
@@ -647,24 +647,18 @@ void PrimitiveDrawer::flushCommands()
 
     Global::Functions& ggl = Global::functions();
 
-    bool usePen = false;
     mCurrentShader = ShaderType_TERM;
-    bindAppositeShader(index, usePen);
+    bindAppositeShader(index);
 
     GLint offset = 0;
-    for (auto& command : mBufferingCommands)
+    for (auto& command : mScheduledCommands)
     {
         switch (command.type)
         {
         case Type_Draw:
         {
-            if (usePen != command.attr.draw.usePen)
-            {
-                usePen = command.attr.draw.usePen;
-                bindAppositeShader(index, usePen);
-            }
-
-            setColorToCurrentShader(usePen);
+            bindAppositeShader(index);
+            setColorToCurrentShader(command.attr.draw.usePen);
             ggl.glDrawArrays(command.attr.draw.prim, offset, command.attr.draw.count);
             offset += command.attr.draw.count;
         } break;
@@ -674,18 +668,21 @@ void PrimitiveDrawer::flushCommands()
             break;
         case Type_Pen:
             mAppliedState.set(command);
-            if (usePen) bindAppositeShader(index, usePen);
+            bindAppositeShader(index);
             break;
         case Type_Texture:
             mAppliedState.set(command);
-            bindAppositeShader(index, usePen);
+            //unbindCurrentShader();
+            bindAppositeShader(index);
+            ggl.glActiveTexture(GL_TEXTURE0);
+            ggl.glBindTexture(GL_TEXTURE_2D, mAppliedState.texture);
             break;
         case Type_Ability:
             if (mAppliedState.hasMSAA != command.attr.ability.hasMSAA)
             {
                 unbindCurrentShader();
                 Util::setAbility(GL_MULTISAMPLE, command.attr.ability.hasMSAA);
-                bindAppositeShader(index, usePen);
+                bindAppositeShader(index);
             }
             mAppliedState.set(command);
             break;
@@ -697,20 +694,33 @@ void PrimitiveDrawer::flushCommands()
     unbindCurrentShader();
     GL_CHECK_ERROR();
 
-    mBufferingCommands.clear();
+    mScheduledCommands.clear();
 }
 
-void PrimitiveDrawer::bindAppositeShader(int aSlotIndex, bool aUsePen)
+void PrimitiveDrawer::bindAppositeShader(int aSlotIndex)
 {
     Global::Functions& ggl = Global::functions();
 
-    unbindCurrentShader();
+    auto prevType = mCurrentShader;
+    auto nextType = ShaderType_Plane;
 
     if (mAppliedState.texture != 0)
     {
-        ggl.glActiveTexture(GL_TEXTURE0);
-        ggl.glBindTexture(GL_TEXTURE_2D, mAppliedState.texture);
+        nextType = ShaderType_Texture;
+    }
+    else if (mAppliedState.penStyle != PenStyle_Solid)
+    {
+        nextType = ShaderType_Stipple;
+    }
 
+    if (prevType == nextType) return;
+
+    // unbind previous shader
+    unbindCurrentShader();
+
+    // bind next shader
+    if (nextType == ShaderType_Texture)
+    {
         mTextureShader.program.bind();
         ggl.glBindBuffer(GL_ARRAY_BUFFER, mPosSlotIds[aSlotIndex]);
         mTextureShader.program.setAttributeBuffer(mTextureShader.locPosition, GL_FLOAT, 2);
@@ -720,7 +730,7 @@ void PrimitiveDrawer::bindAppositeShader(int aSlotIndex, bool aUsePen)
         mTextureShader.program.setUniformValue(mTextureShader.locTexture, 0);
         mCurrentShader = ShaderType_Texture;
     }
-    else if (aUsePen && mAppliedState.penStyle != PenStyle_Solid)
+    else if (nextType == ShaderType_Stipple)
     {
         const QVector2D scrHalfSize(mScreenSize.width() / 2, mScreenSize.height() / 2);
         mStippleShader.program.bind();

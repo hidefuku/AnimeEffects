@@ -175,7 +175,7 @@ private:
                          const gl::Vector2* aSubCoords = nullptr);
     void flushCommands();
 
-    void bindAppositeShader(int aSlotIndex, bool aUsePen);
+    void bindAppositeShader(int aSlotIndex);
     void setColorToCurrentShader(bool aUsePen);
     void unbindCurrentShader();
 
@@ -195,11 +195,11 @@ private:
     QSize mScreenSize;
     float mPixelScale;
 
-    QVector<Command> mBufferingCommands;
+    QVector<Command> mScheduledCommands;
 
     bool mInDrawing;
     State mAppliedState;
-    State mBufferingState;
+    State mScheduledState;
 };
 
 } // namespace gl

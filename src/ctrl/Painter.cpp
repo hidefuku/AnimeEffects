@@ -176,7 +176,7 @@ void GLCorePaintEngine::drawPixmap(const QRectF& aRect, const QPixmap& aPixmap, 
 
 void GLCorePaintEngine::drawTextItem(const QPointF& aPos, const QTextItem& aTextItem)
 {
-    //mDrawer.end();
+    mDrawer.end();
     auto key = gl::TextObject::getMapKey(aTextItem.text());
 
     auto textObj = mTextCaches.get(key, [&]()
@@ -192,10 +192,9 @@ void GLCorePaintEngine::drawTextItem(const QPointF& aPos, const QTextItem& aText
         cache->size = (size_t)obj->pixelCount();
         return cache;
     });
-    auto offs = QPointF(0.0f, -aTextItem.ascent());
-
-    //mDrawer.begin();
-    mDrawer.drawTexture(QRectF(aPos + offs, QSizeF(textObj->texture().size())), textObj->texture());
+    mDrawer.begin();
+    auto pos = aPos.toPoint() + QPoint(0.0f, -aTextItem.ascent());
+    mDrawer.drawTexture(QRect(pos, textObj->texture().size()), textObj->texture());
 }
 
 //-------------------------------------------------------------------------------------------------

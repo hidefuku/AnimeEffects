@@ -336,7 +336,7 @@ void NodeSelector::renderOneNode(const Tag& aTag, QPixmap& aIconPix, int aColorT
     aPainter.setBrush(backBrush);
 
     // background
-    aPainter.drawRect(scrRect);
+    aPainter.drawRect(scrRect.marginsAdded(QMargins(2, 0, 2, 0)));
 
     // text
     aPainter.setPen(QPen(textBrush, 1.0f));
