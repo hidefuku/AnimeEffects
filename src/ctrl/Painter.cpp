@@ -24,6 +24,16 @@ bool GLCorePaintEngine::begin(QPaintDevice* aDevPtr)
     mTextureCaches.reduceByStorageSize();
     mTextCaches.reduceByStorageSize();
     mDrawer.begin();
+
+    // sync state
+    auto painter = this->painter();
+    if (painter)
+    {
+        syncBrush(painter->brush());
+        syncPen(painter->pen());
+        syncRenderHints(painter->renderHints());
+    }
+
     return true;
 }
 
@@ -35,44 +45,58 @@ bool GLCorePaintEngine::end()
     return true;
 }
 
+void GLCorePaintEngine::syncBrush(const QBrush& aBrush)
+{
+    mDrawer.setBrushEnable(aBrush.style() != Qt::NoBrush);
+    mDrawer.setBrush(aBrush.color());
+}
+
+void GLCorePaintEngine::syncPen(const QPen& aPen)
+{
+    bool hasPen = true;
+    gl::PrimitiveDrawer::PenStyle style;
+
+    switch (aPen.style())
+    {
+    case Qt::SolidLine:
+        style = gl::PrimitiveDrawer::PenStyle_Solid; break;
+    case Qt::DotLine:
+        style = gl::PrimitiveDrawer::PenStyle_Dot; break;
+    case Qt::DashLine:
+    case Qt::DashDotLine:
+    case Qt::DashDotDotLine:
+    case Qt::CustomDashLine:
+        style = gl::PrimitiveDrawer::PenStyle_Dash; break;
+    default:
+        hasPen = false; // Qt::NoPen will come here.
+        style = gl::PrimitiveDrawer::PenStyle_Solid;
+        break;
+    }
+    mDrawer.setPenEnable(hasPen);
+    mDrawer.setPen(aPen.color(), aPen.widthF(), style);
+}
+
+void GLCorePaintEngine::syncRenderHints(QPainter::RenderHints aHints)
+{
+    const bool useAA = aHints & QPainter::Antialiasing;
+    mDrawer.setAntiAliasing(useAA);
+}
+
 void GLCorePaintEngine::updateState(const QPaintEngineState& aState)
 {
     if (aState.state() & QPaintEngine::DirtyBrush)
     {
-        mDrawer.setBrushEnable(aState.brush().style() != Qt::NoBrush);
-        mDrawer.setBrush(aState.brush().color());
+        syncBrush(aState.brush());
     }
 
     if (aState.state() & QPaintEngine::DirtyPen)
     {
-        auto pen = aState.pen();
-        bool hasPen = true;
-        gl::PrimitiveDrawer::PenStyle style;
-
-        switch (pen.style())
-        {
-        case Qt::SolidLine:
-            style = gl::PrimitiveDrawer::PenStyle_Solid; break;
-        case Qt::DotLine:
-            style = gl::PrimitiveDrawer::PenStyle_Dot; break;
-        case Qt::DashLine:
-        case Qt::DashDotLine:
-        case Qt::DashDotDotLine:
-        case Qt::CustomDashLine:
-            style = gl::PrimitiveDrawer::PenStyle_Dash; break;
-        default:
-            hasPen = false; // Qt::NoPen will come here.
-            style = gl::PrimitiveDrawer::PenStyle_Solid;
-            break;
-        }
-        mDrawer.setPenEnable(hasPen);
-        mDrawer.setPen(pen.color(), pen.widthF(), style);
+        syncPen(aState.pen());
     }
 
     if (aState.state() & QPaintEngine::DirtyHints)
     {
-        const bool useAA = aState.renderHints() & QPainter::Antialiasing;
-        mDrawer.setAntiAliasing(useAA);
+        syncRenderHints(aState.renderHints());
     }
 }
 
@@ -118,14 +142,34 @@ void GLCorePaintEngine::drawPath(const QPainterPath& aPath)
 
 void GLCorePaintEngine::drawPolygon(const QPoint* aPoints, int aCount, PolygonDrawMode aMode)
 {
-    (void)aMode;
-    mDrawer.drawPolygon(aPoints, aCount);
+    switch (aMode)
+    {
+    case QPaintEngine::ConvexMode:
+        mDrawer.drawConvexPolygon(aPoints, aCount);
+        break;
+    case QPaintEngine::PolylineMode:
+        mDrawer.drawPolyline(aPoints, aCount);
+        break;
+    default:
+        mDrawer.drawPolygon(aPoints, aCount);
+        break;
+    }
 }
 
 void GLCorePaintEngine::drawPolygon(const QPointF* aPoints, int aCount, PolygonDrawMode aMode)
 {
-    (void)aMode;
-    mDrawer.drawPolygon(aPoints, aCount);
+    switch (aMode)
+    {
+    case QPaintEngine::ConvexMode:
+        mDrawer.drawConvexPolygon(aPoints, aCount);
+        break;
+    case QPaintEngine::PolylineMode:
+        mDrawer.drawPolyline(aPoints, aCount);
+        break;
+    default:
+        mDrawer.drawPolygon(aPoints, aCount);
+        break;
+    }
 }
 
 void GLCorePaintEngine::drawImage(

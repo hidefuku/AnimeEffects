@@ -35,7 +35,7 @@ void Renderer::renderMesh(const MeshAccessor& aMesh)
             getScreenPointF(vtx[1]->vec()),
             getScreenPointF(vtx[2]->vec())
         };
-        mPainter.drawPolygon(vpos, 3);
+        mPainter.drawConvexPolygon(vpos, 3);
 
         /*
         setEdgeBrush(false);
@@ -83,7 +83,7 @@ void Renderer::renderDangling(const QVector<QVector2D>& aDangling, const QVector
         };
 
         setFaceBrush(1);
-        mPainter.drawPolygon(vtx, 3);
+        mPainter.drawConvexPolygon(vtx, 3);
 
         setEdgeBrush(true);
         mPainter.drawLine(vtx[0], vtx[1]);
@@ -124,7 +124,7 @@ void Renderer::renderFocus(const Focuser& aFocuser)
             getScreenPointF(vtx[1]->vec()),
             getScreenPointF(vtx[2]->vec())
         };
-        mPainter.drawPolygon(vpos, 3);
+        mPainter.drawConvexPolygon(vpos, 3);
     }
     if (aFocuser.selectingFace())
     {
@@ -136,7 +136,7 @@ void Renderer::renderFocus(const Focuser& aFocuser)
             getScreenPointF(vtx[1]->vec()),
             getScreenPointF(vtx[2]->vec())
         };
-        mPainter.drawPolygon(vpos, 3);
+        mPainter.drawConvexPolygon(vpos, 3);
 
     }
 

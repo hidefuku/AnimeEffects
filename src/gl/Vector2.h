@@ -16,6 +16,43 @@ struct Vector2
     inline void set(GLfloat aX, GLfloat aY) { x = aX; y = aY; }
     inline void set(const QVector2D& aV) { x = aV.x(); y = aV.y(); }
     inline bool isZero() const { return x == 0.0f && y == 0.0f; }
+    QVector2D pos() const { return QVector2D(x, y); }
+
+    Vector2 operator +(const Vector2& aRhs) const
+    {
+        Vector2 result = { x + aRhs.x, y + aRhs.y }; return result;
+    }
+
+    Vector2 operator -(const Vector2& aRhs) const
+    {
+        Vector2 result = { x - aRhs.x, y - aRhs.y }; return result;
+    }
+
+    Vector2 operator *(const Vector2& aRhs) const
+    {
+        Vector2 result = { x * aRhs.x, y * aRhs.y }; return result;
+    }
+
+    Vector2 operator *(float aRhs) const
+    {
+        Vector2 result = { x * aRhs, y * aRhs }; return result;
+    }
+
+    Vector2 operator /(const Vector2& aRhs) const
+    {
+        Vector2 result = { x / aRhs.x, y / aRhs.y }; return result;
+    }
+
+    Vector2 operator /(float aRhs) const
+    {
+        Vector2 result = { x / aRhs, y / aRhs }; return result;
+    }
+
+    Vector2& operator +=(const Vector2& aRhs) { x += aRhs.x; y += aRhs.y; return *this; }
+    Vector2& operator -=(const Vector2& aRhs) { x -= aRhs.x; y -= aRhs.y; return *this; }
+    Vector2& operator *=(float aRhs) { x *= aRhs; y *= aRhs; return *this; }
+    Vector2& operator /=(float aRhs) { x /= aRhs; y /= aRhs; return *this; }
+
     GLfloat x;
     GLfloat y;
 };

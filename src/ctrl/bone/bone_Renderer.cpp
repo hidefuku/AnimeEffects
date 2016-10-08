@@ -121,13 +121,8 @@ void Renderer::renderInfluence(const Bone2* aBone)
     // each child
     for (const Bone2* child : aBone->children())
     {
-        //const QColor color = boneColor(false, false);
-        //const QColor color(255, 128, 90, 64);
-        const QColor color(255, 90, 128, 64);
-        const QBrush brush(color);
-
-        mPainter.setBrush(brush);
-        mPainter.setPen(QPen(QBrush(QColor(0,0,0,0)), 1));
+        mPainter.setBrush(QBrush(QColor(255, 90, 128, 64)));
+        mPainter.setPen(Qt::NoPen);
 
         // draw
         drawOneInfluence(*aBone, *child);
@@ -145,7 +140,7 @@ void Renderer::renderBrush(const util::Circle& aBrush, bool aPressed)
     QBrush brush(aPressed ? focusColor : idleColor);
     Qt::PenStyle style = Qt::SolidLine;
     mPainter.setPen(QPen(brush, 1.2f, style));
-    mPainter.setBrush(QBrush(Qt::NoBrush));
+    mPainter.setBrush(Qt::NoBrush);
 
     auto center = mInfo.camera.toScreenPos(aBrush.center().toPointF());
     auto radius = mInfo.camera.toScreenLength(aBrush.radius());

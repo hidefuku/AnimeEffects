@@ -157,6 +157,9 @@ public:
 private:
     typedef CacheHolder<qint64, QOpenGLTexture> TextureCaches;
     typedef CacheHolder<gl::TextObject::MapKey, gl::TextObject> TextCaches;
+    void syncBrush(const QBrush& aBrush);
+    void syncPen(const QPen& aPen);
+    void syncRenderHints(QPainter::RenderHints aHints);
 
     gl::PrimitiveDrawer mDrawer;
     gl::FontDrawer mFontDrawer;

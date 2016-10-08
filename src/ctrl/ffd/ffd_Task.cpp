@@ -177,7 +177,7 @@ void Task::requestBlur()
     mWorkInWeight.copyFrom(mOutWeight);
 
     ggl.glEnable(GL_RASTERIZER_DISCARD);
-    ggl.glEnable(GL_TEXTURE_1D);
+    //ggl.glEnable(GL_TEXTURE_1D);
     ggl.glActiveTexture(GL_TEXTURE0);
 
     {
@@ -221,7 +221,7 @@ void Task::requestBlur()
 
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_1D, 0);
-    ggl.glDisable(GL_TEXTURE_1D);
+    //ggl.glDisable(GL_TEXTURE_1D);
     ggl.glDisable(GL_RASTERIZER_DISCARD);
 
     XC_ASSERT(ggl.glGetError() == GL_NO_ERROR);

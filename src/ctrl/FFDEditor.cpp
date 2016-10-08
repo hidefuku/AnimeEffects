@@ -157,7 +157,7 @@ FFDEditor::FFDEditor(Project& aProject, DriverResources& aDriverResources)
 
     gl::Util::resetRenderState();
     ggl.glEnable(GL_RASTERIZER_DISCARD);
-    ggl.glEnable(GL_TEXTURE_1D);
+    //ggl.glEnable(GL_TEXTURE_1D);
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_1D, texture.id());
     {
@@ -194,7 +194,7 @@ FFDEditor::FFDEditor(Project& aProject, DriverResources& aDriverResources)
     ggl.glDisable(GL_RASTERIZER_DISCARD);
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_1D, 0);
-    ggl.glDisable(GL_TEXTURE_1D);
+    //ggl.glDisable(GL_TEXTURE_1D);
 
     XC_ASSERT(ggl.glGetError() == GL_NO_ERROR);
 
@@ -531,6 +531,7 @@ void FFDEditor::renderQt(const RenderInfo& aInfo, QPainter& aPainter)
         const QBrush centerBrush(mStatus.isDrawing() ? focusColor : idleColor);
         Qt::PenStyle style = mParam.type == 0 ? Qt::SolidLine : Qt::DotLine;
         aPainter.setPen(QPen(centerBrush, 1.2f, style));
+        aPainter.setBrush(Qt::NoBrush);
 
         const QVector2D center = aInfo.camera.toScreenPos(mStatus.brush.center());
         const float radius = aInfo.camera.toScreenLength(mStatus.brush.radius());

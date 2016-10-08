@@ -2,6 +2,7 @@
 #define GL_PRIMITIVEDRAWER_H
 
 #include <vector>
+#include <functional>
 #include <QPolygonF>
 #include <QBrush>
 #include <QPen>
@@ -47,6 +48,12 @@ public:
 
     void drawCircle(const QPointF& aCenter, float aRadius);
     void drawEllipse(const QPointF& aCenter, float aRadiusX, float aRadiusY);
+
+    void drawPolyline(const QPoint* aPoints, int aCount);
+    void drawPolyline(const QPointF* aPoints, int aCount);
+
+    void drawConvexPolygon(const QPoint* aPoints, int aCount);
+    void drawConvexPolygon(const QPointF* aPoints, int aCount);
 
     void drawPolygon(const QPoint* aPoints, int aCount);
     void drawPolygon(const QPointF* aPoints, int aCount);
@@ -166,6 +173,8 @@ private:
         int locTexture;
     };
 
+    void drawConvexPolygonImpl(const std::function<QPointF(int)>& aGetPos, int aCount);
+    void drawOutline(const std::function<QPointF(int)>& aGetPos, int aCount, bool aForce = false);
     void drawPolygonImpl(const QVector<gl::Vector2>& aTriangles);
     void drawEllipseImpl(const QPointF& aCenter, float aRadiusX, float aRadiusY, int aDivision);
 
@@ -196,10 +205,13 @@ private:
     float mPixelScale;
 
     QVector<Command> mScheduledCommands;
-
     bool mInDrawing;
     State mAppliedState;
     State mScheduledState;
+
+    QVector<gl::Vector2> mPosBuffer;
+    QVector<gl::Vector2> mSubBuffer;
+
 };
 
 } // namespace gl
