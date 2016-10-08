@@ -12,3 +12,8 @@ HEADERS += \
     $$PWD/XCType.h \
     $$PWD/XC.h \
     $$PWD/XCAssert.h
+
+# OpenGL CoreProfile Option
+unix {
+DEFINES += USE_GL_CORE_PROFILE
+}

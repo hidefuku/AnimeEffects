@@ -3,7 +3,7 @@
 namespace ctrl
 {
 
-#if USE_COREPROFILE_PAINTER
+#if USE_GL_CORE_PROFILE
 //-------------------------------------------------------------------------------------------------
 GLCorePaintEngine::GLCorePaintEngine()
     : QPaintEngine(QPaintEngine::AlphaBlend |
@@ -263,10 +263,48 @@ int GLCorePaintDevice::metric(PaintDeviceMetric aMetric) const
 }
 
 //-------------------------------------------------------------------------------------------------
-Painter::Painter()
+PainterHandle::PainterHandle()
+    : mEngine()
+    , mDevice()
+    , mPainter()
 {
-
 }
-#endif // USE_COREPROFILE_PAINTER
+
+QPainter* PainterHandle::begin(QPaintDevice& aDevice)
+{
+    QMatrix4x4 view;
+    view.ortho(0.0f, aDevice.width(), aDevice.height(), 0.0f, -1.0f, 1.0f);
+    mEngine.setViewMatrix(view);
+
+    mDevice.reset(new GLCorePaintDevice(aDevice, mEngine));
+    mPainter.reset(new QPainter(mDevice.data()));
+    return mPainter.data();
+}
+
+void PainterHandle::end()
+{
+    mPainter->end();
+    mPainter.reset();
+    mDevice.reset();
+}
+#else // USE_GL_CORE_PROFILE
+PainterHandle::PainterHandle()
+    : mPainter()
+{
+}
+
+QPainter* PainterHandle::begin(QPaintDevice& aDevice)
+{
+    // QPainter use legacy gl commands.
+    mPainter.reset(new QPainter(&aDevice));
+    return mPainter.data();
+}
+
+void PainterHandle::end()
+{
+    mPainter->end();
+    mPainter.reset();
+}
+#endif // USE_GL_CORE_PROFILE
 
 } // namespace ctrl

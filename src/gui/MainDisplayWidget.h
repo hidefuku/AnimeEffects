@@ -16,6 +16,7 @@
 #include "core/TimeInfo.h"
 #include "core/ClippingFrame.h"
 #include "ctrl/Driver.h"
+#include "ctrl/Painter.h"
 #include "gui/MainViewSetting.h"
 namespace gui { class ProjectTabBar; }
 namespace gui { class ViaPoint; }
@@ -79,6 +80,7 @@ private:
     QScopedPointer<QOpenGLFramebufferObject> mFramebuffer;
     QScopedPointer<core::ClippingFrame> mClippingFrame;
     QScopedPointer<gl::EasyTextureDrawer> mTextureDrawer;
+    QScopedPointer<ctrl::PainterHandle> mPainterHandle;
     QReadWriteLock mRenderingLock;
     core::RenderInfo* mRenderInfo;
     core::AbstractCursor mAbstractCursor;

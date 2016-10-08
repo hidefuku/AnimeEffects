@@ -13,8 +13,6 @@
 #include <QOpenGLFunctions>
 #include "core/ClippingFrame.h"
 
-#define USE_GL_CORE_PROFILE 0
-
 namespace gui
 {
 
@@ -29,6 +27,7 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mFramebuffer()
     , mClippingFrame()
     , mTextureDrawer()
+    , mPainterHandle()
     , mRenderingLock()
     , mRenderInfo()
     , mAbstractCursor()
@@ -39,7 +38,7 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mHandMove(false)
     , mViewSetting()
 {
-#if USE_GL_CORE_PROFILE
+#ifdef USE_GL_CORE_PROFILE
     // setup opengl format (for gl removed)
     QSurfaceFormat format = this->format();
     format.setVersion(gl::Global::kMajorVersion, gl::Global::kMinorVersion);
@@ -54,6 +53,7 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
 
 MainDisplayWidget::~MainDisplayWidget()
 {
+    mPainterHandle.reset();
     mTextureDrawer.reset();
     mClippingFrame.reset();
     mFramebuffer.reset();
@@ -125,7 +125,7 @@ void MainDisplayWidget::initializeGL()
     gl::DeviceInfo::createInstance();
     mViaPoint.setGLDeviceInfo(gl::DeviceInfo::instance());
 
-#if USE_GL_CORE_PROFILE
+#ifdef USE_GL_CORE_PROFILE
     // initialize default vao
     mDefaultVAO.reset(new gl::VertexArrayObject());
     mDefaultVAO->bind(); // keep binding
@@ -144,6 +144,8 @@ void MainDisplayWidget::initializeGL()
     {
         XC_FATAL_ERROR("OpenGL Error", "Failed to initialize texture drawer.", "");
     }
+
+    mPainterHandle.reset(new ctrl::PainterHandle());
 
     GL_CHECK_ERROR();
 }
@@ -227,21 +229,17 @@ void MainDisplayWidget::paintEvent(QPaintEvent* aEvent)
 
     QOpenGLWidget::paintEvent(aEvent);
 
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
+    QPainter* painter = mPainterHandle->begin(*this);
+    painter->setRenderHint(QPainter::Antialiasing);
 
     if (mDriver)
     {
-        // QPainter use legacy gl commands.
-#if !USE_GL_CORE_PROFILE
         XC_PTR_ASSERT(mRenderInfo);
-        mDriver->renderQt(*mRenderInfo, painter);
+        mDriver->renderQt(*mRenderInfo, *painter);
         GL_CHECK_ERROR();
-#endif
     }
-
     // we must call end function
-    painter.end();
+    mPainterHandle->end();
 }
 
 void MainDisplayWidget::resizeGL(int w, int h)

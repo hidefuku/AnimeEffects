@@ -10,12 +10,10 @@
 #include "gl/FontDrawer.h"
 #include "gl/TextObject.h"
 
-#define USE_COREPROFILE_PAINTER 1
-
 namespace ctrl
 {
 
-#if USE_COREPROFILE_PAINTER
+#ifdef USE_GL_CORE_PROFILE
 
 template<typename tKey, typename tCacheObj>
 class CacheHolder
@@ -183,16 +181,30 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
-class Painter
+class PainterHandle
 {
 public:
-    Painter();
+    PainterHandle();
+    QPainter* begin(QPaintDevice& aDevice);
+    void end();
 
 private:
+    GLCorePaintEngine mEngine;
+    QScopedPointer<GLCorePaintDevice> mDevice;
+    QScopedPointer<QPainter> mPainter;
 };
 
 #else // USE_COREPROFILE_PAINTER
-typedef QPainter Painter;
+class PainterHandle
+{
+public:
+    PainterHandle();
+    QPainter* begin(QPaintDevice& aDevice);
+    void end();
+
+private:
+    QScopedPointer<QPainter> mPainter;
+};
 #endif // USE_COREPROFILE_PAINTER
 
 } // namespace ctrl
