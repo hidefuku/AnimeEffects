@@ -83,11 +83,13 @@ void BindNodesMode::bindNode(Bone2& aBone, ObjectNode& aNode)
     if (aBone.isBinding(aNode)) return; // the node was already bound
 
     cmnd::Stack& stack = mProject.commandStack();
-    cmnd::ScopedMacro macro(stack, "bind a node to a bone");
-    macro.grabListener(new Notifier(mProject, mTarget, *mKeyOwner.key,
-                                    TimeLineEvent::Type_ChangeKeyValue));
+    {
+        cmnd::ScopedMacro macro(stack, "bind a node to a bone");
+        macro.grabListener(new Notifier(mProject, mTarget, *mKeyOwner.key,
+                                        TimeLineEvent::Type_ChangeKeyValue));
 
-    stack.push(new cmnd::PushBackList<ObjectNode*>(&aBone.bindingNodes(), &aNode));
+        stack.push(new cmnd::PushBackList<ObjectNode*>(&aBone.bindingNodes(), &aNode));
+    }
 }
 
 void BindNodesMode::unbindNode(ObjectNode& aNode)

@@ -121,47 +121,49 @@ BoneKey::~BoneKey()
 
 void BoneKey::updateCaches(Project& aProject, const QList<Cache*>& aTargets)
 {
-    if (aTargets.isEmpty()) return;
+    auto time = aProject.currentTimeInfo();
+    time.frame.set(this->frame());
 
     auto owner = mCacheOwner.get();
     XC_PTR_ASSERT(owner);
 
-    auto time = aProject.currentTimeInfo();
-    time.frame.set(this->frame());
-
-    QWriteLocker lock(&aProject.objectTree().timeCacheLock().working);
-
-    // update bone influence map
-    for (auto cache : aTargets)
+    if (!aTargets.isEmpty())
     {
-        XC_PTR_ASSERT(cache->node());
-        auto& node = *cache->node();
+        QWriteLocker lock(&aProject.objectTree().timeCacheLock().working);
 
-        const LayerMesh* mesh = TimeKeyBlender::getAreaMesh(node, time);
-        cache->setFrameSign(mesh->frameSign());
-
-        if (!mesh || mesh->vertexCount() <= 0) continue;
-
-        // set world matrix
+        // update bone influence map
+        for (auto cache : aTargets)
         {
-            auto innerMtx = TimeKeyBlender::getRelativeMatrix(node, time, owner);
-            innerMtx.translate(-ObjectNodeUtil::getCenterOffset3D(node));
-            cache->setInnerMatrix(innerMtx);
+            XC_PTR_ASSERT(cache->node());
+            auto& node = *cache->node();
+
+            const LayerMesh* mesh = TimeKeyBlender::getAreaMesh(node, time);
+            cache->setFrameSign(mesh->frameSign());
+
+            if (!mesh || mesh->vertexCount() <= 0) continue;
+
+            // set world matrix
+            {
+                auto innerMtx = TimeKeyBlender::getRelativeMatrix(node, time, owner);
+                innerMtx.translate(-ObjectNodeUtil::getCenterOffset3D(node));
+                cache->setInnerMatrix(innerMtx);
+            }
+
+            BoneInfluenceMap& map = cache->influence();
+            // allocate if necessary
+            map.allocate(mesh->vertexCount(), false);
+            // request writing
+            map.writeAsync(
+                        aProject, mData.topBones(),
+                        cache->innerMatrix(), *mesh);
         }
 
-        BoneInfluenceMap& map = cache->influence();
-        // allocate if necessary
-        map.allocate(mesh->vertexCount(), false);
-        // request writing
-        map.writeAsync(
-                    aProject, mData.topBones(),
-                    cache->innerMatrix(), *mesh);
+#ifndef UNUSE_PARALLEL
+        // wake all worker threads
+        aProject.paralleler().wakeAll();
+#endif
     }
 
-#ifndef UNUSE_PARALLEL
-    // wake all worker threads
-    aProject.paralleler().wakeAll();
-#endif
 
     // update binding caches
     {
