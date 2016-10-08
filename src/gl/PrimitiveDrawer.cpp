@@ -1,3 +1,4 @@
+#include <float.h>
 #include "util/MathUtil.h"
 #include "gl/Global.h"
 #include "gl/Util.h"
@@ -345,14 +346,16 @@ void PrimitiveDrawer::setViewMatrix(const QMatrix4x4& aViewMtx)
 
 void PrimitiveDrawer::setBrush(const QColor& aColor)
 {
-    Command command = { Type_Brush };
+    Command command;
+    command.type = Type_Brush;
     command.attr.brush.color = aColor.rgba();
     pushStateCommand(command);
 }
 
 void PrimitiveDrawer::setPen(const QColor& aColor, float aWidth, PenStyle aPenStyle)
 {
-    Command command = { Type_Pen };
+    Command command;
+    command.type = Type_Pen;
     command.attr.pen.color = aColor.rgba();
     command.attr.pen.width = aWidth;
     command.attr.pen.style = aPenStyle;
@@ -362,7 +365,8 @@ void PrimitiveDrawer::setPen(const QColor& aColor, float aWidth, PenStyle aPenSt
 void PrimitiveDrawer::setBrushEnable(bool aIsEnable)
 {
     if (mScheduledState.hasBrush == aIsEnable) return;
-    Command command = { Type_Ability };
+    Command command;
+    command.type = Type_Ability;
     command.attr.ability.hasBrush = aIsEnable;
     command.attr.ability.hasPen = mScheduledState.hasPen;
     command.attr.ability.hasMSAA = mScheduledState.hasMSAA;
@@ -372,7 +376,8 @@ void PrimitiveDrawer::setBrushEnable(bool aIsEnable)
 void PrimitiveDrawer::setPenEnable(bool aIsEnable)
 {
     if (mScheduledState.hasPen == aIsEnable) return;
-    Command command = { Type_Ability };
+    Command command;
+    command.type = Type_Ability;
     command.attr.ability.hasBrush = mScheduledState.hasBrush;
     command.attr.ability.hasPen = aIsEnable;
     command.attr.ability.hasMSAA = mScheduledState.hasMSAA;
@@ -382,7 +387,8 @@ void PrimitiveDrawer::setPenEnable(bool aIsEnable)
 void PrimitiveDrawer::setAntiAliasing(bool aIsEnable)
 {
     if (mScheduledState.hasMSAA == aIsEnable) return;
-    Command command = { Type_Ability };
+    Command command;
+    command.type = Type_Ability;
     command.attr.ability.hasBrush = mScheduledState.hasBrush;
     command.attr.ability.hasPen = mScheduledState.hasPen;
     command.attr.ability.hasMSAA = aIsEnable;
@@ -396,7 +402,8 @@ void PrimitiveDrawer::drawOutline(const std::function<QPointF(int)>& aGetPos, in
     const int maxVtxCount = 4 * (mVtxCountOfSlot / 4);
     const float width = mScheduledState.penWidth * mPixelScale;
 
-    Command command = { Type_Draw };
+    Command command;
+    command.type = Type_Draw;
     command.attr.draw.prim = GL_TRIANGLE_STRIP;
     command.attr.draw.usePen = true;
 
@@ -448,7 +455,8 @@ void PrimitiveDrawer::drawLine(const QPointF& aFrom, const QPointF& aTo)
 {
     if (!mScheduledState.hasPen) return;
 
-    Command command = { Type_Draw };
+    Command command;
+    command.type = Type_Draw;
     command.attr.draw.prim = GL_TRIANGLE_STRIP;
     command.attr.draw.count = 4;
     command.attr.draw.usePen = true;
@@ -471,7 +479,8 @@ void PrimitiveDrawer::drawRect(const QRect& aRect)
 
 void PrimitiveDrawer::drawRect(const QRectF& aRect)
 {
-    Command command = { Type_Draw };
+    Command command;
+    command.type = Type_Draw;
     command.attr.draw.prim = GL_TRIANGLE_STRIP;
     command.attr.draw.count = 4;
     command.attr.draw.usePen = false;
@@ -505,7 +514,8 @@ void PrimitiveDrawer::drawEllipseImpl(const QPointF& aCenter, float aRadiusX, fl
     const int kMaxVtxCount = 32;
     const int vtxCount = aDivision + 2;
 
-    Command command = { Type_Draw };
+    Command command;
+    command.type = Type_Draw;
     command.attr.draw.prim = GL_TRIANGLE_FAN;
     command.attr.draw.count = vtxCount;
     command.attr.draw.usePen = false;
@@ -551,7 +561,8 @@ void PrimitiveDrawer::drawConvexPolygonImpl(const std::function<QPointF(int)>& a
     while (remainCount >= 3)
     {
         const int count = std::min(remainCount, maxOnceCount);
-        Command command = { Type_Draw };
+        Command command;
+        command.type = Type_Draw;
         command.attr.draw.prim = GL_TRIANGLE_FAN;
         command.attr.draw.count = count;
         command.attr.draw.usePen = false;
@@ -590,7 +601,8 @@ void PrimitiveDrawer::drawPolygonImpl(const QVector<gl::Vector2>& aTriangles)
     while (remainCount > 0)
     {
         const int count = std::min(remainCount, maxOnceCount);
-        Command command = { Type_Draw };
+        Command command;
+        command.type = Type_Draw;
         command.attr.draw.prim = GL_TRIANGLES;
         command.attr.draw.count = count;
         command.attr.draw.usePen = false;
@@ -640,7 +652,8 @@ void PrimitiveDrawer::drawTexture(const QRectF& aRect, GLuint aTexture)
 void PrimitiveDrawer::drawTexture(const QRectF& aRect, GLuint aTexture, const QSize& aTexSize, const QRectF& aSrcRect)
 {
     {
-        Command command = { Type_Texture };
+        Command command;
+        command.type = Type_Texture;
         command.attr.texture.id = aTexture;
         //command.attr.texture.color = QColor(255, 255, 255, 255).rgba();
         command.attr.texture.color = mScheduledState.brushColor;
@@ -648,7 +661,8 @@ void PrimitiveDrawer::drawTexture(const QRectF& aRect, GLuint aTexture, const QS
     }
 
     {
-        Command command = { Type_Draw };
+        Command command;
+        command.type = Type_Draw;
         command.attr.draw.prim = GL_TRIANGLE_STRIP;
         command.attr.draw.count = 4;
         command.attr.draw.usePen = false;
@@ -671,7 +685,8 @@ void PrimitiveDrawer::drawTexture(const QRectF& aRect, GLuint aTexture, const QS
     }
 
     {
-        Command command = { Type_Texture };
+        Command command;
+        command.type = Type_Texture;
         command.attr.texture.id = 0;
         command.attr.texture.color = QColor(255, 255, 255, 255).rgba();
         pushStateCommand(command);

@@ -77,7 +77,7 @@ void NodeSelector::sortCurrentGeometries(const core::CameraInfo& aCamera)
     const int sortCount = childrenCount + (mCurrentTopTag->invisibleTop() ? 0 : 1);
     if (sortCount == 0) return;
 
-    if (mSortVector.size() < sortCount)
+    if ((int)mSortVector.size() < sortCount)
     {
         mSortVector.reserve(sortCount);
     }
@@ -96,7 +96,7 @@ void NodeSelector::sortCurrentGeometries(const core::CameraInfo& aCamera)
     auto highestTag = mSortVector[0];
     highestTag->sortedRect.moveTopLeft(aCamera.toScreenPos(highestTag->originRect.topLeft()));
 
-    for (int i = 1; i < mSortVector.size(); ++i)
+    for (int i = 1; i < (int)mSortVector.size(); ++i)
     {
         Tag* tag = mSortVector[i];
         tag->sortedRect.moveTopLeft(aCamera.toScreenPos(tag->originRect.topLeft()));

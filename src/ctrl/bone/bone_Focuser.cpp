@@ -1,3 +1,4 @@
+#include <float.h>
 #include "util/CollDetect.h"
 #include "core/Constant.h"
 #include "ctrl/bone/bone_Focuser.h"
