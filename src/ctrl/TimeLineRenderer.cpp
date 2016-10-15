@@ -67,9 +67,8 @@ void TimeLineRenderer::renderLines(const QVector<TimeLineRow>& aRows, const QRec
 
                 const float h = (float)rect.height() / sepa;
                 mPainter.drawText(
-                            QRect(textLeft, rect.top() + (int)i * h,
-                                  textWidth, (int)h),
-                            core::TimeLine::timeKeyName(type),
+                            QRect(textLeft, rect.top() + (int)i * h, textWidth, (int)h),
+                            core::TimeLine::getTimeKeyName(type),
                             QTextOption(Qt::AlignCenter));
                 ++i;
             }

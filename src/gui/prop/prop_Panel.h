@@ -16,12 +16,15 @@ class Panel : public QGroupBox
     Q_OBJECT
 public:
     Panel(const QString& aTitle, QWidget* aParent);
-    void addGroup(QWidget* aGroup);
+    //void addGroup(QWidget* aGroup);
+    void addGroup(QGroupBox* aGroup);
+    void addStretch();
 
     std::function<void()> onCollapsed;
 
 private slots:
     void onClicked(bool aChecked);
+    void onChildrenClicked(bool aChecked);
 
 private:
     QVBoxLayout* mLayout;

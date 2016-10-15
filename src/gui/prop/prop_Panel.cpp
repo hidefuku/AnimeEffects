@@ -22,9 +22,21 @@ Panel::Panel(const QString& aTitle, QWidget* aParent)
     this->connect(this, &QGroupBox::clicked, this, &Panel::onClicked);
 }
 
+/*
 void Panel::addGroup(QWidget* aGroup)
 {
     mLayout->addWidget(aGroup);
+}
+*/
+void Panel::addGroup(QGroupBox* aGroup)
+{
+    mLayout->addWidget(aGroup);
+    aGroup->connect(aGroup, &QGroupBox::clicked, this, &Panel::onChildrenClicked);
+}
+
+void Panel::addStretch()
+{
+    mLayout->addStretch();
 }
 
 void Panel::onClicked(bool aChecked)
@@ -38,6 +50,12 @@ void Panel::onClicked(bool aChecked)
         this->setFixedHeight(kCollapsedPanelHeight);
     }
     if (onCollapsed) onCollapsed();
+}
+
+void Panel::onChildrenClicked(bool)
+{
+    this->updateGeometry();
+    //this->update();
 }
 
 } // namespace prop

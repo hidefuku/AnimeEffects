@@ -24,65 +24,289 @@ private:
     core::ObjectNode& mNode;
 };
 
-const core::SRTKey::Data& getSRTKeyData(const core::ObjectNode& aTarget, int aFrame)
-{
-    auto key = aTarget.timeLine()->timeKey(core::TimeKeyType_SRT, aFrame);
-    XC_PTR_ASSERT(key);
-    return ((const core::SRTKey*)key)->data();
-}
-
-const core::OpaKey::Data& getOpaKeyData(const core::ObjectNode& aTarget, int aFrame)
-{
-    auto key = aTarget.timeLine()->timeKey(core::TimeKeyType_Opa, aFrame);
-    XC_PTR_ASSERT(key);
-    return ((const core::OpaKey*)key)->data();
-}
-
-#if 0
-const core::PoseKey::Data& getPoseKeyData(const core::ObjectNode& aTarget, int aFrame)
-{
-    auto key = aTarget.timeLine()->timeKey(core::TimeKeyType_Pose, aFrame);
-    XC_PTR_ASSERT(key);
-    return ((const core::PoseKey*)key)->data();
-}
-
-const core::FFDKey::Data& getFFDKeyData(const core::ObjectNode& aTarget, int aFrame)
-{
-    auto key = aTarget.timeLine()->timeKey(core::TimeKeyType_FFD, aFrame);
-    XC_PTR_ASSERT(key);
-    return ((const core::FFDKey*)key)->data();
-}
-#endif
-
 }
 
 namespace gui {
 namespace prop {
 
 //-------------------------------------------------------------------------------------------------
+ObjectPanel::SRTPanel::SRTPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
+    : mAccessor(aAccessor)
+    , mKnocker()
+    , mGroup()
+    , mEasing()
+    , mSpline()
+    , mTrans()
+    , mRotate()
+    , mScale()
+    , mKeyExists(false)
+{
+    mKnocker = new KeyKnocker("SRT");
+    mKnocker->set([=](){ this->mAccessor.knockNewSRT(); });
+    aPanel.addGroup(mKnocker);
+
+    mGroup = new KeyGroup("SRT", aLabelWidth);
+    {
+        aPanel.addGroup(mGroup);
+
+        // easing
+        mEasing = new EasingItem(mGroup);
+        mGroup->addItem("easing :", mEasing);
+        mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
+        {
+            this->mAccessor.assignSRTEasing(aNext);
+        };
+
+        // spline
+        mSpline = new ComboItem(mGroup);
+        mSpline->box().addItems(QStringList() << "Linear" << "CatmullRom");
+        mSpline->setValue(core::SRTKey::kDefaultSplineType, false);
+        mSpline->onValueUpdated = [=](int, int aNext)
+        {
+            this->mAccessor.assignSpline(aNext);
+        };
+        mGroup->addItem("spline :", mSpline);
+
+        // translate
+        mTrans = new Vector2DItem(mGroup);
+        mTrans->setRange(core::Constant::transMin(), core::Constant::transMax());
+        mTrans->onValueUpdated = [=](QVector2D, QVector2D aNext)
+        {
+            this->mAccessor.assignTrans(aNext);
+        };
+        mGroup->addItem("translate :", mTrans);
+
+        // rotate
+        mRotate = new DecimalItem(mGroup);
+        mRotate->setRange(core::Constant::rotateMin(), core::Constant::rotateMax());
+        mRotate->onValueUpdated = [=](double, double aNext)
+        {
+            this->mAccessor.assignRotate(aNext);
+        };
+        mGroup->addItem("rotate :", mRotate);
+
+        // scale
+        mScale = new Vector2DItem(mGroup);
+        mScale->setRange(core::Constant::scaleMin(), core::Constant::scaleMax());
+        mScale->onValueUpdated = [=](QVector2D, QVector2D aNext)
+        {
+            this->mAccessor.assignScale(aNext);
+        };
+        mGroup->addItem("scale :", mScale);
+    }
+}
+
+void ObjectPanel::SRTPanel::setEnabled(bool aEnabled)
+{
+    mKnocker->setEnabled(aEnabled);
+    mGroup->setEnabled(aEnabled);
+}
+
+void ObjectPanel::SRTPanel::setKeyExists(bool aIsExists)
+{
+    mKeyExists = aIsExists;
+    mKnocker->setVisible(!aIsExists);
+    mGroup->setVisible(aIsExists);
+}
+
+void ObjectPanel::SRTPanel::setKeyValue(const core::TimeKey* aKey)
+{
+    XC_ASSERT(aKey && aKey->type() == core::TimeKeyType_SRT);
+    const core::SRTKey::Data data = ((const core::SRTKey*)aKey)->data();
+    mEasing->setValue(data.easing, false);
+    mSpline->setValue(data.spline, false);
+    mTrans->setValue(data.pos.toVector2D());
+    mRotate->setValue(data.rotate);
+    mScale->setValue(data.scale);
+}
+
+bool ObjectPanel::SRTPanel::keyExists() const
+{
+    return mKeyExists;
+}
+
+//-------------------------------------------------------------------------------------------------
+ObjectPanel::OpaPanel::OpaPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
+    : mAccessor(aAccessor)
+    , mKnocker()
+    , mGroup()
+    , mEasing()
+    , mOpacity()
+    , mKeyExists(false)
+{
+    mKnocker = new KeyKnocker("Opacity");
+    mKnocker->set([=](){ this->mAccessor.knockNewOpacity(); });
+    aPanel.addGroup(mKnocker);
+
+    mGroup = new KeyGroup("Opacity", aLabelWidth);
+    {
+        aPanel.addGroup(mGroup);
+
+        // easing
+        mEasing = new EasingItem(mGroup);
+        mGroup->addItem("easing :", mEasing);
+        mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
+        {
+            this->mAccessor.assignOpaEasing(aNext);
+        };
+
+        // opacity
+        mOpacity = new DecimalItem(mGroup);
+        mOpacity->setRange(0.0f, 1.0f);
+        mOpacity->box().setSingleStep(0.1);
+        mOpacity->onValueUpdated = [=](double, double aNext)
+        {
+            this->mAccessor.assignOpacity(aNext);
+        };
+        mGroup->addItem("opacity :", mOpacity);
+    }
+}
+
+void ObjectPanel::OpaPanel::setEnabled(bool aEnabled)
+{
+    mKnocker->setEnabled(aEnabled);
+    mGroup->setEnabled(aEnabled);
+}
+
+void ObjectPanel::OpaPanel::setKeyExists(bool aIsExists)
+{
+    mKeyExists = aIsExists;
+    mKnocker->setVisible(!aIsExists);
+    mGroup->setVisible(aIsExists);
+}
+
+void ObjectPanel::OpaPanel::setKeyValue(const core::TimeKey* aKey)
+{
+    XC_ASSERT(aKey && aKey->type() == core::TimeKeyType_Opa);
+    const core::OpaKey::Data& data = ((const core::OpaKey*)aKey)->data();
+    mEasing->setValue(data.easing, false);
+    mOpacity->setValue(data.opacity);
+}
+
+bool ObjectPanel::OpaPanel::keyExists() const
+{
+    return mKeyExists;
+}
+
+//-------------------------------------------------------------------------------------------------
+ObjectPanel::PosePanel::PosePanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
+    : mAccessor(aAccessor)
+    , mKnocker()
+    , mGroup()
+    , mEasing()
+    , mKeyExists(false)
+{
+    mKnocker = new KeyKnocker("Pose");
+    mKnocker->set([=](){ this->mAccessor.knockNewPose(); });
+    aPanel.addGroup(mKnocker);
+
+    mGroup = new KeyGroup("Pose", aLabelWidth);
+    {
+        aPanel.addGroup(mGroup);
+
+        // easing
+        mEasing = new EasingItem(mGroup);
+        mGroup->addItem("easing :", mEasing);
+        mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
+        {
+            this->mAccessor.assignPoseEasing(aNext);
+        };
+    }
+}
+
+void ObjectPanel::PosePanel::setEnabled(bool aEnabled)
+{
+    mKnocker->setEnabled(aEnabled);
+    mGroup->setEnabled(aEnabled);
+}
+
+void ObjectPanel::PosePanel::setKeyExists(bool aIsExists, bool aIsKnockable)
+{
+    mKeyExists = aIsExists;
+    mKnocker->setVisible(!aIsExists && aIsKnockable);
+    mGroup->setVisible(aIsExists);
+}
+
+void ObjectPanel::PosePanel::setKeyValue(const core::TimeKey* aKey)
+{
+    XC_ASSERT(aKey && aKey->type() == core::TimeKeyType_Pose);
+    const core::PoseKey::Data& data = ((const core::PoseKey*)aKey)->data();
+    mEasing->setValue(data.easing(), false);
+}
+
+bool ObjectPanel::PosePanel::keyExists() const
+{
+    return mKeyExists;
+}
+
+//-------------------------------------------------------------------------------------------------
+ObjectPanel::FFDPanel::FFDPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
+    : mAccessor(aAccessor)
+    , mKnocker()
+    , mGroup()
+    , mEasing()
+    , mKeyExists(false)
+{
+    mKnocker = new KeyKnocker("FFD");
+    mKnocker->set([=](){ this->mAccessor.knockNewFFD(); });
+    aPanel.addGroup(mKnocker);
+
+    mGroup = new KeyGroup("FFD", aLabelWidth);
+    {
+        aPanel.addGroup(mGroup);
+
+        // easing
+        mEasing = new EasingItem(mGroup);
+        mGroup->addItem("easing :", mEasing);
+        mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
+        {
+            this->mAccessor.assignFFDEasing(aNext);
+        };
+    }
+}
+
+void ObjectPanel::FFDPanel::setEnabled(bool aEnabled)
+{
+    mKnocker->setEnabled(aEnabled);
+    mGroup->setEnabled(aEnabled);
+}
+
+void ObjectPanel::FFDPanel::setKeyExists(bool aIsExists, bool aIsKnockable)
+{
+    mKeyExists = aIsExists;
+    mKnocker->setVisible(!aIsExists && aIsKnockable);
+    mGroup->setVisible(aIsExists);
+}
+
+void ObjectPanel::FFDPanel::setKeyValue(const core::TimeKey* aKey)
+{
+    XC_ASSERT(aKey && aKey->type() == core::TimeKeyType_FFD);
+    const core::FFDKey::Data& data = ((const core::FFDKey*)aKey)->data();
+    mEasing->setValue(data.easing(), false);
+}
+
+bool ObjectPanel::FFDPanel::keyExists() const
+{
+    return mKeyExists;
+}
+
+//-------------------------------------------------------------------------------------------------
 ObjectPanel::ObjectPanel(core::Project& aProject, const QString& aTitle, QWidget* aParent)
     : Panel(aTitle, aParent)
     , mProject(aProject)
     , mTarget()
+    , mKeyAccessor()
     , mLabelWidth()
     , mAttributes()
     , mDepth()
     , mBlendMode()
     , mClipped()
-    , mSRTKey()
-    , mSRTEasing()
-    , mSRTSpline()
-    , mSRTTrans()
-    , mSRTRotate()
-    , mSRTScale()
-    , mOpaKey()
-    , mOpaEasing()
-    , mOpacity()
-    , mPoseKey()
-    , mPoseEasing()
-    , mFFDKey()
-    , mFFDEasing()
+    , mSRTPanel()
+    , mOpaPanel()
+    , mPosePanel()
+    , mFFDPanel()
 {
+    mKeyAccessor.setProject(&aProject);
     mLabelWidth = this->fontMetrics().boundingRect("MaxTextWidth :").width();
 
     build();
@@ -92,6 +316,7 @@ ObjectPanel::ObjectPanel(core::Project& aProject, const QString& aTitle, QWidget
 void ObjectPanel::setTarget(core::ObjectNode* aTarget)
 {
     mTarget = aTarget;
+    mKeyAccessor.setTarget(aTarget);
 
     if (mTarget)
     {
@@ -107,6 +332,17 @@ void ObjectPanel::setTarget(core::ObjectNode* aTarget)
     updateKey();
 }
 
+void ObjectPanel::setPlayBackActivity(bool aIsActive)
+{
+    // resume
+    if (!this->isEnabled() && !aIsActive)
+    {
+        updateKeyExists();
+        updateKeyValue();
+    }
+    this->setEnabled(!aIsActive);
+}
+
 void ObjectPanel::updateKey()
 {
     updateKeyExists();
@@ -115,8 +351,11 @@ void ObjectPanel::updateKey()
 
 void ObjectPanel::updateFrame()
 {
-    updateKeyExists();
-    updateKeyValue();
+    if (this->isEnabled())
+    {
+        updateKeyExists();
+        updateKeyValue();
+    }
 }
 
 void ObjectPanel::build()
@@ -158,132 +397,12 @@ void ObjectPanel::build()
         mAttributes->addItem("clipped :", mClipped);
     }
 
-    mSRTKey = new KeyGroup("SRT", mLabelWidth);
-    {
-        mSRTKey->setKeyKnocker([=](bool aCheck)
-        {
-            if (aCheck)
-            {
-                knockNewSRT(this->mProject, this->mTarget);
-            }
-        });
-        this->addGroup(mSRTKey);
+    mSRTPanel.reset(new SRTPanel(*this, mKeyAccessor, mLabelWidth));
+    mOpaPanel.reset(new OpaPanel(*this, mKeyAccessor, mLabelWidth));
+    mPosePanel.reset(new PosePanel(*this, mKeyAccessor, mLabelWidth));
+    mFFDPanel.reset(new FFDPanel(*this, mKeyAccessor, mLabelWidth));
 
-        // easing
-        mSRTEasing = new EasingItem(mSRTKey);
-        mSRTKey->addItem("easing :", mSRTEasing);
-        mSRTEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
-        {
-            assignSRTEasing(this->mProject, this->mTarget, aNext);
-        };
-
-        // spline
-        mSRTSpline = new ComboItem(mSRTKey);
-        mSRTSpline->box().addItems(QStringList() << "Linear" << "CatmullRom");
-        mSRTSpline->setValue(core::SRTKey::kDefaultSplineType, false);
-        mSRTSpline->onValueUpdated = [=](int, int aNext)
-        {
-            assignSpline(this->mProject, this->mTarget, aNext);
-        };
-        mSRTKey->addItem("spline :", mSRTSpline);
-
-        // translate
-        mSRTTrans = new Vector2DItem(mSRTKey);
-        mSRTTrans->setRange(Constant::transMin(), Constant::transMax());
-        mSRTTrans->onValueUpdated = [=](QVector2D, QVector2D aNext)
-        {
-            assignTrans(this->mProject, this->mTarget, aNext);
-        };
-        mSRTKey->addItem("translate :", mSRTTrans);
-
-        // rotate
-        mSRTRotate = new DecimalItem(mSRTKey);
-        mSRTRotate->setRange(Constant::rotateMin(), Constant::rotateMax());
-        mSRTRotate->onValueUpdated = [=](double, double aNext)
-        {
-            assignRotate(this->mProject, this->mTarget, aNext);
-        };
-        mSRTKey->addItem("rotate :", mSRTRotate);
-
-        // scale
-        mSRTScale = new Vector2DItem(mSRTKey);
-        mSRTScale->setRange(Constant::scaleMin(), Constant::scaleMax());
-        mSRTScale->onValueUpdated = [=](QVector2D, QVector2D aNext)
-        {
-            assignScale(this->mProject, this->mTarget, aNext);
-        };
-        mSRTKey->addItem("scale :", mSRTScale);
-    }
-
-    mOpaKey = new KeyGroup("Opacity", mLabelWidth);
-    {
-        mOpaKey->setKeyKnocker([=](bool aCheck)
-        {
-            if (aCheck)
-            {
-                knockNewOpacity(this->mProject, this->mTarget);
-            }
-        });
-        this->addGroup(mOpaKey);
-
-        // easing
-        mOpaEasing = new EasingItem(mOpaKey);
-        mOpaKey->addItem("easing :", mOpaEasing);
-        mOpaEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
-        {
-            assignOpaEasing(this->mProject, this->mTarget, aNext);
-        };
-
-        // opacity
-        mOpacity = new DecimalItem(mOpaKey);
-        mOpacity->setRange(0.0f, 1.0f);
-        mOpacity->box().setSingleStep(0.1);
-        mOpacity->onValueUpdated = [=](double, double aNext)
-        {
-            assignOpacity(this->mProject, this->mTarget, aNext);
-        };
-        mOpaKey->addItem("opacity :", mOpacity);
-    }
-
-    mPoseKey = new KeyGroup("Pose", mLabelWidth);
-    {
-        mPoseKey->setKeyKnocker([=](bool aCheck)
-        {
-            if (aCheck)
-            {
-                knockNewPose(this->mProject, this->mTarget);
-            }
-        });
-        this->addGroup(mPoseKey);
-
-        // easing
-        mPoseEasing = new EasingItem(mPoseKey);
-        mPoseKey->addItem("easing :", mPoseEasing);
-        mPoseEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
-        {
-            assignPoseEasing(this->mProject, this->mTarget, aNext);
-        };
-    }
-
-    mFFDKey = new KeyGroup("FFD", mLabelWidth);
-    {
-        mFFDKey->setKeyKnocker([=](bool aCheck)
-        {
-            if (aCheck)
-            {
-                knockNewFFD(this->mProject, this->mTarget);
-            }
-        });
-        this->addGroup(mFFDKey);
-
-        // easing
-        mFFDEasing = new EasingItem(mFFDKey);
-        mFFDKey->addItem("easing :", mFFDEasing);
-        mFFDEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
-        {
-            assignFFDEasing(this->mProject, this->mTarget, aNext);
-        };
-    }
+    this->addStretch();
 }
 
 void ObjectPanel::updateAttribute()
@@ -325,17 +444,21 @@ void ObjectPanel::updateKeyExists()
         const bool hasAreaBone = timeLine.current().areaBone();
         const bool hasAnyMesh = mTarget->gridMesh();
 
-        mSRTKey->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_SRT, frame));
-        mOpaKey->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Opa, frame));
-        mPoseKey->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Pose, frame), hasAreaBone);
-        mFFDKey->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_FFD, frame), hasAnyMesh);
+        mSRTPanel->setEnabled(true);
+        mSRTPanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_SRT, frame));
+        mOpaPanel->setEnabled(true);
+        mOpaPanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Opa, frame));
+        mPosePanel->setEnabled(true);
+        mPosePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Pose, frame), hasAreaBone);
+        mFFDPanel->setEnabled(true);
+        mFFDPanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_FFD, frame), hasAnyMesh);
     }
     else
     {
-        mSRTKey->setKeyExists(false);
-        mOpaKey->setKeyExists(false);
-        mPoseKey->setKeyExists(false, false);
-        mFFDKey->setKeyExists(false, false);
+        mSRTPanel->setEnabled(false);
+        mOpaPanel->setEnabled(false);
+        mPosePanel->setEnabled(false);
+        mFFDPanel->setEnabled(false);
     }
 }
 
@@ -345,42 +468,21 @@ void ObjectPanel::updateKeyValue()
     {
         const int frame = mProject.animator().currentFrame().get();
 
-        if (mSRTKey->keyExists())
+        if (mSRTPanel->keyExists())
         {
-            auto key = mTarget->timeLine()->timeKey(core::TimeKeyType_SRT, frame);
-            XC_PTR_ASSERT(key);
-
-            const core::SRTKey::Data data = ((const core::SRTKey*)key)->data();
-            mSRTEasing->setValue(data.easing, false);
-            mSRTSpline->setValue(data.spline, false);
-            mSRTTrans->setValue(data.pos.toVector2D());
-            mSRTRotate->setValue(data.rotate);
-            mSRTScale->setValue(data.scale);
+            mSRTPanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_SRT, frame));
         }
-        if (mOpaKey->keyExists())
+        if (mOpaPanel->keyExists())
         {
-            auto key = mTarget->timeLine()->timeKey(core::TimeKeyType_Opa, frame);
-            XC_PTR_ASSERT(key);
-
-            const core::OpaKey::Data data = ((const core::OpaKey*)key)->data();
-            mOpaEasing->setValue(data.easing, false);
-            mOpacity->setValue(data.opacity);
+            mOpaPanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_Opa, frame));
         }
-        if (mPoseKey->keyExists())
+        if (mPosePanel->keyExists())
         {
-            auto key = mTarget->timeLine()->timeKey(core::TimeKeyType_Pose, frame);
-            XC_PTR_ASSERT(key);
-
-            const core::PoseKey::Data data = ((const core::PoseKey*)key)->data();
-            mPoseEasing->setValue(data.easing(), false);
+            mPosePanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_Pose, frame));
         }
-        if (mFFDKey->keyExists())
+        if (mFFDPanel->keyExists())
         {
-            auto key = mTarget->timeLine()->timeKey(core::TimeKeyType_FFD, frame);
-            XC_PTR_ASSERT(key);
-
-            const core::FFDKey::Data data = ((const core::FFDKey*)key)->data();
-            mFFDEasing->setValue(data.easing(), false);
+            mFFDPanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_FFD, frame));
         }
     }
 }
@@ -427,145 +529,6 @@ void ObjectPanel::assignClipped(core::Project& aProject, core::ObjectNode* aTarg
     auto exec = [=](){ aTarget->renderer()->setClipped(aValue); };
     auto undo = [=](){ aTarget->renderer()->setClipped(prev); };
     aProject.commandStack().push(new cmnd::Delegatable(exec, undo));
-}
-
-//-------------------------------------------------------------------------------------------------
-#define ASSERT_AND_RETURN_INVALID_TARGET(aTarget) \
-    XC_ASSERT(aTarget && aTarget->timeLine());    \
-    if (!aTarget || !aTarget->timeLine()) return; \
-
-void ObjectPanel::assignSRTEasing(core::Project& aProject, core::ObjectNode* aTarget, util::Easing::Param aNext)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET(aTarget);
-    XC_ASSERT(aNext.isValidParam());
-    const int frame = aProject.animator().currentFrame().get();
-    auto newData = getSRTKeyData(*aTarget, frame);
-    newData.easing = aNext;
-
-    ctrl::TimeLineUtil::assignSRTKeyData(aProject, *aTarget, frame, newData);
-}
-
-void ObjectPanel::assignSpline(core::Project& aProject, core::ObjectNode* aTarget, int aNext)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET(aTarget);
-    XC_ASSERT(0 <= aNext && aNext < core::SRTKey::SplineType_TERM);
-    const int frame = aProject.animator().currentFrame().get();
-    auto newData = getSRTKeyData(*aTarget, frame);
-    newData.spline = (core::SRTKey::SplineType)aNext;
-
-    ctrl::TimeLineUtil::assignSRTKeyData(aProject, *aTarget, frame, newData);
-}
-
-void ObjectPanel::assignTrans(core::Project& aProject, core::ObjectNode* aTarget, const QVector2D& aNewPos)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET(aTarget);
-    const int frame = aProject.animator().currentFrame().get();
-    auto newData = getSRTKeyData(*aTarget, frame);
-    newData.pos.setX(aNewPos.x());
-    newData.pos.setY(aNewPos.y());
-
-    ctrl::TimeLineUtil::assignSRTKeyData(aProject, *aTarget, frame, newData);
-}
-
-void ObjectPanel::assignRotate(core::Project& aProject, core::ObjectNode* aTarget, float aRotate)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET(aTarget);
-    const int frame = aProject.animator().currentFrame().get();
-    auto newData = getSRTKeyData(*aTarget, frame);
-    newData.rotate = aRotate;
-
-    ctrl::TimeLineUtil::assignSRTKeyData(aProject, *aTarget, frame, newData);
-}
-
-void ObjectPanel::assignScale(core::Project& aProject, core::ObjectNode* aTarget, const QVector2D& aNewScale)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET(aTarget);
-    const int frame = aProject.animator().currentFrame().get();
-    auto newData = getSRTKeyData(*aTarget, frame);
-    newData.scale = aNewScale;
-
-    ctrl::TimeLineUtil::assignSRTKeyData(aProject, *aTarget, frame, newData);
-}
-
-void ObjectPanel::assignOpacity(core::Project& aProject, core::ObjectNode* aTarget, float aOpacity)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET(aTarget);
-    const int frame = aProject.animator().currentFrame().get();
-    auto newData = getOpaKeyData(*aTarget, frame);
-    newData.opacity = aOpacity;
-
-    ctrl::TimeLineUtil::assignOpaKeyData(aProject, *aTarget, frame, newData);
-}
-
-void ObjectPanel::assignOpaEasing(core::Project& aProject, core::ObjectNode* aTarget, util::Easing::Param aNext)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET(aTarget);
-    XC_ASSERT(aNext.isValidParam());
-    const int frame = aProject.animator().currentFrame().get();
-    auto newData = getOpaKeyData(*aTarget, frame);
-    newData.easing = aNext;
-
-    ctrl::TimeLineUtil::assignOpaKeyData(aProject, *aTarget, frame, newData);
-}
-
-void ObjectPanel::assignPoseEasing(core::Project& aProject, core::ObjectNode* aTarget, util::Easing::Param aNext)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET(aTarget);
-    XC_ASSERT(aNext.isValidParam());
-    const int frame = aProject.animator().currentFrame().get();
-    ctrl::TimeLineUtil::assignPoseKeyEasing(aProject, *aTarget, frame, aNext);
-}
-
-void ObjectPanel::assignFFDEasing(core::Project& aProject, core::ObjectNode* aTarget, util::Easing::Param aNext)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET(aTarget);
-    XC_ASSERT(aNext.isValidParam());
-    const int frame = aProject.animator().currentFrame().get();
-    ctrl::TimeLineUtil::assignFFDKeyEasing(aProject, *aTarget, frame, aNext);
-}
-
-//-------------------------------------------------------------------------------------------------
-void ObjectPanel::knockNewSRT(core::Project& aProject, core::ObjectNode* aTarget)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET(aTarget);
-    auto newKey = new core::SRTKey();
-    newKey->data() = aTarget->timeLine()->current().srt().data();
-    const int frame = aProject.animator().currentFrame().get();
-
-    ctrl::TimeLineUtil::pushNewSRTKey(aProject, *aTarget, frame, newKey);
-}
-
-void ObjectPanel::knockNewOpacity(core::Project& aProject, core::ObjectNode* aTarget)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET(aTarget);
-    auto newKey = new core::OpaKey();
-    newKey->data() = aTarget->timeLine()->current().opa();
-    const int frame = aProject.animator().currentFrame().get();
-
-    ctrl::TimeLineUtil::pushNewOpaKey(aProject, *aTarget, frame, newKey);
-}
-
-void ObjectPanel::knockNewPose(core::Project& aProject, core::ObjectNode* aTarget)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET(aTarget);
-    auto newKey = new core::PoseKey();
-    newKey->data() = aTarget->timeLine()->current().pose();
-    core::BoneKey* parentKey = aTarget->timeLine()->current().areaBone();
-    XC_PTR_ASSERT(parentKey);
-    newKey->data().createBonesBy(*parentKey);
-    const int frame = aProject.animator().currentFrame().get();
-    ctrl::TimeLineUtil::pushNewPoseKey(aProject, *aTarget, frame, newKey, parentKey);
-}
-
-void ObjectPanel::knockNewFFD(core::Project& aProject, core::ObjectNode* aTarget)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET(aTarget);
-    auto newKey = new core::FFDKey();
-    newKey->data() = aTarget->timeLine()->current().ffd();
-    core::MeshKey* parentKey = aTarget->timeLine()->current().areaMesh();
-    const int frame = aProject.animator().currentFrame().get();
-
-    ctrl::TimeLineUtil::pushNewFFDKey(aProject, *aTarget, frame, newKey, parentKey);
 }
 
 } // namespace prop

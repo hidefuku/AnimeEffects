@@ -48,20 +48,12 @@ QCheckBox#keyIcon::indicator {
 width: 15px;
 height: 15px;
 }
-
-QCheckBox#keyIcon::indicator::checked {
-image: url(data/icon/paperpin.png);
+QCheckBox#keyIcon::indicator:unchecked {
+image: url(data/icon/branchclose.png);
 }
 
-QCheckBox#keyIcon::indicator::unchecked {
-image: url(data/icon/paperpinshadow.png);
-}
-
-QCheckBox#keyIcon::indicator::enabled {
-image: url(data/icon/paperpinshadow.png);
-}
-QCheckBox#keyIcon::indicator::disabled {
-image: url(data/icon/paperpin.png);
+QCheckBox#keyIcon::indicator:checked {
+image: url(data/icon/branchopen.png);
 }
 
 QGroupBox#keyGroup {
@@ -76,7 +68,7 @@ padding-top: 10px;
 QGroupBox#keyGroup::title {
 subcontrol-origin: margin;
 subcontrol-position:top left;
-padding-left: 20px;
+padding-left: 8px;
 padding-top: 2px;
 }
 
@@ -94,6 +86,38 @@ subcontrol-origin: margin;
 subcontrol-position:top left;
 padding-left: 10px;
 padding-top: 2px;
+}
+
+QGroupBox#keyKnocker {
+font-family: Meiryo UI;font-style: normal;font-size: 9pt;font-weight:normal;
+background-color: #f8f8f8;
+border:1px solid transparent;
+border-radius:4px;
+margin: 0ex;
+padding-left: 6px;
+padding-right: 6px;
+padding-top: 2px;
+padding-bottom: 2px;
+}
+
+QGroupBox#keyKnocker::title {
+subcontrol-origin: margin;
+subcontrol-position:top left;
+padding: 0px;
+}
+
+QPushButton#keyKnocker {
+border: 1px solid #a0a0a0;
+border-radius: 2px;
+padding: 0px;
+width: 15px;
+height: 15px;
+}
+QPushButton#keyKnocker::enabled {
+image: url(data/icon/plus.png);
+}
+QPushButton#keyKnocker::disabled {
+image: url(data/icon/minus.png);
 }
 
 QGroupBox#propertyPanel {

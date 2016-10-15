@@ -13,6 +13,7 @@
 #include <QVector2D>
 #include <QHBoxLayout>
 */
+#include <QPushButton>
 #include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QVector2D>

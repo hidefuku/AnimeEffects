@@ -22,7 +22,9 @@ class TimeLine
 public:
     typedef QMap<int, TimeKey*> MapType;
 
-    static QString timeKeyName(TimeKeyType aType);
+    static QString getTimeKeyName(TimeKeyType aType);
+    static TimeKeyType getTimeKeyType(const QString& aName);
+    static TimeKeyType getTimeKeyTypeInOrderOfOperations(int aIndex);
 
     TimeLine();
     ~TimeLine();

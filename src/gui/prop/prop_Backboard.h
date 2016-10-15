@@ -17,6 +17,7 @@ public:
     Backboard(QWidget* aParent);
     void setProject(core::Project* aProject);
     void setTarget(core::ObjectNode* aNode);
+    void setPlayBackActivity(bool aIsActive);
 
     void updateAttribute();
     void updateKey();

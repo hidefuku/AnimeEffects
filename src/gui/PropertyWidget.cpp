@@ -83,7 +83,7 @@ void PropertyWidget::onFrameUpdated()
 
 void PropertyWidget::onPlayBackStateChanged(bool aIsActive)
 {
-    mBoard->setEnabled(!aIsActive);
+    mBoard->setPlayBackActivity(aIsActive);
 }
 
 void PropertyWidget::resizeEvent(QResizeEvent* aEvent)

@@ -98,7 +98,9 @@ SOURCES += \
     menu/menu_ProgressReporter.cpp \
     tool/tool_ViewPanel.cpp \
     tool/tool_FlowLayout.cpp \
-    GUIResources.cpp
+    GUIResources.cpp \
+    prop/prop_KeyKnocker.cpp \
+    prop/prop_KeyAccessor.cpp
 
 HEADERS += \
     MainDisplayMode.h \
@@ -151,7 +153,9 @@ HEADERS += \
     tool/tool_FlowLayout.h \
     MainViewSetting.h \
     MainDisplayStyle.h \
-    GUIResources.h
+    GUIResources.h \
+    prop/prop_KeyKnocker.h \
+    prop/prop_KeyAccessor.h
 
 FORMS +=
 

@@ -18,32 +18,41 @@ static const std::array<const char*, core::TimeKeyType_TERM> kTimeKeyNames = {
     "FFD"
 };
 
-QString getTimeKeyName(core::TimeKeyType aType)
-{
-    return QString(kTimeKeyNames.at(aType));
-}
-
-core::TimeKeyType getTimeKeyType(const QString& aName)
-{
-    for (int i = 0; i < core::TimeKeyType_TERM; ++i)
-    {
-        if (getTimeKeyName((core::TimeKeyType)i) == aName)
-        {
-            return (core::TimeKeyType)i;
-        }
-    }
-    return core::TimeKeyType_TERM;
-}
-
 }
 
 namespace core
 {
 
 //---------------------------------------------------------------------------------------
-QString TimeLine::timeKeyName(TimeKeyType aType)
+QString TimeLine::getTimeKeyName(TimeKeyType aType)
 {
-    return getTimeKeyName(aType);
+    return QString(kTimeKeyNames.at(aType));
+}
+
+TimeKeyType TimeLine::getTimeKeyType(const QString& aName)
+{
+    for (int i = 0; i < TimeKeyType_TERM; ++i)
+    {
+        if (getTimeKeyName((TimeKeyType)i) == aName)
+        {
+            return (TimeKeyType)i;
+        }
+    }
+    return core::TimeKeyType_TERM;
+}
+
+TimeKeyType TimeLine::getTimeKeyTypeInOrderOfOperations(int aIndex)
+{
+    switch (aIndex)
+    {
+    case 0: return TimeKeyType_Mesh;
+    case 1: return TimeKeyType_FFD;
+    case 2: return TimeKeyType_Bone;
+    case 3: return TimeKeyType_Pose;
+    case 4: return TimeKeyType_SRT;
+    case 5: return TimeKeyType_Opa;
+    default: XC_ASSERT(0); return TimeKeyType_TERM;
+    }
 }
 
 TimeLine::TimeLine()

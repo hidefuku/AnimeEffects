@@ -43,6 +43,16 @@ void Backboard::setTarget(core::ObjectNode* aNode)
     }
 }
 
+void Backboard::setPlayBackActivity(bool aIsActive)
+{
+    this->setEnabled(!aIsActive);
+
+    if (mObjectPanel)
+    {
+        mObjectPanel->setPlayBackActivity(aIsActive);
+    }
+}
+
 void Backboard::updateAttribute()
 {
     if (mObjectPanel)
