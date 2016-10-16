@@ -12,6 +12,7 @@
 #include <QGL>
 #include "XC.h"
 #include "util/Segment2D.h"
+#include "util/Easing.h"
 #include "util/IndexTable.h"
 #include "util/StreamWriter.h"
 #include "util/IDAssigner.h"
@@ -42,6 +43,7 @@ public:
     void write(const QRectF& aValue);
     void write(const QMatrix4x4& aValue);
     void write(const Frame& aValue);
+    void write(const util::Easing::Param& aValue);
     void write(const QPolygonF& aValue);
     void write(const QString& aValue);
     void write(const XCMemBlock& aValue);

@@ -66,9 +66,7 @@ SRTKey::SRTKey()
 
 bool SRTKey::serialize(Serializer& aOut) const
 {
-    aOut.write((int)mData.easing.type);
-    aOut.write((int)mData.easing.range);
-    aOut.write(mData.easing.weight);
+    aOut.write(mData.easing);
     aOut.write((int)mData.spline);
     aOut.write(mData.pos);
     aOut.write(mData.rotate);
@@ -80,10 +78,7 @@ bool SRTKey::deserialize(Deserializer &aIn)
 {
     aIn.pushLogScope("SRTKey");
 
-    aIn.read((int&)mData.easing.type);
-    aIn.read((int&)mData.easing.range);
-    aIn.read(mData.easing.weight);
-    if (!mData.easing.isValidParam())
+    if (!aIn.read(mData.easing))
     {
         return aIn.errored("invalid easing param");
     }

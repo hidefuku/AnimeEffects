@@ -24,6 +24,7 @@ TimeKeyExpans::TimeKeyExpans()
     , mPosePalette()
     , mAreaMesh()
     , mFFD()
+    , mAreaImage()
 {
     clearCaches();
 }

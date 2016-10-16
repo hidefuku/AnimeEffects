@@ -14,6 +14,7 @@
 #include <QGL>
 #include "XC.h"
 #include "util/Segment2D.h"
+#include "util/Easing.h"
 #include "util/IndexTable.h"
 #include "util/StreamReader.h"
 #include "util/IDSolver.h"
@@ -53,6 +54,7 @@ public:
     void read(QRectF& aValue);
     void read(QMatrix4x4& aValue);
     void read(Frame& aValue);
+    bool read(util::Easing::Param& aValue);
     void read(QPolygonF& aValue);
     void read(QString& aValue, int aMax = 0);
     bool read(const XCMemBlock& aValue);

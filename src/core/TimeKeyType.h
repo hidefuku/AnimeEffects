@@ -12,6 +12,7 @@ enum TimeKeyType
     TimeKeyType_Pose,
     TimeKeyType_Mesh,
     TimeKeyType_FFD,
+    TimeKeyType_Image,
     TimeKeyType_TERM
 };
 

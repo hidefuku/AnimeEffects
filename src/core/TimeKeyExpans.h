@@ -7,6 +7,7 @@
 #include "core/PoseKey.h"
 #include "core/MeshKey.h"
 #include "core/FFDKey.h"
+#include "core/ImageKey.h"
 #include "core/TimeKeyType.h"
 #include "core/PosePalette.h"
 
@@ -75,6 +76,9 @@ public:
     FFDKey::Data& ffd() { return mFFD; }
     const FFDKey::Data& ffd() const { return mFFD; }
 
+    void setAreaImage(ImageKey* aKey) { mAreaImage = aKey; }
+    ImageKey* areaImage() { return mAreaImage; }
+
 private:
     Frame mMasterCache;
     std::array<Frame, TimeKeyType_TERM> mKeyCaches;
@@ -96,6 +100,7 @@ private:
     PosePalette mPosePalette;
     MeshKey* mAreaMesh;
     FFDKey::Data mFFD;
+    ImageKey* mAreaImage;
 };
 
 } // namespace core

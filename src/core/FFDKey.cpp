@@ -107,9 +107,7 @@ bool FFDKey::serialize(Serializer& aOut) const
     XC_ASSERT(mData.count() >= 0);
 
     // easing
-    aOut.write((int)mData.easing().type);
-    aOut.write((int)mData.easing().range);
-    aOut.write(mData.easing().weight);
+    aOut.write(mData.easing());
 
     // vertex count
     aOut.write(mData.count());
@@ -123,10 +121,7 @@ bool FFDKey::deserialize(Deserializer& aIn)
 {
     aIn.pushLogScope("FFDKey");
 
-    aIn.read((int&)mData.easing().type);
-    aIn.read((int&)mData.easing().range);
-    aIn.read(mData.easing().weight);
-    if (!mData.easing().isValidParam())
+    if (!aIn.read(mData.easing()))
     {
         return aIn.errored("invalid easing param");
     }

@@ -14,7 +14,7 @@ void BoneKeyUpdater::onTimeLineModified(TimeLineEvent& aEvent)
     for (auto t : aEvent.targets())
     {
         auto type = t.pos.type();
-        if (type == TimeKeyType_SRT || type == TimeKeyType_Mesh)
+        if (type == TimeKeyType_SRT || type == TimeKeyType_Mesh || type == TimeKeyType_Image)
         {
             targets.push_back(t.node);
         }

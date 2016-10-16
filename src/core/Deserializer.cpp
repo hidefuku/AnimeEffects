@@ -119,6 +119,14 @@ void Deserializer::read(Frame& aValue)
     aValue.setSerialValue(s);
 }
 
+bool Deserializer::read(util::Easing::Param& aValue)
+{
+    aValue.type = (util::Easing::Type)mIn.readSInt32();
+    aValue.range = (util::Easing::Range)mIn.readSInt32();
+    aValue.weight = mIn.readFloat32();
+    return aValue.isValidParam();
+}
+
 void Deserializer::read(QPolygonF& aValue)
 {
     aValue.clear();

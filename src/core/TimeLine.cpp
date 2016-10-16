@@ -15,7 +15,8 @@ static const std::array<const char*, core::TimeKeyType_TERM> kTimeKeyNames = {
     "Bone",
     "Pose",
     "Mesh",
-    "FFD"
+    "FFD",
+    "Image"
 };
 
 }
@@ -45,12 +46,13 @@ TimeKeyType TimeLine::getTimeKeyTypeInOrderOfOperations(int aIndex)
 {
     switch (aIndex)
     {
-    case 0: return TimeKeyType_Mesh;
-    case 1: return TimeKeyType_FFD;
-    case 2: return TimeKeyType_Bone;
-    case 3: return TimeKeyType_Pose;
-    case 4: return TimeKeyType_SRT;
-    case 5: return TimeKeyType_Opa;
+    case 0: return TimeKeyType_Image;
+    case 1: return TimeKeyType_Mesh;
+    case 2: return TimeKeyType_FFD;
+    case 3: return TimeKeyType_Bone;
+    case 4: return TimeKeyType_Pose;
+    case 5: return TimeKeyType_SRT;
+    case 6: return TimeKeyType_Opa;
     default: XC_ASSERT(0); return TimeKeyType_TERM;
     }
 }
@@ -349,6 +351,10 @@ bool TimeLine::deserialize(Deserializer& aIn)
             else if (typeIndex == TimeKeyType_FFD)
             {
                 key = new FFDKey();
+            }
+            else if (typeIndex == TimeKeyType_Image)
+            {
+                key = new ImageKey();
             }
 
             // reference id

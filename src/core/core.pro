@@ -86,7 +86,8 @@ SOURCES += \
     TimeLineEvent.cpp \
     MeshKeyUtil.cpp \
     ProjectEvent.cpp \
-    MeshTransformerResource.cpp
+    MeshTransformerResource.cpp \
+    ImageKey.cpp
 
 HEADERS += \
     AbstractCursor.h \
@@ -144,4 +145,5 @@ HEADERS += \
     Frame.h \
     MeshKeyUtil.h \
     ProjectEvent.h \
-    MeshTransformerResource.h
+    MeshTransformerResource.h \
+    ImageKey.h

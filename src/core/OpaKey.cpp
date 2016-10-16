@@ -26,9 +26,7 @@ OpaKey::OpaKey()
 
 bool OpaKey::serialize(Serializer& aOut) const
 {
-    aOut.write((int)mData.easing.type);
-    aOut.write((int)mData.easing.range);
-    aOut.write(mData.easing.weight);
+    aOut.write(mData.easing);
     aOut.write(mData.opacity);
     return aOut.checkStream();
 }
@@ -37,10 +35,7 @@ bool OpaKey::deserialize(Deserializer& aIn)
 {
     aIn.pushLogScope("OpaKey");
 
-    aIn.read((int&)mData.easing.type);
-    aIn.read((int&)mData.easing.range);
-    aIn.read(mData.easing.weight);
-    if (!mData.easing.isValidParam())
+    if (!aIn.read(mData.easing))
     {
         return aIn.errored("invalid easing param");
     }

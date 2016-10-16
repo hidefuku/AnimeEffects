@@ -138,14 +138,13 @@ void Texture::setWrap(GLint aParam, QColor aBorderColor)
 
 void Texture::destroy()
 {
-    Global::Functions& ggl = Global::functions();
     if (mId != 0)
     {
-        ggl.glDeleteTextures(1, &mId);
+        Global::functions().glDeleteTextures(1, &mId);
         mId = 0;
         mSize = QSize();
+        GL_CHECK_ERROR();
     }
-    XC_ASSERT(ggl.glGetError() == GL_NO_ERROR);
 }
 
 } // namespace gl

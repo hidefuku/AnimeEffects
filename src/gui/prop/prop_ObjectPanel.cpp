@@ -94,6 +94,8 @@ ObjectPanel::SRTPanel::SRTPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabe
         };
         mGroup->addItem("scale :", mScale);
     }
+    setEnabled(false);
+    setKeyExists(false);
 }
 
 void ObjectPanel::SRTPanel::setEnabled(bool aEnabled)
@@ -160,6 +162,8 @@ ObjectPanel::OpaPanel::OpaPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabe
         };
         mGroup->addItem("opacity :", mOpacity);
     }
+    setEnabled(false);
+    setKeyExists(false);
 }
 
 void ObjectPanel::OpaPanel::setEnabled(bool aEnabled)
@@ -212,6 +216,8 @@ ObjectPanel::PosePanel::PosePanel(Panel& aPanel, KeyAccessor& aAccessor, int aLa
             this->mAccessor.assignPoseEasing(aNext);
         };
     }
+    setEnabled(false);
+    setKeyExists(false, false);
 }
 
 void ObjectPanel::PosePanel::setEnabled(bool aEnabled)
@@ -263,6 +269,8 @@ ObjectPanel::FFDPanel::FFDPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabe
             this->mAccessor.assignFFDEasing(aNext);
         };
     }
+    setEnabled(false);
+    setKeyExists(false, false);
 }
 
 void ObjectPanel::FFDPanel::setEnabled(bool aEnabled)

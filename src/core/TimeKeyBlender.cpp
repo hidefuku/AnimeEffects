@@ -231,6 +231,9 @@ void TimeKeyBlender::updateCurrents(ObjectNode* aRootNode, const TimeInfo& aTime
 
             // build ffd
             blendFFDKey(pos, aTime);
+
+            // build image
+            blendImageKey(pos, aTime);
         }
     }
 
@@ -734,51 +737,18 @@ void TimeKeyBlender::blendFFDKey(PositionType aPos, const TimeInfo& aTime)
     }
 }
 
-#if 0
-void TimeKeyBlender::buildPosePalette(ObjectNode& aNode, PosePalette::KeyPairs& aPairs)
+void TimeKeyBlender::blendImageKey(PositionType aPos, const TimeInfo& aTime)
 {
-    bool pushed = false;
-    if (aNode.timeLine())
-    {
-        XC_PTR_ASSERT(mSeeker->data(&aNode).expans);
-        auto& expans = *(mSeeker->data(&aNode).expans);
+    auto seekData = mSeeker->data(aPos);
+    if (!seekData.objNode || !seekData.expans) return;
+    auto& node = *seekData.objNode;
+    auto& expans = *seekData.expans;
+    if (!node.timeLine()) return;
 
-        // update pairs
-        if (expans.poseParent())
-        {
-            PosePalette::KeyPair pair = {
-                &expans.poseParent()->data(), &expans.pose()
-            };
-            aPairs.push_back(pair);
-            pushed = true;
-        }
-        /// @todo
-        /// poseParent() will has null pointer, when no pose key exists.
-        /// But the nearestPair should update if a nearer bone key exists,
-        /// no matter whether a pose key was exists or not.
-
-        // build by nearest pair
-        PosePalette::KeyPairs nearestPair;
-        if (!aPairs.empty())
-        {
-            nearestPair.push_back(aPairs.back());
-        }
-        expans.posePalette().build(nearestPair);
-    }
-
-    // iterate children
-    for (auto child : aNode.children())
-    {
-        XC_PTR_ASSERT(child);
-        buildPosePalette(*child, aPairs);
-    }
-
-    if (pushed)
-    {
-        aPairs.pop_back();
-    }
+    const TimeLine::MapType& map = node.timeLine()->map(TimeKeyType_Image);
+    expans.setAreaImage((ImageKey*)TimeKeyGatherer::findLastKey(map, aTime.frame));
 }
-#else
+
 void TimeKeyBlender::buildPosePalette(ObjectNode& aNode, PosePalette::KeyPair aPair)
 {
     if (aNode.timeLine())
@@ -817,7 +787,6 @@ void TimeKeyBlender::buildPosePalette(ObjectNode& aNode, PosePalette::KeyPair aP
         buildPosePalette(*child, aPair);
     }
 }
-#endif
 
 void TimeKeyBlender::setBoneInfluenceMaps(
         ObjectNode& aNode, const BoneKey* aKey, const TimeInfo& aTime)

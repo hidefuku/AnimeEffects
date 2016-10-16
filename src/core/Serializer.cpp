@@ -98,6 +98,13 @@ void Serializer::write(const Frame& aValue)
     mOut.write((sint32)s.milli);
 }
 
+void Serializer::write(const util::Easing::Param& aValue)
+{
+    mOut.write((sint32)aValue.type);
+    mOut.write((sint32)aValue.range);
+    mOut.write((float32)aValue.weight);
+}
+
 void Serializer::write(const QPolygonF& aValue)
 {
     mOut.write((sint32)aValue.count());
