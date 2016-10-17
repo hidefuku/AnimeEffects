@@ -58,7 +58,7 @@ ResourceDialog::ResourceDialog(ViaPoint& aViaPoint, bool aModal, QWidget* aParen
             this->mNodeList.clear();
             for (auto node : aNodes)
             {
-                if (node->hasImage())
+                if (node->data().hasImage())
                 {
                     this->mNodeList.push_back(node);
                 }

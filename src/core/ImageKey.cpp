@@ -30,10 +30,10 @@ void ImageKey::resetCache()
     mCache.reset();
     mCache.reset(new Cache());
 
-    if (mData.resource().hasImage())
+    if (mData.resource()->hasImage())
     {
-        auto imageData = mData.resource().image().data();
-        auto pixelSize = mData.resource().image().pixelSize();
+        auto imageData = mData.resource()->image().data();
+        auto pixelSize = mData.resource()->image().pixelSize();
 
         // make a gl texture
         mCache->texture().create(pixelSize, imageData);
@@ -51,14 +51,14 @@ bool ImageKey::serialize(Serializer& aOut) const
     // easing
     aOut.write(mData.easing());
     // image id
-    aOut.writeID(mData.resource().serialAddress());
+    aOut.writeID(mData.resource()->serialAddress());
 
     return aOut.checkStream();
 }
 
 bool ImageKey::deserialize(Deserializer& aIn)
 {
-    mData.resource() = img::ResourceHandle();
+    mData.resource().reset();
 
     aIn.pushLogScope("ImageKey");
 

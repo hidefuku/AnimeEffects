@@ -477,8 +477,8 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
             auto resNode = dialog->nodeList().first();
             if (!resNode) return;
 
-            XC_ASSERT(resNode->hasImage());
-            const QRect resRect(resNode->pos(), resNode->image().pixelSize());
+            XC_ASSERT(resNode->data().hasImage());
+            const QRect resRect(resNode->data().pos(), resNode->data().image().pixelSize());
 
             cmnd::ScopedMacro macro(mProject->commandStack(), "create object");
             {
@@ -491,7 +491,7 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
 
             // create node
             core::LayerNode* ptr = new core::LayerNode(
-                        resNode->identifier(),
+                        resNode->data().identifier(),
                         mProject->objectTree().shaderHolder());
             ptr->setDepth(node.depth() + 1.0f);
             ptr->setVisibility(true);

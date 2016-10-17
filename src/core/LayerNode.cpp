@@ -44,19 +44,19 @@ LayerNode::~LayerNode()
 
 void LayerNode::setImage(const img::ResourceHandle& aHandle)
 {
-    setImage(aHandle, aHandle.blendMode());
+    setImage(aHandle, aHandle->blendMode());
 }
 
 void LayerNode::setImage(const img::ResourceHandle& aHandle, img::BlendMode aBlendMode)
 {
     XC_ASSERT(aHandle);
-    XC_PTR_ASSERT(aHandle.image().data());
-    XC_ASSERT(aHandle.image().pixelSize().isValid());
-    if (!aHandle || !aHandle.image().data()) return; // fail safe
+    XC_PTR_ASSERT(aHandle->image().data());
+    XC_ASSERT(aHandle->image().pixelSize().isValid());
+    if (!aHandle || !aHandle->image().data()) return; // fail safe
 
     mImageHandle = aHandle;
 
-    readImageData(aHandle.image(), aHandle.pos());
+    readImageData(mImageHandle->image(), mImageHandle->pos());
 
     mBlendMode = aBlendMode;
     mShaderHolder.reserveShader(mBlendMode, true);
@@ -84,7 +84,7 @@ void LayerNode::readImageData(const img::Buffer& aBuffer, const QPoint& aPos)
 void LayerNode::clear()
 {
     mTexture.destroy();
-    mImageHandle = img::ResourceHandle();
+    mImageHandle.reset();
 }
 
 void LayerNode::setClipped(bool aIsClipped)
@@ -371,18 +371,20 @@ cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent)
     class ResUpdater : public cmnd::Stable
     {
         LayerNode& mOwner;
-        img::Buffer mOldImage;
-        QPoint mOldPos;
+        const img::ResourceNode* mTarget;
+        img::ResourceHandle mPrevImage;
+        img::ResourceHandle mNextImage;
         QScopedPointer<cmnd::Stable> mKeyUpdater;
 
     public:
-        ResUpdater(LayerNode& aOwner, img::Buffer& aCurImage, const QPoint& aCurPos)
+        ResUpdater(LayerNode& aOwner, const img::ResourceNode* aTarget)
             : mOwner(aOwner)
-            , mOldImage()
-            , mOldPos(aCurPos)
+            , mTarget(aTarget)
+            , mPrevImage()
+            , mNextImage()
             , mKeyUpdater()
         {
-            mOldImage.grab(aCurImage);
+            mPrevImage = mOwner.mImageHandle;
         }
 
         virtual void exec()
@@ -390,9 +392,12 @@ cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent)
             GridMesh::TransitionCreater transer(
                         mOwner.mGridMesh, mOwner.mImageRect.topLeft());
 
+            mNextImage = mTarget->handle();
+            mOwner.mImageHandle = mNextImage;
+
             mOwner.readImageData(
-                        mOwner.mImageHandle.image(),
-                        mOwner.mImageHandle.pos());
+                        mOwner.mImageHandle->image(),
+                        mOwner.mImageHandle->pos());
 
             auto trans = transer.create(
                         mOwner.mGridMesh.positions(),
@@ -411,9 +416,10 @@ cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent)
 
         virtual void redo()
         {
+            mOwner.mImageHandle = mNextImage;
             mOwner.readImageData(
-                        mOwner.mImageHandle.image(),
-                        mOwner.mImageHandle.pos());
+                        mOwner.mImageHandle->image(),
+                        mOwner.mImageHandle->pos());
 
             if (mKeyUpdater)
             {
@@ -423,7 +429,10 @@ cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent)
 
         virtual void undo()
         {
-            mOwner.readImageData(mOldImage, mOldPos);
+            mOwner.mImageHandle = mPrevImage;
+            mOwner.readImageData(
+                        mOwner.mImageHandle->image(),
+                        mOwner.mImageHandle->pos());
 
             if (mKeyUpdater)
             {
@@ -433,12 +442,12 @@ cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent)
     };
 
     cmnd::Vector result;
-    if (mImageHandle && mImageHandle.hasImage())
+    if (mImageHandle && mImageHandle->hasImage())
     {
-        if (aEvent.targets().contains(mImageHandle.serialAddress()))
+        auto target = aEvent.findTarget(mImageHandle->serialAddress());
+        if (target)
         {
-            img::Buffer curImage(mImageHandle.image());
-            result.push(new ResUpdater(*this, curImage, mImageHandle.pos()));
+            result.push(new ResUpdater(*this, target));
         }
     }
 
@@ -469,7 +478,7 @@ bool LayerNode::serialize(Serializer& aOut) const
     aOut.writeFixedString(img::getQuadIdFromBlendMode(mBlendMode), 4);
 
     // image id
-    aOut.writeID(mImageHandle.serialAddress());
+    aOut.writeID(mImageHandle->serialAddress());
 
     // grid mesh
     if (!mGridMesh.serialize(aOut))

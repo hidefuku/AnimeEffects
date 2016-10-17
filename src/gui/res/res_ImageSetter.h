@@ -11,63 +11,48 @@ class ImageSetter : public cmnd::Stable
 {
     img::ResourceNode& mNode;
     XCMemBlock mBlock;
-    XCMemBlock mBlockPrev;
     QRect mRect;
-    QRect mRectPrev;
-    img::Format mFormatPrev;
-    bool mDone;
+    img::ResourceHandle mAnotherHandle;
+    bool mDoneOnce;
 
 public:
     ImageSetter(img::ResourceNode& aNode, const XCMemBlock& aBlock, const QRect& aRect)
         : mNode(aNode)
         , mBlock(aBlock)
-        , mBlockPrev()
         , mRect(aRect)
-        , mRectPrev()
-        , mFormatPrev()
-        , mDone(false)
+        , mAnotherHandle()
+        , mDoneOnce(false)
     {
         XC_PTR_ASSERT(aBlock.data);
     }
 
     ~ImageSetter()
     {
-        if (mDone)
-        {
-            if (mBlockPrev.data)
-            {
-                delete [] mBlockPrev.data;
-            }
-        }
-        else
+        if (!mDoneOnce)
         {
             delete [] mBlock.data;
         }
     }
 
+    void exec()
+    {
+        mAnotherHandle = mNode.handle();
+
+        mNode.resetData();
+        mNode.data() = *mAnotherHandle;
+        mNode.data().setPos(mRect.topLeft());
+        mNode.data().grabImage(mBlock, mRect.size(), img::Format_RGBA8);
+        mDoneOnce = true;
+    }
+
     void redo()
     {
-        if (mNode.hasImage())
-        {
-            mFormatPrev = mNode.image().format();
-            mRectPrev = QRect(mNode.pos(), mNode.image().pixelSize());
-            mBlockPrev = mNode.releaseImage();
-            XC_ASSERT(mBlockPrev.data != mBlock.data);
-        }
-        mNode.setPos(mRect.topLeft());
-        mNode.grabImage(mBlock, mRect.size(), img::Format_RGBA8);
-        mDone = true;
+        mNode.swapData(mAnotherHandle);
     }
 
     void undo()
     {
-        mNode.releaseImage();
-        if (mBlockPrev.data)
-        {
-            mNode.setPos(mRectPrev.topLeft());
-            mNode.grabImage(mBlockPrev, mRectPrev.size(), mFormatPrev);
-        }
-        mDone = false;
+        mNode.swapData(mAnotherHandle);
     }
 };
 

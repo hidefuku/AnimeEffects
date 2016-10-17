@@ -32,11 +32,11 @@ public:
     // image buffer
     void setImage(const img::ResourceHandle& aHandle);
     void setImage(const img::ResourceHandle& aHandle, img::BlendMode aBlendMode);
-    int imageWidth() const { return mImageHandle.image().width(); }
-    int imageHeight() const { return mImageHandle.image().height(); }
-    QSize imageSize() const { return mImageHandle.image().pixelSize(); }
-    //uint8* imageData() { return mImageHandle.image().data(); }
-    const uint8* imageData() const { return mImageHandle.image().data(); }
+    int imageWidth() const { return mImageHandle->image().width(); }
+    int imageHeight() const { return mImageHandle->image().height(); }
+    QSize imageSize() const { return mImageHandle->image().pixelSize(); }
+    //uint8* imageData() { return mImageHandle->image().data(); }
+    const uint8* imageData() const { return mImageHandle->image().data(); }
 
     // from ObjectNode
     virtual ObjectType type() const { return ObjectType_Layer; }

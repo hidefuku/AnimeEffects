@@ -1,6 +1,8 @@
 #ifndef IMG_RESOURCENODE_H
 #define IMG_RESOURCENODE_H
 
+#include <memory>
+#include <utility>
 #include <QRect>
 #include "util/TreeNodeBase.h"
 #include "util/NonCopyable.h"
@@ -12,6 +14,7 @@
 namespace img
 {
 
+#if 0
 class ResourceNode
         : public util::TreeNodeBase<ResourceNode>
         , private util::NonCopyable
@@ -56,6 +59,30 @@ private:
     BlendMode mBlendMode;
     int mRefCount;
 };
+#else
+
+class ResourceNode
+        : public util::TreeNodeBase<ResourceNode>
+        , private util::NonCopyable
+{
+public:
+    ResourceNode(const QString& aIdentifier);
+    virtual ~ResourceNode();
+
+    ResourceData& data() { return *mData; }
+    const ResourceData& data() const { return *mData; }
+    void resetData();
+    void swapData(ResourceHandle& aHandle);
+
+    ResourceHandle handle() const { ResourceHandle handle = mData; return std::move(handle); }
+
+    bool isReferenced() const { return mData.use_count() > 1; }
+    int getCountOfSameSiblings() const;
+
+private:
+    ResourceHandle mData;
+};
+#endif
 
 } // namespace img
 

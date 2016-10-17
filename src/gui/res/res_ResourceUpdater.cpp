@@ -209,12 +209,12 @@ std::pair<int, img::ResourceNode*> findCorrespondingNode(
 
     // search
     QVector<img::ResourceNode*> sameNames;
-    const bool targetIsLayer = aNode.isLayer();
+    const bool targetIsLayer = aNode.data().isLayer();
     for (auto searchChild : aSearchList)
     {
-        if (searchChild->identifier() == aNode.identifier())
+        if (searchChild->data().identifier() == aNode.data().identifier())
         {
-            if (targetIsLayer == searchChild->isLayer())
+            if (targetIsLayer == searchChild->data().isLayer())
             {
                 sameNames.push_back(searchChild);
             }
@@ -243,7 +243,7 @@ std::pair<bool, QVector<QString>> allChildrenCanBeIdentified(
         if (corresponds.first > 1)
         {
             result.first = false;
-            result.second.push_back(child->identifier());
+            result.second.push_back(child->data().identifier());
         }
         else if (corresponds.first == 1)
         {
@@ -277,20 +277,20 @@ img::ResourceNode* createNewAppendNode(
 {
     using img::PSDFormat;
 
-    auto newNode = new img::ResourceNode(aNode.identifier());
-    newNode->setPos(aNode.pos());
-    newNode->setIsLayer(aNode.isLayer());
+    auto newNode = new img::ResourceNode(aNode.data().identifier());
+    newNode->data().setPos(aNode.data().pos());
+    newNode->data().setIsLayer(aNode.data().isLayer());
 
     aNotifier.event().pushTarget(*newNode);
 
-    if (newNode->isLayer())
+    if (newNode->data().isLayer())
     {
-        auto newLayer = static_cast<PSDFormat::Layer*>(aNode.userData());
+        auto newLayer = static_cast<PSDFormat::Layer*>(aNode.data().userData());
         XC_PTR_ASSERT(newLayer);
         auto image = img::Util::createTextureImage(aHeader, *newLayer);
-        newNode->setPos(image.second.topLeft());
-        newNode->grabImage(image.first, image.second.size(), img::Format_RGBA8);
-        newNode->setBlendMode(img::getBlendModeFromPSD(newLayer->blendMode));
+        newNode->data().setPos(image.second.topLeft());
+        newNode->data().grabImage(image.first, image.second.size(), img::Format_RGBA8);
+        newNode->data().setBlendMode(img::getBlendModeFromPSD(newLayer->blendMode));
     }
 
     for (auto child : aNode.children())
@@ -311,14 +311,14 @@ void ResourceUpdater::reloadImages(
 {
     using img::PSDFormat;
 
-    RESOURCE_UPDATER_DUMP("reload image %s", aCurNode.identifier().toLatin1().data());
+    RESOURCE_UPDATER_DUMP("reload image %s", aCurNode.data().identifier().toLatin1().data());
 
     aNotifier.event().pushTarget(aCurNode);
 
-    if (aCurNode.isLayer())
+    if (aCurNode.data().isLayer())
     {
         // reload image
-        auto newLayer = static_cast<PSDFormat::Layer*>(aNewNode.userData());
+        auto newLayer = static_cast<PSDFormat::Layer*>(aNewNode.data().userData());
         XC_PTR_ASSERT(newLayer);
         aStack.push(createImageSetter(aCurNode, aHeader, *newLayer));
     }
@@ -380,8 +380,8 @@ bool ResourceUpdater::tryReloadCorrespondingImages(
     // reload
     {
         RESOURCE_UPDATER_DUMP("create reload command %s, %s",
-                              targetNode.identifier().toLatin1().data(),
-                              newNode->identifier().toLatin1().data());
+                              targetNode.data().identifier().toLatin1().data(),
+                              newNode->data().identifier().toLatin1().data());
 
         auto& stack = mProject.commandStack();
         cmnd::ScopedMacro macro(stack, "reload images");

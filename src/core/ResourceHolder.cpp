@@ -135,7 +135,7 @@ bool ResourceHolder::serializeNode(Serializer& aOut, const img::ResourceNode& aN
     auto pos = aOut.beginBlock(kSignature);
 
     // identifier
-    aOut.write(aNode.identifier());
+    aOut.write(aNode.data().identifier());
 
     // child count
     aOut.write((int)aNode.children().size());
@@ -144,16 +144,16 @@ bool ResourceHolder::serializeNode(Serializer& aOut, const img::ResourceNode& aN
     aOut.writeID(&aNode);
 
     // is layer
-    aOut.write(aNode.isLayer());
+    aOut.write(aNode.data().isLayer());
 
     // rect
-    aOut.write(QRect(aNode.pos(), aNode.image().pixelSize()));
+    aOut.write(QRect(aNode.data().pos(), aNode.data().image().pixelSize()));
 
     // blend mode
-    aOut.writeFixedString(img::getQuadIdFromBlendMode(aNode.blendMode()), 4);
+    aOut.writeFixedString(img::getQuadIdFromBlendMode(aNode.data().blendMode()), 4);
 
     // memory block(null image is also ok)
-    aOut.writeImage(aNode.image().block(), aNode.image().pixelSize());
+    aOut.writeImage(aNode.data().image().block(), aNode.data().image().pixelSize());
 
     // block end
     aOut.endBlock(pos);
@@ -243,11 +243,12 @@ bool ResourceHolder::deserializeNode(Deserializer& aIn, img::ResourceNode** aDst
 
     // create instance
     QScopedPointer<img::ResourceNode> node(new img::ResourceNode(identifier));
+    auto nodePtr = node.data();
     if (!node)
         return aIn.errored("failed to create resource node");
 
     // reference id
-    if (!aIn.bindIDData(node.data()))
+    if (!aIn.bindIDData(nodePtr))
     {
         return aIn.errored("failed to bind reference id");
     }
@@ -255,12 +256,12 @@ bool ResourceHolder::deserializeNode(Deserializer& aIn, img::ResourceNode** aDst
     // is layer
     bool isLayer = false;
     aIn.read(isLayer);
-    node.data()->setIsLayer(isLayer);
+    nodePtr->data().setIsLayer(isLayer);
 
     // rect
     QRect rect;
     aIn.read(rect);
-    node.data()->setPos(rect.topLeft());
+    nodePtr->data().setPos(rect.topLeft());
 
     // blend mode
     {
@@ -271,7 +272,7 @@ bool ResourceHolder::deserializeNode(Deserializer& aIn, img::ResourceNode** aDst
         {
             return aIn.errored("invalid image blending mode");
         }
-        node.data()->setBlendMode(blendMode);
+        nodePtr->data().setBlendMode(blendMode);
     }
 
     // memory block
@@ -283,7 +284,7 @@ bool ResourceHolder::deserializeNode(Deserializer& aIn, img::ResourceNode** aDst
 
     if (block.data)
     {
-        node.data()->grabImage(block, rect.size(), img::Format_RGBA8);
+        nodePtr->data().grabImage(block, rect.size(), img::Format_RGBA8);
     }
 
     // check block end
@@ -301,7 +302,7 @@ bool ResourceHolder::deserializeNode(Deserializer& aIn, img::ResourceNode** aDst
         if (!deserializeNode(aIn, &child)) return false;
 
         XC_PTR_ASSERT(child);
-        node.data()->children().pushBack(child);
+        nodePtr->children().pushBack(child);
     }
 
     // end

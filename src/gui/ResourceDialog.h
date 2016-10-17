@@ -28,7 +28,6 @@ public:
 
 private:
     void onAddResourceTriggered(bool);
-    img::ResourceNode* createResourceNodes(img::PSDFormat& aFormat);
 
     ViaPoint& mViaPoint;
     util::LinkPointer<core::Project> mProject;

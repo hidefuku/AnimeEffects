@@ -113,7 +113,7 @@ void ResourceTree::resetTreeView(
 
     if (parent)
     {
-        auto item = new Item(*this, *rootNode, rootNode->identifier());
+        auto item = new Item(*this, *rootNode, rootNode->data().identifier());
         parent->insertChild(index, item);
         addTreeItemRecursive(item, rootNode);
     }
@@ -133,7 +133,7 @@ void ResourceTree::addTreeItemRecursive(QTreeWidgetItem* aItem, img::ResourceNod
 
     for (auto childNode : aNode->children())
     {
-        auto childItem = new Item(*this, *childNode, childNode->identifier());
+        auto childItem = new Item(*this, *childNode, childNode->data().identifier());
         aItem->addChild(childItem);
 
         // recursive call

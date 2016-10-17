@@ -210,16 +210,16 @@ ResourceNode* Util::createResourceNodes(PSDFormat& aFormat, bool aLoadImage)
         {
             // create resource
             auto resNode = new ResourceNode(name);
-            resNode->setPos(rect.topLeft());
-            resNode->setUserData(&layer);
-            resNode->setIsLayer(true);
-            resNode->setBlendMode(getBlendModeFromPSD(layer.blendMode));
+            resNode->data().setPos(rect.topLeft());
+            resNode->data().setUserData(&layer);
+            resNode->data().setIsLayer(true);
+            resNode->data().setBlendMode(getBlendModeFromPSD(layer.blendMode));
 
             if (aLoadImage)
             {
                 auto image = createTextureImage(aFormat.header(), layer);
-                resNode->setPos(image.second.topLeft());
-                resNode->grabImage(image.first, image.second.size(), Format_RGBA8);
+                resNode->data().setPos(image.second.topLeft());
+                resNode->data().grabImage(image.first, image.second.size(), Format_RGBA8);
             }
 
             // push tree
@@ -234,9 +234,9 @@ ResourceNode* Util::createResourceNodes(PSDFormat& aFormat, bool aLoadImage)
         {
             // create resource
             auto resNode = new ResourceNode(name);
-            resNode->setPos(rect.topLeft());
-            resNode->setUserData(&layer);
-            resNode->setIsLayer(false);
+            resNode->data().setPos(rect.topLeft());
+            resNode->data().setUserData(&layer);
+            resNode->data().setIsLayer(false);
             resCurrent->children().pushBack(resNode);
 
             // push tree

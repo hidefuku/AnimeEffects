@@ -77,18 +77,18 @@ img::ResourceNode* createLayerResource(
 
     // create resource
     auto resNode = new img::ResourceNode(aName);
-    resNode->grabImage(image, aInOutRect.size(), img::Format_RGBA8);
-    resNode->setPos(aInOutRect.topLeft());
-    resNode->setIsLayer(true);
-    resNode->setBlendMode(img::getBlendModeFromPSD(aLayer.blendMode));
+    resNode->data().grabImage(image, aInOutRect.size(), img::Format_RGBA8);
+    resNode->data().setPos(aInOutRect.topLeft());
+    resNode->data().setIsLayer(true);
+    resNode->data().setBlendMode(img::getBlendModeFromPSD(aLayer.blendMode));
     return resNode;
 }
 
 img::ResourceNode* createLayerSetResource(const QString& aName, const QPoint& aPos)
 {
     auto resNode = new img::ResourceNode(aName);
-    resNode->setPos(aPos);
-    resNode->setIsLayer(false);
+    resNode->data().setPos(aPos);
+    resNode->data().setIsLayer(false);
     return resNode;
 }
 
