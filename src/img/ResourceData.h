@@ -16,6 +16,7 @@ public:
 
     void grabImage(const XCMemBlock& aBlock, const QSize& aSize, Format aFormat);
     XCMemBlock releaseImage();
+    void freeImage();
 
     void setPos(const QPoint& aPos);
     void setUserData(void* aData) { mUserData = aData; }
@@ -29,8 +30,9 @@ public:
     const QPoint& pos() const { return mPos; }
     void* userData() const { return mUserData; }
     BlendMode blendMode() const { return mBlendMode; }
-
     const ResourceNode* serialAddress() const { return mSerialAddress; }
+
+    bool hasSameLayerDataWith(const ResourceData& aData); // it's heavy
 
 private:
     img::Buffer mBuffer;

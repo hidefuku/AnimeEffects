@@ -378,15 +378,17 @@ cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent)
         img::ResourceHandle mPrevImage;
         img::ResourceHandle mNextImage;
         ResourceUpdatingWorkspacePtr mWorkspace;
+        bool mCreateTransitions;
 
     public:
         ResUpdater(LayerNode& aOwner, const img::ResourceNode* aTarget,
-                   const ResourceUpdatingWorkspacePtr& aWorkspace)
+                   const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions)
             : mOwner(aOwner)
             , mTarget(aTarget)
             , mPrevImage()
             , mNextImage()
             , mWorkspace(aWorkspace)
+            , mCreateTransitions(aCreateTransitions)
         {
             mPrevImage = mOwner.mImageHandle;
         }
@@ -404,11 +406,14 @@ cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent)
                         mOwner.mImageHandle->pos());
 
             // create transition data(will be used by ffd key)
-            auto& trans = mWorkspace->makeSureTransitions(nullptr, mOwner.mGridMesh);
-            trans = transer.create(
-                        mOwner.mGridMesh.positions(),
-                        mOwner.mGridMesh.vertexCount(),
-                        mOwner.mImageRect.topLeft());
+            if (mCreateTransitions)
+            {
+                auto& trans = mWorkspace->makeSureTransitions(nullptr, mOwner.mGridMesh);
+                trans = transer.create(
+                            mOwner.mGridMesh.positions(),
+                            mOwner.mGridMesh.vertexCount(),
+                            mOwner.mImageRect.topLeft());
+            }
             mWorkspace.reset();
         }
 
@@ -432,6 +437,7 @@ cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent)
     cmnd::Vector result;
 
     ResourceUpdatingWorkspacePtr workspace = std::make_shared<ResourceUpdatingWorkspace>();
+    const bool createTransitions = !mTimeLine.isEmpty(TimeKeyType_FFD);
 
     // my image handle
     if (mImageHandle && mImageHandle->hasImage())
@@ -439,18 +445,18 @@ cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent)
         auto target = aEvent.findTarget(mImageHandle->serialAddress());
         if (target)
         {
-            result.push(new ResUpdater(*this, target, workspace));
+            result.push(new ResUpdater(*this, target, workspace, createTransitions));
         }
     }
 
     // image key
     if (!mTimeLine.isEmpty(TimeKeyType_Image))
     {
-        result.push(ImageKeyUpdater::createResourceUpdater(*this, aEvent, workspace));
+        result.push(ImageKeyUpdater::createResourceUpdater(*this, aEvent, workspace, createTransitions));
     }
 
     // ffd key should be called finally
-    if (!mTimeLine.isEmpty(TimeKeyType_FFD))
+    if (createTransitions)
     {
         result.push(FFDKeyUpdater::createResourceUpdater(*this, workspace));
     }

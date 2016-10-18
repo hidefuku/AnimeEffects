@@ -23,14 +23,16 @@ class ImageResourceUpdater : public cmnd::Stable
     const ResourceEvent& mEvent;
     QList<Target> mTargets;
     ResourceUpdatingWorkspacePtr mWorkspace;
+    bool mCreateTransitions;
 
 public:
     ImageResourceUpdater(TimeLine& aTimeLine, const ResourceEvent& aEvent,
-                         const ResourceUpdatingWorkspacePtr& aWorkspace)
+                         const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions)
         : mTimeLine(aTimeLine)
         , mEvent(aEvent)
         , mTargets()
         , mWorkspace(aWorkspace)
+        , mCreateTransitions(aCreateTransitions)
     {
     }
 
@@ -66,11 +68,14 @@ public:
             target.key->resetCache();
 
             // create transition data
-            auto& trans = mWorkspace->makeSureTransitions(key, key->cache().gridMesh());
-            trans = transer.create(
-                        key->cache().gridMesh().positions(),
-                        key->cache().gridMesh().vertexCount(),
-                        key->data().resource()->pos());
+            if (mCreateTransitions)
+            {
+                auto& trans = mWorkspace->makeSureTransitions(key, key->cache().gridMesh());
+                trans = transer.create(
+                            key->cache().gridMesh().positions(),
+                            key->cache().gridMesh().vertexCount(),
+                            key->data().resource()->pos());
+            }
         }
         mWorkspace.reset(); // finish using
     }
@@ -96,10 +101,10 @@ public:
 
 cmnd::Stable* ImageKeyUpdater::createResourceUpdater(
         ObjectNode& aNode, const ResourceEvent& aEvent,
-        const ResourceUpdatingWorkspacePtr& aWorkspace)
+        const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions)
 {
     if (!aNode.timeLine()) return nullptr;
-    return new ImageResourceUpdater(*aNode.timeLine(), aEvent, aWorkspace);
+    return new ImageResourceUpdater(*aNode.timeLine(), aEvent, aWorkspace, aCreateTransitions);
 }
 
 } // namespace core

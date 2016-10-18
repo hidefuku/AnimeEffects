@@ -313,6 +313,7 @@ void ResourceUpdater::reloadImages(
 
     RESOURCE_UPDATER_DUMP("reload image %s", aCurNode.data().identifier().toLatin1().data());
 
+#if 0
     aNotifier.event().pushTarget(aCurNode);
 
     if (aCurNode.data().isLayer())
@@ -322,6 +323,34 @@ void ResourceUpdater::reloadImages(
         XC_PTR_ASSERT(newLayer);
         aStack.push(createImageSetter(aCurNode, aHeader, *newLayer));
     }
+#else
+    if (aCurNode.data().isLayer())
+    {
+        XC_ASSERT(aNewNode.data().isLayer());
+
+        // load new image
+        auto newLayer = static_cast<PSDFormat::Layer*>(aNewNode.data().userData());
+        XC_PTR_ASSERT(newLayer);
+        auto newImage = img::Util::createTextureImage(aHeader, *newLayer);
+        aNewNode.data().setPos(newImage.second.topLeft());
+        aNewNode.data().grabImage(newImage.first, newImage.second.size(), img::Format_RGBA8);
+
+        // if layer data be modified
+        if (!aCurNode.data().hasSameLayerDataWith(aNewNode.data()))
+        {
+            // push to targets
+            aNotifier.event().pushTarget(aCurNode);
+
+            // push reload image command
+            aNewNode.data().releaseImage();
+            aStack.push(new ImageSetter(aCurNode, newImage.first, newImage.second));
+        }
+        else
+        {
+            aNewNode.data().freeImage();
+        }
+    }
+#endif
 
     // each child
     for (auto child : aNewNode.children())

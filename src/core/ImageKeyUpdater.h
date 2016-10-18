@@ -14,7 +14,7 @@ class ImageKeyUpdater
 public:
     static cmnd::Stable* createResourceUpdater(
             ObjectNode& aNode, const ResourceEvent& aEvent,
-            const ResourceUpdatingWorkspacePtr& aWorkspace);
+            const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions);
 };
 
 } // namespace core
