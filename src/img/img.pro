@@ -29,10 +29,10 @@ SOURCES += \
     PSDWriter.cpp \
     Buffer.cpp \
     ResourceNode.cpp \
-    ResourceHandle.cpp \
     Util.cpp \
     BlendMode.cpp \
-    GridMeshCreator.cpp
+    GridMeshCreator.cpp \
+    ResourceData.cpp
 
 HEADERS += \
     Buffer.h \
@@ -48,4 +48,5 @@ HEADERS += \
     Util.h \
     ColorRGBA.h \
     BlendMode.h \
-    GridMeshCreator.h
+    GridMeshCreator.h \
+    ResourceData.h
