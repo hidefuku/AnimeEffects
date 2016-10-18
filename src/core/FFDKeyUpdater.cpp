@@ -9,30 +9,26 @@ class FFDResourceUpdater : public cmnd::Stable
 {
     struct Target
     {
-        Target(FFDKey* aKey)
-            : key(aKey), pos() {}
+        Target(FFDKey* aKey) : key(aKey), pos() {}
         FFDKey* key;
         QVector<gl::Vector3> pos;
     };
 
     TimeLine& mTimeLine;
-    const GridMesh& mNewMesh;
-    const GridMesh::Transitions& mTransitions;
     QList<Target> mTargets;
+    ResourceUpdatingWorkspacePtr mWorkspace;
 
 public:
-    FFDResourceUpdater(TimeLine& aTimeLine,
-               const GridMesh& aNewMesh,
-               const GridMesh::Transitions& aTransitions)
+    FFDResourceUpdater(TimeLine& aTimeLine, const ResourceUpdatingWorkspacePtr& aWorkspace)
         : mTimeLine(aTimeLine)
-        , mNewMesh(aNewMesh)
-        , mTransitions(aTransitions)
         , mTargets()
+        , mWorkspace(aWorkspace)
     {
     }
 
     virtual void exec()
     {
+        // for each ffd keys
         auto& map = mTimeLine.map(TimeKeyType_FFD);
         for (auto itr = map.begin(); itr != map.end(); ++itr)
         {
@@ -41,26 +37,27 @@ public:
             XC_ASSERT(timeKey->type() == TimeKeyType_FFD);
             FFDKey* ffdKey = (FFDKey*)timeKey;
 
-            if (!ffdKey->belongsToDefaultParent())
+            // find transition information
+            auto transUnit = mWorkspace->findUnit(ffdKey->parent());
+            if (!transUnit)
             {
                 continue;
             }
 
+            // calculate new ffd data
             util::ArrayBlock<const gl::Vector3> posArray(
-                        ffdKey->data().positions(),
-                        ffdKey->data().count());
+                        ffdKey->data().positions(), ffdKey->data().count());
+            auto newFFD = transUnit->mesh->createFFD(posArray, transUnit->trans);
+            QScopedArrayPointer<gl::Vector3> newFFDScope(newFFD.array());
 
-            auto newFFD = mNewMesh.createFFD(posArray, mTransitions);
-
+            // append new ffd data to targets
             mTargets.push_back(Target(ffdKey));
-
             auto& target = mTargets.back();
             target.pos.resize(newFFD.count());
             memcpy(target.pos.data(), newFFD.array(),
                    sizeof(gl::Vector3) * newFFD.count());
-
-            delete[] newFFD.array();
         }
+        mWorkspace.reset(); // finish using of workspace
 
         redo();
     }
@@ -85,13 +82,10 @@ public:
 
 //-------------------------------------------------------------------------------------------------
 cmnd::Stable* FFDKeyUpdater::createResourceUpdater(
-        ObjectNode& aNode,
-        const GridMesh& aNewMesh,
-        const GridMesh::Transitions& aTransitions)
+        ObjectNode& aNode, const ResourceUpdatingWorkspacePtr& aWorkspace)
 {
     if (!aNode.timeLine()) return nullptr;
-
-    return new FFDResourceUpdater(*aNode.timeLine(), aNewMesh, aTransitions);
+    return new FFDResourceUpdater(*aNode.timeLine(), aWorkspace);
 }
 
 } // namespace core

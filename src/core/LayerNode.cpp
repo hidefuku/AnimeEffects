@@ -1,3 +1,4 @@
+#include <utility>
 #include <QMatrix4x4>
 #include <QOpenGLFunctions>
 #include <QOpenGLContext>
@@ -11,7 +12,9 @@
 #include "core/ObjectNodeUtil.h"
 #include "core/TimeKeyExpans.h"
 #include "core/ResourceEvent.h"
+#include "core/ResourceUpdatingWorkspace.h"
 #include "core/FFDKeyUpdater.h"
+#include "core/ImageKeyUpdater.h"
 #include "core/ClippingFrame.h"
 
 namespace core
@@ -374,15 +377,16 @@ cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent)
         const img::ResourceNode* mTarget;
         img::ResourceHandle mPrevImage;
         img::ResourceHandle mNextImage;
-        QScopedPointer<cmnd::Stable> mKeyUpdater;
+        ResourceUpdatingWorkspacePtr mWorkspace;
 
     public:
-        ResUpdater(LayerNode& aOwner, const img::ResourceNode* aTarget)
+        ResUpdater(LayerNode& aOwner, const img::ResourceNode* aTarget,
+                   const ResourceUpdatingWorkspacePtr& aWorkspace)
             : mOwner(aOwner)
             , mTarget(aTarget)
             , mPrevImage()
             , mNextImage()
-            , mKeyUpdater()
+            , mWorkspace(aWorkspace)
         {
             mPrevImage = mOwner.mImageHandle;
         }
@@ -399,19 +403,13 @@ cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent)
                         mOwner.mImageHandle->image(),
                         mOwner.mImageHandle->pos());
 
-            auto trans = transer.create(
+            // create transition data(will be used by ffd key)
+            auto& trans = mWorkspace->makeSureTransitions(nullptr, mOwner.mGridMesh);
+            trans = transer.create(
                         mOwner.mGridMesh.positions(),
                         mOwner.mGridMesh.vertexCount(),
                         mOwner.mImageRect.topLeft());
-
-            // only ffd key requires updater
-            if (!mOwner.mTimeLine.isEmpty(TimeKeyType_FFD))
-            {
-                mKeyUpdater.reset(FFDKeyUpdater::createResourceUpdater(
-                                      mOwner, mOwner.mGridMesh, trans));
-                XC_ASSERT(mKeyUpdater);
-                mKeyUpdater->exec();
-            }
+            mWorkspace.reset();
         }
 
         virtual void redo()
@@ -420,11 +418,6 @@ cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent)
             mOwner.readImageData(
                         mOwner.mImageHandle->image(),
                         mOwner.mImageHandle->pos());
-
-            if (mKeyUpdater)
-            {
-                mKeyUpdater->redo();
-            }
         }
 
         virtual void undo()
@@ -433,22 +426,33 @@ cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent)
             mOwner.readImageData(
                         mOwner.mImageHandle->image(),
                         mOwner.mImageHandle->pos());
-
-            if (mKeyUpdater)
-            {
-                mKeyUpdater->undo();
-            }
         }
     };
 
     cmnd::Vector result;
+
+    ResourceUpdatingWorkspacePtr workspace = std::make_shared<ResourceUpdatingWorkspace>();
+
+    // my image handle
     if (mImageHandle && mImageHandle->hasImage())
     {
         auto target = aEvent.findTarget(mImageHandle->serialAddress());
         if (target)
         {
-            result.push(new ResUpdater(*this, target));
+            result.push(new ResUpdater(*this, target, workspace));
         }
+    }
+
+    // image key
+    if (!mTimeLine.isEmpty(TimeKeyType_Image))
+    {
+        result.push(ImageKeyUpdater::createResourceUpdater(*this, aEvent, workspace));
+    }
+
+    // ffd key should be called finally
+    if (!mTimeLine.isEmpty(TimeKeyType_FFD))
+    {
+        result.push(FFDKeyUpdater::createResourceUpdater(*this, workspace));
     }
 
     return result;

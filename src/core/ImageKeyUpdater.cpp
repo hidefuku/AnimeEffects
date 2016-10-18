@@ -3,27 +3,34 @@
 
 namespace core
 {
-#if 0
+
 //-------------------------------------------------------------------------------------------------
 class ImageResourceUpdater : public cmnd::Stable
 {
     struct Target
     {
-        Target(ImageKey* aKey) : key(aKey), pos() {}
+        Target(ImageKey* aKey)
+            : key(aKey)
+            , prevImage()
+            , nextImage()
+        {}
         ImageKey* key;
-        QVector<gl::Vector3> pos;
-        //img::Buffer mOldImage;
+        img::ResourceHandle prevImage;
+        img::ResourceHandle nextImage;
     };
 
     TimeLine& mTimeLine;
-    ResourceEvent& mEvent;
+    const ResourceEvent& mEvent;
     QList<Target> mTargets;
+    ResourceUpdatingWorkspacePtr mWorkspace;
 
 public:
-    ImageResourceUpdater(TimeLine& aTimeLine, ResourceEvent& aEvent)
+    ImageResourceUpdater(TimeLine& aTimeLine, const ResourceEvent& aEvent,
+                         const ResourceUpdatingWorkspacePtr& aWorkspace)
         : mTimeLine(aTimeLine)
         , mEvent(aEvent)
         , mTargets()
+        , mWorkspace(aWorkspace)
     {
     }
 
@@ -38,22 +45,42 @@ public:
             ImageKey* imgKey = (ImageKey*)key;
 
             // reset cache
-            if (mEvent.targets().contains(imgKey->data().resource().serialAddress()))
+            auto node = mEvent.findTarget(imgKey->data().resource()->serialAddress());
+            if (node)
             {
-                imgKey->resetCache();
+                mTargets.push_back(Target(imgKey));
+                mTargets.back().prevImage = imgKey->data().resource();
+                mTargets.back().nextImage = node->handle();
             }
-
-            mTargets.push_back(Target(ffdKey));
         }
 
-        redo();
+        for (auto& target : mTargets)
+        {
+            auto key = target.key;
+            GridMesh::TransitionCreater transer(
+                        key->cache().gridMesh(),
+                        key->data().resource()->pos());
+
+            // update image
+            target.key->data().resource() = target.nextImage;
+            target.key->resetCache();
+
+            // create transition data
+            auto& trans = mWorkspace->makeSureTransitions(key, key->cache().gridMesh());
+            trans = transer.create(
+                        key->cache().gridMesh().positions(),
+                        key->cache().gridMesh().vertexCount(),
+                        key->data().resource()->pos());
+        }
+        mWorkspace.reset(); // finish using
     }
 
     virtual void redo()
     {
         for (auto& target : mTargets)
         {
-            target.key->data().swap(target.pos);
+            target.key->data().resource() = target.nextImage;
+            target.key->resetCache();
         }
     }
 
@@ -61,40 +88,18 @@ public:
     {
         for (auto& target : mTargets)
         {
-            target.key->data().swap(target.pos);
+            target.key->data().resource() = target.prevImage;
+            target.key->resetCache();
         }
     }
 };
 
-cmnd::Stable* ImageKeyUpdater::createResourceUpdater(ObjectNode& aNode, ResourceEvent& aEvent)
+cmnd::Stable* ImageKeyUpdater::createResourceUpdater(
+        ObjectNode& aNode, const ResourceEvent& aEvent,
+        const ResourceUpdatingWorkspacePtr& aWorkspace)
 {
     if (!aNode.timeLine()) return nullptr;
-    return new ImageResourceUpdater(*aNode.timeLine(), aEvent);
+    return new ImageResourceUpdater(*aNode.timeLine(), aEvent, aWorkspace);
 }
-#endif
-
-#if 0
-void ImageKeyUpdater::onResourceModified(TimeLine* aLine, ResourceEvent& aEvent)
-{
-    if (aLine)
-    {
-        auto& map = aLine->map(TimeKeyType_Image);
-
-        // update bone cache
-        for (auto itr = map.begin(); itr != map.end(); ++itr)
-        {
-            TimeKey* key = itr.value();
-            XC_PTR_ASSERT(key);
-            XC_ASSERT(key->type() == TimeKeyType_Image);
-            ImageKey* imgKey = (ImageKey*)key;
-            // reset cache
-            if (aEvent.targets().contains(imgKey->data().resource().serialAddress()))
-            {
-                imgKey->resetCache();
-            }
-        }
-    }
-}
-#endif
 
 } // namespace core

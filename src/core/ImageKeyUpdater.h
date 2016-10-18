@@ -4,6 +4,7 @@
 #include "cmnd/Stable.h"
 #include "core/ObjectNode.h"
 #include "core/ResourceEvent.h"
+#include "core/ResourceUpdatingWorkspace.h"
 
 namespace core
 {
@@ -11,7 +12,9 @@ namespace core
 class ImageKeyUpdater
 {
 public:
-    //static cmnd::Stable* createResourceUpdater(ObjectNode& aNode, ResourceEvent& aEvent);
+    static cmnd::Stable* createResourceUpdater(
+            ObjectNode& aNode, const ResourceEvent& aEvent,
+            const ResourceUpdatingWorkspacePtr& aWorkspace);
 };
 
 } // namespace core

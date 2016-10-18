@@ -88,7 +88,8 @@ SOURCES += \
     ProjectEvent.cpp \
     MeshTransformerResource.cpp \
     ImageKey.cpp \
-    ImageKeyUpdater.cpp
+    ImageKeyUpdater.cpp \
+    ResourceUpdatingWorkspace.cpp
 
 HEADERS += \
     AbstractCursor.h \
@@ -148,4 +149,5 @@ HEADERS += \
     ProjectEvent.h \
     MeshTransformerResource.h \
     ImageKey.h \
-    ImageKeyUpdater.h
+    ImageKeyUpdater.h \
+    ResourceUpdatingWorkspace.h

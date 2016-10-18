@@ -33,19 +33,8 @@ public:
     Targets& targets() { return mTargets; }
     const Targets& targets() const { return mTargets; }
 
-    bool contains(const void* aSerialAddress) const
-    {
-        return mTargets.contains((const img::ResourceNode*)aSerialAddress);
-    }
-
-    const img::ResourceNode* findTarget(const void* aSerialAddress) const
-    {
-        for (auto target : mTargets)
-        {
-            if (target == aSerialAddress) return target;
-        }
-        return nullptr;
-    }
+    bool contains(const void* aSerialAddress) const;
+    const img::ResourceNode* findTarget(const void* aSerialAddress) const;
 
 private:
     Project& mProject;
