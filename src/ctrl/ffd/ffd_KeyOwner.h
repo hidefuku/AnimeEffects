@@ -6,7 +6,6 @@
 #include "core/ObjectNode.h"
 #include "core/TimeLine.h"
 #include "core/LayerMesh.h"
-#include "core/MeshKey.h"
 #include "core/FFDKey.h"
 
 namespace ctrl {
@@ -23,7 +22,7 @@ struct KeyOwner
     void createKey(
             const core::TimeLine& aLine,
             const core::LayerMesh& aAreaMesh,
-            core::MeshKey* aAreaKey,
+            core::TimeKey* aAreaKey,
             int aFrame);
     void setupMtx(const core::ObjectNode& aNode, const core::TimeLine& aLine);
 
@@ -39,7 +38,7 @@ struct KeyOwner
     QMatrix4x4 invMtx;
     bool hasInv;
 
-    core::MeshKey* parentKey;
+    core::TimeKey* parentKey;
 };
 
 } // namespace ffd

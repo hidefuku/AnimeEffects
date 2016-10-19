@@ -298,11 +298,8 @@ void FFDEditor::updateEvent(EventType)
 
 core::LayerMesh* FFDEditor::getCurrentAreaMesh(core::ObjectNode& aNode) const
 {
-    if (aNode.timeLine() && aNode.timeLine()->current().areaMesh())
-    {
-        return &aNode.timeLine()->current().areaMesh()->data();
-    }
-    return aNode.gridMesh();
+    if (!aNode.timeLine()) return aNode.gridMesh();
+    return aNode.timeLine()->current().ffdMesh();
 }
 
 bool FFDEditor::resetCurrentTarget()
@@ -359,17 +356,17 @@ void FFDEditor::updateTargetsKeys()
     for (int i = 0; i < mTargets.size(); ++i)
     {
         ObjectNode* node = mTargets[i]->node;
-        const TimeLine* line = node->timeLine();
-        const LayerMesh* areaMesh = getCurrentAreaMesh(*node);
-        MeshKey* areaKey = node->timeLine()->current().areaMesh();
-        const int frame = mProject.animator().currentFrame().get();
+        TimeLine* line = node->timeLine();
         XC_PTR_ASSERT(line);
-        XC_PTR_ASSERT(areaMesh);
-        XC_ASSERT(areaMesh->vertexCount() > 0);
-        XC_ASSERT(!areaKey || areaKey->data().vertexCount() > 0);
+
+        const int frame = mProject.animator().currentFrame().get();
+
+        const LayerMesh* mesh = line->current().ffdMesh();
+        XC_ASSERT(mesh && mesh->vertexCount() > 0);
+        TimeKey* areaKey = line->current().ffdMeshParent();
 
         // get key
-        mTargets[i]->keyOwner.createKey(*line, *areaMesh, areaKey, frame);
+        mTargets[i]->keyOwner.createKey(*line, *mesh, areaKey, frame);
         // setup srt
         mTargets[i]->keyOwner.setupMtx(*node, *line);
     }

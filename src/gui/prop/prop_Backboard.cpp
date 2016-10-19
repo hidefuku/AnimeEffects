@@ -9,8 +9,9 @@ static const int kDefaultHeight = 32;
 namespace gui {
 namespace prop {
 
-Backboard::Backboard(QWidget* aParent)
+Backboard::Backboard(ViaPoint& aViaPoint, QWidget* aParent)
     : QWidget(aParent)
+    , mViaPoint(aViaPoint)
     , mProject()
     , mLayout(new QVBoxLayout())
     , mProjectPanel()
@@ -30,7 +31,7 @@ void Backboard::setProject(core::Project* aProject)
 
     if (mProject)
     {
-        mObjectPanel.reset(new ObjectPanel(*mProject, "Null", this));
+        mObjectPanel.reset(new ObjectPanel(mViaPoint, *mProject, "Null", this));
         mLayout->addWidget(mObjectPanel.data());
     }
 }

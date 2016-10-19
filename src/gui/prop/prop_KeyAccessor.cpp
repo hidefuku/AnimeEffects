@@ -65,7 +65,7 @@ void KeyAccessor::assignSRTEasing(util::Easing::Param aNext)
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     XC_ASSERT(aNext.isValidParam());
-    const int frame = mProject->animator().currentFrame().get();
+    const int frame = getFrame();
     auto newData = getSRTKeyData(*mTarget, frame);
     newData.easing = aNext;
 
@@ -76,7 +76,7 @@ void KeyAccessor::assignSpline(int aNext)
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     XC_ASSERT(0 <= aNext && aNext < core::SRTKey::SplineType_TERM);
-    const int frame = mProject->animator().currentFrame().get();
+    const int frame = getFrame();
     auto newData = getSRTKeyData(*mTarget, frame);
     newData.spline = (core::SRTKey::SplineType)aNext;
 
@@ -86,7 +86,7 @@ void KeyAccessor::assignSpline(int aNext)
 void KeyAccessor::assignTrans(const QVector2D& aNewPos)
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
-    const int frame = mProject->animator().currentFrame().get();
+    const int frame = getFrame();
     auto newData = getSRTKeyData(*mTarget, frame);
     newData.pos.setX(aNewPos.x());
     newData.pos.setY(aNewPos.y());
@@ -97,7 +97,7 @@ void KeyAccessor::assignTrans(const QVector2D& aNewPos)
 void KeyAccessor::assignRotate(float aRotate)
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
-    const int frame = mProject->animator().currentFrame().get();
+    const int frame = getFrame();
     auto newData = getSRTKeyData(*mTarget, frame);
     newData.rotate = aRotate;
 
@@ -107,7 +107,7 @@ void KeyAccessor::assignRotate(float aRotate)
 void KeyAccessor::assignScale(const QVector2D& aNewScale)
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
-    const int frame = mProject->animator().currentFrame().get();
+    const int frame = getFrame();
     auto newData = getSRTKeyData(*mTarget, frame);
     newData.scale = aNewScale;
 
@@ -117,7 +117,7 @@ void KeyAccessor::assignScale(const QVector2D& aNewScale)
 void KeyAccessor::assignOpacity(float aOpacity)
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
-    const int frame = mProject->animator().currentFrame().get();
+    const int frame = getFrame();
     auto newData = getOpaKeyData(*mTarget, frame);
     newData.opacity = aOpacity;
 
@@ -128,7 +128,7 @@ void KeyAccessor::assignOpaEasing(util::Easing::Param aNext)
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     XC_ASSERT(aNext.isValidParam());
-    const int frame = mProject->animator().currentFrame().get();
+    const int frame = getFrame();
     auto newData = getOpaKeyData(*mTarget, frame);
     newData.easing = aNext;
 
@@ -139,16 +139,14 @@ void KeyAccessor::assignPoseEasing(util::Easing::Param aNext)
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     XC_ASSERT(aNext.isValidParam());
-    const int frame = mProject->animator().currentFrame().get();
-    ctrl::TimeLineUtil::assignPoseKeyEasing(*mProject, *mTarget, frame, aNext);
+    ctrl::TimeLineUtil::assignPoseKeyEasing(*mProject, *mTarget, getFrame(), aNext);
 }
 
 void KeyAccessor::assignFFDEasing(util::Easing::Param aNext)
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     XC_ASSERT(aNext.isValidParam());
-    const int frame = mProject->animator().currentFrame().get();
-    ctrl::TimeLineUtil::assignFFDKeyEasing(*mProject, *mTarget, frame, aNext);
+    ctrl::TimeLineUtil::assignFFDKeyEasing(*mProject, *mTarget, getFrame(), aNext);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -157,9 +155,8 @@ void KeyAccessor::knockNewSRT()
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::SRTKey();
     newKey->data() = mTarget->timeLine()->current().srt().data();
-    const int frame = mProject->animator().currentFrame().get();
 
-    ctrl::TimeLineUtil::pushNewSRTKey(*mProject, *mTarget, frame, newKey);
+    ctrl::TimeLineUtil::pushNewSRTKey(*mProject, *mTarget, getFrame(), newKey);
 }
 
 void KeyAccessor::knockNewOpacity()
@@ -167,9 +164,8 @@ void KeyAccessor::knockNewOpacity()
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::OpaKey();
     newKey->data() = mTarget->timeLine()->current().opa();
-    const int frame = mProject->animator().currentFrame().get();
 
-    ctrl::TimeLineUtil::pushNewOpaKey(*mProject, *mTarget, frame, newKey);
+    ctrl::TimeLineUtil::pushNewOpaKey(*mProject, *mTarget, getFrame(), newKey);
 }
 
 void KeyAccessor::knockNewPose()
@@ -180,8 +176,8 @@ void KeyAccessor::knockNewPose()
     core::BoneKey* parentKey = mTarget->timeLine()->current().areaBone();
     XC_PTR_ASSERT(parentKey);
     newKey->data().createBonesBy(*parentKey);
-    const int frame = mProject->animator().currentFrame().get();
-    ctrl::TimeLineUtil::pushNewPoseKey(*mProject, *mTarget, frame, newKey, parentKey);
+
+    ctrl::TimeLineUtil::pushNewPoseKey(*mProject, *mTarget, getFrame(), newKey, parentKey);
 }
 
 void KeyAccessor::knockNewFFD()
@@ -189,10 +185,19 @@ void KeyAccessor::knockNewFFD()
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::FFDKey();
     newKey->data() = mTarget->timeLine()->current().ffd();
-    core::MeshKey* parentKey = mTarget->timeLine()->current().areaMesh();
-    const int frame = mProject->animator().currentFrame().get();
+    core::TimeKey* parentKey = mTarget->timeLine()->current().ffdMeshParent();
 
-    ctrl::TimeLineUtil::pushNewFFDKey(*mProject, *mTarget, frame, newKey, parentKey);
+    ctrl::TimeLineUtil::pushNewFFDKey(*mProject, *mTarget, getFrame(), newKey, parentKey);
+}
+
+void KeyAccessor::knockNewImage(const img::ResourceHandle& aHandle)
+{
+    ASSERT_AND_RETURN_INVALID_TARGET();
+    auto newKey = new core::ImageKey();
+    newKey->data().resource() = aHandle;
+    newKey->resetCache();
+
+    ctrl::TimeLineUtil::pushNewImageKey(*mProject, *mTarget, getFrame(), newKey);
 }
 
 } // namespace prop

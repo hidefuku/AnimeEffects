@@ -44,6 +44,20 @@ void ViaPoint::createResourceDialog()
     mResDialog->show();
 }
 
+img::ResourceNode* ViaPoint::requireOneResource()
+{
+    QScopedPointer<ResourceDialog> dialog(new ResourceDialog(*this, true, mParent));
+    dialog->setProject(mProject);
+    dialog->updateResources();
+    dialog->exec();
+
+    if (dialog->hasValidNode())
+    {
+        return dialog->nodeList().first();
+    }
+    return nullptr;
+}
+
 void ViaPoint::setLogView(QPlainTextEdit* aLogView)
 {
     mLogView = aLogView;

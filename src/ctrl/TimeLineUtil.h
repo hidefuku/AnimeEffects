@@ -14,6 +14,7 @@
 #include "core/PoseKey.h"
 #include "core/FFDKey.h"
 #include "core/MeshKey.h"
+#include "core/ImageKey.h"
 
 namespace ctrl
 {
@@ -102,7 +103,11 @@ void pushNewPoseKey(
 
 void pushNewFFDKey(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
-        core::FFDKey* aKey, core::MeshKey* aParentKey);
+        core::FFDKey* aKey, core::TimeKey* aParentKey);
+
+void pushNewImageKey(
+        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
+        core::ImageKey* aKey);
 
 //-------------------------------------------------------------------------------------------------
 Notifier* createMoveNotifier(core::Project& aProject,

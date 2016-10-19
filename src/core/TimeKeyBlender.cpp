@@ -131,16 +131,36 @@ QMatrix4x4 TimeKeyBlender::getRelativeMatrix(
     return QMatrix4x4();
 }
 
-LayerMesh* TimeKeyBlender::getAreaMesh(
-        ObjectNode& aNode, const TimeInfo& aTime)
+LayerMesh* TimeKeyBlender::getAreaMesh(ObjectNode& aNode, const TimeInfo& aTime)
 {
-    if (aNode.timeLine())
+    return getAreaMeshImpl(aNode, aTime).second;
+}
+
+std::pair<TimeKey*, LayerMesh*> TimeKeyBlender::getAreaMeshImpl(ObjectNode& aNode, const TimeInfo& aTime)
+{
+    if (!aNode.timeLine())
     {
-        auto& map = aNode.timeLine()->map(TimeKeyType_Mesh);
-        auto key = (MeshKey*)TimeKeyGatherer::findLastKey(map, aTime.frame);
-        if (key) return &(key->data());
+        return std::pair<TimeKey*, LayerMesh*>(nullptr, aNode.gridMesh());
     }
-    return aNode.gridMesh();
+
+    TimeKey* areaKey = nullptr;
+    LayerMesh* areaMesh = aNode.gridMesh();
+
+    // find parent key
+    ImageKey* areaImageKey = getImageKey(aNode, aTime);
+    MeshKey* areaMeshKey = getMeshKey(aNode, aTime);
+
+    if (areaImageKey && (!areaMeshKey || areaImageKey->frame() > areaMeshKey->frame()))
+    {
+        areaKey = areaImageKey;
+        areaMesh = &(areaImageKey->cache().gridMesh());
+    }
+    else if (areaMeshKey)
+    {
+        areaKey = areaMeshKey;
+        areaMesh = &(areaMeshKey->data());
+    }
+    return std::pair<TimeKey*, LayerMesh*>(areaKey, areaMesh);
 }
 
 BoneKey* TimeKeyBlender::getAreaBone(
@@ -648,8 +668,7 @@ void TimeKeyBlender::blendMeshKey(PositionType aPos, const TimeInfo& aTime)
     auto& expans = *seekData.expans;
     if (!node.timeLine()) return;
 
-    const TimeLine::MapType& map = node.timeLine()->map(TimeKeyType_Mesh);
-    expans.setAreaMesh((MeshKey*)TimeKeyGatherer::findLastKey(map, aTime.frame));
+    expans.setAreaMesh(getMeshKey(node, aTime));
 }
 
 MeshKey* TimeKeyBlender::getMeshKey(const ObjectNode& aNode, const TimeInfo& aTime)
@@ -667,39 +686,41 @@ void TimeKeyBlender::blendFFDKey(PositionType aPos, const TimeInfo& aTime)
     auto& expans = *seekData.expans;
     if (!node.timeLine()) return;
 
-    MeshKey* areaMeshKey = getMeshKey(node, aTime);
+    // find area key and mesh
+    auto areaMeshPair = getAreaMeshImpl(node, aTime);
+    TimeKey* areaKey = areaMeshPair.first;
+    LayerMesh* areaMesh = areaMeshPair.second;
+    expans.setFFDMesh(areaMesh);
+    expans.setFFDMeshParent(areaKey);
 
-    // get blend info
-    TimeKeyGatherer blend(
-                node.timeLine()->map(TimeKeyType_FFD), aTime,
-                TimeKeyGatherer::ForceType_AssignedParent, areaMeshKey);
-
-    // find parent's mesh
-    const LayerMesh* mesh = node.gridMesh();
-    if (areaMeshKey) mesh = &(areaMeshKey->data());
-
-    if (!mesh || mesh->vertexCount() == 0)
+    // no mesh exists
+    if (!areaMesh || areaMesh->vertexCount() == 0)
     {
         expans.ffd().clear();
         return;
     }
 
+    // get blend info
+    TimeKeyGatherer blend(
+                node.timeLine()->map(TimeKeyType_FFD), aTime,
+                TimeKeyGatherer::ForceType_AssignedParent, areaKey);
+
     // no key is exists
     if (blend.isEmpty())
     {
-        expans.ffd().write(mesh->positions(), mesh->vertexCount());
+        expans.ffd().write(areaMesh->positions(), areaMesh->vertexCount());
     }
     else if (blend.hasSameFrame())
     {
         // a key is exists
-        XC_ASSERT(blend.point(0).key->parent() == (TimeKey*)areaMeshKey);
-        expans.ffd().write(((const FFDKey*)(blend.point(0).key))->data().positions(), mesh->vertexCount());
+        XC_ASSERT(blend.point(0).key->parent() == areaKey);
+        expans.ffd().write(((const FFDKey*)(blend.point(0).key))->data().positions(), areaMesh->vertexCount());
     }
     else if (blend.isSingle())
     {
         // perfect following
-        XC_ASSERT(blend.singlePoint().key->parent() == (TimeKey*)areaMeshKey);
-        expans.ffd().write(((const FFDKey*)(blend.singlePoint().key))->data().positions(), mesh->vertexCount());
+        XC_ASSERT(blend.singlePoint().key->parent() == areaKey);
+        expans.ffd().write(((const FFDKey*)(blend.singlePoint().key))->data().positions(), areaMesh->vertexCount());
     }
     else
     {
@@ -712,8 +733,8 @@ void TimeKeyBlender::blendFFDKey(PositionType aPos, const TimeInfo& aTime)
         const gl::Vector3* v1 = key1->data().positions();
         const int count = key0->data().count();
         XC_ASSERT(count == key1->data().count());
-        XC_ASSERT(key0->parent() == (TimeKey*)areaMeshKey);
-        XC_ASSERT(key1->parent() == (TimeKey*)areaMeshKey);
+        XC_ASSERT(key0->parent() == areaKey);
+        XC_ASSERT(key1->parent() == areaKey);
         const float frame = p1.relativeFrame - p0.relativeFrame;
         XC_ASSERT(frame != 0.0f);
 
@@ -742,8 +763,16 @@ void TimeKeyBlender::blendImageKey(PositionType aPos, const TimeInfo& aTime)
     auto& expans = *seekData.expans;
     if (!node.timeLine()) return;
 
-    const TimeLine::MapType& map = node.timeLine()->map(TimeKeyType_Image);
-    expans.setAreaImage((ImageKey*)TimeKeyGatherer::findLastKey(map, aTime.frame));
+    auto imageKey = getImageKey(node, aTime);
+    expans.setAreaImage(imageKey);
+    expans.setAreaTexture(imageKey ? &(imageKey->cache().texture()) : nullptr);
+}
+
+ImageKey* TimeKeyBlender::getImageKey(const ObjectNode& aNode, const TimeInfo& aTime)
+{
+    if (!aNode.timeLine()) return nullptr;
+    const TimeLine::MapType& map = aNode.timeLine()->map(TimeKeyType_Image);
+    return (ImageKey*)TimeKeyGatherer::findLastKey(map, aTime.frame);
 }
 
 void TimeKeyBlender::buildPosePalette(ObjectNode& aNode, PosePalette::KeyPair aPair)

@@ -1,8 +1,10 @@
 #include "cmnd/ScopedMacro.h"
 #include "cmnd/BasicCommands.h"
+#include "gl/Global.h"
 #include "core/Constant.h"
 #include "core/TimeKeyExpans.h"
 #include "ctrl/TimeLineUtil.h"
+#include "gui/ResourceDialog.h"
 #include "gui/prop/prop_ObjectPanel.h"
 #include "gui/prop/prop_Items.h"
 
@@ -299,8 +301,64 @@ bool ObjectPanel::FFDPanel::keyExists() const
 }
 
 //-------------------------------------------------------------------------------------------------
-ObjectPanel::ObjectPanel(core::Project& aProject, const QString& aTitle, QWidget* aParent)
+ObjectPanel::ImagePanel::ImagePanel(Panel& aPanel, KeyAccessor& aAccessor,
+                                    int aLabelWidth, ViaPoint& aViaPoint)
+    : mAccessor(aAccessor)
+    , mKnocker()
+    , mGroup()
+    , mKeyExists(false)
+    , mViaPoint(aViaPoint)
+{
+    mKnocker = new KeyKnocker("Image");
+    mKnocker->set([=]() { this->knockNewKey(); });
+    aPanel.addGroup(mKnocker);
+
+    mGroup = new KeyGroup("Image", aLabelWidth);
+    {
+        aPanel.addGroup(mGroup);
+    }
+    setEnabled(false);
+    setKeyExists(false, false);
+}
+
+void ObjectPanel::ImagePanel::knockNewKey()
+{
+    auto resNode = mViaPoint.requireOneResource();
+    if (resNode)
+    {
+        gl::Global::makeCurrent();
+        this->mAccessor.knockNewImage(resNode->handle());
+    }
+}
+
+void ObjectPanel::ImagePanel::setEnabled(bool aEnabled)
+{
+    mKnocker->setEnabled(aEnabled);
+    mGroup->setEnabled(aEnabled);
+}
+
+void ObjectPanel::ImagePanel::setKeyExists(bool aIsExists, bool aIsKnockable)
+{
+    mKeyExists = aIsExists;
+    mKnocker->setVisible(!aIsExists && aIsKnockable);
+    mGroup->setVisible(aIsExists);
+}
+
+void ObjectPanel::ImagePanel::setKeyValue(const core::TimeKey* /*aKey*/)
+{
+    //TIMEKEY_PTR_TYPE_ASSERT(aKey, Image);
+    //const core::ImageKey::Data& data = ((const core::FFDKey*)aKey)->data();
+}
+
+bool ObjectPanel::ImagePanel::keyExists() const
+{
+    return mKeyExists;
+}
+
+//-------------------------------------------------------------------------------------------------
+ObjectPanel::ObjectPanel(ViaPoint& aViaPoint, core::Project& aProject, const QString& aTitle, QWidget* aParent)
     : Panel(aTitle, aParent)
+    , mViaPoint(aViaPoint)
     , mProject(aProject)
     , mTarget()
     , mKeyAccessor()
@@ -313,6 +371,7 @@ ObjectPanel::ObjectPanel(core::Project& aProject, const QString& aTitle, QWidget
     , mOpaPanel()
     , mPosePanel()
     , mFFDPanel()
+    , mImagePanel()
 {
     mKeyAccessor.setProject(&aProject);
     mLabelWidth = this->fontMetrics().boundingRect("MaxTextWidth :").width();
@@ -409,6 +468,7 @@ void ObjectPanel::build()
     mOpaPanel.reset(new OpaPanel(*this, mKeyAccessor, mLabelWidth));
     mPosePanel.reset(new PosePanel(*this, mKeyAccessor, mLabelWidth));
     mFFDPanel.reset(new FFDPanel(*this, mKeyAccessor, mLabelWidth));
+    mImagePanel.reset(new ImagePanel(*this, mKeyAccessor, mLabelWidth, mViaPoint));
 
     this->addStretch();
 }
@@ -451,6 +511,7 @@ void ObjectPanel::updateKeyExists()
         const int frame = mProject.animator().currentFrame().get();
         const bool hasAreaBone = timeLine.current().areaBone();
         const bool hasAnyMesh = mTarget->gridMesh();
+        const bool isLayer = mTarget->type() == core::ObjectType_Layer;
 
         mSRTPanel->setEnabled(true);
         mSRTPanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_SRT, frame));
@@ -460,6 +521,8 @@ void ObjectPanel::updateKeyExists()
         mPosePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Pose, frame), hasAreaBone);
         mFFDPanel->setEnabled(true);
         mFFDPanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_FFD, frame), hasAnyMesh);
+        mImagePanel->setEnabled(true);
+        mImagePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Image, frame), isLayer);
     }
     else
     {
@@ -467,6 +530,7 @@ void ObjectPanel::updateKeyExists()
         mOpaPanel->setEnabled(false);
         mPosePanel->setEnabled(false);
         mFFDPanel->setEnabled(false);
+        mImagePanel->setEnabled(false);
     }
 }
 
@@ -491,6 +555,10 @@ void ObjectPanel::updateKeyValue()
         if (mFFDPanel->keyExists())
         {
             mFFDPanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_FFD, frame));
+        }
+        if (mImagePanel->keyExists())
+        {
+            mImagePanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_Image, frame));
         }
     }
 }

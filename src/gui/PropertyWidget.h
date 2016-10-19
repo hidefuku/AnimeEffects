@@ -7,6 +7,7 @@
 #include "core/Project.h"
 #include "core/ObjectNode.h"
 #include "core/TimeLineEvent.h"
+#include "gui/ViaPoint.h"
 #include "gui/prop/prop_Backboard.h"
 
 namespace gui
@@ -15,7 +16,7 @@ namespace gui
 class PropertyWidget : public QScrollArea
 {
 public:
-    PropertyWidget(QWidget* aParent);
+    PropertyWidget(ViaPoint& aViaPoint, QWidget* aParent);
     ~PropertyWidget();
 
     void setProject(core::Project* aProject);

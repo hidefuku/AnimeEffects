@@ -1,6 +1,7 @@
 #ifndef CORE_TIMEKEYEXPANS_H
 #define CORE_TIMEKEYEXPANS_H
 
+#include "gl/Texture.h"
 #include "core/SRTExpans.h"
 #include "core/OpaKey.h"
 #include "core/BoneKey.h"
@@ -75,9 +76,15 @@ public:
 
     FFDKey::Data& ffd() { return mFFD; }
     const FFDKey::Data& ffd() const { return mFFD; }
+    void setFFDMesh(LayerMesh* aMesh) { mFFDMesh = aMesh; }
+    LayerMesh* ffdMesh() { return mFFDMesh; }
+    void setFFDMeshParent(TimeKey* aKey) { mFFDMeshParent = aKey; }
+    TimeKey* ffdMeshParent() { return mFFDMeshParent; }
 
     void setAreaImage(ImageKey* aKey) { mAreaImage = aKey; }
     ImageKey* areaImage() { return mAreaImage; }
+    void setAreaTexture(gl::Texture* aTexture) { mAreaTexture = aTexture; }
+    gl::Texture* areaTexture() { return mAreaTexture; }
 
 private:
     Frame mMasterCache;
@@ -100,7 +107,10 @@ private:
     PosePalette mPosePalette;
     MeshKey* mAreaMesh;
     FFDKey::Data mFFD;
+    LayerMesh* mFFDMesh;
+    TimeKey* mFFDMeshParent;
     ImageKey* mAreaImage;
+    gl::Texture* mAreaTexture;
 };
 
 } // namespace core

@@ -19,7 +19,7 @@ class TimeKeyBlender
 public:
     struct SeekData
     {
-        const ObjectNode* objNode;
+        ObjectNode* objNode;
         TimeKeyExpans* expans;
     };
     typedef util::ITreeSeeker<SeekData, ObjectNode*> SeekerType;
@@ -51,12 +51,10 @@ private:
     static SRTKey::Data getDefaultSRT(const ObjectNode& aNode);
     static std::array<QVector3D, 2> catmullRomVels(const TimeKeyGatherer& aBlend);
     static void getSRTData(
-            TimeKeyExpans& aCurrent,
-            const ObjectNode& aNode,
-            const TimeInfo& aTime);
-    static MeshKey* getMeshKey(
-            const ObjectNode& aNode,
-            const TimeInfo& aTime);
+            TimeKeyExpans& aCurrent, const ObjectNode& aNode, const TimeInfo& aTime);
+    static std::pair<TimeKey*, LayerMesh*> getAreaMeshImpl(ObjectNode& aNode, const TimeInfo& aTime);
+    static MeshKey* getMeshKey(const ObjectNode& aNode, const TimeInfo& aTime);
+    static ImageKey* getImageKey(const ObjectNode& aNode, const TimeInfo& aTime);
 
     //QMatrix4x4 getParentMatrix(PositionType aPos, const TimeInfo& aTime, int aCacheFrame);
     void blendSRTKey(PositionType aPos, const TimeInfo& aTime);

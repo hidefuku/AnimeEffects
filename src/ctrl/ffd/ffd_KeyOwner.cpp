@@ -1,5 +1,7 @@
 #include "cmnd/BasicCommands.h"
 #include "core/TimeKeyExpans.h"
+#include "core/MeshKey.h"
+#include "core/ImageKey.h"
 #include "ctrl/ffd/ffd_KeyOwner.h"
 
 using namespace core;
@@ -24,7 +26,7 @@ KeyOwner::~KeyOwner()
 
 void KeyOwner::createKey(
         const TimeLine& aLine, const LayerMesh& aAreaMesh,
-        MeshKey* aAreaKey, int aFrame)
+        TimeKey* aAreaKey, int aFrame)
 {
     // delete old holding key
     deleteOwnsKey();
@@ -41,8 +43,9 @@ void KeyOwner::createKey(
         // check parent mesh
         if (key->parent())
         {
-            TIMEKEY_TYPE_ASSERT(*(key->parent()), Mesh);
-            parentKey = (MeshKey*)key->parent();
+            auto parentType = key->parent()->type();
+            XC_ASSERT(parentType == TimeKeyType_Mesh || parentType == TimeKeyType_Image);
+            parentKey = key->parent();
         }
     }
     else
@@ -98,7 +101,19 @@ core::LayerMesh* KeyOwner::getParentMesh(core::ObjectNode* node)
 {
     if (parentKey)
     {
-        return &parentKey->data();
+        if (parentKey->type() == TimeKeyType_Mesh)
+        {
+            return &(((MeshKey*)parentKey)->data());
+        }
+        else if (parentKey->type() == TimeKeyType_Image)
+        {
+            return &(((ImageKey*)parentKey)->cache().gridMesh());
+        }
+        else
+        {
+            XC_ASSERT(0);
+            return nullptr;
+        }
     }
     if (node)
     {

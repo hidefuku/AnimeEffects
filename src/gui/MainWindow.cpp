@@ -120,7 +120,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
         auto splitter = new QSplitter(Qt::Vertical, dockWidget);
         dockWidget->setWidget(splitter);
 
-        mProperty = new PropertyWidget(splitter);
+        mProperty = new PropertyWidget(mViaPoint, splitter);
         splitter->addWidget(mProperty);
 
         auto textEdit = new QPlainTextEdit(splitter);

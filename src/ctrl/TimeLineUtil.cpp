@@ -251,11 +251,21 @@ void pushNewPoseKey(
 
 void pushNewFFDKey(
         Project& aProject, ObjectNode& aTarget, int aFrame,
-        FFDKey* aKey, MeshKey* aParentKey)
+        FFDKey* aKey, TimeKey* aParentKey)
 {
+    XC_ASSERT(!aParentKey ||
+              aParentKey->type() == TimeKeyType_Mesh ||
+              aParentKey->type() == TimeKeyType_Image);
     pushNewKey<FFDKey, TimeKeyType_FFD>(
                 aProject, aTarget, aFrame, aKey,
                 "push new ffd key", aParentKey);
+}
+
+void pushNewImageKey(
+        Project& aProject, ObjectNode& aTarget, int aFrame, ImageKey* aKey)
+{
+    pushNewKey<ImageKey, TimeKeyType_Image>(
+                aProject, aTarget, aFrame, aKey, "push new image key");
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -6,6 +6,7 @@
 #include "util/NonCopyable.h"
 #include "gl/DeviceInfo.h"
 #include "core/Project.h"
+namespace img { class ResourceNode; }
 namespace gui { class ResourceDialog; }
 namespace gui { class MainMenuBar; }
 
@@ -24,6 +25,7 @@ public:
 
     ResourceDialog* resourceDialog() const { return mResDialog; }
     void createResourceDialog();
+    img::ResourceNode* requireOneResource();
 
     void setLogView(QPlainTextEdit* aLogView);
     void pushLog(const QString& aText);

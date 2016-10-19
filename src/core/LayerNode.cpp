@@ -182,6 +182,7 @@ void LayerNode::renderClipper(
     gl::Global::Functions& ggl = gl::Global::functions();
     auto& shader = mShaderHolder.clipperShader(aInfo.clippingId != 0);
     auto& expans = aAccessor.get(mTimeLine);
+    auto areaTextureId = expans.areaTexture() ? expans.areaTexture()->id() : mTexture.id();
 
     core::ClippingFrame& frame = *aInfo.clippingFrame;
     frame.updateRenderStamp();
@@ -193,7 +194,7 @@ void LayerNode::renderClipper(
     // bind textures
     //ggl.glEnable(GL_TEXTURE_2D);
     ggl.glActiveTexture(GL_TEXTURE0);
-    ggl.glBindTexture(GL_TEXTURE_2D, mTexture.id());
+    ggl.glBindTexture(GL_TEXTURE_2D, areaTextureId);
     ggl.glActiveTexture(GL_TEXTURE1);
     ggl.glBindTexture(GL_TEXTURE_2D, frame.texture().id());
 
@@ -264,9 +265,9 @@ void LayerNode::transformShape(
     }
     else
     {
-        if (expans.areaMesh())
+        if (expans.ffdMesh())
         {
-            mesh = &expans.areaMesh()->data();
+            mesh = expans.ffdMesh();
         }
 
         if (mesh->vertexCount() <= 0)
@@ -304,6 +305,7 @@ void LayerNode::renderShape(
                 mShaderHolder.gridShader() :
                 mShaderHolder.shader(mBlendMode, isClippee);
     auto& expans = aAccessor.get(mTimeLine);
+    auto areaTextureId = expans.areaTexture() ? expans.areaTexture()->id() : mTexture.id();
 
     if (aInfo.isGrid)
     {
@@ -313,7 +315,7 @@ void LayerNode::renderShape(
     {
         //ggl.glEnable(GL_TEXTURE_2D);
         ggl.glActiveTexture(GL_TEXTURE0);
-        ggl.glBindTexture(GL_TEXTURE_2D, mTexture.id());
+        ggl.glBindTexture(GL_TEXTURE_2D, areaTextureId);
         ggl.glActiveTexture(GL_TEXTURE1);
         ggl.glBindTexture(GL_TEXTURE_2D, aInfo.dest);
 
