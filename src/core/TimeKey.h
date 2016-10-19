@@ -48,4 +48,12 @@ private:
 
 } // namespace core
 
+
+#define TIMEKEY_TYPE_ASSERT(aKey, aType) \
+    XC_MSG_ASSERT((aKey).type() == core::TimeKeyType_##aType, "timekey type error: %d", (aKey).type())
+
+#define TIMEKEY_PTR_TYPE_ASSERT(aKeyPtr, aType) \
+    do { XC_PTR_ASSERT(aKeyPtr); TIMEKEY_TYPE_ASSERT(*(aKeyPtr), aType); } while(0)
+
+
 #endif // CORE_TIMEKEY_H

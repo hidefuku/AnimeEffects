@@ -95,7 +95,7 @@ void MeshKeyUtil::CreateVtx::redo()
     auto pos = gl::Vector3::make(mPos.x(), mPos.y(), 0.0f);
     for (auto child : mKey.children())
     {
-        XC_ASSERT(child->type() == TimeKeyType_FFD);
+        TIMEKEY_PTR_TYPE_ASSERT(child, FFD);
         ((FFDKey*)child)->data().pushBackVtx(pos);
     }
     mNewVtx.done();
@@ -109,7 +109,7 @@ void MeshKeyUtil::CreateVtx::undo()
 
     for (auto child : mKey.children())
     {
-        XC_ASSERT(child->type() == TimeKeyType_FFD);
+        TIMEKEY_PTR_TYPE_ASSERT(child, FFD);
         ((FFDKey*)child)->data().popBackVtx();
     }
     mNewVtx.undone();
@@ -208,7 +208,7 @@ void MeshKeyUtil::RemoveVtx::redo()
     mPrevFFDs.clear();
     for (auto child : mKey.children())
     {
-        XC_ASSERT(child->type() == TimeKeyType_FFD);
+        TIMEKEY_PTR_TYPE_ASSERT(child, FFD);
         mPrevFFDs.push_back(((FFDKey*)child)->data().removeVtx(mIndex));
     }
     mDelVtx.done();
@@ -222,7 +222,7 @@ void MeshKeyUtil::RemoveVtx::undo()
     int i = 0;
     for (auto child : mKey.children())
     {
-        XC_ASSERT(child->type() == TimeKeyType_FFD);
+        TIMEKEY_PTR_TYPE_ASSERT(child, FFD);
         ((FFDKey*)child)->data().insertVtx(mIndex, mPrevFFDs.at(i));
         ++i;
     }

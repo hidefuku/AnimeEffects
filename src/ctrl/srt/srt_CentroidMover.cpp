@@ -68,7 +68,7 @@ void CentroidMover::exec()
         for (auto itr = map.begin(); itr != map.end(); ++itr)
         {
             core::TimeKey* key = itr.value();
-            XC_ASSERT(key->type() == core::TimeKeyType_SRT);
+            TIMEKEY_PTR_TYPE_ASSERT(key, SRT);
 
             core::SRTKey* srtKey = (core::SRTKey*)key;
             const QVector3D prev = srtKey->data().pos;
@@ -86,7 +86,7 @@ void CentroidMover::exec()
         for (auto itr = map.begin(); itr != map.end(); ++itr)
         {
             core::TimeKey* key = itr.value();
-            XC_ASSERT(key->type() == core::TimeKeyType_SRT);
+            TIMEKEY_PTR_TYPE_ASSERT(key, SRT);
             core::SRTKey* srtKey = (core::SRTKey*)key;
 
             const QVector3D prev = srtKey->data().pos;

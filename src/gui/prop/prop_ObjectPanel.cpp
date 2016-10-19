@@ -113,7 +113,7 @@ void ObjectPanel::SRTPanel::setKeyExists(bool aIsExists)
 
 void ObjectPanel::SRTPanel::setKeyValue(const core::TimeKey* aKey)
 {
-    XC_ASSERT(aKey && aKey->type() == core::TimeKeyType_SRT);
+    TIMEKEY_PTR_TYPE_ASSERT(aKey, SRT);
     const core::SRTKey::Data data = ((const core::SRTKey*)aKey)->data();
     mEasing->setValue(data.easing, false);
     mSpline->setValue(data.spline, false);
@@ -181,7 +181,7 @@ void ObjectPanel::OpaPanel::setKeyExists(bool aIsExists)
 
 void ObjectPanel::OpaPanel::setKeyValue(const core::TimeKey* aKey)
 {
-    XC_ASSERT(aKey && aKey->type() == core::TimeKeyType_Opa);
+    TIMEKEY_PTR_TYPE_ASSERT(aKey, Opa);
     const core::OpaKey::Data& data = ((const core::OpaKey*)aKey)->data();
     mEasing->setValue(data.easing, false);
     mOpacity->setValue(data.opacity);
@@ -235,7 +235,7 @@ void ObjectPanel::PosePanel::setKeyExists(bool aIsExists, bool aIsKnockable)
 
 void ObjectPanel::PosePanel::setKeyValue(const core::TimeKey* aKey)
 {
-    XC_ASSERT(aKey && aKey->type() == core::TimeKeyType_Pose);
+    TIMEKEY_PTR_TYPE_ASSERT(aKey, Pose);
     const core::PoseKey::Data& data = ((const core::PoseKey*)aKey)->data();
     mEasing->setValue(data.easing(), false);
 }
@@ -288,7 +288,7 @@ void ObjectPanel::FFDPanel::setKeyExists(bool aIsExists, bool aIsKnockable)
 
 void ObjectPanel::FFDPanel::setKeyValue(const core::TimeKey* aKey)
 {
-    XC_ASSERT(aKey && aKey->type() == core::TimeKeyType_FFD);
+    TIMEKEY_PTR_TYPE_ASSERT(aKey, FFD);
     const core::FFDKey::Data& data = ((const core::FFDKey*)aKey)->data();
     mEasing->setValue(data.easing(), false);
 }

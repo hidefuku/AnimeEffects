@@ -42,8 +42,7 @@ public:
         for (auto itr = map.begin(); itr != map.end(); ++itr)
         {
             TimeKey* key = itr.value();
-            XC_PTR_ASSERT(key);
-            XC_ASSERT(key->type() == TimeKeyType_Image);
+            TIMEKEY_PTR_TYPE_ASSERT(key, Image);
             ImageKey* imgKey = (ImageKey*)key;
 
             // reset cache

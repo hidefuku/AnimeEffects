@@ -33,8 +33,7 @@ public:
         for (auto itr = map.begin(); itr != map.end(); ++itr)
         {
             TimeKey* timeKey = itr.value();
-            XC_PTR_ASSERT(timeKey);
-            XC_ASSERT(timeKey->type() == TimeKeyType_FFD);
+            TIMEKEY_PTR_TYPE_ASSERT(timeKey, FFD);
             FFDKey* ffdKey = (FFDKey*)timeKey;
 
             // find transition information

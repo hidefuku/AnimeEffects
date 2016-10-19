@@ -152,7 +152,7 @@ BoneKey* TimeKeyBlender::getAreaBone(
         TimeKey* key = TimeKeyGatherer::findLastKey(map, aTime.frame);
         if (key)
         {
-            XC_ASSERT(key->type() == TimeKeyType_Bone);
+            TIMEKEY_PTR_TYPE_ASSERT(key, Bone);
             return (BoneKey*)key;
         }
     }
@@ -602,9 +602,9 @@ void TimeKeyBlender::blendPoseKey(PositionType aPos, const TimeInfo& aTime)
         const float frame = p1.relativeFrame - p0.relativeFrame;
         XC_ASSERT(frame != 0.0f);
 
-        XC_ASSERT(key0->parent() &&
-                  key0->parent() == (TimeKey*)areaBoneKey &&
-                  key0->parent()->type() == TimeKeyType_Bone);
+        auto key0Parent = key0->parent();
+        TIMEKEY_PTR_TYPE_ASSERT(key0Parent, Bone);
+        XC_ASSERT(key0Parent == (TimeKey*)areaBoneKey);
 
         // initialize
         expans.pose() = key0->data();

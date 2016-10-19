@@ -41,7 +41,7 @@ void KeyOwner::createKey(
         // check parent mesh
         if (key->parent())
         {
-            XC_ASSERT(key->parent()->type() == TimeKeyType_Mesh);
+            TIMEKEY_TYPE_ASSERT(*(key->parent()), Mesh);
             parentKey = (MeshKey*)key->parent();
         }
     }
