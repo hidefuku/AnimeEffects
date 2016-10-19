@@ -575,9 +575,8 @@ void TimeKeyBlender::blendPoseKey(PositionType aPos, const TimeInfo& aTime)
         auto poseKey = (const PoseKey*)(blend.point(0).key);
         expans.pose() = poseKey->data();
 
-        XC_ASSERT(poseKey->parent() &&
-                  poseKey->parent() == (TimeKey*)areaBoneKey &&
-                  poseKey->parent()->type() == TimeKeyType_Bone);
+        TIMEKEY_PTR_TYPE_ASSERT(poseKey->parent(), Bone);
+        XC_ASSERT(poseKey->parent() == (TimeKey*)areaBoneKey);
     }
     else if (blend.isSingle())
     {
@@ -585,9 +584,8 @@ void TimeKeyBlender::blendPoseKey(PositionType aPos, const TimeInfo& aTime)
         auto poseKey = (const PoseKey*)(blend.singlePoint().key);
         expans.pose() = poseKey->data();
 
-        XC_ASSERT(poseKey->parent() &&
-                  poseKey->parent() == (TimeKey*)areaBoneKey &&
-                  poseKey->parent()->type() == TimeKeyType_Bone);
+        TIMEKEY_PTR_TYPE_ASSERT(poseKey->parent(), Bone);
+        XC_ASSERT(poseKey->parent() == (TimeKey*)areaBoneKey);
     }
     else
     {
@@ -602,9 +600,8 @@ void TimeKeyBlender::blendPoseKey(PositionType aPos, const TimeInfo& aTime)
         const float frame = p1.relativeFrame - p0.relativeFrame;
         XC_ASSERT(frame != 0.0f);
 
-        auto key0Parent = key0->parent();
-        TIMEKEY_PTR_TYPE_ASSERT(key0Parent, Bone);
-        XC_ASSERT(key0Parent == (TimeKey*)areaBoneKey);
+        TIMEKEY_PTR_TYPE_ASSERT(key0->parent(), Bone);
+        XC_ASSERT(key0->parent() == (TimeKey*)areaBoneKey);
 
         // initialize
         expans.pose() = key0->data();
