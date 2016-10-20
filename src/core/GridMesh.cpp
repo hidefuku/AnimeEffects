@@ -31,7 +31,7 @@ GridMesh::GridMesh()
     , mCellNumX(0)
     , mCellNumY(0)
     , mCellPx(0)
-    , mPrimitiveType(GL_QUADS)
+    , mPrimitiveType(GL_TRIANGLES)
     , mIndexCount(0)
     , mVertexCount(0)
     , mVertexRect()
@@ -41,6 +41,7 @@ GridMesh::GridMesh()
     , mTexCoords()
     , mNormals()
     , mQuadConnections()
+    , mHexaConnections()
     , mMeshBuffer()
 {
     // initialize mesh buffer
@@ -58,6 +59,7 @@ void GridMesh::freeBuffers()
     mOffsets.reset();
     mTexCoords.reset();
     mNormals.reset();
+    mHexaConnections.reset();
     mQuadConnections.reset();
     mIndices.reset();
 }
@@ -81,6 +83,7 @@ void GridMesh::allocVertexBuffers(int aVertexCount)
 
 void GridMesh::allocIndexBuffer(int aIndexCount)
 {
+    mIndices.reset();
     mIndices.reset(new GLuint[aIndexCount]);
 }
 
@@ -136,6 +139,7 @@ void GridMesh::createFromImageVer2(const void* aImagePtr, const QSize& aSize, in
     creator.writeConnections(mHexaConnections.data());
 }
 
+#if 1
 void GridMesh::createFromImageVer1(const void* aImagePtr, const QSize& aSize, int aCellPx)
 {
     using img::PixelPos;
@@ -539,6 +543,7 @@ void GridMesh::createFromImageVer1(const void* aImagePtr, const QSize& aSize, in
 
     //qDebug() << "test end";
 }
+#endif
 
 void GridMesh::writeHeightMap(const HeightMap& aMap, const QVector2D& aMinPos)
 {

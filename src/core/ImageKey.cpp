@@ -27,22 +27,34 @@ ImageKey::ImageKey()
 
 void ImageKey::resetCache()
 {
-    mCache.reset();
-    mCache.reset(new Cache());
+    resetGridMeshCache();
+    resetTextureCache();
+}
 
+void ImageKey::resetGridMeshCache()
+{
+    if (mData.resource()->hasImage())
+    {
+        auto imageData = mData.resource()->image().data();
+        auto pixelSize = mData.resource()->image().pixelSize();
+
+        // grid mesh
+        const int cellPx = std::max(std::min(8, pixelSize.width() / 4), 2);
+        mCache.gridMesh().createFromImage(imageData, pixelSize, cellPx);
+    }
+}
+
+void ImageKey::resetTextureCache()
+{
     if (mData.resource()->hasImage())
     {
         auto imageData = mData.resource()->image().data();
         auto pixelSize = mData.resource()->image().pixelSize();
 
         // make a gl texture
-        mCache->texture().create(pixelSize, imageData);
-        mCache->texture().setFilter(GL_LINEAR);
-        mCache->texture().setWrap(GL_CLAMP_TO_BORDER, QColor(0, 0, 0, 0));
-
-        // grid mesh
-        const int cellPx = std::max(std::min(8, pixelSize.width() / 4), 2);
-        mCache->gridMesh().createFromImage(imageData, pixelSize, cellPx);
+        mCache.texture().create(pixelSize, imageData);
+        mCache.texture().setFilter(GL_LINEAR);
+        mCache.texture().setWrap(GL_CLAMP_TO_BORDER, QColor(0, 0, 0, 0));
     }
 }
 
@@ -52,6 +64,11 @@ bool ImageKey::serialize(Serializer& aOut) const
     aOut.write(mData.easing());
     // image id
     aOut.writeID(mData.resource()->serialAddress());
+    // grid mesh
+    if (!mCache.gridMesh().serialize(aOut))
+    {
+        return false;
+    }
 
     return aOut.checkStream();
 }
@@ -72,12 +89,17 @@ bool ImageKey::deserialize(Deserializer& aIn)
         auto solver = [=](void* aPtr)
         {
             this->mData.resource() = ((img::ResourceNode*)aPtr)->handle();
-            this->resetCache();
+            this->resetTextureCache();
         };
         if (!aIn.orderIDData(solver))
         {
             return aIn.errored("invalid image reference id");
         }
+    }
+    // grid mesh
+    if (!mCache.gridMesh().deserialize(aIn))
+    {
+        return aIn.errored("failed to deserialize grid mesh");
     }
 
     aIn.popLogScope();

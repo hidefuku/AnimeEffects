@@ -43,17 +43,19 @@ public:
     const Data& data() const { return mData; }
 
     void resetCache();
-    bool hasCache() const { return mCache; }
-    Cache& cache() { XC_ASSERT(mCache); return *mCache; }
-    const Cache& cache() const { XC_ASSERT(mCache); return *mCache; }
+    Cache& cache() { return mCache; }
+    const Cache& cache() const { return mCache; }
 
     virtual TimeKeyType type() const { return TimeKeyType_Image; }
     virtual bool serialize(Serializer& aOut) const;
     virtual bool deserialize(Deserializer& aIn);
 
 private:
+    void resetGridMeshCache();
+    void resetTextureCache();
+
     Data mData;
-    QScopedPointer<Cache> mCache;
+    Cache mCache;
 };
 
 } // namespace core
