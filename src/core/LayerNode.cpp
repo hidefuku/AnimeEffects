@@ -26,23 +26,14 @@ LayerNode::LayerNode(const QString& aName, ShaderHolder& aShaderHolder)
     , mIsVisible(true)
     , mImageRect()
     , mInitialCenter()
-    , mImageHandle()
-    , mBlendMode(img::BlendMode_Normal)
-    , mGridMesh()
     , mTimeLine()
     , mShaderHolder(aShaderHolder)
     , mIsClipped()
-    , mTexture()
     , mMeshTransformer("./data/shader/MeshTransform.glslex")
     , mRenderDepth(0.0f)
     , mCurrentMesh()
     , mClippees()
 {
-}
-
-LayerNode::~LayerNode()
-{
-    clear();
 }
 
 void LayerNode::setImage(const img::ResourceHandle& aHandle)
@@ -57,37 +48,16 @@ void LayerNode::setImage(const img::ResourceHandle& aHandle, img::BlendMode aBle
     XC_ASSERT(aHandle->image().pixelSize().isValid());
     if (!aHandle || !aHandle->image().data()) return; // fail safe
 
-    mImageHandle = aHandle;
+    auto key = new ImageKey();
+    mTimeLine.grabDefaultKey(TimeKeyType_Image, key);
+    key->setImage(aHandle, aBlendMode);
 
-    readImageData(mImageHandle->image(), mImageHandle->pos());
+    mImageRect = QRect(aHandle->pos(), aHandle->image().pixelSize());
+    mInitialCenter = QVector2D(QRectF(mImageRect).center());
 
-    mBlendMode = aBlendMode;
-    mShaderHolder.reserveShader(mBlendMode, true);
-    mShaderHolder.reserveShader(mBlendMode, false);
+    mShaderHolder.reserveShaders(aBlendMode);
     mShaderHolder.reserveGridShader();
-    mShaderHolder.reserveClipperShader(true);
-    mShaderHolder.reserveClipperShader(false);
-}
-
-void LayerNode::readImageData(const img::Buffer& aBuffer, const QPoint& aPos)
-{
-    mImageRect = QRect(aPos, aBuffer.pixelSize());
-    //mInitialCenter = QVector2D(QRectF(mImageRect).center());
-
-    // make a gl texture
-    mTexture.create(aBuffer.pixelSize(), aBuffer.data());
-    mTexture.setFilter(GL_LINEAR);
-    mTexture.setWrap(GL_CLAMP_TO_BORDER, QColor(0, 0, 0, 0));
-
-    // grid mesh
-    const int cellPx = std::max(std::min(8, aBuffer.width() / 4), 2);
-    mGridMesh.createFromImage(aBuffer.data(), aBuffer.pixelSize(), cellPx);
-}
-
-void LayerNode::clear()
-{
-    mTexture.destroy();
-    mImageHandle.reset();
+    mShaderHolder.reserveClipperShaders();
 }
 
 void LayerNode::setClipped(bool aIsClipped)
@@ -107,11 +77,32 @@ bool LayerNode::isClipper() const
     return true;
 }
 
+img::BlendMode LayerNode::blendMode() const
+{
+    auto key = (ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image);
+    return key ? key->data().blendMode() : img::BlendMode_Normal;
+}
+
 void LayerNode::setBlendMode(img::BlendMode aMode)
 {
-    mBlendMode = aMode;
-    mShaderHolder.reserveShader(mBlendMode, true);
-    mShaderHolder.reserveShader(mBlendMode, false);
+    auto key = (ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image);
+    if (key)
+    {
+        key->data().setBlendMode(aMode);
+        mShaderHolder.reserveShaders(aMode);
+    }
+}
+
+GridMesh* LayerNode::gridMesh()
+{
+    auto key = (ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image);
+    return key ? &(key->data().gridMesh()) : nullptr;
+}
+
+const GridMesh* LayerNode::gridMesh() const
+{
+    auto key = (ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image);
+    return key ? &(key->data().gridMesh()) : nullptr;
 }
 
 void LayerNode::prerender(const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor)
@@ -176,13 +167,16 @@ void LayerNode::renderClippees(
 void LayerNode::renderClipper(
         const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor, uint8 aClipperId)
 {
-    if (!mIsVisible || !aInfo.clippingFrame || !mImageHandle) return;
+    //if (!mIsVisible || !aInfo.clippingFrame || !mImageHandle) return;
+    auto imageKey = (ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image);
+    if (!mIsVisible || !aInfo.clippingFrame || !imageKey || !imageKey->hasImage()) return;
 
     XC_PTR_ASSERT(mCurrentMesh);
     gl::Global::Functions& ggl = gl::Global::functions();
     auto& shader = mShaderHolder.clipperShader(aInfo.clippingId != 0);
     auto& expans = aAccessor.get(mTimeLine);
-    auto areaTextureId = expans.areaTexture() ? expans.areaTexture()->id() : mTexture.id();
+    //auto areaTextureId = expans.areaTexture() ? expans.areaTexture()->id() : mTexture.id();
+    auto areaTextureId = expans.areaTexture() ? expans.areaTexture()->id() : imageKey->cache().texture().id();
 
     core::ClippingFrame& frame = *aInfo.clippingFrame;
     frame.updateRenderStamp();
@@ -192,7 +186,6 @@ void LayerNode::renderClipper(
     frame.setupDrawBuffers();
 
     // bind textures
-    //ggl.glEnable(GL_TEXTURE_2D);
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_2D, areaTextureId);
     ggl.glActiveTexture(GL_TEXTURE1);
@@ -230,7 +223,6 @@ void LayerNode::renderClipper(
     // unbind texture
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_2D, 0);
-    //ggl.glDisable(GL_TEXTURE_2D);
 
     // release framebuffer
     frame.release();
@@ -246,8 +238,12 @@ void LayerNode::transformShape(
 {
     auto& expans = aAccessor.get(mTimeLine);
 
+    auto imageKey = (ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image);
+    if (!imageKey || !imageKey->hasImage()) return;
+
     // select mesh and positions
-    LayerMesh* mesh = &mGridMesh;
+    GridMesh& gridMesh = imageKey->data().gridMesh();
+    LayerMesh* mesh = &gridMesh;
     util::ArrayBlock<const gl::Vector3> positions;
     bool useInfluence = true;
 
@@ -260,7 +256,7 @@ void LayerNode::transformShape(
 
         useInfluence = false;
         positions = util::ArrayBlock<const gl::Vector3>(
-                    mGridMesh.positions(), mGridMesh.vertexCount());
+                    gridMesh.positions(), gridMesh.vertexCount());
         XC_ASSERT(mesh->vertexCount() == positions.count());
     }
     else
@@ -297,15 +293,19 @@ void LayerNode::renderShape(
 {
     //XC_PTR_ASSERT(mCurrentMesh);
     if (!mCurrentMesh) return;
-    if (!mImageHandle) return;
+    //if (!mImageHandle) return;
+    auto imageKey = (ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image);
+    if (!imageKey || !imageKey->hasImage()) return;
+    auto blendMode = imageKey->data().blendMode();
 
     gl::Global::Functions& ggl = gl::Global::functions();
     const bool isClippee = (aInfo.clippingFrame && aInfo.clippingId != 0);
     auto& shader = aInfo.isGrid ?
                 mShaderHolder.gridShader() :
-                mShaderHolder.shader(mBlendMode, isClippee);
+                mShaderHolder.shader(blendMode, isClippee);
     auto& expans = aAccessor.get(mTimeLine);
-    auto areaTextureId = expans.areaTexture() ? expans.areaTexture()->id() : mTexture.id();
+    //auto areaTextureId = expans.areaTexture() ? expans.areaTexture()->id() : mTexture.id();
+    auto areaTextureId = expans.areaTexture() ? expans.areaTexture()->id() : imageKey->cache().texture().id();
 
     if (aInfo.isGrid)
     {
@@ -313,7 +313,6 @@ void LayerNode::renderShape(
     }
     else
     {
-        //ggl.glEnable(GL_TEXTURE_2D);
         ggl.glActiveTexture(GL_TEXTURE0);
         ggl.glBindTexture(GL_TEXTURE_2D, areaTextureId);
         ggl.glActiveTexture(GL_TEXTURE1);
@@ -365,7 +364,6 @@ void LayerNode::renderShape(
     {
         ggl.glActiveTexture(GL_TEXTURE0);
         ggl.glBindTexture(GL_TEXTURE_2D, 0);
-        //ggl.glDisable(GL_TEXTURE_2D);
     }
 
     ggl.glFlush();
@@ -373,89 +371,13 @@ void LayerNode::renderShape(
 
 cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent)
 {
-    class ResUpdater : public cmnd::Stable
-    {
-        LayerNode& mOwner;
-        const img::ResourceNode* mTarget;
-        img::ResourceHandle mPrevImage;
-        img::ResourceHandle mNextImage;
-        ResourceUpdatingWorkspacePtr mWorkspace;
-        bool mCreateTransitions;
-
-    public:
-        ResUpdater(LayerNode& aOwner, const img::ResourceNode* aTarget,
-                   const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions)
-            : mOwner(aOwner)
-            , mTarget(aTarget)
-            , mPrevImage()
-            , mNextImage()
-            , mWorkspace(aWorkspace)
-            , mCreateTransitions(aCreateTransitions)
-        {
-            mPrevImage = mOwner.mImageHandle;
-        }
-
-        virtual void exec()
-        {
-            GridMesh::TransitionCreater transer(
-                        mOwner.mGridMesh, mOwner.mImageRect.topLeft());
-
-            mNextImage = mTarget->handle();
-            mOwner.mImageHandle = mNextImage;
-
-            mOwner.readImageData(
-                        mOwner.mImageHandle->image(),
-                        mOwner.mImageHandle->pos());
-
-            // create transition data(will be used by ffd key)
-            if (mCreateTransitions)
-            {
-                auto& trans = mWorkspace->makeSureTransitions(nullptr, mOwner.mGridMesh);
-                trans = transer.create(
-                            mOwner.mGridMesh.positions(),
-                            mOwner.mGridMesh.vertexCount(),
-                            mOwner.mImageRect.topLeft());
-            }
-            mWorkspace.reset();
-        }
-
-        virtual void redo()
-        {
-            mOwner.mImageHandle = mNextImage;
-            mOwner.readImageData(
-                        mOwner.mImageHandle->image(),
-                        mOwner.mImageHandle->pos());
-        }
-
-        virtual void undo()
-        {
-            mOwner.mImageHandle = mPrevImage;
-            mOwner.readImageData(
-                        mOwner.mImageHandle->image(),
-                        mOwner.mImageHandle->pos());
-        }
-    };
-
     cmnd::Vector result;
 
     ResourceUpdatingWorkspacePtr workspace = std::make_shared<ResourceUpdatingWorkspace>();
     const bool createTransitions = !mTimeLine.isEmpty(TimeKeyType_FFD);
 
-    // my image handle
-    if (mImageHandle && mImageHandle->hasImage())
-    {
-        auto target = aEvent.findTarget(mImageHandle->serialAddress());
-        if (target)
-        {
-            result.push(new ResUpdater(*this, target, workspace, createTransitions));
-        }
-    }
-
     // image key
-    if (!mTimeLine.isEmpty(TimeKeyType_Image))
-    {
-        result.push(ImageKeyUpdater::createResourceUpdater(*this, aEvent, workspace, createTransitions));
-    }
+    result.push(ImageKeyUpdater::createResourceUpdater(*this, aEvent, workspace, createTransitions));
 
     // ffd key should be called finally
     if (createTransitions)
@@ -486,18 +408,6 @@ bool LayerNode::serialize(Serializer& aOut) const
     aOut.write(mInitialCenter);
     // clipping
     aOut.write(mIsClipped);
-    // blend mode
-    aOut.writeFixedString(img::getQuadIdFromBlendMode(mBlendMode), 4);
-
-    // image id
-    aOut.writeID(mImageHandle->serialAddress());
-
-    // grid mesh
-    if (!mGridMesh.serialize(aOut))
-    {
-        return false;
-    }
-
     // timeline
     if (!mTimeLine.serialize(aOut))
     {
@@ -512,8 +422,6 @@ bool LayerNode::serialize(Serializer& aOut) const
 
 bool LayerNode::deserialize(Deserializer& aIn)
 {
-    clear();
-
     // check block begin
     if (!aIn.beginBlock("LayerNd_"))
         return aIn.errored("invalid signature of layer node");
@@ -530,38 +438,27 @@ bool LayerNode::deserialize(Deserializer& aIn)
     aIn.read(mInitialCenter);
     // clipping
     aIn.read(mIsClipped);
-    // blend mode
-    {
-        QString bname;
-        aIn.readFixedString(bname, 4);
-        auto bmode = img::getBlendModeFromQuadId(bname);
-        if (bmode == img::BlendMode_TERM)
-        {
-            return aIn.errored("invalid image blending mode");
-        }
-        mBlendMode = bmode;
-    }
-
-    // image id
-    {
-        auto solver = [=](void* aPtr)
-        {
-            this->mImageHandle = ((img::ResourceNode*)aPtr)->handle();
-            this->setImage(this->mImageHandle, this->mBlendMode);
-        };
-        if (!aIn.orderIDData(solver))
-        {
-            return aIn.errored("invalid image reference id");
-        }
-    }
-
-    // grid mesh
-    if (!mGridMesh.deserialize(aIn))
-        return aIn.errored("failed to deserialize grid mesh");
-
     // timeline
     if (!mTimeLine.deserialize(aIn))
         return aIn.errored("failed to deserialize time line");
+
+    // reserve shaders
+    {
+        mShaderHolder.reserveGridShader();
+        mShaderHolder.reserveClipperShaders();
+
+        auto defaultKey = (ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image);
+        if (defaultKey)
+        {
+            mShaderHolder.reserveShaders(defaultKey->data().blendMode());
+        }
+
+        auto& map = mTimeLine.map(TimeKeyType_Image);
+        for (auto key : map)
+        {
+            mShaderHolder.reserveShaders(((ImageKey*)key)->data().blendMode());
+        }
+    }
 
     // check block end
     if (!aIn.endBlock())

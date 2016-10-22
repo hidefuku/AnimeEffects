@@ -25,6 +25,20 @@ class ImageResourceUpdater : public cmnd::Stable
     ResourceUpdatingWorkspacePtr mWorkspace;
     bool mCreateTransitions;
 
+    void tryPushTarget(ImageKey* aKey)
+    {
+        if (aKey)
+        {
+            auto node = mEvent.findTarget(aKey->data().resource()->serialAddress());
+            if (node)
+            {
+                mTargets.push_back(Target(aKey));
+                mTargets.back().prevImage = aKey->data().resource();
+                mTargets.back().nextImage = node->handle();
+            }
+        }
+    }
+
 public:
     ImageResourceUpdater(TimeLine& aTimeLine, const ResourceEvent& aEvent,
                          const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions)
@@ -38,41 +52,36 @@ public:
 
     virtual void exec()
     {
+        // push default key
+        tryPushTarget((ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image));
+
         auto& map = mTimeLine.map(TimeKeyType_Image);
         for (auto itr = map.begin(); itr != map.end(); ++itr)
         {
             TimeKey* key = itr.value();
             TIMEKEY_PTR_TYPE_ASSERT(key, Image);
-            ImageKey* imgKey = (ImageKey*)key;
 
-            // reset cache
-            auto node = mEvent.findTarget(imgKey->data().resource()->serialAddress());
-            if (node)
-            {
-                mTargets.push_back(Target(imgKey));
-                mTargets.back().prevImage = imgKey->data().resource();
-                mTargets.back().nextImage = node->handle();
-            }
+            // push key
+            tryPushTarget((ImageKey*)key);
         }
 
         for (auto& target : mTargets)
         {
             auto key = target.key;
             GridMesh::TransitionCreater transer(
-                        key->cache().gridMesh(),
+                        key->data().gridMesh(),
                         key->data().resource()->pos());
 
             // update image
-            target.key->data().resource() = target.nextImage;
-            target.key->resetCache();
+            target.key->setImage(target.nextImage);
 
             // create transition data
             if (mCreateTransitions)
             {
-                auto& trans = mWorkspace->makeSureTransitions(key, key->cache().gridMesh());
+                auto& trans = mWorkspace->makeSureTransitions(key, key->data().gridMesh());
                 trans = transer.create(
-                            key->cache().gridMesh().positions(),
-                            key->cache().gridMesh().vertexCount(),
+                            key->data().gridMesh().positions(),
+                            key->data().gridMesh().vertexCount(),
                             key->data().resource()->pos());
             }
         }
@@ -83,8 +92,7 @@ public:
     {
         for (auto& target : mTargets)
         {
-            target.key->data().resource() = target.nextImage;
-            target.key->resetCache();
+            target.key->setImage(target.nextImage);
         }
     }
 
@@ -92,8 +100,7 @@ public:
     {
         for (auto& target : mTargets)
         {
-            target.key->data().resource() = target.prevImage;
-            target.key->resetCache();
+            target.key->setImage(target.prevImage);
         }
     }
 };

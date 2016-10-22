@@ -40,6 +40,10 @@ public:
     TimeKey* timeKey(TimeKeyType aType, int aIndex);
     const TimeKey* timeKey(TimeKeyType aType, int aIndex) const;
 
+    void grabDefaultKey(TimeKeyType aType, TimeKey* aKey);
+    TimeKey* defaultKey(TimeKeyType aType);
+    const TimeKey* defaultKey(TimeKeyType aType) const;
+
     TimeKeyExpans& current() { return *mCurrent; }
     const TimeKeyExpans& current() const { return *mCurrent; }
 
@@ -55,13 +59,16 @@ public:
 
 private:
     void clear();
-    int nonEmptyMapCount() const;
+    int serializeTypeCount() const;
     void pushRemoveCommands(
             TimeKeyType aType, int aFrame, cmnd::Vector& aCommands);
+    bool serializeTimeKey(Serializer& aOut, const TimeKey& aTimeKey) const;
+    bool deserializeTimeKey(Deserializer& aIn, TimeKeyType aType, int aIndex);
 
     std::array<MapType, TimeKeyType_TERM> mMap;
     QScopedPointer<TimeKeyExpans> mCurrent;
     QScopedPointer<TimeKeyExpans> mWorking;
+    std::array<QScopedPointer<TimeKey>, TimeKeyType_TERM> mDefaultKeys;
 };
 
 } // namespace core

@@ -61,6 +61,7 @@ TimeLine::TimeLine()
     : mMap()
     , mCurrent(new TimeKeyExpans())
     , mWorking(new TimeKeyExpans())
+    , mDefaultKeys()
 {
 }
 
@@ -130,10 +131,31 @@ const TimeKey* TimeLine::timeKey(TimeKeyType aType, int aIndex) const
     return NULL;
 }
 
+void TimeLine::grabDefaultKey(TimeKeyType aType, TimeKey* aKey)
+{
+    if (aKey)
+    {
+        aKey->setFrame(-1);
+    }
+    mDefaultKeys.at(aType).reset(aKey);
+}
+
+TimeKey* TimeLine::defaultKey(TimeKeyType aType)
+{
+    return mDefaultKeys.at(aType).data();
+}
+
+const TimeKey* TimeLine::defaultKey(TimeKeyType aType) const
+{
+    return mDefaultKeys.at(aType).data();
+}
+
 void TimeLine::clear()
 {
     for (int i = 0; i < TimeKeyType_TERM; ++i)
     {
+        mDefaultKeys[i].reset();
+
         QList<TimeKey*> values = mMap[i].values();
         qDeleteAll(values.begin(), values.end());
         mMap[i].clear();
@@ -160,6 +182,7 @@ bool TimeLine::move(TimeKeyType aType, int aFrom, int aTo)
 
 cmnd::Base* TimeLine::createPusher(TimeKeyType aType, int aFrame, TimeKey* aTimeKey)
 {
+    XC_ASSERT(aFrame >= 0);
     return new cmnd::LambdaScalable([=](cmnd::Vector& aCommands)
     {
         TimeLine::MapType& map = this->mMap.at(aType);
@@ -191,6 +214,7 @@ cmnd::Base* TimeLine::createRemover(TimeKeyType aType, int aFrame, bool aOptiona
 void TimeLine::pushRemoveCommands(
         TimeKeyType aType, int aFrame, cmnd::Vector& aCommands)
 {
+    XC_ASSERT(aFrame >= 0);
     TimeLine::MapType& map = mMap.at(aType);
     TimeKey* key = map.value(aFrame);
     XC_ASSERT(key->frame() == aFrame);
@@ -218,6 +242,16 @@ void TimeLine::pushRemoveCommands(
     aCommands.push(new cmnd::GrabDeleteObject<TimeKey>(key));
 }
 
+int TimeLine::serializeTypeCount() const
+{
+    int count = 0;
+    for (int i = 0; i < TimeKeyType_TERM; ++i)
+    {
+        if (mDefaultKeys[i] || !mMap[i].isEmpty()) ++count;
+    }
+    return count;
+}
+
 bool TimeLine::serialize(Serializer& aOut) const
 {
     static const std::array<uint8, 8> kSignature =
@@ -228,21 +262,34 @@ bool TimeLine::serialize(Serializer& aOut) const
     // signature
     auto pos = aOut.beginBlock(kSignature);
 
-    // valid map count
-    aOut.write(validTypeCount());
+    // non empty type count (including default keys)
+    aOut.write(serializeTypeCount());
 
     // each map
     for (int i = 0; i < TimeKeyType_TERM; ++i)
     {
         const MapType& map = mMap[i];
+        auto defaultKey = mDefaultKeys[i].data();
 
-        if (map.isEmpty()) continue;
+        if (!defaultKey && map.isEmpty()) continue;
 
         // signature
         auto mapPos = aOut.beginBlock(kMapSignature);
 
         // type name
         aOut.write(getTimeKeyName((TimeKeyType)i));
+
+        // default key is exists
+        aOut.write((bool)defaultKey);
+
+        // defautltKey
+        if (defaultKey)
+        {
+            if (!serializeTimeKey(aOut, *defaultKey))
+            {
+                return false;
+            }
+        }
 
         // key count
         aOut.write(map.count());
@@ -255,22 +302,10 @@ bool TimeLine::serialize(Serializer& aOut) const
             const TimeKey* timeKey = itr.value();
             XC_PTR_ASSERT(timeKey);
 
-            // reference id
-            aOut.writeID(timeKey);
-
-            // timekey value
-            if (!timeKey->serialize(aOut))
+            // time key
+            if (!serializeTimeKey(aOut, *timeKey))
             {
                 return false;
-            }
-
-            // child count
-            aOut.write((int)timeKey->children().size());
-
-            // references to children
-            for (const TimeKey* child : timeKey->children())
-            {
-                aOut.writeID(child);
             }
         }
 
@@ -280,6 +315,28 @@ bool TimeLine::serialize(Serializer& aOut) const
     aOut.endBlock(pos);
 
     return aOut.checkStream();
+}
+
+bool TimeLine::serializeTimeKey(Serializer& aOut, const TimeKey& aTimeKey) const
+{
+    // reference id
+    aOut.writeID(&aTimeKey);
+
+    // timekey value
+    if (!aTimeKey.serialize(aOut))
+    {
+        return false;
+    }
+
+    // child count
+    aOut.write((int)aTimeKey.children().size());
+
+    // references to children
+    for (const TimeKey* child : aTimeKey.children())
+    {
+        aOut.writeID(child);
+    }
+    return true;
 }
 
 bool TimeLine::deserialize(Deserializer& aIn)
@@ -293,7 +350,7 @@ bool TimeLine::deserialize(Deserializer& aIn)
     }
     aIn.pushLogScope("TimeLine");
 
-    // valid map count
+    // non empty type count (including default keys)
     int mapCount = 0;
     aIn.read(mapCount);
 
@@ -315,7 +372,18 @@ bool TimeLine::deserialize(Deserializer& aIn)
         // pass only supported index
         if (typeIndex >= TimeKeyType_TERM) continue;
 
-        MapType& map = mMap[typeIndex];
+        // default key is exists
+        bool hasDefaultKey = false;
+        aIn.read(hasDefaultKey);
+
+        // default key
+        if (hasDefaultKey)
+        {
+            if (!deserializeTimeKey(aIn, (TimeKeyType)typeIndex, -1))
+            {
+                return false;
+            }
+        }
 
         // timekey count
         int keyCount = 0;
@@ -327,68 +395,10 @@ bool TimeLine::deserialize(Deserializer& aIn)
             int keyIndex = 0;
             aIn.read(keyIndex);
 
-            TimeKey* key = nullptr;
-            if (typeIndex == TimeKeyType_SRT)
+            // time key
+            if (!deserializeTimeKey(aIn, (TimeKeyType)typeIndex, keyIndex))
             {
-                key = new SRTKey();
-            }
-            else if (typeIndex == TimeKeyType_Opa)
-            {
-                key = new OpaKey();
-            }
-            else if (typeIndex == TimeKeyType_Bone)
-            {
-                key = new BoneKey();
-            }
-            else if (typeIndex == TimeKeyType_Pose)
-            {
-                key = new PoseKey();
-            }
-            else if (typeIndex == TimeKeyType_Mesh)
-            {
-                key = new MeshKey();
-            }
-            else if (typeIndex == TimeKeyType_FFD)
-            {
-                key = new FFDKey();
-            }
-            else if (typeIndex == TimeKeyType_Image)
-            {
-                key = new ImageKey();
-            }
-
-            // reference id
-            if (!aIn.bindIDData(key))
-            {
-                return aIn.errored("failed to bind reference id");
-            }
-
-            // set frame
-            key->setFrame(keyIndex);
-
-            // timekey value
-            if (!key->deserialize(aIn))
-            {
-                delete key;
                 return false;
-            }
-            map.insert(keyIndex, key);
-
-            // child count
-            int childCount = 0;
-            aIn.read(childCount);
-
-            // references to children
-            for (int ci = 0; ci < childCount; ++ci)
-            {
-                auto solver = [=](void* aPtr) {
-                    TimeKey* child = static_cast<TimeKey*>(aPtr);
-                    key->children().pushBack(child);
-                };
-                if (!aIn.orderIDData(solver))
-                {
-                    return aIn.errored("invalid child reference id");
-                }
             }
         }
 
@@ -408,6 +418,82 @@ bool TimeLine::deserialize(Deserializer& aIn)
     aIn.popLogScope();
 
     return aIn.checkStream();
+}
+
+bool TimeLine::deserializeTimeKey(Deserializer& aIn, TimeKeyType aType, int aIndex)
+{
+    TimeKey* key = nullptr;
+    if (aType == TimeKeyType_SRT)
+    {
+        key = new SRTKey();
+    }
+    else if (aType == TimeKeyType_Opa)
+    {
+        key = new OpaKey();
+    }
+    else if (aType == TimeKeyType_Bone)
+    {
+        key = new BoneKey();
+    }
+    else if (aType == TimeKeyType_Pose)
+    {
+        key = new PoseKey();
+    }
+    else if (aType == TimeKeyType_Mesh)
+    {
+        key = new MeshKey();
+    }
+    else if (aType == TimeKeyType_FFD)
+    {
+        key = new FFDKey();
+    }
+    else if (aType == TimeKeyType_Image)
+    {
+        key = new ImageKey();
+    }
+
+    // reference id
+    if (!aIn.bindIDData(key))
+    {
+        return aIn.errored("failed to bind reference id");
+    }
+
+    // set frame
+    key->setFrame(aIndex);
+
+    // timekey value
+    if (!key->deserialize(aIn))
+    {
+        delete key;
+        return false;
+    }
+
+    if (aIndex == -1)
+    {
+        mDefaultKeys[aType].reset(key);
+    }
+    else
+    {
+        mMap[aType].insert(aIndex, key);
+    }
+
+    // child count
+    int childCount = 0;
+    aIn.read(childCount);
+
+    // references to children
+    for (int ci = 0; ci < childCount; ++ci)
+    {
+        auto solver = [=](void* aPtr) {
+            TimeKey* child = static_cast<TimeKey*>(aPtr);
+            key->children().pushBack(child);
+        };
+        if (!aIn.orderIDData(solver))
+        {
+            return aIn.errored("invalid child reference id");
+        }
+    }
+    return true;
 }
 
 } // namespace core

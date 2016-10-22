@@ -194,8 +194,7 @@ void KeyAccessor::knockNewImage(const img::ResourceHandle& aHandle)
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::ImageKey();
-    newKey->data().resource() = aHandle;
-    newKey->resetCache();
+    newKey->setImage(aHandle);
 
     ctrl::TimeLineUtil::pushNewImageKey(*mProject, *mTarget, getFrame(), newKey);
 }

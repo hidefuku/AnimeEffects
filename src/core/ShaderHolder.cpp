@@ -72,6 +72,12 @@ gl::EasyShaderProgram& ShaderHolder::reserveShader(img::BlendMode aBlendMode, bo
     return *mShaders[index];
 }
 
+void ShaderHolder::reserveShaders(img::BlendMode aBlendMode)
+{
+    reserveShader(aBlendMode, true);
+    reserveShader(aBlendMode, false);
+}
+
 gl::EasyShaderProgram& ShaderHolder::shader(img::BlendMode aBlendMode, bool aIsClippee)
 {
     const int index = aBlendMode + img::BlendMode_TERM * (int)aIsClippee;
@@ -169,6 +175,12 @@ gl::EasyShaderProgram& ShaderHolder::reserveClipperShader(bool aIsClippee)
         }
     }
     return *mClipperShaders[aIsClippee];
+}
+
+void ShaderHolder::reserveClipperShaders()
+{
+    reserveClipperShader(true);
+    reserveClipperShader(false);
 }
 
 gl::EasyShaderProgram& ShaderHolder::clipperShader(bool aIsClippee)

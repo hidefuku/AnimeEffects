@@ -25,18 +25,12 @@ class LayerNode
 {
 public:
     LayerNode(const QString& aName, ShaderHolder& aShaderHolder);
-    ~LayerNode();
 
     util::LifeLink::Pointee<LayerNode> pointee() { return lifeLink().pointee<LayerNode>(this); }
 
     // image buffer
     void setImage(const img::ResourceHandle& aHandle);
     void setImage(const img::ResourceHandle& aHandle, img::BlendMode aBlendMode);
-    int imageWidth() const { return mImageHandle->image().width(); }
-    int imageHeight() const { return mImageHandle->image().height(); }
-    QSize imageSize() const { return mImageHandle->image().pixelSize(); }
-    //uint8* imageData() { return mImageHandle->image().data(); }
-    const uint8* imageData() const { return mImageHandle->image().data(); }
 
     // from ObjectNode
     virtual ObjectType type() const { return ObjectType_Layer; }
@@ -54,8 +48,8 @@ public:
     virtual const Renderer* renderer() const { return this; }
     virtual TimeLine* timeLine() { return &mTimeLine; }
     virtual const TimeLine* timeLine() const { return &mTimeLine; }
-    virtual GridMesh* gridMesh() { return &mGridMesh; }
-    virtual const GridMesh* gridMesh() const { return &mGridMesh; }
+    virtual GridMesh* gridMesh();
+    virtual const GridMesh* gridMesh() const;
 
     virtual cmnd::Vector createResourceUpdater(const ResourceEvent& aEvent);
 
@@ -72,12 +66,10 @@ public:
     virtual void setClipped(bool aIsClipped);
     virtual bool isClipped() const { return mIsClipped; }
     virtual bool hasBlendMode() const { return true; }
-    virtual img::BlendMode blendMode() const { return mBlendMode; }
+    virtual img::BlendMode blendMode() const;
     virtual void setBlendMode(img::BlendMode);
 
 private:
-    void clear();
-    void readImageData(const img::Buffer& aBuffer, const QPoint& aPos);
     void transformShape(const RenderInfo& aInfo, const TimeCacheAccessor&);
     void renderShape(const RenderInfo& aInfo, const TimeCacheAccessor&);
     void renderClippees(const RenderInfo& aInfo, const TimeCacheAccessor&);
@@ -88,14 +80,10 @@ private:
     bool mIsVisible;
     QRect mImageRect;
     QVector2D mInitialCenter;
-    img::ResourceHandle mImageHandle;
-    img::BlendMode mBlendMode;
-    GridMesh mGridMesh;
     TimeLine mTimeLine;
     ShaderHolder& mShaderHolder;
     bool mIsClipped;
 
-    gl::Texture mTexture;
     MeshTransformer mMeshTransformer;
     float mRenderDepth;
     LayerMesh* mCurrentMesh;

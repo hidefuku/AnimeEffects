@@ -153,7 +153,7 @@ std::pair<TimeKey*, LayerMesh*> TimeKeyBlender::getAreaMeshImpl(ObjectNode& aNod
     if (areaImageKey && (!areaMeshKey || areaImageKey->frame() > areaMeshKey->frame()))
     {
         areaKey = areaImageKey;
-        areaMesh = &(areaImageKey->cache().gridMesh());
+        areaMesh = &(areaImageKey->data().gridMesh());
     }
     else if (areaMeshKey)
     {

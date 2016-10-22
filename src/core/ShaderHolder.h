@@ -16,6 +16,7 @@ public:
     ~ShaderHolder();
 
     gl::EasyShaderProgram& reserveShader(img::BlendMode aBlendMode, bool aIsClippee);
+    void reserveShaders(img::BlendMode aBlendMode);
     gl::EasyShaderProgram& shader(img::BlendMode aBlendMode, bool aIsClippee);
     const gl::EasyShaderProgram& shader(img::BlendMode aBlendMode, bool aIsClippee) const;
 
@@ -24,6 +25,7 @@ public:
     const gl::EasyShaderProgram& gridShader() const;
 
     gl::EasyShaderProgram& reserveClipperShader(bool aIsClippee);
+    void reserveClipperShaders();
     gl::EasyShaderProgram& clipperShader(bool aIsClippee);
     const gl::EasyShaderProgram& clipperShader(bool aIsClippee) const;
 

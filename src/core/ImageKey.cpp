@@ -1,4 +1,5 @@
 #include "img/ResourceNode.h"
+#include "img/BlendMode.h"
 #include "core/ImageKey.h"
 
 namespace core
@@ -8,13 +9,14 @@ namespace core
 ImageKey::Data::Data()
     : mEasing()
     , mResHandle()
+    , mBlendMode(img::BlendMode_Normal)
+    , mGridMesh()
 {
 }
 
 //-------------------------------------------------------------------------------------------------
 ImageKey::Cache::Cache()
     : mTexture()
-    , mGridMesh()
 {
 }
 
@@ -25,13 +27,20 @@ ImageKey::ImageKey()
 {
 }
 
-void ImageKey::resetCache()
+void ImageKey::setImage(const img::ResourceHandle& aResource, img::BlendMode aMode)
 {
-    resetGridMeshCache();
+    mData.setBlendMode(aMode);
+    setImage(aResource);
+}
+
+void ImageKey::setImage(const img::ResourceHandle& aResource)
+{
+    mData.resource() = aResource;
+    resetGridMesh();
     resetTextureCache();
 }
 
-void ImageKey::resetGridMeshCache()
+void ImageKey::resetGridMesh()
 {
     if (mData.resource()->hasImage())
     {
@@ -40,7 +49,7 @@ void ImageKey::resetGridMeshCache()
 
         // grid mesh
         const int cellPx = std::max(std::min(8, pixelSize.width() / 4), 2);
-        mCache.gridMesh().createFromImage(imageData, pixelSize, cellPx);
+        mData.gridMesh().createFromImage(imageData, pixelSize, cellPx);
     }
 }
 
@@ -64,8 +73,10 @@ bool ImageKey::serialize(Serializer& aOut) const
     aOut.write(mData.easing());
     // image id
     aOut.writeID(mData.resource()->serialAddress());
+    // blend mode
+    aOut.writeFixedString(img::getQuadIdFromBlendMode(mData.blendMode()), 4);
     // grid mesh
-    if (!mCache.gridMesh().serialize(aOut))
+    if (!mData.gridMesh().serialize(aOut))
     {
         return false;
     }
@@ -96,8 +107,19 @@ bool ImageKey::deserialize(Deserializer& aIn)
             return aIn.errored("invalid image reference id");
         }
     }
+    // blend mode
+    {
+        QString bname;
+        aIn.readFixedString(bname, 4);
+        auto bmode = img::getBlendModeFromQuadId(bname);
+        if (bmode == img::BlendMode_TERM)
+        {
+            return aIn.errored("invalid image blending mode");
+        }
+        mData.setBlendMode(bmode);
+    }
     // grid mesh
-    if (!mCache.gridMesh().deserialize(aIn))
+    if (!mData.gridMesh().deserialize(aIn))
     {
         return aIn.errored("failed to deserialize grid mesh");
     }

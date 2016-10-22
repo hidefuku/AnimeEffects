@@ -1,6 +1,5 @@
 #include "cmnd/ScopedMacro.h"
 #include "cmnd/BasicCommands.h"
-#include "gl/Global.h"
 #include "core/Constant.h"
 #include "core/TimeKeyExpans.h"
 #include "ctrl/TimeLineUtil.h"
@@ -326,7 +325,6 @@ void ObjectPanel::ImagePanel::knockNewKey()
     auto resNode = mViaPoint.requireOneResource();
     if (resNode)
     {
-        gl::Global::makeCurrent();
         this->mAccessor.knockNewImage(resNode->handle());
     }
 }

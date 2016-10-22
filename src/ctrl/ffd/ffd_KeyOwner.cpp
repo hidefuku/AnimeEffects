@@ -107,7 +107,7 @@ core::LayerMesh* KeyOwner::getParentMesh(core::ObjectNode* node)
         }
         else if (parentKey->type() == TimeKeyType_Image)
         {
-            return &(((ImageKey*)parentKey)->cache().gridMesh());
+            return &(((ImageKey*)parentKey)->data().gridMesh());
         }
         else
         {
