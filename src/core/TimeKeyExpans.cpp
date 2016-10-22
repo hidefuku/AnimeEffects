@@ -28,6 +28,7 @@ TimeKeyExpans::TimeKeyExpans()
     , mFFDMeshParent()
     , mAreaImage()
     , mAreaTexture()
+    , mImageOffset()
 {
     clearCaches();
 }

@@ -62,7 +62,7 @@ bool CentroidMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor&
             moveCentroid(QVector2D(mTarget.initialRect().topLeft()) +
                          newLocalCenter.toVector2D());
 
-            mKeyOwner.updatePosture(mTarget.timeLine()->current().srt());
+            mKeyOwner.updatePosture(mTarget.timeLine()->current());
         }
         mod = true;
     }

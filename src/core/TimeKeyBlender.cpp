@@ -766,6 +766,14 @@ void TimeKeyBlender::blendImageKey(PositionType aPos, const TimeInfo& aTime)
     auto imageKey = getImageKey(node, aTime);
     expans.setAreaImage(imageKey);
     expans.setAreaTexture(imageKey ? &(imageKey->cache().texture()) : nullptr);
+    if (imageKey || node.timeLine()->defaultKey(TimeKeyType_Image))
+    {
+        expans.setImageOffset(-ObjectNodeUtil::getCenterOffset(node));
+    }
+    else
+    {
+        expans.setImageOffset(QVector2D());
+    }
 }
 
 ImageKey* TimeKeyBlender::getImageKey(const ObjectNode& aNode, const TimeInfo& aTime)
@@ -832,6 +840,7 @@ void TimeKeyBlender::setBoneInfluenceMaps(
         BoneInfluenceMap* influence = nullptr;
         QMatrix4x4 outerMtx;
         QMatrix4x4 innerMtx;
+        QVector2D imageOffset = expans.imageOffset();
         const bool isDefaultMesh = true;//!expans.areaMesh();
 
         if (key && isDefaultMesh)
@@ -845,6 +854,7 @@ void TimeKeyBlender::setBoneInfluenceMaps(
 
                 influence = &cache->influence();
                 innerMtx = cache->innerMatrix();
+                imageOffset = cache->imageOffset();
             }
 
             auto cacheOwner = key->cacheOwner();
@@ -861,6 +871,7 @@ void TimeKeyBlender::setBoneInfluenceMaps(
         expans.setBoneInfluence(influence);
         expans.setOuterMatrix(outerMtx);
         expans.setInnerMatrix(innerMtx);
+        expans.setImageOffset(imageOffset);
     }
 
     for (auto child : aNode.children())
@@ -936,7 +947,6 @@ void TimeKeyBlender::setBindingMatrices(
                 aBindingMtx = aBindingMtx * expans.srt().data().localMatrix();
                 expans.setOuterMatrix(aBindingMtx);
                 QMatrix4x4 innerMtx;
-                innerMtx.translate(-ObjectNodeUtil::getCenterOffset3D(aNode));
                 expans.setInnerMatrix(innerMtx);
             }
             else
@@ -961,9 +971,7 @@ void TimeKeyBlender::setBindingMatrices(
                     auto transform = root.expans->posePalette().matrices()[boneIndex];
                     aBindingMtx = root.expans->outerMatrix() * transform * expans.bindingMatrix();
                     expans.setOuterMatrix(aBindingMtx);
-                    QMatrix4x4 innerMtx;
-                    innerMtx.translate(-ObjectNodeUtil::getCenterOffset3D(aNode));
-                    expans.setInnerMatrix(innerMtx);
+                    expans.setInnerMatrix(QMatrix4x4());
                     //qDebug() << "transform bound by bone";
                 }
             }

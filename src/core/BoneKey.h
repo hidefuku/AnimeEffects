@@ -38,6 +38,7 @@ public:
         BoneInfluenceMap mInfluence;
         util::LinkPointer<ObjectNode> mNode;
         QMatrix4x4 mInnerMtx;
+        QVector2D mImageOffset;
         Frame mFrameSign; // for debug that the cache updating be forgotten
     public:
         Cache();
@@ -48,6 +49,8 @@ public:
         const BoneInfluenceMap& influence() const { return mInfluence; }
         void setInnerMatrix(const QMatrix4x4& aMtx) { mInnerMtx = aMtx; }
         const QMatrix4x4& innerMatrix() const { return mInnerMtx; }
+        void setImageOffset(const QVector2D& aOffset) { mImageOffset = aOffset; }
+        const QVector2D& imageOffset() const { return mImageOffset; }
         void setFrameSign(const Frame& aFrame) { mFrameSign = aFrame; }
         const Frame& frameSign() const { return mFrameSign; }
     };

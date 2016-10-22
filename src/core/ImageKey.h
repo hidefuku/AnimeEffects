@@ -19,6 +19,7 @@ public:
         util::Easing::Param mEasing;
         img::ResourceHandle mResHandle;
         img::BlendMode mBlendMode;
+        QVector2D mCenterOffset;
         GridMesh mGridMesh;
     public:
         Data();
@@ -28,6 +29,8 @@ public:
         const img::ResourceHandle& resource() const { return mResHandle; }
         void setBlendMode(img::BlendMode aMode) { mBlendMode = aMode; }
         img::BlendMode blendMode() const { return mBlendMode; }
+        void setCenterOffset(const QVector2D& aOffset) { mCenterOffset = aOffset; }
+        const QVector2D& centerOffset() const { return mCenterOffset; }
         GridMesh& gridMesh() { return mGridMesh; }
         const GridMesh& gridMesh() const { return mGridMesh; }
     };

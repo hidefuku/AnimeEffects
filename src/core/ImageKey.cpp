@@ -10,6 +10,7 @@ ImageKey::Data::Data()
     : mEasing()
     , mResHandle()
     , mBlendMode(img::BlendMode_Normal)
+    , mCenterOffset()
     , mGridMesh()
 {
 }
@@ -36,6 +37,12 @@ void ImageKey::setImage(const img::ResourceHandle& aResource, img::BlendMode aMo
 void ImageKey::setImage(const img::ResourceHandle& aResource)
 {
     mData.resource() = aResource;
+    mData.setCenterOffset(QVector2D());
+    if (hasImage())
+    {
+        auto size = mData.resource()->image().pixelSize();
+        mData.setCenterOffset(QVector2D(size.width() * 0.5f, size.height() * 0.5f));
+    }
     resetGridMesh();
     resetTextureCache();
 }
@@ -75,6 +82,8 @@ bool ImageKey::serialize(Serializer& aOut) const
     aOut.writeID(mData.resource()->serialAddress());
     // blend mode
     aOut.writeFixedString(img::getQuadIdFromBlendMode(mData.blendMode()), 4);
+    // center offset
+    aOut.write(mData.centerOffset());
     // grid mesh
     if (!mData.gridMesh().serialize(aOut))
     {
@@ -117,6 +126,12 @@ bool ImageKey::deserialize(Deserializer& aIn)
             return aIn.errored("invalid image blending mode");
         }
         mData.setBlendMode(bmode);
+    }
+    // center offset
+    {
+        QVector2D centerOffs;
+        aIn.read(centerOffs);
+        mData.setCenterOffset(centerOffs);
     }
     // grid mesh
     if (!mData.gridMesh().deserialize(aIn))

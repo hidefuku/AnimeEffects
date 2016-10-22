@@ -97,9 +97,7 @@ void MeshEditor::resetTarget(ObjectNode* aPrev, ObjectNode* aNext)
 
         bool success = false;
         mTarget.mtx = mTarget->timeLine()->current().srt().worldMatrix();
-        mTarget.mtx.translate(
-                    -ObjectNodeUtil::getCenterOffset3D(
-                        mTarget->timeLine()->current().srt()));
+        mTarget.mtx.translate(mTarget->timeLine()->current().imageOffset());
 
         mTarget.invMtx = mTarget.mtx.inverted(&success);
         if (!success)

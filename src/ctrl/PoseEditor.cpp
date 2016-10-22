@@ -90,14 +90,12 @@ void PoseEditor::resetCurrentTarget()
         if (current.isAffectedByBinding())
         {
             mTarget.mtx = current.outerMatrix() * current.innerMatrix();
-            mTarget.mtx.translate(ObjectNodeUtil::getCenterOffset3D(current.srt()));
-
         }
         else
         {
             mTarget.mtx = current.srt().worldMatrix();
         }
-        //mTarget.mtx = mTarget->timeLine()->current().srt().worldMatrix();
+
         mTarget.invMtx = mTarget.mtx.inverted(&success);
         if (!success)
         {

@@ -4,7 +4,7 @@
 #include "cmnd/Stack.h"
 #include "core/TimeLine.h"
 #include "core/SRTKey.h"
-namespace core { class SRTExpans; }
+namespace core { class TimeKeyExpans; }
 
 namespace ctrl {
 namespace srt {
@@ -18,7 +18,7 @@ struct KeyOwner
     void pushOwnsKey(cmnd::Stack& aStack, core::TimeLine& aLine, int aFrame);
     void deleteOwnsKey();
 
-    bool updatePosture(const core::SRTExpans& aExpans);
+    bool updatePosture(const core::TimeKeyExpans& aExpans);
 
     core::SRTKey* key;
     bool ownsKey;

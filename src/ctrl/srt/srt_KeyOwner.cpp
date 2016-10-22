@@ -1,5 +1,5 @@
 #include "cmnd/BasicCommands.h"
-#include "core/SRTExpans.h"
+#include "core/TimeKeyExpans.h"
 #include "core/ObjectNodeUtil.h"
 #include "ctrl/srt/srt_KeyOwner.h"
 
@@ -28,16 +28,16 @@ void KeyOwner::deleteOwnsKey()
     key = nullptr;
 }
 
-bool KeyOwner::updatePosture(const SRTExpans& aExpans)
+bool KeyOwner::updatePosture(const TimeKeyExpans& aExpans)
 {
     XC_PTR_ASSERT(key);
 
     if (ownsKey)
     {
-        key->data() = aExpans.data();
+        key->data() = aExpans.srt().data();
     }
 
-    mtx = aExpans.parentMatrix();
+    mtx = aExpans.srt().parentMatrix();
     invMtx = mtx.inverted(&hasInv);
 
     if (!hasInv)
@@ -49,7 +49,7 @@ bool KeyOwner::updatePosture(const SRTExpans& aExpans)
     invSRMtx.setColumn(3, QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
 
     ltLocMtx = key->data().localMatrix();
-    ltLocMtx.translate(-ObjectNodeUtil::getCenterOffset3D(aExpans));
+    ltLocMtx.translate(aExpans.imageOffset());
 
     return true;
 }

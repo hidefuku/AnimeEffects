@@ -85,6 +85,8 @@ public:
     ImageKey* areaImage() { return mAreaImage; }
     void setAreaTexture(gl::Texture* aTexture) { mAreaTexture = aTexture; }
     gl::Texture* areaTexture() { return mAreaTexture; }
+    void setImageOffset(const QVector2D& aOffset) { mImageOffset = aOffset; }
+    const QVector2D& imageOffset() const { return mImageOffset; }
 
 private:
     Frame mMasterCache;
@@ -111,6 +113,7 @@ private:
     TimeKey* mFFDMeshParent;
     ImageKey* mAreaImage;
     gl::Texture* mAreaTexture;
+    QVector2D mImageOffset;
 };
 
 } // namespace core

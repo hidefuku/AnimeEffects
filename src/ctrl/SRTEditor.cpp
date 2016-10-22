@@ -46,7 +46,7 @@ bool SRTEditor::initializeKey(TimeLine& aLine)
         mKeyOwner.key->data() = current.srt().data();
     }
 
-    if (!mKeyOwner.updatePosture(current.srt()))
+    if (!mKeyOwner.updatePosture(current))
     {
         mKeyOwner.deleteOwnsKey();
         return false;

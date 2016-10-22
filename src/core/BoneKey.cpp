@@ -86,6 +86,7 @@ BoneKey::Cache::Cache()
     : mInfluence()
     , mNode()
     , mInnerMtx()
+    , mImageOffset()
     , mFrameSign()
 {
     static const int kMaxBoneCount = 32;
@@ -143,19 +144,18 @@ void BoneKey::updateCaches(Project& aProject, const QList<Cache*>& aTargets)
             if (!mesh || mesh->vertexCount() <= 0) continue;
 
             // set world matrix
-            {
-                auto innerMtx = TimeKeyBlender::getRelativeMatrix(node, time, owner);
-                innerMtx.translate(-ObjectNodeUtil::getCenterOffset3D(node));
-                cache->setInnerMatrix(innerMtx);
-            }
+            cache->setInnerMatrix(TimeKeyBlender::getRelativeMatrix(node, time, owner));
+            cache->setImageOffset(-ObjectNodeUtil::getCenterOffset(node));
+
+            // influence map matrix
+            auto mapMtx = cache->innerMatrix();
+            mapMtx.translate(cache->imageOffset());
 
             BoneInfluenceMap& map = cache->influence();
             // allocate if necessary
             map.allocate(mesh->vertexCount(), false);
             // request writing
-            map.writeAsync(
-                        aProject, mData.topBones(),
-                        cache->innerMatrix(), *mesh);
+            map.writeAsync(aProject, mData.topBones(), mapMtx, *mesh);
         }
 
 #ifndef UNUSE_PARALLEL
@@ -181,7 +181,6 @@ void BoneKey::updateCaches(Project& aProject, const QList<Cache*>& aTargets)
                     bc.boneIndex = PosePalette::getBoneIndex(mData, *bone);
                     XC_ASSERT(bc.boneIndex >= 0);
                     auto innerMtx = TimeKeyBlender::getRelativeMatrix(*node, time, owner);
-                    //innerMtx.translate(-ObjectNodeUtil::getCenterOffset3D(*node));
                     bc.innerMtx = innerMtx;
                     mBindingCaches.push_back(bc);
                 }
@@ -384,6 +383,7 @@ bool BoneKey::serialize(Serializer& aOut) const
     {
         aOut.writeID(cache->node());
         aOut.write(cache->innerMatrix());
+        aOut.write(cache->imageOffset());
         aOut.write(cache->frameSign());
 
         if (!cache->influence().serialize(aOut))
@@ -501,6 +501,11 @@ bool BoneKey::deserialize(Deserializer& aIn)
         QMatrix4x4 innerMtx;
         aIn.read(innerMtx);
         cache->setInnerMatrix(innerMtx);
+
+        // image offset
+        QVector2D imageOffset;
+        aIn.read(imageOffset);
+        cache->setImageOffset(imageOffset);
 
         // frame sign
         Frame frameSign;

@@ -63,11 +63,13 @@ void MeshTransformer::callGL(
     if (!aNonPosed && aExpans.isAffectedByBinding())
     {
         worldMatrix = aExpans.outerMatrix() * aExpans.innerMatrix();
+        worldMatrix.translate(aExpans.imageOffset());
     }
     else if (useInfluence)
     {
         worldMatrix = aExpans.outerMatrix();
         innerMatrix = aExpans.innerMatrix();
+        innerMatrix.translate(aExpans.imageOffset());
         inflData = influence->accessor();
 
         XC_MSG_ASSERT(influence->vertexCount() == vtxCount,
@@ -76,7 +78,7 @@ void MeshTransformer::callGL(
     else
     {
         worldMatrix = aExpans.srt().worldMatrix();
-        worldMatrix.translate(-ObjectNodeUtil::getCenterOffset3D(aExpans.srt()));
+        worldMatrix.translate(aExpans.imageOffset());
     }
 
     gl::Global::Functions& ggl = gl::Global::functions();
