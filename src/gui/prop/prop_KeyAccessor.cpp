@@ -173,7 +173,7 @@ void KeyAccessor::knockNewPose()
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::PoseKey();
     newKey->data() = mTarget->timeLine()->current().pose();
-    core::BoneKey* parentKey = mTarget->timeLine()->current().areaBone();
+    core::BoneKey* parentKey = mTarget->timeLine()->current().areaBoneKey();
     XC_PTR_ASSERT(parentKey);
     newKey->data().createBonesBy(*parentKey);
 

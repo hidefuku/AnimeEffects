@@ -40,33 +40,6 @@ void BoneEditor::setTarget(core::ObjectNode* aTarget)
 
     if (!aTarget || !aTarget->timeLine()) return;
 
-#if 0
-    // ignore a node which was already bound by bone
-    /// @todo this condition should update by resetCurrentTarget
-    {
-        auto parent = aTarget->parent();
-        while (parent)
-        {
-            if (parent->timeLine() && parent->timeLine()->current().areaBone())
-            {
-                return;
-            }
-            parent = parent->parent();
-        }
-
-        ObjectNode::Iterator itr(aTarget);
-        itr.next();
-        while (itr.hasNext())
-        {
-            auto child = itr.next();
-            if (child->timeLine() && child->timeLine()->current().areaBone())
-            {
-                return;
-            }
-        }
-    }
-#endif
-
     mTarget.node = aTarget;
     resetCurrentTarget();
 }

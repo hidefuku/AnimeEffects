@@ -39,9 +39,9 @@ public:
     void setWorldOpacity(float aValue) { mWorldOpacity = aValue; }
     float worldOpacity() const { return mWorldOpacity; }
 
-    void setAreaBone(BoneKey* aKey) { mAreaBone = aKey; }
-    BoneKey* areaBone() { return mAreaBone; }
-    const BoneKey* areaBone() const { return mAreaBone; }
+    void setAreaBoneKey(BoneKey* aKey) { mAreaBoneKey = aKey; }
+    BoneKey* areaBoneKey() { return mAreaBoneKey; }
+    const BoneKey* areaBoneKey() const { return mAreaBoneKey; }
     void setBoneInfluence(const BoneInfluenceMap* aMap) { mBoneInfluence = aMap; }
     const BoneInfluenceMap* boneInfluence() const { return mBoneInfluence; }
     void setOuterMatrix(const QMatrix4x4& aMtx) { mOuterMtx = aMtx; }
@@ -71,8 +71,9 @@ public:
     PosePalette& posePalette() { return mPosePalette; }
     const PosePalette& posePalette() const { return mPosePalette; }
 
-    void setAreaMesh(MeshKey* aKey) { mAreaMesh = aKey; }
-    MeshKey* areaMesh() { return mAreaMesh; }
+    void setAreaMeshKey(MeshKey* aKey) { mAreaMeshKey = aKey; }
+    MeshKey* areaMeshKey() { return mAreaMeshKey; }
+    const MeshKey* areaMeshKey() const { return mAreaMeshKey; }
 
     FFDKey::Data& ffd() { return mFFD; }
     const FFDKey::Data& ffd() const { return mFFD; }
@@ -81,8 +82,9 @@ public:
     void setFFDMeshParent(TimeKey* aKey) { mFFDMeshParent = aKey; }
     TimeKey* ffdMeshParent() { return mFFDMeshParent; }
 
-    void setAreaImage(ImageKey* aKey) { mAreaImage = aKey; }
-    ImageKey* areaImage() { return mAreaImage; }
+    void setAreaImageKey(ImageKey* aKey) { mAreaImageKey = aKey; }
+    ImageKey* areaImageKey() { return mAreaImageKey; }
+    const ImageKey* areaImageKey() const { return mAreaImageKey; }
     void setAreaTexture(gl::Texture* aTexture) { mAreaTexture = aTexture; }
     gl::Texture* areaTexture() { return mAreaTexture; }
     void setImageOffset(const QVector2D& aOffset) { mImageOffset = aOffset; }
@@ -94,7 +96,7 @@ private:
     SRTExpans mSRT;
     OpaKey::Data mOpa;
     float mWorldOpacity;
-    BoneKey* mAreaBone;
+    BoneKey* mAreaBoneKey;
     const BoneInfluenceMap* mBoneInfluence;
     QMatrix4x4 mOuterMtx;
     QMatrix4x4 mInnerMtx;
@@ -107,11 +109,11 @@ private:
     PoseKey::Data mPose;
     BoneKey* mPoseParent;
     PosePalette mPosePalette;
-    MeshKey* mAreaMesh;
+    MeshKey* mAreaMeshKey;
     FFDKey::Data mFFD;
     LayerMesh* mFFDMesh;
     TimeKey* mFFDMeshParent;
-    ImageKey* mAreaImage;
+    ImageKey* mAreaImageKey;
     gl::Texture* mAreaTexture;
     QVector2D mImageOffset;
 };

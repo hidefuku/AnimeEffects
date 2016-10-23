@@ -266,10 +266,10 @@ void LayerNode::renderShape(
     const bool isClippee = (aInfo.clippingFrame && aInfo.clippingId != 0);
 
     auto& expans = aAccessor.get(mTimeLine);
-    if (!expans.areaImage() || !expans.areaTexture()) return;
+    if (!expans.areaImageKey() || !expans.areaTexture()) return;
 
     auto areaTextureId = expans.areaTexture()->id();
-    auto blendMode = expans.areaImage()->data().blendMode();
+    auto blendMode = expans.areaImageKey()->data().blendMode();
 
     auto& shader = aInfo.isGrid ?
                 mShaderHolder.gridShader() :

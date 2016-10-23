@@ -555,8 +555,7 @@ void TimeKeyBlender::blendBoneKey(PositionType aPos, const TimeInfo& aTime)
     auto& expans = *seekData.expans;
     if (!node.timeLine()) return;
 
-    const TimeLine::MapType& map = node.timeLine()->map(TimeKeyType_Bone);
-    expans.setAreaBone((BoneKey*)TimeKeyGatherer::findLastKey(map, aTime.frame));
+    expans.setAreaBoneKey(getAreaBone(node, aTime));
 }
 
 void TimeKeyBlender::blendPoseKey(PositionType aPos, const TimeInfo& aTime)
@@ -568,7 +567,7 @@ void TimeKeyBlender::blendPoseKey(PositionType aPos, const TimeInfo& aTime)
     if (!node.timeLine()) return;
 
     // area bone
-    auto areaBoneKey = expans.areaBone();
+    auto areaBoneKey = expans.areaBoneKey();
     expans.setPoseParent(areaBoneKey);
 
     // get blend info
@@ -661,7 +660,7 @@ void TimeKeyBlender::blendMeshKey(PositionType aPos, const TimeInfo& aTime)
     auto& expans = *seekData.expans;
     if (!node.timeLine()) return;
 
-    expans.setAreaMesh(getMeshKey(node, aTime));
+    expans.setAreaMeshKey(getMeshKey(node, aTime));
 }
 
 MeshKey* TimeKeyBlender::getMeshKey(const ObjectNode& aNode, const TimeInfo& aTime)
@@ -757,7 +756,7 @@ void TimeKeyBlender::blendImageKey(PositionType aPos, const TimeInfo& aTime)
     if (!node.timeLine()) return;
 
     auto imageKey = getImageKey(node, aTime);
-    expans.setAreaImage(imageKey);
+    expans.setAreaImageKey(imageKey);
     expans.setAreaTexture(imageKey ? &(imageKey->cache().texture()) : nullptr);
     expans.setImageOffset(imageKey ? -ObjectNodeUtil::getCenterOffset(node) : QVector2D());
 }
@@ -782,7 +781,7 @@ void TimeKeyBlender::buildPosePalette(ObjectNode& aNode, PosePalette::KeyPair aP
             PosePalette::KeyPair pair = { &expans.poseParent()->data(), &expans.pose() };
             aPair = pair;
         }
-        else if (expans.areaBone())
+        else if (expans.areaBoneKey())
         {
             PosePalette::KeyPair pair = {};
             aPair = pair;
@@ -819,8 +818,7 @@ void TimeKeyBlender::setBoneInfluenceMaps(
         XC_PTR_ASSERT(mSeeker->data(&aNode).expans);
         auto& expans = *(mSeeker->data(&aNode).expans);
 
-        //auto parent = expans.poseParent();
-        auto parent = expans.areaBone();
+        auto parent = expans.areaBoneKey();
         if (parent) key = parent;
 
         const LayerMesh* mesh = nullptr;
@@ -828,9 +826,8 @@ void TimeKeyBlender::setBoneInfluenceMaps(
         QMatrix4x4 outerMtx;
         QMatrix4x4 innerMtx;
         QVector2D imageOffset = expans.imageOffset();
-        const bool isDefaultMesh = true;//!expans.areaMesh();
 
-        if (key && isDefaultMesh)
+        if (key)
         {
             auto cache = key->findCache(aNode);
             if (cache)
@@ -888,7 +885,7 @@ void TimeKeyBlender::setBinderBones(ObjectNode& aRootNode)
             auto seekData = mSeeker->data(mSeeker->position(node));
             if (!seekData.objNode || !seekData.expans) continue;
 
-            auto boneKey = seekData.expans->areaBone();
+            auto boneKey = seekData.expans->areaBoneKey();
             if (!boneKey) continue;
 
             for (auto bindingCache : boneKey->bindingCaches())
@@ -967,7 +964,7 @@ void TimeKeyBlender::setBindingMatrices(
         expans.setIsUnderOfBinding(aUnderOfBinding);
         expans.setIsAffectedByBinding(aAffectedByBinding);
 
-        if (expans.areaBone())
+        if (expans.areaBoneKey())
         {
             aAffectedByBinding = false;
             aBindingMtx = expans.outerMatrix();

@@ -127,14 +127,14 @@ bool PoseEditor::initializeKey(TimeLine& aLine)
         mKeyOwner.parent = mKeyOwner.key->parent();
         return true;
     }
-    else if (current.areaBone())
+    else if (current.areaBoneKey())
     {
         // create new key
         mKeyOwner.key = new PoseKey();
         mKeyOwner.ownsKey = true;
-        mKeyOwner.parent = current.areaBone();
+        mKeyOwner.parent = current.areaBoneKey();
 
-        if (current.areaBone() == current.poseParent())
+        if (current.areaBoneKey() == current.poseParent())
         {
             // copy blended pose
             mKeyOwner.key->data() = current.pose();
@@ -142,7 +142,7 @@ bool PoseEditor::initializeKey(TimeLine& aLine)
         else
         {
             // create from original bones
-            mKeyOwner.key->data().createBonesBy(*current.areaBone());
+            mKeyOwner.key->data().createBonesBy(*current.areaBoneKey());
         }
         return true;
     }
