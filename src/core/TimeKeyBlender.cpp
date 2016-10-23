@@ -138,29 +138,22 @@ LayerMesh* TimeKeyBlender::getAreaMesh(ObjectNode& aNode, const TimeInfo& aTime)
 
 std::pair<TimeKey*, LayerMesh*> TimeKeyBlender::getAreaMeshImpl(ObjectNode& aNode, const TimeInfo& aTime)
 {
-    if (!aNode.timeLine())
+    if (aNode.timeLine())
     {
-        return std::pair<TimeKey*, LayerMesh*>(nullptr, aNode.gridMesh());
-    }
+        // find parent key
+        ImageKey* imageKey = getImageKey(aNode, aTime);
+        MeshKey* meshKey = getMeshKey(aNode, aTime);
 
-    TimeKey* areaKey = nullptr;
-    LayerMesh* areaMesh = aNode.gridMesh();
-
-    // find parent key
-    ImageKey* areaImageKey = getImageKey(aNode, aTime);
-    MeshKey* areaMeshKey = getMeshKey(aNode, aTime);
-
-    if (areaImageKey && (!areaMeshKey || areaImageKey->frame() > areaMeshKey->frame()))
-    {
-        areaKey = areaImageKey;
-        areaMesh = &(areaImageKey->data().gridMesh());
+        if (imageKey && (!meshKey || imageKey->frame() > meshKey->frame()))
+        {
+            return std::pair<TimeKey*, LayerMesh*>(imageKey, &(imageKey->data().gridMesh()));
+        }
+        else if (meshKey)
+        {
+            return std::pair<TimeKey*, LayerMesh*>(meshKey, &(meshKey->data()));
+        }
     }
-    else if (areaMeshKey)
-    {
-        areaKey = areaMeshKey;
-        areaMesh = &(areaMeshKey->data());
-    }
-    return std::pair<TimeKey*, LayerMesh*>(areaKey, areaMesh);
+    return std::pair<TimeKey*, LayerMesh*>(nullptr, nullptr);
 }
 
 BoneKey* TimeKeyBlender::getAreaBone(
@@ -766,21 +759,15 @@ void TimeKeyBlender::blendImageKey(PositionType aPos, const TimeInfo& aTime)
     auto imageKey = getImageKey(node, aTime);
     expans.setAreaImage(imageKey);
     expans.setAreaTexture(imageKey ? &(imageKey->cache().texture()) : nullptr);
-    if (imageKey || node.timeLine()->defaultKey(TimeKeyType_Image))
-    {
-        expans.setImageOffset(-ObjectNodeUtil::getCenterOffset(node));
-    }
-    else
-    {
-        expans.setImageOffset(QVector2D());
-    }
+    expans.setImageOffset(imageKey ? -ObjectNodeUtil::getCenterOffset(node) : QVector2D());
 }
 
 ImageKey* TimeKeyBlender::getImageKey(const ObjectNode& aNode, const TimeInfo& aTime)
 {
     if (!aNode.timeLine()) return nullptr;
     const TimeLine::MapType& map = aNode.timeLine()->map(TimeKeyType_Image);
-    return (ImageKey*)TimeKeyGatherer::findLastKey(map, aTime.frame);
+    auto imageKey = (ImageKey*)TimeKeyGatherer::findLastKey(map, aTime.frame);
+    return imageKey ? imageKey : (ImageKey*)aNode.timeLine()->defaultKey(TimeKeyType_Image);
 }
 
 void TimeKeyBlender::buildPosePalette(ObjectNode& aNode, PosePalette::KeyPair aPair)

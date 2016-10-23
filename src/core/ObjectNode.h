@@ -68,8 +68,8 @@ public:
     virtual TimeLine* timeLine() { return NULL; }
     virtual const TimeLine* timeLine() const { return NULL; }
 
-    virtual GridMesh* gridMesh() { return NULL; }
-    virtual const GridMesh* gridMesh() const { return NULL; }
+    virtual bool hasAnyMesh() const { return false; }
+    virtual bool hasAnyImage() const { return false; }
 
     virtual bool serialize(Serializer& aOut) const = 0;
     virtual bool deserialize(Deserializer& aIn) = 0;

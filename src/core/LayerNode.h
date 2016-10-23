@@ -48,8 +48,8 @@ public:
     virtual const Renderer* renderer() const { return this; }
     virtual TimeLine* timeLine() { return &mTimeLine; }
     virtual const TimeLine* timeLine() const { return &mTimeLine; }
-    virtual GridMesh* gridMesh();
-    virtual const GridMesh* gridMesh() const;
+    virtual bool hasAnyMesh() const { return true; }
+    virtual bool hasAnyImage() const { return true; }
 
     virtual cmnd::Vector createResourceUpdater(const ResourceEvent& aEvent);
 

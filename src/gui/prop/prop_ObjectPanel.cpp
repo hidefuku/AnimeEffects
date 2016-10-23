@@ -508,8 +508,8 @@ void ObjectPanel::updateKeyExists()
         const core::TimeLine& timeLine = *mTarget->timeLine();
         const int frame = mProject.animator().currentFrame().get();
         const bool hasAreaBone = timeLine.current().areaBone();
-        const bool hasAnyMesh = mTarget->gridMesh();
-        const bool isLayer = mTarget->type() == core::ObjectType_Layer;
+        const bool hasAnyMesh = mTarget->hasAnyMesh();
+        const bool hasAnyImage = mTarget->hasAnyImage();
 
         mSRTPanel->setEnabled(true);
         mSRTPanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_SRT, frame));
@@ -520,7 +520,7 @@ void ObjectPanel::updateKeyExists()
         mFFDPanel->setEnabled(true);
         mFFDPanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_FFD, frame), hasAnyMesh);
         mImagePanel->setEnabled(true);
-        mImagePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Image, frame), isLayer);
+        mImagePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Image, frame), hasAnyImage);
     }
     else
     {

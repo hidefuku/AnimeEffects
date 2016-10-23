@@ -93,18 +93,6 @@ void LayerNode::setBlendMode(img::BlendMode aMode)
     }
 }
 
-GridMesh* LayerNode::gridMesh()
-{
-    auto key = (ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image);
-    return key ? &(key->data().gridMesh()) : nullptr;
-}
-
-const GridMesh* LayerNode::gridMesh() const
-{
-    auto key = (ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image);
-    return key ? &(key->data().gridMesh()) : nullptr;
-}
-
 void LayerNode::prerender(const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor)
 {
     mCurrentMesh = nullptr;
@@ -167,16 +155,15 @@ void LayerNode::renderClippees(
 void LayerNode::renderClipper(
         const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor, uint8 aClipperId)
 {
-    //if (!mIsVisible || !aInfo.clippingFrame || !mImageHandle) return;
-    auto imageKey = (ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image);
-    if (!mIsVisible || !aInfo.clippingFrame || !imageKey || !imageKey->hasImage()) return;
+    if (!mIsVisible || !aInfo.clippingFrame) return;
 
     XC_PTR_ASSERT(mCurrentMesh);
     gl::Global::Functions& ggl = gl::Global::functions();
     auto& shader = mShaderHolder.clipperShader(aInfo.clippingId != 0);
     auto& expans = aAccessor.get(mTimeLine);
-    //auto areaTextureId = expans.areaTexture() ? expans.areaTexture()->id() : mTexture.id();
-    auto areaTextureId = expans.areaTexture() ? expans.areaTexture()->id() : imageKey->cache().texture().id();
+
+    if (!expans.areaTexture()) return;
+    auto areaTextureId = expans.areaTexture()->id();
 
     core::ClippingFrame& frame = *aInfo.clippingFrame;
     frame.updateRenderStamp();
@@ -238,41 +225,23 @@ void LayerNode::transformShape(
 {
     auto& expans = aAccessor.get(mTimeLine);
 
-    auto imageKey = (ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image);
-    if (!imageKey || !imageKey->hasImage()) return;
+    // current mesh
+    LayerMesh* mesh = expans.ffdMesh();
+    if (mesh->vertexCount() <= 0) return;
 
-    // select mesh and positions
-    GridMesh& gridMesh = imageKey->data().gridMesh();
-    LayerMesh* mesh = &gridMesh;
+    // positions
     util::ArrayBlock<const gl::Vector3> positions;
     bool useInfluence = true;
 
     if (aInfo.originMesh) // ignore mesh deforming
     {
-        if (mesh->vertexCount() <= 0)
-        {
-            return;
-        }
-
         useInfluence = false;
         positions = util::ArrayBlock<const gl::Vector3>(
-                    gridMesh.positions(), gridMesh.vertexCount());
-        XC_ASSERT(mesh->vertexCount() == positions.count());
+                    mesh->positions(), mesh->vertexCount());
     }
     else
     {
-        if (expans.ffdMesh())
-        {
-            mesh = expans.ffdMesh();
-        }
-
-        if (mesh->vertexCount() <= 0)
-        {
-            return;
-        }
-
         useInfluence = (mesh == expans.boneParent());
-
         positions = util::ArrayBlock<const gl::Vector3>(
                     expans.ffd().positions(), expans.ffd().count());
         XC_MSG_ASSERT(mesh->vertexCount() == positions.count(),
@@ -291,21 +260,20 @@ void LayerNode::transformShape(
 void LayerNode::renderShape(
         const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor)
 {
-    //XC_PTR_ASSERT(mCurrentMesh);
     if (!mCurrentMesh) return;
-    //if (!mImageHandle) return;
-    auto imageKey = (ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image);
-    if (!imageKey || !imageKey->hasImage()) return;
-    auto blendMode = imageKey->data().blendMode();
 
     gl::Global::Functions& ggl = gl::Global::functions();
     const bool isClippee = (aInfo.clippingFrame && aInfo.clippingId != 0);
+
+    auto& expans = aAccessor.get(mTimeLine);
+    if (!expans.areaImage() || !expans.areaTexture()) return;
+
+    auto areaTextureId = expans.areaTexture()->id();
+    auto blendMode = expans.areaImage()->data().blendMode();
+
     auto& shader = aInfo.isGrid ?
                 mShaderHolder.gridShader() :
                 mShaderHolder.shader(blendMode, isClippee);
-    auto& expans = aAccessor.get(mTimeLine);
-    //auto areaTextureId = expans.areaTexture() ? expans.areaTexture()->id() : mTexture.id();
-    auto areaTextureId = expans.areaTexture() ? expans.areaTexture()->id() : imageKey->cache().texture().id();
 
     if (aInfo.isGrid)
     {

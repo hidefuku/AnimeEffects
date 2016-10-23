@@ -31,6 +31,8 @@ public:
     int frame() const { return mFrame; }
     void setFrame(int aFrame) { mFrame = aFrame; }
 
+    bool isDefaultKey() const { return mFrame == -1; }
+
     bool isFocused() const { return mFocus.isLinking(); }
     void setFocus(util::LifeLink& aLink) { mFocus = aLink; }
 

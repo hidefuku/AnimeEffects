@@ -298,7 +298,7 @@ void FFDEditor::updateEvent(EventType)
 
 core::LayerMesh* FFDEditor::getCurrentAreaMesh(core::ObjectNode& aNode) const
 {
-    if (!aNode.timeLine()) return aNode.gridMesh();
+    if (!aNode.timeLine()) return nullptr;
     return aNode.timeLine()->current().ffdMesh();
 }
 

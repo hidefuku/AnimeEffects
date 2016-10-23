@@ -97,7 +97,7 @@ void KeyOwner::deleteOwnsKey()
     parentKey = nullptr;
 }
 
-core::LayerMesh* KeyOwner::getParentMesh(core::ObjectNode* node)
+core::LayerMesh* KeyOwner::getParentMesh(core::ObjectNode*)
 {
     if (parentKey)
     {
@@ -115,10 +115,13 @@ core::LayerMesh* KeyOwner::getParentMesh(core::ObjectNode* node)
             return nullptr;
         }
     }
-    if (node)
+#if 0
+    else if (aNode && aNode->timeLine())
     {
-        return node->gridMesh();
+        auto imageKey = (ImageKey*)aNode->timeLine()->defaultKey(TimeKeyType_Image);
+        if (imageKey) return &(imageKey->data().gridMesh());
     }
+#endif
     return nullptr;
 }
 
