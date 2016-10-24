@@ -478,7 +478,7 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
             if (!resNode) return;
 
             XC_ASSERT(resNode->data().hasImage());
-            const QRect resRect(resNode->data().pos(), resNode->data().image().pixelSize());
+            //const QRect resRect(resNode->data().pos(), resNode->data().image().pixelSize());
 
             cmnd::ScopedMacro macro(mProject->commandStack(), "create object");
             {
@@ -496,7 +496,7 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
             ptr->setDepth(node.depth() + 1.0f);
             ptr->setVisibility(true);
             ptr->setDefaultImage(resNode->handle());
-            ptr->setDefaultPos(util::MathUtil::getCenter(resRect));
+            ptr->setDefaultPos(QVector2D());
             ptr->setDefaultOpacity(1.0f); // @todo support default opacity
             mProject->commandStack().push(new cmnd::GrabNewObject<core::LayerNode>(ptr));
             mProject->commandStack().push(new cmnd::InsertTree<core::ObjectNode>(&(parent->children()), index, ptr));
