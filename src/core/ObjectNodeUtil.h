@@ -16,11 +16,6 @@ namespace ObjectNodeUtil
 {
 float getGlobalDepth(ObjectNode& aNode);
 
-QVector2D getCenterOffset(const ObjectNode& aNode);
-QVector2D getCenterOffset(const SRTExpans& aExpans);
-QVector3D getCenterOffset3D(const ObjectNode& aNode);
-QVector3D getCenterOffset3D(const SRTExpans& aExpans);
-
 bool thereAreSomeKeysExceedingFrame(const ObjectNode* aRootNode, int aMaxFrame);
 
 void collectRenderClippees(ObjectNode& aNode, std::vector<Renderer*>& aDest);

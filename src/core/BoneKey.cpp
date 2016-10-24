@@ -145,7 +145,7 @@ void BoneKey::updateCaches(Project& aProject, const QList<Cache*>& aTargets)
 
             // set world matrix
             cache->setInnerMatrix(TimeKeyBlender::getRelativeMatrix(node, time, owner));
-            cache->setImageOffset(-ObjectNodeUtil::getCenterOffset(node));
+            cache->setImageOffset(TimeKeyBlender::getImageOffset(node, time));
 
             // influence map matrix
             auto mapMtx = cache->innerMatrix();

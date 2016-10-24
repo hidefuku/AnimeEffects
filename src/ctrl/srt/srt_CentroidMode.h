@@ -29,6 +29,7 @@ private:
     bool mFocusing;
     bool mMoving;
     QVector2D mBaseVec;
+    QVector2D mBaseCenter;
     CentroidMover* mCommandRef;
 };
 

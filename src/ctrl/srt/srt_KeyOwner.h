@@ -11,7 +11,7 @@ namespace srt {
 
 struct KeyOwner
 {
-    KeyOwner() : key(), ownsKey() {}
+    KeyOwner();
 
     explicit operator bool() const { return key; }
     bool owns() const { return ownsKey; }
@@ -26,7 +26,8 @@ struct KeyOwner
     QMatrix4x4 mtx;
     QMatrix4x4 invMtx;
     QMatrix4x4 invSRMtx;
-    QMatrix4x4 ltLocMtx;
+    QMatrix4x4 locMtx;
+    QMatrix4x4 locSRMtx;
     bool hasInv;
 };
 

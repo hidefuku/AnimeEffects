@@ -27,6 +27,8 @@ private:
             core::Project& aProject,
             util::IProgressReporter& aReporter);
 
+    static QRect calculateBoundingRectFromChildren(const core::ObjectNode& aNode);
+    void setDefaultPositions(core::ObjectNode& aNode);
     bool checkTextureSizeError(uint32 aWidth, uint32 aHeight);
 
     QString mLog;

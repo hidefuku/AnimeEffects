@@ -495,8 +495,9 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
                         mProject->objectTree().shaderHolder());
             ptr->setDepth(node.depth() + 1.0f);
             ptr->setVisibility(true);
-            ptr->setImage(resNode->handle());
-            ptr->setInitialCenter(util::MathUtil::getCenter(resRect));
+            ptr->setDefaultImage(resNode->handle());
+            ptr->setDefaultPos(util::MathUtil::getCenter(resRect));
+            ptr->setDefaultOpacity(1.0f); // @todo support default opacity
             mProject->commandStack().push(new cmnd::GrabNewObject<core::LayerNode>(ptr));
             mProject->commandStack().push(new cmnd::InsertTree<core::ObjectNode>(&(parent->children()), index, ptr));
 
@@ -542,6 +543,8 @@ void ObjectTreeWidget::onFolderActionTriggered(bool)
             // create node
             core::LayerSetNode* ptr = new core::LayerSetNode("folder0");
             ptr->setDepth(node.depth() + 1.0f);
+            ptr->setDefaultPos(QVector2D());
+            ptr->setDefaultOpacity(1.0f); // @todo support default opacity
             mProject->commandStack().push(new cmnd::GrabNewObject<core::LayerSetNode>(ptr));
             mProject->commandStack().push(new cmnd::InsertTree<core::ObjectNode>(&(parent->children()), index, ptr));
 

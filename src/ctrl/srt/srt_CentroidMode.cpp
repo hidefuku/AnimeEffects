@@ -3,6 +3,7 @@
 #include "core/Constant.h"
 #include "core/ObjectNodeUtil.h"
 #include "core/TimeKeyExpans.h"
+#include "core/TimeKeyBlender.h"
 #include "ctrl/TimeLineUtil.h"
 #include "ctrl/srt/srt_CentroidMode.h"
 
@@ -32,7 +33,7 @@ CentroidMode::CentroidMode(Project& aProject, ObjectNode& aTarget, KeyOwner& aKe
 
 bool CentroidMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCursor)
 {
-    auto worldMtx = mKeyOwner.mtx * mKeyOwner.ltLocMtx;
+    auto worldMtx = mKeyOwner.mtx * mKeyOwner.locSRMtx;
     bool hasWorldInv = false;
     auto worldInvMtx = worldMtx.inverted(&hasWorldInv);
 
@@ -48,6 +49,7 @@ bool CentroidMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor&
         {        
             mMoving = true;
             mBaseVec = center - curPos;
+            mBaseCenter = (worldInvMtx * QVector3D(center)).toVector2D();
             mCommandRef = nullptr;
         }
         mod = true;
@@ -56,12 +58,8 @@ bool CentroidMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor&
     {
         if (mMoving && hasWorldInv)
         {
-            const QVector2D newWorldCenter = curPos + mBaseVec;
-            const QVector3D newLocalCenter = worldInvMtx * QVector3D(newWorldCenter);
-
-            moveCentroid(QVector2D(mTarget.initialRect().topLeft()) +
-                         newLocalCenter.toVector2D());
-
+            auto newLocalCenter = worldInvMtx * QVector3D(curPos + mBaseVec);
+            moveCentroid(newLocalCenter.toVector2D());
             mKeyOwner.updatePosture(mTarget.timeLine()->current());
         }
         mod = true;
@@ -134,7 +132,7 @@ void CentroidMode::moveCentroid(const QVector2D& aNewCenter)
         macro.grabListener(new ObjectNodeUtil::AttributeNotifier(mProject, mTarget));
 
         // create command
-        mCommandRef = new CentroidMover(mTarget, newCenter);
+        mCommandRef = new CentroidMover(mTarget, mBaseCenter, newCenter);
 
         // push command
         stack.push(mCommandRef);
@@ -152,22 +150,31 @@ void CentroidMode::pushEventTarget(core::ObjectNode& aTarget, TimeLineEvent& aEv
         }
     }
 
-    for (auto child : aTarget.children())
+    if (aTarget.canHoldChild())
     {
-        XC_PTR_ASSERT(child->timeLine());
-        auto& map = child->timeLine()->map(TimeKeyType_SRT);
+        for (auto child : aTarget.children())
+        {
+            XC_PTR_ASSERT(child->timeLine());
+            auto& map = child->timeLine()->map(TimeKeyType_SRT);
+            for (auto itr = map.begin(); itr != map.end(); ++itr)
+            {
+                aEvent.pushTarget(*child, TimeKeyType_SRT, itr.key());
+            }
+        }
+    }
+    else
+    {
+        auto& map = aTarget.timeLine()->map(TimeKeyType_Image);
         for (auto itr = map.begin(); itr != map.end(); ++itr)
         {
-            aEvent.pushTarget(*child, TimeKeyType_SRT, itr.key());
+            aEvent.pushTarget(aTarget, TimeKeyType_SRT, itr.key());
         }
     }
 }
 
 QVector2D CentroidMode::getWorldCentroidPos() const
 {
-    auto mtx = mKeyOwner.mtx * mKeyOwner.ltLocMtx;
-    auto pos = mtx * ObjectNodeUtil::getCenterOffset3D(mTarget);
-    return pos.toVector2D();
+    return (mKeyOwner.mtx * mKeyOwner.locMtx * QVector3D()).toVector2D();
 }
 
 } // namespace srt

@@ -28,9 +28,13 @@ public:
 
     util::LifeLink::Pointee<LayerNode> pointee() { return lifeLink().pointee<LayerNode>(this); }
 
-    // image buffer
-    void setImage(const img::ResourceHandle& aHandle);
-    void setImage(const img::ResourceHandle& aHandle, img::BlendMode aBlendMode);
+    // default image
+    void setDefaultImage(const img::ResourceHandle& aHandle);
+    void setDefaultImage(const img::ResourceHandle& aHandle, img::BlendMode aBlendMode);
+    // default position
+    void setDefaultPos(const QVector2D& aPos);
+    // default opacity
+    void setDefaultOpacity(float aValue);
 
     // from ObjectNode
     virtual ObjectType type() const { return ObjectType_Layer; }
@@ -41,9 +45,8 @@ public:
     virtual void setVisibility(bool aIsVisible) { mIsVisible = aIsVisible; }
     virtual bool isVisible() const { return mIsVisible; }
     virtual bool canHoldChild() const { return false; }
-    virtual QRect initialRect() const { return mImageRect; }
-    virtual void setInitialCenter(const QVector2D& aCenter) { mInitialCenter = aCenter; }
-    virtual QVector2D initialCenter() const { return mInitialCenter; }
+    virtual void setInitialRect(const QRect& aRect) { mInitialRect = aRect; }
+    virtual QRect initialRect() const { return mInitialRect; }
     virtual Renderer* renderer() { return this; }
     virtual const Renderer* renderer() const { return this; }
     virtual TimeLine* timeLine() { return &mTimeLine; }
@@ -78,8 +81,7 @@ private:
     QString mName;
     float mDepth;
     bool mIsVisible;
-    QRect mImageRect;
-    QVector2D mInitialCenter;
+    QRect mInitialRect;
     TimeLine mTimeLine;
     ShaderHolder& mShaderHolder;
     bool mIsClipped;

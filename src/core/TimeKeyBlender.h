@@ -38,6 +38,8 @@ public:
             ObjectNode& aNode, const TimeInfo& aTime);
     static BoneKey* getNearestInfluencerBone(
             ObjectNode& aNode, const TimeInfo& aTime);
+    static QVector2D getImageOffset(
+            ObjectNode& aNode, const TimeInfo& aTime);
 
     TimeKeyBlender(ObjectTree& aTree);
     TimeKeyBlender(ObjectNode& aRootNode, bool aUseWorking);

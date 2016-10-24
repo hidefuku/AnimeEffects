@@ -55,26 +55,6 @@ float getGlobalDepth(ObjectNode& aNode)
     return gdepth;
 }
 
-QVector2D getCenterOffset(const ObjectNode& aNode)
-{
-    return aNode.initialCenter() - QVector2D(aNode.initialRect().topLeft());
-}
-
-QVector2D getCenterOffset(const SRTExpans& aExpans)
-{
-    return aExpans.initialCenter() - QVector2D(aExpans.initialRect().topLeft());
-}
-
-QVector3D getCenterOffset3D(const ObjectNode& aNode)
-{
-    return QVector3D(getCenterOffset(aNode));
-}
-
-QVector3D getCenterOffset3D(const SRTExpans& aExpans)
-{
-    return QVector3D(getCenterOffset(aExpans));
-}
-
 void buildBoundingBox(ObjectNode& aNode)
 {
     ObjectNodeBox* box = aNode.boxCache();

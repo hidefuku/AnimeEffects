@@ -24,8 +24,7 @@ LayerNode::LayerNode(const QString& aName, ShaderHolder& aShaderHolder)
     : mName(aName)
     , mDepth()
     , mIsVisible(true)
-    , mImageRect()
-    , mInitialCenter()
+    , mInitialRect()
     , mTimeLine()
     , mShaderHolder(aShaderHolder)
     , mIsClipped()
@@ -36,12 +35,12 @@ LayerNode::LayerNode(const QString& aName, ShaderHolder& aShaderHolder)
 {
 }
 
-void LayerNode::setImage(const img::ResourceHandle& aHandle)
+void LayerNode::setDefaultImage(const img::ResourceHandle& aHandle)
 {
-    setImage(aHandle, aHandle->blendMode());
+    setDefaultImage(aHandle, aHandle->blendMode());
 }
 
-void LayerNode::setImage(const img::ResourceHandle& aHandle, img::BlendMode aBlendMode)
+void LayerNode::setDefaultImage(const img::ResourceHandle& aHandle, img::BlendMode aBlendMode)
 {
     XC_ASSERT(aHandle);
     XC_PTR_ASSERT(aHandle->image().data());
@@ -52,12 +51,33 @@ void LayerNode::setImage(const img::ResourceHandle& aHandle, img::BlendMode aBle
     mTimeLine.grabDefaultKey(TimeKeyType_Image, key);
     key->setImage(aHandle, aBlendMode);
 
-    mImageRect = QRect(aHandle->pos(), aHandle->image().pixelSize());
-    mInitialCenter = QVector2D(QRectF(mImageRect).center());
-
     mShaderHolder.reserveShaders(aBlendMode);
     mShaderHolder.reserveGridShader();
     mShaderHolder.reserveClipperShaders();
+}
+
+void LayerNode::setDefaultPos(const QVector2D& aPos)
+{
+    auto key = (SRTKey*)mTimeLine.defaultKey(TimeKeyType_SRT);
+    if (!key)
+    {
+        key = new SRTKey();
+        mTimeLine.grabDefaultKey(TimeKeyType_SRT, key);
+    }
+    key->data().pos = QVector3D(aPos);
+    key->data().clampPos();
+}
+
+void LayerNode::setDefaultOpacity(float aValue)
+{
+    auto key = (OpaKey*)mTimeLine.defaultKey(TimeKeyType_Opa);
+    if (!key)
+    {
+        key = new OpaKey();
+        mTimeLine.grabDefaultKey(TimeKeyType_Opa, key);
+    }
+    key->data().opacity = aValue;
+    key->data().clamp();
 }
 
 void LayerNode::setClipped(bool aIsClipped)
@@ -370,10 +390,8 @@ bool LayerNode::serialize(Serializer& aOut) const
     aOut.write(mDepth);
     // visibility
     aOut.write(mIsVisible);
-    // image rect
-    aOut.write(mImageRect);
-    // center
-    aOut.write(mInitialCenter);
+    // initial rect
+    aOut.write(mInitialRect);
     // clipping
     aOut.write(mIsClipped);
     // timeline
@@ -400,10 +418,8 @@ bool LayerNode::deserialize(Deserializer& aIn)
     aIn.read(mDepth);
     // visibility
     aIn.read(mIsVisible);
-    // image rect
-    aIn.read(mImageRect);
-    // center
-    aIn.read(mInitialCenter);
+    // initial rect
+    aIn.read(mInitialRect);
     // clipping
     aIn.read(mIsClipped);
     // timeline

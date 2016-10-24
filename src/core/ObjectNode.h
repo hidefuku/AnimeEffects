@@ -54,10 +54,9 @@ public:
     virtual bool isVisible() const = 0;
 
     virtual bool canHoldChild() const = 0;
-    virtual QRect initialRect() const = 0;
 
-    virtual void setInitialCenter(const QVector2D&) = 0;
-    virtual QVector2D initialCenter() const = 0;
+    virtual void setInitialRect(const QRect&) = 0;
+    virtual QRect initialRect() const = 0;
 
     virtual ObjectNodeBox* boxCache() { return NULL; }
     virtual const ObjectNodeBox* boxCache() const { return NULL; }

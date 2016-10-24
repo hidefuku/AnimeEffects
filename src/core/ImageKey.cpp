@@ -1,6 +1,7 @@
 #include "img/ResourceNode.h"
 #include "img/BlendMode.h"
 #include "core/ImageKey.h"
+#include "core/Constant.h"
 
 namespace core
 {
@@ -10,9 +11,17 @@ ImageKey::Data::Data()
     : mEasing()
     , mResHandle()
     , mBlendMode(img::BlendMode_Normal)
-    , mCenterOffset()
+    , mImageOffset()
     , mGridMesh()
 {
+}
+
+void ImageKey::Data::setImageOffset(const QVector2D& aOffset)
+{
+    const QVector2D offset(
+                xc_clamp(aOffset.x(), Constant::transMin(), Constant::transMax()),
+                xc_clamp(aOffset.y(), Constant::transMin(), Constant::transMax()));
+    mImageOffset = offset;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -37,11 +46,11 @@ void ImageKey::setImage(const img::ResourceHandle& aResource, img::BlendMode aMo
 void ImageKey::setImage(const img::ResourceHandle& aResource)
 {
     mData.resource() = aResource;
-    mData.setCenterOffset(QVector2D());
+    mData.setImageOffset(QVector2D());
     if (hasImage())
     {
         auto size = mData.resource()->image().pixelSize();
-        mData.setCenterOffset(QVector2D(size.width() * 0.5f, size.height() * 0.5f));
+        mData.setImageOffset(QVector2D(-size.width() * 0.5f, -size.height() * 0.5f));
     }
     resetGridMesh();
     resetTextureCache();
@@ -82,8 +91,8 @@ bool ImageKey::serialize(Serializer& aOut) const
     aOut.writeID(mData.resource()->serialAddress());
     // blend mode
     aOut.writeFixedString(img::getQuadIdFromBlendMode(mData.blendMode()), 4);
-    // center offset
-    aOut.write(mData.centerOffset());
+    // image offset
+    aOut.write(mData.imageOffset());
     // grid mesh
     if (!mData.gridMesh().serialize(aOut))
     {
@@ -127,11 +136,11 @@ bool ImageKey::deserialize(Deserializer& aIn)
         }
         mData.setBlendMode(bmode);
     }
-    // center offset
+    // image offset
     {
-        QVector2D centerOffs;
-        aIn.read(centerOffs);
-        mData.setCenterOffset(centerOffs);
+        QVector2D offset;
+        aIn.read(offset);
+        mData.setImageOffset(offset);
     }
     // grid mesh
     if (!mData.gridMesh().deserialize(aIn))

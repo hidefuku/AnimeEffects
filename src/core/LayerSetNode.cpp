@@ -13,8 +13,7 @@ LayerSetNode::LayerSetNode(const QString& aName)
     : mName(aName)
     , mDepth()
     , mIsVisible(true)
-    , mBoundingRect(QPoint(0, 0), QSize(1, 1))
-    , mInitialCenter()
+    , mInitialRect()
     , mHeightMap()
     , mTimeLine()
     , mIsClipped()
@@ -28,10 +27,28 @@ LayerSetNode::~LayerSetNode()
     qDeleteAll(children());
 }
 
-void LayerSetNode::setBoundingRect(const QRect& aRect)
+void LayerSetNode::setDefaultPos(const QVector2D& aPos)
 {
-    XC_ASSERT(aRect.isValid());
-    mBoundingRect = aRect;
+    auto key = (SRTKey*)mTimeLine.defaultKey(TimeKeyType_SRT);
+    if (!key)
+    {
+        key = new SRTKey();
+        mTimeLine.grabDefaultKey(TimeKeyType_SRT, key);
+    }
+    key->data().pos = QVector3D(aPos);
+    key->data().clampPos();
+}
+
+void LayerSetNode::setDefaultOpacity(float aValue)
+{
+    auto key = (OpaKey*)mTimeLine.defaultKey(TimeKeyType_Opa);
+    if (!key)
+    {
+        key = new OpaKey();
+        mTimeLine.grabDefaultKey(TimeKeyType_Opa, key);
+    }
+    key->data().opacity = aValue;
+    key->data().clamp();
 }
 
 void LayerSetNode::grabHeightMap(HeightMap* aNode)
@@ -132,10 +149,8 @@ bool LayerSetNode::serialize(Serializer& aOut) const
     aOut.write(mDepth);
     // visibility
     aOut.write(mIsVisible);
-    // bounding rect
-    aOut.write(mBoundingRect);
-    // initial center
-    aOut.write(mInitialCenter);
+    // initial rect
+    aOut.write(mInitialRect);
     // clipping
     aOut.write(mIsClipped);
 
@@ -163,10 +178,8 @@ bool LayerSetNode::deserialize(Deserializer& aIn)
     aIn.read(mDepth);
     // visibility
     aIn.read(mIsVisible);
-    // bounding rect
-    aIn.read(mBoundingRect);
-    // initial center
-    aIn.read(mInitialCenter);
+    // initial rect
+    aIn.read(mInitialRect);
     // clipping
     aIn.read(mIsClipped);
 

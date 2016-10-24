@@ -18,7 +18,11 @@ public:
     LayerSetNode(const QString& aName);
     ~LayerSetNode();
 
-    void setBoundingRect(const QRect& aRect);
+    // default position
+    void setDefaultPos(const QVector2D& aPos);
+    // default opacity
+    void setDefaultOpacity(float aValue);
+
     void grabHeightMap(HeightMap* aNode);
     const HeightMap* heightMap() const { return mHeightMap.data(); }
 
@@ -31,9 +35,8 @@ public:
     virtual void setVisibility(bool aIsVisible) { mIsVisible = aIsVisible; }
     virtual bool isVisible() const { return mIsVisible; }
     virtual bool canHoldChild() const { return true; }
-    virtual QRect initialRect() const { return mBoundingRect; }
-    virtual void setInitialCenter(const QVector2D& aCenter) { mInitialCenter = aCenter; }
-    virtual QVector2D initialCenter() const { return mInitialCenter; }
+    virtual void setInitialRect(const QRect& aRect) { mInitialRect = aRect; }
+    virtual QRect initialRect() const { return mInitialRect; }
     virtual Renderer* renderer() { return this; }
     virtual const Renderer* renderer() const { return this; }
     virtual TimeLine* timeLine() { return &mTimeLine; }
@@ -59,8 +62,7 @@ private:
     QString mName;
     float mDepth;
     bool mIsVisible;
-    QRect mBoundingRect;
-    QVector2D mInitialCenter;
+    QRect mInitialRect;
     QScopedPointer<HeightMap> mHeightMap;
     TimeLine mTimeLine;
     bool mIsClipped;

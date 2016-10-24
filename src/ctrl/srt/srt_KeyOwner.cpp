@@ -8,6 +8,18 @@ using namespace core;
 namespace ctrl {
 namespace srt {
 
+KeyOwner::KeyOwner()
+    : key()
+    , ownsKey()
+    , mtx()
+    , invMtx()
+    , invSRMtx()
+    , locMtx()
+    , locSRMtx()
+    , hasInv()
+{
+}
+
 void KeyOwner::pushOwnsKey(cmnd::Stack& aStack, TimeLine& aLine, int aFrame)
 {
     if (ownsKey)
@@ -48,8 +60,9 @@ bool KeyOwner::updatePosture(const TimeKeyExpans& aExpans)
     invSRMtx = invMtx;
     invSRMtx.setColumn(3, QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
 
-    ltLocMtx = key->data().localMatrix();
-    ltLocMtx.translate(aExpans.imageOffset());
+    locMtx = key->data().localMatrix();
+    locSRMtx = locMtx;
+    locSRMtx.setColumn(3, QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
 
     return true;
 }

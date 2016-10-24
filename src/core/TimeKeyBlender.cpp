@@ -183,6 +183,12 @@ BoneKey* TimeKeyBlender::getNearestInfluencerBone(
     return nullptr;
 }
 
+QVector2D TimeKeyBlender::getImageOffset(ObjectNode& aNode, const TimeInfo& aTime)
+{
+    auto imageKey = getImageKey(aNode, aTime);
+    return imageKey ? imageKey->data().imageOffset() : QVector2D();
+}
+
 //-------------------------------------------------------------------------------------------------
 TimeKeyBlender::TimeKeyBlender(ObjectTree& aTree)
     : mSeeker()
@@ -339,22 +345,12 @@ void TimeKeyBlender::clearCaches(ObjectNode* aRootNode)
 
 SRTKey::Data TimeKeyBlender::getDefaultSRT(const ObjectNode& aNode)
 {
-    const QVector3D initialPos = QVector3D(aNode.initialCenter());
-    SRTKey::Data data;
-
-    const ObjectNode* parent = aNode.parent();
-    while (parent)
+    if (aNode.timeLine())
     {
-        if (parent->timeLine())
-        {
-            const QVector3D parentPos = QVector3D(parent->initialCenter());
-            data.pos = initialPos - parentPos;
-            return data;
-        }
-        parent = parent->parent();
+        auto key = (SRTKey*)aNode.timeLine()->defaultKey(TimeKeyType_SRT);
+        if (key) return key->data();
     }
-
-    return data;
+    return SRTKey::Data();
 }
 
 #if 0
@@ -383,10 +379,6 @@ void TimeKeyBlender::blendSRTKey(PositionType aPos, const TimeInfo& aTime)
 
     // set srt
     getSRTData(expans, node, aTime);
-
-    // set initial rect and center
-    expans.srt().setInitialRect(node.initialRect());
-    expans.srt().setInitialCenter(node.initialCenter());
 
     // update matrix
     expans.srt().parentMatrix() = QMatrix4x4();
@@ -485,7 +477,8 @@ void TimeKeyBlender::blendOpaKey(PositionType aPos, const TimeInfo& aTime)
     // no key is exists
     if (blend.isEmpty())
     {
-        expans.opa() = OpaKey::Data();
+        auto defaultKey = (OpaKey*)node.timeLine()->defaultKey(TimeKeyType_Opa);
+        expans.opa() = defaultKey ? defaultKey->data() : OpaKey::Data();
     }
     else if (blend.hasSameFrame())
     {
@@ -758,7 +751,7 @@ void TimeKeyBlender::blendImageKey(PositionType aPos, const TimeInfo& aTime)
     auto imageKey = getImageKey(node, aTime);
     expans.setAreaImageKey(imageKey);
     expans.setAreaTexture(imageKey ? &(imageKey->cache().texture()) : nullptr);
-    expans.setImageOffset(imageKey ? -ObjectNodeUtil::getCenterOffset(node) : QVector2D());
+    expans.setImageOffset(imageKey ? imageKey->data().imageOffset() : QVector2D());
 }
 
 ImageKey* TimeKeyBlender::getImageKey(const ObjectNode& aNode, const TimeInfo& aTime)

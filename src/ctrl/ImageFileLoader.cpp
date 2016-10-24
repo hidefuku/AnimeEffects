@@ -99,6 +99,7 @@ bool ImageFileLoader::loadPsd(
     using img::PSDFormat;
     using img::PSDReader;
     using img::PSDUtil;
+    typedef PSDFormat::LayerList::reverse_iterator ReverseIterator;
 
     aReporter.setSection("Loading the PSD File...");
     aReporter.setMaximum(1);
@@ -141,12 +142,12 @@ bool ImageFileLoader::loadPsd(
 
     // create tree top node
     LayerSetNode* topNode = new LayerSetNode(mFileInfo.baseName());
+    topNode->setDefaultOpacity(1.0f);
     aProject.objectTree().grabTopNode(topNode);
 
     // tree stack
     std::vector<LayerSetNode*> treeStack;
     treeStack.push_back(topNode);
-    QRect boundBox;
     float globalDepth = 0.0f;
 
     // resource tree stack
@@ -155,18 +156,17 @@ bool ImageFileLoader::loadPsd(
     aProject.resourceHolder().pushImageTree(*resStack.back(), mFileInfo.absoluteFilePath());
 
     // for each layer
-    PSDFormat::LayerList::reverse_iterator layerItr;
-    for (layerItr = layers.rbegin(); layerItr != layers.rend(); ++layerItr)
+    for (ReverseIterator itr = layers.rbegin(); itr != layers.rend(); ++itr)
     {
         LayerSetNode* current = treeStack.back();
         XC_PTR_ASSERT(current);
         img::ResourceNode* resCurrent = resStack.back();
         XC_PTR_ASSERT(resCurrent);
 
-        PSDFormat::Layer& layer = *((*layerItr).get());
+        PSDFormat::Layer& layer = *((*itr).get());
         const QString name = textFilter.get(layer.name);
-        const PSDFormat::Rect frmRect = layer.rect;
-        QRect rect(frmRect.left(), frmRect.top(), frmRect.width(), frmRect.height());
+        QRect rect(layer.rect.left(), layer.rect.top(),
+                   layer.rect.width(), layer.rect.height());
         const float parentDepth = core::ObjectNodeUtil::getGlobalDepth(*current);
 
         XC_REPORT() << "name =" << name << "size =" << rect.width() << "," << rect.height();
@@ -176,7 +176,6 @@ bool ImageFileLoader::loadPsd(
         {
             return false;
         }
-
 
         if (layer.entryType == PSDFormat::LayerEntryType_Layer)
         {
@@ -188,27 +187,20 @@ bool ImageFileLoader::loadPsd(
             LayerNode* layerNode = new LayerNode(name, aProject.objectTree().shaderHolder());
             layerNode->setDepth(globalDepth - parentDepth);
             layerNode->setVisibility(layer.isVisible());
-            layerNode->setImage(resNode->handle());
-            layerNode->setInitialCenter(util::MathUtil::getCenter(rect));
             layerNode->setClipped(layer.clipping != 0);
+            layerNode->setInitialRect(rect);
+            layerNode->setDefaultImage(resNode->handle());
+            layerNode->setDefaultOpacity(layer.opacity / 255.0f);
 
             current->children().pushBack(layerNode);
 
             // update depth
             globalDepth -= 1.0f;
-
-            // update bounding box
-            boundBox = boundBox.isValid() ? boundBox.united(rect) : rect;
         }
         else if (layer.entryType == PSDFormat::LayerEntryType_Bounding)
         {
-            // set bounding box
-            if (!boundBox.isValid())
-            {
-                boundBox = QRect(QPoint(0, 0), QSize(1, 1));
-            }
-            current->setBoundingRect(boundBox);
-            current->setInitialCenter(util::MathUtil::getCenter(boundBox));
+            // create bounding box
+            current->setInitialRect(calculateBoundingRectFromChildren(*current));
 
             // pop tree
             treeStack.pop_back();
@@ -226,6 +218,7 @@ bool ImageFileLoader::loadPsd(
             layerSetNode->setDepth(globalDepth - parentDepth);
             layerSetNode->setVisibility(layer.isVisible());
             layerSetNode->setClipped(layer.clipping != 0);
+            layerSetNode->setDefaultOpacity(layer.opacity / 255.0f);
 
             // push tree
             current->children().pushBack(layerSetNode);
@@ -233,19 +226,60 @@ bool ImageFileLoader::loadPsd(
 
             // update depth
             globalDepth -= 1.0f;
-
-            // reset bounding box
-            boundBox = QRect();
         }
 
         ++progress;
         aReporter.setProgress(progress);
     }
+    topNode->setInitialRect(calculateBoundingRectFromChildren(*topNode));
+
+    setDefaultPositions(*topNode);
 
     XC_DEBUG_REPORT("------------------------------------------");
 
     mLog = "success";
     return true;
+}
+
+QRect ImageFileLoader::calculateBoundingRectFromChildren(const ObjectNode& aNode)
+{
+    QRect rect;
+    for (auto child : aNode.children())
+    {
+        if (child->initialRect().isValid())
+        {
+            rect = rect.isValid() ? rect.united(child->initialRect()) : child->initialRect();
+        }
+    }
+    return rect;
+}
+
+void ImageFileLoader::setDefaultPositions(ObjectNode& aNode)
+{
+    ObjectNode::Iterator itr(&aNode);
+    while (itr.hasNext())
+    {
+        auto node = itr.next();
+        auto parent = node->parent();
+
+        // parent position
+        const QVector2D parentPos = (parent && parent->initialRect().isValid()) ?
+                    util::MathUtil::getCenter(parent->initialRect()) : QVector2D();
+
+        // node position
+        const QVector2D pos = (node->initialRect().isValid()) ?
+                    util::MathUtil::getCenter(node->initialRect()) : parentPos;
+
+        // set
+        if (node->type() == ObjectType_Layer)
+        {
+            ((LayerNode*)node)->setDefaultPos(pos - parentPos);
+        }
+        else if (node->type() == ObjectType_LayerSet)
+        {
+            ((LayerSetNode*)node)->setDefaultPos(pos - parentPos);
+        }
+    }
 }
 
 bool ImageFileLoader::checkTextureSizeError(uint32 aWidth, uint32 aHeight)
