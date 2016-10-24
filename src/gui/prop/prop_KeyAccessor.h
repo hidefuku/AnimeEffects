@@ -35,6 +35,7 @@ public:
 
     // image
     void assignImageResource(img::ResourceNode&);
+    void assignImageOffset(const QVector2D&);
 
     // new keys
     void knockNewSRT();

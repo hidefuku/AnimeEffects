@@ -155,6 +155,12 @@ void KeyAccessor::assignImageResource(img::ResourceNode& aNext)
     ctrl::TimeLineUtil::assignImageKeyResource(*mProject, *mTarget, getFrame(), aNext);
 }
 
+void KeyAccessor::assignImageOffset(const QVector2D& aNext)
+{
+    ASSERT_AND_RETURN_INVALID_TARGET();
+    ctrl::TimeLineUtil::assignImageKeyOffset(*mProject, *mTarget, getFrame(), aNext);
+}
+
 //-------------------------------------------------------------------------------------------------
 void KeyAccessor::knockNewSRT()
 {

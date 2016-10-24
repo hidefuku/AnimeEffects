@@ -167,6 +167,28 @@ void assignKeyEasing(
     }
 }
 
+//---------------------------------------------------------------------------------------
+template<class tKey, TimeKeyType tType>
+void assignKeyBy(
+        Project& aProject, ObjectNode& aTarget, int aFrame, const QString& aText,
+        const std::function<void(tKey*)>& aFunc)
+{
+    XC_ASSERT(aTarget.timeLine());
+    tKey* key = (tKey*)(aTarget.timeLine()->timeKey(tType, aFrame));
+    XC_PTR_ASSERT(key);
+
+    {
+        cmnd::ScopedMacro macro(aProject.commandStack(), aText);
+
+        auto notifier = new Notifier(aProject);
+        notifier->event().setType(TimeLineEvent::Type_ChangeKeyValue);
+        notifier->event().pushTarget(aTarget, tType, aFrame);
+        macro.grabListener(notifier);
+
+        aFunc(key);
+    }
+}
+
 void assignSRTKeyData(
         Project& aProject, ObjectNode& aTarget, int aFrame,
         const SRTKey::Data& aNewData)
@@ -203,33 +225,43 @@ void assignImageKeyResource(
         Project& aProject, ObjectNode& aTarget, int aFrame,
         img::ResourceNode& aNewData)
 {
-    XC_ASSERT(aTarget.timeLine());
-    ImageKey* key = (ImageKey*)(aTarget.timeLine()->timeKey(TimeKeyType_Image, aFrame));
-    XC_PTR_ASSERT(key);
+    ResourceUpdatingWorkspacePtr workspace = std::make_shared<ResourceUpdatingWorkspace>();
+    const bool createTransitions = !aTarget.timeLine()->isEmpty(TimeKeyType_FFD);
 
+    assignKeyBy<ImageKey, TimeKeyType_Image>(
+                aProject, aTarget, aFrame, "assign image key resource", [&](ImageKey* aKey)
     {
-        cmnd::ScopedMacro macro(aProject.commandStack(), "assign image key");
-
-        // set notifier
-        auto notifier = new Notifier(aProject);
-        notifier->event().setType(TimeLineEvent::Type_ChangeKeyValue);
-        notifier->event().pushTarget(aTarget, TimeKeyType_Image, aFrame);
-        macro.grabListener(notifier);
-
-        ResourceUpdatingWorkspacePtr workspace = std::make_shared<ResourceUpdatingWorkspace>();
-        const bool createTransitions = !aTarget.timeLine()->isEmpty(TimeKeyType_FFD);
-
         // image key
         aProject.commandStack().push(
                     ImageKeyUpdater::createResourceUpdater(
-                        *key, aNewData, workspace, createTransitions));
+                        *aKey, aNewData, workspace, createTransitions));
 
         // ffd key should be called finally
         if (createTransitions)
         {
             aProject.commandStack().push(FFDKeyUpdater::createResourceUpdater(aTarget, workspace));
         }
-    }
+    });
+}
+
+void TimeLineUtil::assignImageKeyOffset(
+        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
+        const QVector2D& aNewData)
+{
+    assignKeyBy<ImageKey, TimeKeyType_Image>(
+                aProject, aTarget, aFrame, "assign image key center", [&](ImageKey* aKey)
+    {
+        auto prevOffset = aKey->data().imageOffset();
+
+        aProject.commandStack().push(new cmnd::Delegatable([=]()
+        {
+            aKey->data().setImageOffset(aNewData);
+        },
+        [=]()
+        {
+            aKey->data().setImageOffset(prevOffset);
+        }));
+    });
 }
 
 template<class tKey, TimeKeyType tType>

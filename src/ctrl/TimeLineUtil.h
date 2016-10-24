@@ -125,6 +125,10 @@ void assignImageKeyResource(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
         img::ResourceNode& aNewData);
 
+void assignImageKeyOffset(
+        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
+        const QVector2D& aNewData);
+
 void pushNewSRTKey(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
         core::SRTKey* aKey);

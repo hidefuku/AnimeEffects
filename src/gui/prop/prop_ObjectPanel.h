@@ -114,6 +114,7 @@ private:
         KeyKnocker* mKnocker;
         KeyGroup* mGroup;
         BrowseItem* mBrowse;
+        Vector2DItem* mOffset;
         bool mKeyExists;
         ViaPoint& mViaPoint;
     };

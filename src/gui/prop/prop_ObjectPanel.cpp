@@ -306,6 +306,7 @@ ObjectPanel::ImagePanel::ImagePanel(Panel& aPanel, KeyAccessor& aAccessor,
     , mKnocker()
     , mGroup()
     , mBrowse()
+    , mOffset()
     , mKeyExists(false)
     , mViaPoint(aViaPoint)
 {
@@ -329,6 +330,14 @@ ObjectPanel::ImagePanel::ImagePanel(Panel& aPanel, KeyAccessor& aAccessor,
                 this->mAccessor.assignImageResource(*resNode);
             }
         };
+        // offset
+        mOffset = new Vector2DItem(mGroup);
+        mOffset->setRange(core::Constant::transMin(), core::Constant::transMax());
+        mOffset->onValueUpdated = [=](QVector2D, QVector2D aNext)
+        {
+            this->mAccessor.assignImageOffset(-aNext);
+        };
+        mGroup->addItem("center :", mOffset);
     }
     setEnabled(false);
     setKeyExists(false, false);
@@ -361,6 +370,7 @@ void ObjectPanel::ImagePanel::setKeyValue(const core::TimeKey* aKey)
     TIMEKEY_PTR_TYPE_ASSERT(aKey, Image);
     const core::ImageKey::Data& data = ((const core::ImageKey*)aKey)->data();
     mBrowse->setValue(data.resource()->identifier());
+    mOffset->setValue(-data.imageOffset());
 }
 
 bool ObjectPanel::ImagePanel::keyExists() const
