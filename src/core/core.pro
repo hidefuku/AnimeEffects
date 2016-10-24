@@ -89,7 +89,8 @@ SOURCES += \
     MeshTransformerResource.cpp \
     ImageKey.cpp \
     ImageKeyUpdater.cpp \
-    ResourceUpdatingWorkspace.cpp
+    ResourceUpdatingWorkspace.cpp \
+    BoneExpans.cpp
 
 HEADERS += \
     AbstractCursor.h \
@@ -150,4 +151,5 @@ HEADERS += \
     MeshTransformerResource.h \
     ImageKey.h \
     ImageKeyUpdater.h \
-    ResourceUpdatingWorkspace.h
+    ResourceUpdatingWorkspace.h \
+    BoneExpans.h

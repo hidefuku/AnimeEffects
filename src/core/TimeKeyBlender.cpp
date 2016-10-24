@@ -548,7 +548,7 @@ void TimeKeyBlender::blendBoneKey(PositionType aPos, const TimeInfo& aTime)
     auto& expans = *seekData.expans;
     if (!node.timeLine()) return;
 
-    expans.setAreaBoneKey(getAreaBone(node, aTime));
+    expans.bone().setAreaKey(getAreaBone(node, aTime));
 }
 
 void TimeKeyBlender::blendPoseKey(PositionType aPos, const TimeInfo& aTime)
@@ -560,7 +560,7 @@ void TimeKeyBlender::blendPoseKey(PositionType aPos, const TimeInfo& aTime)
     if (!node.timeLine()) return;
 
     // area bone
-    auto areaBoneKey = expans.areaBoneKey();
+    auto areaBoneKey = expans.bone().areaKey();
     expans.setPoseParent(areaBoneKey);
 
     // get blend info
@@ -750,7 +750,6 @@ void TimeKeyBlender::blendImageKey(PositionType aPos, const TimeInfo& aTime)
 
     auto imageKey = getImageKey(node, aTime);
     expans.setAreaImageKey(imageKey);
-    expans.setAreaTexture(imageKey ? &(imageKey->cache().texture()) : nullptr);
     expans.setImageOffset(imageKey ? imageKey->data().imageOffset() : QVector2D());
 }
 
@@ -774,7 +773,7 @@ void TimeKeyBlender::buildPosePalette(ObjectNode& aNode, PosePalette::KeyPair aP
             PosePalette::KeyPair pair = { &expans.poseParent()->data(), &expans.pose() };
             aPair = pair;
         }
-        else if (expans.areaBoneKey())
+        else if (expans.bone().areaKey())
         {
             PosePalette::KeyPair pair = {};
             aPair = pair;
@@ -811,7 +810,7 @@ void TimeKeyBlender::setBoneInfluenceMaps(
         XC_PTR_ASSERT(mSeeker->data(&aNode).expans);
         auto& expans = *(mSeeker->data(&aNode).expans);
 
-        auto parent = expans.areaBoneKey();
+        auto parent = expans.bone().areaKey();
         if (parent) key = parent;
 
         const LayerMesh* mesh = nullptr;
@@ -844,10 +843,10 @@ void TimeKeyBlender::setBoneInfluenceMaps(
                 }
             }
         }
-        expans.setBoneParent(mesh);
-        expans.setBoneInfluence(influence);
-        expans.setOuterMatrix(outerMtx);
-        expans.setInnerMatrix(innerMtx);
+        expans.bone().setTargetMesh(mesh);
+        expans.bone().setInfluenceMap(influence);
+        expans.bone().setOuterMatrix(outerMtx);
+        expans.bone().setInnerMatrix(innerMtx);
         expans.setImageOffset(imageOffset);
     }
 
@@ -866,7 +865,7 @@ void TimeKeyBlender::setBinderBones(ObjectNode& aRootNode)
         {
             auto seekData = mSeeker->data(mSeeker->position(itr.next()));
             if (!seekData.expans) continue;
-            seekData.expans->setBinderBoneIndex(-1);
+            seekData.expans->bone().setBinderIndex(-1);
         }
     }
     // update binding references
@@ -878,7 +877,7 @@ void TimeKeyBlender::setBinderBones(ObjectNode& aRootNode)
             auto seekData = mSeeker->data(mSeeker->position(node));
             if (!seekData.objNode || !seekData.expans) continue;
 
-            auto boneKey = seekData.expans->areaBoneKey();
+            auto boneKey = seekData.expans->bone().areaKey();
             if (!boneKey) continue;
 
             for (auto bindingCache : boneKey->bindingCaches())
@@ -886,9 +885,9 @@ void TimeKeyBlender::setBinderBones(ObjectNode& aRootNode)
                 auto bound = mSeeker->data(mSeeker->position(bindingCache.node));
                 if (bound.expans)
                 {
-                    bound.expans->setBinderBoneIndex(bindingCache.boneIndex);
-                    bound.expans->setBindingRoot(node);
-                    bound.expans->setBindingMatrix(bindingCache.innerMtx);
+                    bound.expans->bone().setBinderIndex(bindingCache.boneIndex);
+                    bound.expans->bone().setBindingRoot(node);
+                    bound.expans->bone().setBindingMatrix(bindingCache.innerMtx);
                 }
             }
         }
@@ -899,8 +898,10 @@ void TimeKeyBlender::setBinderBones(ObjectNode& aRootNode)
         auto root = mSeeker->data(mSeeker->position(&aRootNode));
         if (root.expans)
         {
-            setBindingMatrices(aRootNode, root.expans->isAffectedByBinding(),
-                               root.expans->isUnderOfBinding(), root.expans->outerMatrix());
+            setBindingMatrices(aRootNode,
+                               root.expans->bone().isAffectedByBinding(),
+                               root.expans->bone().isUnderOfBinding(),
+                               root.expans->bone().outerMatrix());
         }
         else
         {
@@ -922,45 +923,45 @@ void TimeKeyBlender::setBindingMatrices(
             if (aAffectedByBinding)
             {
                 aBindingMtx = aBindingMtx * expans.srt().data().localMatrix();
-                expans.setOuterMatrix(aBindingMtx);
+                expans.bone().setOuterMatrix(aBindingMtx);
                 QMatrix4x4 innerMtx;
-                expans.setInnerMatrix(innerMtx);
+                expans.bone().setInnerMatrix(innerMtx);
             }
             else
             {
-                expans.setOuterMatrix(aBindingMtx);
+                expans.bone().setOuterMatrix(aBindingMtx);
             }
         }
 
-        if (expans.isBoundByBone())
+        if (expans.bone().isBoundByBone())
         {
             //qDebug() << "bound by bone";
             aAffectedByBinding = true;
             aUnderOfBinding = true;
-            XC_PTR_ASSERT(expans.bindingRoot());
-            auto root = mSeeker->data(mSeeker->position(expans.bindingRoot()));
+            XC_PTR_ASSERT(expans.bone().bindingRoot());
+            auto root = mSeeker->data(mSeeker->position(expans.bone().bindingRoot()));
             if (root.expans)
             {
-                auto boneIndex = expans.binderBoneIndex();
+                auto boneIndex = expans.bone().binderIndex();
                 XC_ASSERT(boneIndex >= 0);
                 if (boneIndex < PosePalette::kMaxCount)
                 {
                     auto transform = root.expans->posePalette().matrices()[boneIndex];
-                    aBindingMtx = root.expans->outerMatrix() * transform * expans.bindingMatrix();
-                    expans.setOuterMatrix(aBindingMtx);
-                    expans.setInnerMatrix(QMatrix4x4());
+                    aBindingMtx = root.expans->bone().outerMatrix() * transform * expans.bone().bindingMatrix();
+                    expans.bone().setOuterMatrix(aBindingMtx);
+                    expans.bone().setInnerMatrix(QMatrix4x4());
                     //qDebug() << "transform bound by bone";
                 }
             }
         }
 
-        expans.setIsUnderOfBinding(aUnderOfBinding);
-        expans.setIsAffectedByBinding(aAffectedByBinding);
+        expans.bone().setIsUnderOfBinding(aUnderOfBinding);
+        expans.bone().setIsAffectedByBinding(aAffectedByBinding);
 
-        if (expans.areaBoneKey())
+        if (expans.bone().areaKey())
         {
             aAffectedByBinding = false;
-            aBindingMtx = expans.outerMatrix();
+            aBindingMtx = expans.bone().outerMatrix();
         }
     }
 

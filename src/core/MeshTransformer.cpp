@@ -53,22 +53,22 @@ void MeshTransformer::callGL(
     QMatrix4x4 worldMatrix;
     QMatrix4x4 innerMatrix;
 
-    const BoneInfluenceMap* influence = aExpans.boneInfluence();
+    const BoneInfluenceMap* influence = aExpans.bone().influenceMap();
     bool useInfluence = aUseInfluence && influence && !aNonPosed;
     const bool useDualQuaternion = true;
     BoneInfluenceMap::Accessor inflData;
 
     const int vtxCount = aPositions.count();
 
-    if (!aNonPosed && aExpans.isAffectedByBinding())
+    if (!aNonPosed && aExpans.bone().isAffectedByBinding())
     {
-        worldMatrix = aExpans.outerMatrix() * aExpans.innerMatrix();
+        worldMatrix = aExpans.bone().worldMatrix();
         worldMatrix.translate(aExpans.imageOffset());
     }
     else if (useInfluence)
     {
-        worldMatrix = aExpans.outerMatrix();
-        innerMatrix = aExpans.innerMatrix();
+        worldMatrix = aExpans.bone().outerMatrix();
+        innerMatrix = aExpans.bone().innerMatrix();
         innerMatrix.translate(aExpans.imageOffset());
         inflData = influence->accessor();
 

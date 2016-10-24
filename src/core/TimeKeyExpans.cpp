@@ -9,16 +9,7 @@ TimeKeyExpans::TimeKeyExpans()
     , mSRT()
     , mOpa()
     , mWorldOpacity(1.0f)
-    , mAreaBoneKey()
-    , mBoneInfluence()
-    , mOuterMtx()
-    , mInnerMtx()
-    , mBoneParent()
-    , mBindingRoot()
-    , mBinderBoneIndex(-1)
-    , mBindingMtx()
-    , mIsUnderOfBinding()
-    , mIsAffectedByBinding()
+    , mBone()
     , mPose()
     , mPoseParent()
     , mPosePalette()
@@ -27,7 +18,6 @@ TimeKeyExpans::TimeKeyExpans()
     , mFFDMesh()
     , mFFDMeshParent()
     , mAreaImageKey()
-    , mAreaTexture()
     , mImageOffset()
 {
     clearCaches();
@@ -67,6 +57,17 @@ void TimeKeyExpans::clearCaches()
         mKeyCaches[i].set(-1);
     }
     mSRT.clearSplineCache();
+}
+
+//-------------------------------------------------------------------------------------------------
+const gl::Texture* TimeKeyExpans::areaTexture() const
+{
+    return mAreaImageKey ? &(mAreaImageKey->cache().texture()) : nullptr;
+}
+
+img::BlendMode TimeKeyExpans::blendMode() const
+{
+    return mAreaImageKey ? mAreaImageKey->data().blendMode() : img::BlendMode_Normal;
 }
 
 } // namespace core

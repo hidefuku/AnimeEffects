@@ -183,7 +183,7 @@ void LayerNode::renderClipper(
     auto& expans = aAccessor.get(mTimeLine);
 
     if (!expans.areaTexture()) return;
-    auto areaTextureId = expans.areaTexture()->id();
+    auto textureId = expans.areaTexture()->id();
 
     core::ClippingFrame& frame = *aInfo.clippingFrame;
     frame.updateRenderStamp();
@@ -194,7 +194,7 @@ void LayerNode::renderClipper(
 
     // bind textures
     ggl.glActiveTexture(GL_TEXTURE0);
-    ggl.glBindTexture(GL_TEXTURE_2D, areaTextureId);
+    ggl.glBindTexture(GL_TEXTURE_2D, textureId);
     ggl.glActiveTexture(GL_TEXTURE1);
     ggl.glBindTexture(GL_TEXTURE_2D, frame.texture().id());
 
@@ -261,7 +261,7 @@ void LayerNode::transformShape(
     }
     else
     {
-        useInfluence = (mesh == expans.boneParent());
+        useInfluence = (mesh == expans.bone().targetMesh());
         positions = util::ArrayBlock<const gl::Vector3>(
                     expans.ffd().positions(), expans.ffd().count());
         XC_MSG_ASSERT(mesh->vertexCount() == positions.count(),
@@ -288,8 +288,8 @@ void LayerNode::renderShape(
     auto& expans = aAccessor.get(mTimeLine);
     if (!expans.areaImageKey() || !expans.areaTexture()) return;
 
-    auto areaTextureId = expans.areaTexture()->id();
-    auto blendMode = expans.areaImageKey()->data().blendMode();
+    auto textureId = expans.areaTexture()->id();
+    auto blendMode = expans.blendMode();
 
     auto& shader = aInfo.isGrid ?
                 mShaderHolder.gridShader() :
@@ -302,7 +302,7 @@ void LayerNode::renderShape(
     else
     {
         ggl.glActiveTexture(GL_TEXTURE0);
-        ggl.glBindTexture(GL_TEXTURE_2D, areaTextureId);
+        ggl.glBindTexture(GL_TEXTURE_2D, textureId);
         ggl.glActiveTexture(GL_TEXTURE1);
         ggl.glBindTexture(GL_TEXTURE_2D, aInfo.dest);
 

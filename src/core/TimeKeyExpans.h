@@ -11,6 +11,7 @@
 #include "core/ImageKey.h"
 #include "core/TimeKeyType.h"
 #include "core/PosePalette.h"
+#include "core/BoneExpans.h"
 
 namespace core
 {
@@ -39,29 +40,8 @@ public:
     void setWorldOpacity(float aValue) { mWorldOpacity = aValue; }
     float worldOpacity() const { return mWorldOpacity; }
 
-    void setAreaBoneKey(BoneKey* aKey) { mAreaBoneKey = aKey; }
-    BoneKey* areaBoneKey() { return mAreaBoneKey; }
-    const BoneKey* areaBoneKey() const { return mAreaBoneKey; }
-    void setBoneInfluence(const BoneInfluenceMap* aMap) { mBoneInfluence = aMap; }
-    const BoneInfluenceMap* boneInfluence() const { return mBoneInfluence; }
-    void setOuterMatrix(const QMatrix4x4& aMtx) { mOuterMtx = aMtx; }
-    const QMatrix4x4& outerMatrix() const { return mOuterMtx; }
-    void setInnerMatrix(const QMatrix4x4& aMtx) { mInnerMtx = aMtx; }
-    const QMatrix4x4& innerMatrix() const { return mInnerMtx; }
-    void setBoneParent(const LayerMesh* aMesh) { mBoneParent = aMesh; }
-    const LayerMesh* boneParent() const { return mBoneParent; }
-
-    void setBindingRoot(ObjectNode* aRoot) { mBindingRoot = aRoot; }
-    ObjectNode* bindingRoot() const { return mBindingRoot; }
-    void setBinderBoneIndex(int aIndex) { mBinderBoneIndex = aIndex; }
-    int binderBoneIndex() const { return mBinderBoneIndex; }
-    void setBindingMatrix(const QMatrix4x4& aMtx) { mBindingMtx = aMtx; }
-    const QMatrix4x4& bindingMatrix() const { return mBindingMtx; }
-    bool isBoundByBone() const { return mBinderBoneIndex >= 0; }
-    void setIsUnderOfBinding(bool aFlag) { mIsUnderOfBinding = aFlag; }
-    bool isUnderOfBinding() const { return mIsUnderOfBinding; }
-    void setIsAffectedByBinding(bool aFlag) { mIsAffectedByBinding = aFlag; }
-    bool isAffectedByBinding() const { return mIsAffectedByBinding; }
+    BoneExpans& bone() { return mBone; }
+    const BoneExpans& bone() const { return mBone; }
 
     PoseKey::Data& pose() { return mPose; }
     const PoseKey::Data& pose() const { return mPose; }
@@ -85,10 +65,10 @@ public:
     void setAreaImageKey(ImageKey* aKey) { mAreaImageKey = aKey; }
     ImageKey* areaImageKey() { return mAreaImageKey; }
     const ImageKey* areaImageKey() const { return mAreaImageKey; }
-    void setAreaTexture(gl::Texture* aTexture) { mAreaTexture = aTexture; }
-    gl::Texture* areaTexture() { return mAreaTexture; }
+    const gl::Texture* areaTexture() const;
+    img::BlendMode blendMode() const;
     void setImageOffset(const QVector2D& aOffset) { mImageOffset = aOffset; }
-    const QVector2D& imageOffset() const { return mImageOffset; }
+    QVector2D imageOffset() const { return mImageOffset; }
 
 private:
     Frame mMasterCache;
@@ -96,16 +76,7 @@ private:
     SRTExpans mSRT;
     OpaKey::Data mOpa;
     float mWorldOpacity;
-    BoneKey* mAreaBoneKey;
-    const BoneInfluenceMap* mBoneInfluence;
-    QMatrix4x4 mOuterMtx;
-    QMatrix4x4 mInnerMtx;
-    const LayerMesh* mBoneParent;
-    ObjectNode* mBindingRoot;
-    int mBinderBoneIndex;
-    QMatrix4x4 mBindingMtx;
-    bool mIsUnderOfBinding;
-    bool mIsAffectedByBinding;
+    BoneExpans mBone;
     PoseKey::Data mPose;
     BoneKey* mPoseParent;
     PosePalette mPosePalette;
@@ -114,7 +85,6 @@ private:
     LayerMesh* mFFDMesh;
     TimeKey* mFFDMeshParent;
     ImageKey* mAreaImageKey;
-    gl::Texture* mAreaTexture;
     QVector2D mImageOffset;
 };
 

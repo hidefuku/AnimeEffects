@@ -532,7 +532,7 @@ void ObjectPanel::updateKeyExists()
     {
         const core::TimeLine& timeLine = *mTarget->timeLine();
         const int frame = mProject.animator().currentFrame().get();
-        const bool hasAreaBone = timeLine.current().areaBoneKey();
+        const bool hasAreaBone = timeLine.current().bone().areaKey();
         const bool hasAnyMesh = mTarget->hasAnyMesh();
         const bool hasAnyImage = mTarget->hasAnyImage();
 

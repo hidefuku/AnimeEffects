@@ -87,9 +87,9 @@ void PoseEditor::resetCurrentTarget()
 
         bool success = false;
 
-        if (current.isAffectedByBinding())
+        if (current.bone().isAffectedByBinding())
         {
-            mTarget.mtx = current.outerMatrix() * current.innerMatrix();
+            mTarget.mtx = current.bone().worldMatrix();
         }
         else
         {
@@ -127,14 +127,14 @@ bool PoseEditor::initializeKey(TimeLine& aLine)
         mKeyOwner.parent = mKeyOwner.key->parent();
         return true;
     }
-    else if (current.areaBoneKey())
+    else if (current.bone().areaKey())
     {
         // create new key
         mKeyOwner.key = new PoseKey();
         mKeyOwner.ownsKey = true;
-        mKeyOwner.parent = current.areaBoneKey();
+        mKeyOwner.parent = current.bone().areaKey();
 
-        if (current.areaBoneKey() == current.poseParent())
+        if (current.bone().areaKey() == current.poseParent())
         {
             // copy blended pose
             mKeyOwner.key->data() = current.pose();
@@ -142,7 +142,7 @@ bool PoseEditor::initializeKey(TimeLine& aLine)
         else
         {
             // create from original bones
-            mKeyOwner.key->data().createBonesBy(*current.areaBoneKey());
+            mKeyOwner.key->data().createBonesBy(*current.bone().areaKey());
         }
         return true;
     }
