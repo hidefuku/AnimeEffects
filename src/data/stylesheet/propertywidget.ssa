@@ -120,6 +120,20 @@ QPushButton#keyKnocker::disabled {
 image: url(data/icon/minus.png);
 }
 
+QPushButton#browser {
+border: 1px solid #a0a0a0;
+border-radius: 2px;
+padding: 2px;
+width: 18px;
+height: 15px;
+}
+QPushButton#browser::enabled {
+image: url(data/icon/filew.png);
+}
+QPushButton#browser::disabled {
+image: url(data/icon/file.png);
+}
+
 QGroupBox#propertyPanel {
 font-family: Meiryo UI;font-style: normal;font-size: 10pt;font-weight:normal;
 background-color: #d0d0d0;

@@ -5,66 +5,23 @@ namespace core
 {
 
 //-------------------------------------------------------------------------------------------------
-class ImageResourceUpdater : public cmnd::Stable
+class ImageResourceUpdaterBase : public cmnd::Stable
 {
-    struct Target
-    {
-        Target(ImageKey* aKey)
-            : key(aKey)
-            , prevImage()
-            , nextImage()
-        {}
-        ImageKey* key;
-        img::ResourceHandle prevImage;
-        img::ResourceHandle nextImage;
-    };
-
-    TimeLine& mTimeLine;
-    const ResourceEvent& mEvent;
-    QList<Target> mTargets;
-    ResourceUpdatingWorkspacePtr mWorkspace;
-    bool mCreateTransitions;
-
-    void tryPushTarget(ImageKey* aKey)
-    {
-        if (aKey)
-        {
-            auto node = mEvent.findTarget(aKey->data().resource()->serialAddress());
-            if (node)
-            {
-                mTargets.push_back(Target(aKey));
-                mTargets.back().prevImage = aKey->data().resource();
-                mTargets.back().nextImage = node->handle();
-            }
-        }
-    }
-
 public:
-    ImageResourceUpdater(TimeLine& aTimeLine, const ResourceEvent& aEvent,
-                         const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions)
-        : mTimeLine(aTimeLine)
-        , mEvent(aEvent)
-        , mTargets()
+    ImageResourceUpdaterBase(const ResourceUpdatingWorkspacePtr& aWorkspace,
+                             bool aCreateTransitions)
+        : mTargets()
         , mWorkspace(aWorkspace)
         , mCreateTransitions(aCreateTransitions)
     {
     }
 
+    virtual ~ImageResourceUpdaterBase()
+    {
+    }
+
     virtual void exec()
     {
-        // push default key
-        tryPushTarget((ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image));
-
-        auto& map = mTimeLine.map(TimeKeyType_Image);
-        for (auto itr = map.begin(); itr != map.end(); ++itr)
-        {
-            TimeKey* key = itr.value();
-            TIMEKEY_PTR_TYPE_ASSERT(key, Image);
-
-            // push key
-            tryPushTarget((ImageKey*)key);
-        }
-
         for (auto& target : mTargets)
         {
             auto key = target.key;
@@ -103,14 +60,106 @@ public:
             target.key->setImage(target.prevImage);
         }
     }
+
+protected:
+    struct Target
+    {
+        Target(ImageKey* aKey)
+            : key(aKey)
+            , prevImage()
+            , nextImage()
+        {}
+        ImageKey* key;
+        img::ResourceHandle prevImage;
+        img::ResourceHandle nextImage;
+    };
+
+    QList<Target>& targets() { return mTargets; }
+    const QList<Target>& targets() const { return mTargets; }
+
+private:
+    QList<Target> mTargets;
+    ResourceUpdatingWorkspacePtr mWorkspace;
+    bool mCreateTransitions;
+
 };
 
+//-------------------------------------------------------------------------------------------------
+class ImageReloader : public ImageResourceUpdaterBase
+{
+    TimeLine& mTimeLine;
+    const ResourceEvent& mEvent;
+
+    void tryPushTarget(ImageKey* aKey)
+    {
+        if (aKey)
+        {
+            auto node = mEvent.findTarget(aKey->data().resource()->serialAddress());
+            if (node)
+            {
+                this->targets().push_back(Target(aKey));
+                this->targets().back().prevImage = aKey->data().resource();
+                this->targets().back().nextImage = node->handle();
+            }
+        }
+    }
+
+public:
+    ImageReloader(TimeLine& aTimeLine, const ResourceEvent& aEvent,
+                  const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions)
+        : ImageResourceUpdaterBase(aWorkspace, aCreateTransitions)
+        , mTimeLine(aTimeLine)
+        , mEvent(aEvent)
+    {
+    }
+
+    virtual void exec()
+    {
+        // push default key
+        tryPushTarget((ImageKey*)mTimeLine.defaultKey(TimeKeyType_Image));
+
+        auto& map = mTimeLine.map(TimeKeyType_Image);
+        for (auto itr = map.begin(); itr != map.end(); ++itr)
+        {
+            TimeKey* key = itr.value();
+            TIMEKEY_PTR_TYPE_ASSERT(key, Image);
+
+            // push key
+            tryPushTarget((ImageKey*)key);
+        }
+
+        ImageResourceUpdaterBase::exec();
+    }
+};
+
+//-------------------------------------------------------------------------------------------------
+class ImageChanger : public ImageResourceUpdaterBase
+{
+public:
+    ImageChanger(ImageKey& aKey, img::ResourceNode& aNewResource,
+                 const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions)
+        : ImageResourceUpdaterBase(aWorkspace, aCreateTransitions)
+    {
+        this->targets().push_back(Target(&aKey));
+        this->targets().back().prevImage = aKey.data().resource();
+        this->targets().back().nextImage = aNewResource.handle();
+    }
+};
+
+//-------------------------------------------------------------------------------------------------
 cmnd::Stable* ImageKeyUpdater::createResourceUpdater(
         ObjectNode& aNode, const ResourceEvent& aEvent,
         const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions)
 {
     if (!aNode.timeLine()) return nullptr;
-    return new ImageResourceUpdater(*aNode.timeLine(), aEvent, aWorkspace, aCreateTransitions);
+    return new ImageReloader(*aNode.timeLine(), aEvent, aWorkspace, aCreateTransitions);
+}
+
+cmnd::Stable* ImageKeyUpdater::createResourceUpdater(
+        ImageKey& aKey, img::ResourceNode& aNewResource,
+        const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions)
+{
+    return new ImageChanger(aKey, aNewResource, aWorkspace, aCreateTransitions);
 }
 
 } // namespace core

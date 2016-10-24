@@ -113,6 +113,7 @@ private:
         KeyAccessor& mAccessor;
         KeyKnocker* mKnocker;
         KeyGroup* mGroup;
+        BrowseItem* mBrowse;
         bool mKeyExists;
         ViaPoint& mViaPoint;
     };

@@ -149,6 +149,12 @@ void KeyAccessor::assignFFDEasing(util::Easing::Param aNext)
     ctrl::TimeLineUtil::assignFFDKeyEasing(*mProject, *mTarget, getFrame(), aNext);
 }
 
+void KeyAccessor::assignImageResource(img::ResourceNode& aNext)
+{
+    ASSERT_AND_RETURN_INVALID_TARGET();
+    ctrl::TimeLineUtil::assignImageKeyResource(*mProject, *mTarget, getFrame(), aNext);
+}
+
 //-------------------------------------------------------------------------------------------------
 void KeyAccessor::knockNewSRT()
 {

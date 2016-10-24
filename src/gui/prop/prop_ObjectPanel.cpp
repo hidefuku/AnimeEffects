@@ -305,6 +305,7 @@ ObjectPanel::ImagePanel::ImagePanel(Panel& aPanel, KeyAccessor& aAccessor,
     : mAccessor(aAccessor)
     , mKnocker()
     , mGroup()
+    , mBrowse()
     , mKeyExists(false)
     , mViaPoint(aViaPoint)
 {
@@ -315,6 +316,19 @@ ObjectPanel::ImagePanel::ImagePanel(Panel& aPanel, KeyAccessor& aAccessor,
     mGroup = new KeyGroup("Image", aLabelWidth);
     {
         aPanel.addGroup(mGroup);
+
+        // browse
+        mBrowse = new BrowseItem(mGroup);
+        mGroup->addItem("resource :", mBrowse);
+        mBrowse->onButtonPushed = [=]()
+        {
+            auto resNode = this->mViaPoint.requireOneResource();
+            if (resNode)
+            {
+                this->mBrowse->setValue(resNode->data().identifier());
+                this->mAccessor.assignImageResource(*resNode);
+            }
+        };
     }
     setEnabled(false);
     setKeyExists(false, false);
@@ -342,10 +356,11 @@ void ObjectPanel::ImagePanel::setKeyExists(bool aIsExists, bool aIsKnockable)
     mGroup->setVisible(aIsExists);
 }
 
-void ObjectPanel::ImagePanel::setKeyValue(const core::TimeKey* /*aKey*/)
+void ObjectPanel::ImagePanel::setKeyValue(const core::TimeKey* aKey)
 {
-    //TIMEKEY_PTR_TYPE_ASSERT(aKey, Image);
-    //const core::ImageKey::Data& data = ((const core::FFDKey*)aKey)->data();
+    TIMEKEY_PTR_TYPE_ASSERT(aKey, Image);
+    const core::ImageKey::Data& data = ((const core::ImageKey*)aKey)->data();
+    mBrowse->setValue(data.resource()->identifier());
 }
 
 bool ObjectPanel::ImagePanel::keyExists() const

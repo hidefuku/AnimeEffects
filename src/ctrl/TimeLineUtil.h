@@ -72,6 +72,38 @@ private:
     core::TimeLineEvent mEvent;
 };
 
+class ResourceModificationNotifier : public cmnd::Listener
+{
+public:
+    ResourceModificationNotifier(core::Project& aProject)
+        : mProject(aProject)
+        , mEvent(aProject)
+    {
+    }
+
+    core::ResourceEvent& event() { return mEvent; }
+    const core::ResourceEvent& event() const { return mEvent; }
+
+    virtual void onExecuted()
+    {
+        mProject.onResourceModified(mEvent, false);
+    }
+
+    virtual void onUndone()
+    {
+        mProject.onResourceModified(mEvent, true);
+    }
+
+    virtual void onRedone()
+    {
+        mProject.onResourceModified(mEvent, false);
+    }
+
+private:
+    core::Project& mProject;
+    core::ResourceEvent mEvent;
+};
+
 //-------------------------------------------------------------------------------------------------
 void assignSRTKeyData(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
@@ -88,6 +120,10 @@ void assignPoseKeyEasing(
 void assignFFDKeyEasing(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
         const util::Easing::Param& aNewData);
+
+void assignImageKeyResource(
+        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
+        img::ResourceNode& aNewData);
 
 void pushNewSRTKey(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,

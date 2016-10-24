@@ -33,6 +33,9 @@ public:
     // ffd
     void assignFFDEasing(util::Easing::Param);
 
+    // image
+    void assignImageResource(img::ResourceNode&);
+
     // new keys
     void knockNewSRT();
     void knockNewOpacity();

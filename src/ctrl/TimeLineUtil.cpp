@@ -8,6 +8,9 @@
 #include "core/PoseKey.h"
 #include "core/FFDKey.h"
 #include "core/MeshKey.h"
+#include "core/ImageKeyUpdater.h"
+#include "core/FFDKeyUpdater.h"
+#include "core/ResourceUpdatingWorkspace.h"
 #include "ctrl/TimeLineUtil.h"
 
 using namespace core;
@@ -194,6 +197,39 @@ void assignFFDKeyEasing(
 {
     assignKeyEasing<FFDKey, TimeKeyType_FFD>(
                 aProject, aTarget, aFrame, aNewData, "assign ffd key");
+}
+
+void assignImageKeyResource(
+        Project& aProject, ObjectNode& aTarget, int aFrame,
+        img::ResourceNode& aNewData)
+{
+    XC_ASSERT(aTarget.timeLine());
+    ImageKey* key = (ImageKey*)(aTarget.timeLine()->timeKey(TimeKeyType_Image, aFrame));
+    XC_PTR_ASSERT(key);
+
+    {
+        cmnd::ScopedMacro macro(aProject.commandStack(), "assign image key");
+
+        // set notifier
+        auto notifier = new Notifier(aProject);
+        notifier->event().setType(TimeLineEvent::Type_ChangeKeyValue);
+        notifier->event().pushTarget(aTarget, TimeKeyType_Image, aFrame);
+        macro.grabListener(notifier);
+
+        ResourceUpdatingWorkspacePtr workspace = std::make_shared<ResourceUpdatingWorkspace>();
+        const bool createTransitions = !aTarget.timeLine()->isEmpty(TimeKeyType_FFD);
+
+        // image key
+        aProject.commandStack().push(
+                    ImageKeyUpdater::createResourceUpdater(
+                        *key, aNewData, workspace, createTransitions));
+
+        // ffd key should be called finally
+        if (createTransitions)
+        {
+            aProject.commandStack().push(FFDKeyUpdater::createResourceUpdater(aTarget, workspace));
+        }
+    }
 }
 
 template<class tKey, TimeKeyType tType>

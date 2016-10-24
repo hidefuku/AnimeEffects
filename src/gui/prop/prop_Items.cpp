@@ -362,167 +362,33 @@ void Vector2DItem::setItemEnabled(bool aEnable)
     mSignal = true;
 }
 
-/*
-#if 0
 //-------------------------------------------------------------------------------------------------
-Holder::Holder(const QString& aLabel, const QPalette& aPalette, int aRowCount)
-    : mLayout(new QHBoxLayout(this))
-    , mLabel()
-    , mRowCount(aRowCount)
+BrowseItem::BrowseItem(QWidget* aParent)
+    : mLayout()
+    , mLine()
+    , mButton()
 {
-    this->setObjectName("holder");
-    {
-        QRect geo = this->geometry();
-        geo.setHeight(kRowHeight * mRowCount);
-        this->setGeometry(geo);
-    }
+    mLayout = new QHBoxLayout();
+    //mLayout->setSpacing(2);
 
-    mLabel = new QLabel(this);
-    mLabel->setPalette(aPalette);
-    mLabel->setText(aLabel);
-    mLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-    mLayout->addWidget(mLabel);
-    //qDebug() << "cstrct" << this;
+    mLine = new QLineEdit(aParent);
+    mLine->setEnabled(false);
+    mLayout->addWidget(mLine);
+    mButton = new QPushButton(aParent);
+    mButton->connect(mButton, &QPushButton::pressed, [=](){ this->onButtonPushed(); });
+    mButton->setObjectName("browser");
+    mLayout->addWidget(mButton);
 }
 
-Holder::~Holder()
+void BrowseItem::setValue(const QString& aValue)
 {
-    //qDebug() << "dstrct" << this;
+    mLine->setText(aValue);
 }
 
-void Holder::updateGeometry(const QPoint& aTopLeft, int aWidth)
+void BrowseItem::setItemEnabled(bool aEnable)
 {
-    const int labelWidth = (int)(aWidth * 0.3f);
-    this->setGeometry(aTopLeft.x(), aTopLeft.y(), aWidth, kRowHeight * mRowCount);
-    mLabel->setGeometry(6, 0, labelWidth, kRowHeight - 2);
+    mButton->setEnabled(aEnable);
 }
-
-//-------------------------------------------------------------------------------------------------
-StringItem::StringItem(const QString& aLabel, const QPalette& aPalette)
-    : Holder(aLabel, aPalette)
-    , mEdit()
-    , mStamp()
-{
-    mEdit = new QLineEdit(this);
-    this->layout().addWidget(mEdit);
-
-    this->connect(
-                mEdit, &QLineEdit::editingFinished,
-                this, &StringItem::onEditingFinished);
-}
-
-void StringItem::updateGeometry(const QPoint& aTopLeft, int aWidth)
-{
-    Holder::updateGeometry(aTopLeft, aWidth);
-    setRightBoxGeometry(this, mEdit, aWidth);
-}
-
-void StringItem::onEditingFinished()
-{
-    const QString v = value();
-    if (mStamp != v)
-    {
-        if (onValueUpdated) onValueUpdated(mStamp, v);
-        mStamp = v;
-    }
-}
-
-//-------------------------------------------------------------------------------------------------
-IntegerItem::IntegerItem(const QString& aLabel, const QPalette& aPalette)
-    : Holder(aLabel, aPalette)
-    , mBox()
-    , mStamp()
-{
-    mBox = new QSpinBox(this);
-
-    mStamp = mBox->value();
-
-    this->connect(
-                mBox, &QAbstractSpinBox::editingFinished,
-                this, &IntegerItem::onEditingFinished);
-}
-
-void IntegerItem::updateGeometry(const QPoint& aTopLeft, int aWidth)
-{
-    Holder::updateGeometry(aTopLeft, aWidth);
-    setRightBoxGeometry(this, mBox, aWidth);
-}
-
-void IntegerItem::onEditingFinished()
-{
-    if (mStamp != value())
-    {
-        if (onValueUpdated) onValueUpdated(mStamp, value());
-        mStamp = value();
-    }
-}
-
-//-------------------------------------------------------------------------------------------------
-DecimalItem::DecimalItem(const QString& aLabel, const QPalette& aPalette)
-    : Holder(aLabel, aPalette)
-    , mBox()
-    , mStamp()
-{
-    mBox = new QDoubleSpinBox(this);
-
-    mStamp = mBox->value();
-    mBox->setDecimals(3);
-
-    this->connect(
-                mBox, &QAbstractSpinBox::editingFinished,
-                this, &DecimalItem::onEditingFinished);
-}
-
-void DecimalItem::updateGeometry(const QPoint& aTopLeft, int aWidth)
-{
-    Holder::updateGeometry(aTopLeft, aWidth);
-    setRightBoxGeometry(this, mBox, aWidth);
-}
-
-void DecimalItem::onEditingFinished()
-{
-    if (mStamp != value())
-    {
-        if (onValueUpdated) onValueUpdated(mStamp, value());
-        mStamp = value();
-    }
-}
-
-//-------------------------------------------------------------------------------------------------
-Vector2DItem::Vector2DItem(const QString& aLabel, const QPalette& aPalette)
-    : Holder(aLabel, aPalette)
-    , mStamp()
-{
-    for (int i = 0; i < 2; ++i)
-    {
-        mBox[i] = new QDoubleSpinBox(this);
-        mBox[i]->setDecimals(3);
-        this->layout().addWidget(mBox[i]);
-
-        this->connect(
-                    mBox[i], &QAbstractSpinBox::editingFinished,
-                    this, &Vector2DItem::onEditingFinished);
-    }
-
-    mStamp = QVector2D(mBox[0]->value(), mBox[1]->value());
-}
-
-void Vector2DItem::updateGeometry(const QPoint& aTopLeft, int aWidth)
-{
-    Holder::updateGeometry(aTopLeft, aWidth);
-    setRightBoxGeometry(this, mBox[0], mBox[1], aWidth);
-}
-
-void Vector2DItem::onEditingFinished()
-{
-    if (mStamp != value())
-    {
-        if (onValueUpdated) onValueUpdated(mStamp, value());
-        mStamp = value();
-    }
-}
-#endif
-*/
 
 } // namespace prop
 } // namespace gui
