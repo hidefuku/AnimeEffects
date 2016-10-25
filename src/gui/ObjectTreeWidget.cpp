@@ -10,7 +10,7 @@
 #include "cmnd/ScopedMacro.h"
 #include "cmnd/BasicCommands.h"
 #include "core/LayerNode.h"
-#include "core/LayerSetNode.h"
+#include "core/FolderNode.h"
 #include "ctrl/TimeLineRow.h"
 #include "gui/ObjectTreeWidget.h"
 #include "gui/ResourceDialog.h"
@@ -541,11 +541,11 @@ void ObjectTreeWidget::onFolderActionTriggered(bool)
             macro.grabListener(new obj::RestructureNotifier(*this));
 
             // create node
-            core::LayerSetNode* ptr = new core::LayerSetNode("folder0");
+            core::FolderNode* ptr = new core::FolderNode("folder0");
             ptr->setDepth(node.depth() + 1.0f);
             ptr->setDefaultPos(QVector2D());
             ptr->setDefaultOpacity(1.0f); // @todo support default opacity
-            mProject->commandStack().push(new cmnd::GrabNewObject<core::LayerSetNode>(ptr));
+            mProject->commandStack().push(new cmnd::GrabNewObject<core::FolderNode>(ptr));
             mProject->commandStack().push(new cmnd::InsertTree<core::ObjectNode>(&(parent->children()), index, ptr));
 
             // create item

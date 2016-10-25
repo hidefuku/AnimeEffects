@@ -48,7 +48,6 @@ SOURCES += \
     CameraInfo.cpp \
     GridMesh.cpp \
     LayerNode.cpp \
-    LayerSetNode.cpp \
     ObjectNodeUtil.cpp \
     ObjectTree.cpp \
     Project.cpp \
@@ -89,7 +88,8 @@ SOURCES += \
     ImageKey.cpp \
     ImageKeyUpdater.cpp \
     ResourceUpdatingWorkspace.cpp \
-    BoneExpans.cpp
+    BoneExpans.cpp \
+    FolderNode.cpp
 
 HEADERS += \
     AbstractCursor.h \
@@ -97,7 +97,6 @@ HEADERS += \
     TimeKeyType.h \
     GridMesh.h \
     LayerNode.h \
-    LayerSetNode.h \
     ObjectNode.h \
     ObjectNodeUtil.h \
     ObjectTree.h \
@@ -149,4 +148,5 @@ HEADERS += \
     ImageKey.h \
     ImageKeyUpdater.h \
     ResourceUpdatingWorkspace.h \
-    BoneExpans.h
+    BoneExpans.h \
+    FolderNode.h

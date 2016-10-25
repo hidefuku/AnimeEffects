@@ -1,5 +1,5 @@
 #include <algorithm>
-#include "core/LayerSetNode.h"
+#include "core/FolderNode.h"
 #include "core/ObjectNodeUtil.h"
 #include "core/ObjectTreeEvent.h"
 #include "core/ResourceEvent.h"
@@ -9,7 +9,7 @@
 namespace core
 {
 
-LayerSetNode::LayerSetNode(const QString& aName)
+FolderNode::FolderNode(const QString& aName)
     : mName(aName)
     , mDepth()
     , mIsVisible(true)
@@ -22,12 +22,12 @@ LayerSetNode::LayerSetNode(const QString& aName)
 {
 }
 
-LayerSetNode::~LayerSetNode()
+FolderNode::~FolderNode()
 {
     qDeleteAll(children());
 }
 
-void LayerSetNode::setDefaultPos(const QVector2D& aPos)
+void FolderNode::setDefaultPos(const QVector2D& aPos)
 {
     auto key = (SRTKey*)mTimeLine.defaultKey(TimeKeyType_SRT);
     if (!key)
@@ -39,7 +39,7 @@ void LayerSetNode::setDefaultPos(const QVector2D& aPos)
     key->data().clampPos();
 }
 
-void LayerSetNode::setDefaultOpacity(float aValue)
+void FolderNode::setDefaultOpacity(float aValue)
 {
     auto key = (OpaKey*)mTimeLine.defaultKey(TimeKeyType_Opa);
     if (!key)
@@ -51,12 +51,12 @@ void LayerSetNode::setDefaultOpacity(float aValue)
     key->data().clamp();
 }
 
-void LayerSetNode::grabHeightMap(HeightMap* aNode)
+void FolderNode::grabHeightMap(HeightMap* aNode)
 {
     mHeightMap.reset(aNode);
 }
 
-bool LayerSetNode::isClipper() const
+bool FolderNode::isClipper() const
 {
     if (mIsClipped) return false;
 
@@ -68,11 +68,11 @@ bool LayerSetNode::isClipper() const
     return true;
 }
 
-void LayerSetNode::prerender(const RenderInfo&, const TimeCacheAccessor&)
+void FolderNode::prerender(const RenderInfo&, const TimeCacheAccessor&)
 {
 }
 
-void LayerSetNode::render(const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor)
+void FolderNode::render(const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor)
 {
     if (!mIsVisible) return;
 
@@ -84,7 +84,7 @@ void LayerSetNode::render(const RenderInfo& aInfo, const TimeCacheAccessor& aAcc
     renderClippees(aInfo, aAccessor);
 }
 
-void LayerSetNode::renderClippees(
+void FolderNode::renderClippees(
         const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor)
 {
     if (!aInfo.clippingFrame || !isClipper()) return;
@@ -118,7 +118,7 @@ void LayerSetNode::renderClippees(
     }
 }
 
-void LayerSetNode::renderClipper(
+void FolderNode::renderClipper(
         const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor, uint8 aClipperId)
 {
     for (auto child : this->children())
@@ -130,15 +130,15 @@ void LayerSetNode::renderClipper(
     }
 }
 
-void LayerSetNode::setClipped(bool aIsClipped)
+void FolderNode::setClipped(bool aIsClipped)
 {
     mIsClipped = aIsClipped;
 }
 
-bool LayerSetNode::serialize(Serializer& aOut) const
+bool FolderNode::serialize(Serializer& aOut) const
 {
     static const std::array<uint8, 8> kSignature =
-        { 'L', 'a', 'y', 'S', 'e', 't', 'N', 'd' };
+        { 'F', 'o', 'l', 'd', 'e', 'r', 'N', 'd' };
 
     // block begin
     auto pos = aOut.beginBlock(kSignature);
@@ -166,11 +166,11 @@ bool LayerSetNode::serialize(Serializer& aOut) const
     return !aOut.failure();
 }
 
-bool LayerSetNode::deserialize(Deserializer& aIn)
+bool FolderNode::deserialize(Deserializer& aIn)
 {
     // check block begin
-    if (!aIn.beginBlock("LaySetNd"))
-        return aIn.errored("invalid signature of layer set node");
+    if (!aIn.beginBlock("FolderNd"))
+        return aIn.errored("invalid signature of folder node");
 
     // name
     aIn.read(mName);
@@ -191,7 +191,7 @@ bool LayerSetNode::deserialize(Deserializer& aIn)
 
     // check block end
     if (!aIn.endBlock())
-        return aIn.errored("invalid end of layer set node");
+        return aIn.errored("invalid end of folder node");
 
     return !aIn.failure();
 }

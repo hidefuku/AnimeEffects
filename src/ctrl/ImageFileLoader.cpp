@@ -8,7 +8,7 @@
 #include "img/Util.h"
 #include "img/BlendMode.h"
 #include "core/LayerNode.h"
-#include "core/LayerSetNode.h"
+#include "core/FolderNode.h"
 #include "core/HeightMap.h"
 #include "core/ObjectNodeUtil.h"
 #include "ctrl/ImageFileLoader.h"
@@ -84,7 +84,7 @@ img::ResourceNode* createLayerResource(
     return resNode;
 }
 
-img::ResourceNode* createLayerSetResource(const QString& aName, const QPoint& aPos)
+img::ResourceNode* createFolderResource(const QString& aName, const QPoint& aPos)
 {
     auto resNode = new img::ResourceNode(aName);
     resNode->data().setPos(aPos);
@@ -141,24 +141,24 @@ bool ImageFileLoader::loadPsd(
     aProject.attribute().setImageSize(QSize(imageWidth, imageHeight));
 
     // create tree top node
-    LayerSetNode* topNode = new LayerSetNode(mFileInfo.baseName());
+    FolderNode* topNode = new FolderNode(mFileInfo.baseName());
     topNode->setDefaultOpacity(1.0f);
     aProject.objectTree().grabTopNode(topNode);
 
     // tree stack
-    std::vector<LayerSetNode*> treeStack;
+    std::vector<FolderNode*> treeStack;
     treeStack.push_back(topNode);
     float globalDepth = 0.0f;
 
     // resource tree stack
     std::vector<img::ResourceNode*> resStack;
-    resStack.push_back(createLayerSetResource("topnode", QPoint(0, 0)));
+    resStack.push_back(createFolderResource("topnode", QPoint(0, 0)));
     aProject.resourceHolder().pushImageTree(*resStack.back(), mFileInfo.absoluteFilePath());
 
     // for each layer
     for (ReverseIterator itr = layers.rbegin(); itr != layers.rend(); ++itr)
     {
-        LayerSetNode* current = treeStack.back();
+        FolderNode* current = treeStack.back();
         XC_PTR_ASSERT(current);
         img::ResourceNode* resCurrent = resStack.back();
         XC_PTR_ASSERT(resCurrent);
@@ -208,21 +208,21 @@ bool ImageFileLoader::loadPsd(
         }
         else
         {
-            // create layerset resource
-            auto resNode = createLayerSetResource(name, rect.topLeft());
+            // create folder resource
+            auto resNode = createFolderResource(name, rect.topLeft());
             resCurrent->children().pushBack(resNode);
             resStack.push_back(resNode);
 
-            // create layerset node
-            LayerSetNode* layerSetNode = new LayerSetNode(name);
-            layerSetNode->setDepth(globalDepth - parentDepth);
-            layerSetNode->setVisibility(layer.isVisible());
-            layerSetNode->setClipped(layer.clipping != 0);
-            layerSetNode->setDefaultOpacity(layer.opacity / 255.0f);
+            // create folder node
+            FolderNode* folderNode = new FolderNode(name);
+            folderNode->setDepth(globalDepth - parentDepth);
+            folderNode->setVisibility(layer.isVisible());
+            folderNode->setClipped(layer.clipping != 0);
+            folderNode->setDefaultOpacity(layer.opacity / 255.0f);
 
             // push tree
-            current->children().pushBack(layerSetNode);
-            treeStack.push_back(layerSetNode);
+            current->children().pushBack(folderNode);
+            treeStack.push_back(folderNode);
 
             // update depth
             globalDepth -= 1.0f;
@@ -275,9 +275,9 @@ void ImageFileLoader::setDefaultPositions(ObjectNode& aNode)
         {
             ((LayerNode*)node)->setDefaultPos(pos - parentPos);
         }
-        else if (node->type() == ObjectType_LayerSet)
+        else if (node->type() == ObjectType_Folder)
         {
-            ((LayerSetNode*)node)->setDefaultPos(pos - parentPos);
+            ((FolderNode*)node)->setDefaultPos(pos - parentPos);
         }
     }
 }

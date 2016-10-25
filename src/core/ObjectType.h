@@ -7,7 +7,7 @@ namespace core
 enum ObjectType
 {
     ObjectType_Layer,
-    ObjectType_LayerSet,
+    ObjectType_Folder,
     ObjectType_TERM
 };
 

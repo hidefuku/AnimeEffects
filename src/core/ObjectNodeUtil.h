@@ -6,7 +6,7 @@
 #include <QMatrix4x4>
 #include "cmnd/Listener.h"
 #include "core/ObjectNode.h"
-#include "core/LayerSetNode.h"
+#include "core/FolderNode.h"
 #include "core/SRTExpans.h"
 
 namespace core

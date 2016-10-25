@@ -1,5 +1,5 @@
-#ifndef CORE_LAYERSETNODE_H
-#define CORE_LAYERSETNODE_H
+#ifndef CORE_FOLDERNODE_H
+#define CORE_FOLDERNODE_H
 
 #include <QScopedPointer>
 #include "XC.h"
@@ -10,13 +10,13 @@
 namespace core
 {
 
-class LayerSetNode
+class FolderNode
         : public ObjectNode
         , public Renderer
 {
 public:
-    LayerSetNode(const QString& aName);
-    ~LayerSetNode();
+    FolderNode(const QString& aName);
+    ~FolderNode();
 
     // default position
     void setDefaultPos(const QVector2D& aPos);
@@ -27,7 +27,7 @@ public:
     const HeightMap* heightMap() const { return mHeightMap.data(); }
 
     // from ObjectNode
-    virtual ObjectType type() const { return ObjectType_LayerSet; }
+    virtual ObjectType type() const { return ObjectType_Folder; }
     virtual void setName(const QString& aName) { mName = aName; }
     virtual const QString& name() const { return mName; }
     virtual void setDepth(float aDepth) { mDepth = aDepth; }
@@ -74,4 +74,4 @@ private:
 
 } // namespace core
 
-#endif // CORE_LAYERSETNODE_H
+#endif // CORE_FOLDERNODE_H

@@ -7,7 +7,7 @@
 #include "cmnd/BasicCommands.h"
 #include "core/ObjectTree.h"
 #include "core/LayerNode.h"
-#include "core/LayerSetNode.h"
+#include "core/FolderNode.h"
 #include "core/ObjectTreeEvent.h"
 #include "core/TimeCacheAccessor.h"
 #include "core/BoneKeyUpdater.h"
@@ -474,11 +474,11 @@ ObjectNode* ObjectTree::createSerialNode(int aType)
         layer->setVisibility(true);
         node = layer;
     }
-    else if (aType == ObjectType_LayerSet)
+    else if (aType == ObjectType_Folder)
     {
-        LayerSetNode* layerSet = new LayerSetNode(QString("no name"));
-        layerSet->setVisibility(true);
-        node = layerSet;
+        FolderNode* folder = new FolderNode(QString("no name"));
+        folder->setVisibility(true);
+        node = folder;
     }
 
     return node;
