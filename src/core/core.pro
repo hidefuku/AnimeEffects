@@ -49,7 +49,6 @@ SOURCES += \
     GridMesh.cpp \
     LayerNode.cpp \
     LayerSetNode.cpp \
-    ObjectNodeBoxesAccessor.cpp \
     ObjectNodeUtil.cpp \
     ObjectTree.cpp \
     Project.cpp \
@@ -100,8 +99,6 @@ HEADERS += \
     LayerNode.h \
     LayerSetNode.h \
     ObjectNode.h \
-    ObjectNodeBox.h \
-    ObjectNodeBoxesAccessor.h \
     ObjectNodeUtil.h \
     ObjectTree.h \
     PenInfo.h \

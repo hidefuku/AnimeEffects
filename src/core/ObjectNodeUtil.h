@@ -20,8 +20,6 @@ bool thereAreSomeKeysExceedingFrame(const ObjectNode* aRootNode, int aMaxFrame);
 
 void collectRenderClippees(ObjectNode& aNode, std::vector<Renderer*>& aDest);
 
-void buildBoundingBox(ObjectNode& aNode);
-
 class AttributeNotifier : public cmnd::Listener
 {
     Project& mProject;

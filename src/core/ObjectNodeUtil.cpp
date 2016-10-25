@@ -1,5 +1,4 @@
 #include "core/ObjectNodeUtil.h"
-#include "core/ObjectNodeBox.h"
 #include "core/TimeKeyExpans.h"
 #include "core/Project.h"
 namespace
@@ -53,36 +52,6 @@ float getGlobalDepth(ObjectNode& aNode)
         node = node->parent();
     }
     return gdepth;
-}
-
-void buildBoundingBox(ObjectNode& aNode)
-{
-    ObjectNodeBox* box = aNode.boxCache();
-    if (!box || !box->isPack) return;
-
-    box->rect = QRectF();
-
-    for (ObjectNode* child : aNode.children())
-    {
-        if (!child) continue;
-        buildBoundingBox(*child);
-
-        ObjectNodeBox* childBox = child->boxCache();
-        if (!childBox) continue;
-
-        if (childBox->rect.isValid())
-        {
-            if (box->rect.isValid())
-            {
-                box->rect = fGetContainedRect(box->rect, childBox->rect);
-            }
-            else
-            {
-                box->rect = childBox->rect;
-            }
-        }
-    }
-
 }
 
 bool thereAreSomeKeysExceedingFrame(const ObjectNode* aRootNode, int aMaxFrame)

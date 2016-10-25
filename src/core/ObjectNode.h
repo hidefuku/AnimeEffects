@@ -12,7 +12,6 @@
 #include "cmnd/Vector.h"
 #include "core/ObjectType.h"
 #include "core/Renderer.h"
-#include "core/ObjectNodeBox.h"
 #include "core/TimeLine.h"
 #include "core/GridMesh.h"
 #include "core/Serializer.h"
@@ -57,9 +56,6 @@ public:
 
     virtual void setInitialRect(const QRect&) = 0;
     virtual QRect initialRect() const = 0;
-
-    virtual ObjectNodeBox* boxCache() { return NULL; }
-    virtual const ObjectNodeBox* boxCache() const { return NULL; }
 
     virtual Renderer* renderer() { return NULL; }
     virtual const Renderer* renderer() const { return NULL; }
