@@ -60,20 +60,18 @@ void MeshTransformer::callGL(
 
     const int vtxCount = aPositions.count();
 
-    if (!aNonPosed && aExpans.bone().isAffectedByBinding())
+    if (useInfluence)
     {
-        worldMatrix = aExpans.bone().worldMatrix();
-        worldMatrix.translate(aExpans.imageOffset());
+        inflData = influence->accessor();
+        XC_MSG_ASSERT(influence->vertexCount() == vtxCount,
+                      "%d, %d", vtxCount, influence->vertexCount());
     }
-    else if (useInfluence)
+
+    if ((!aNonPosed && aExpans.bone().isAffectedByBinding()) || useInfluence)
     {
         worldMatrix = aExpans.bone().outerMatrix();
         innerMatrix = aExpans.bone().innerMatrix();
         innerMatrix.translate(aExpans.imageOffset());
-        inflData = influence->accessor();
-
-        XC_MSG_ASSERT(influence->vertexCount() == vtxCount,
-                      "%d, %d", vtxCount, influence->vertexCount());
     }
     else
     {
