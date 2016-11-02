@@ -28,6 +28,9 @@ public:
     MainWindow(ctrl::System& aSystem, GUIResources& aResources);
     ~MainWindow();
 
+    void showWithSettings();
+    void saveCurrentSettings(int aResultCode);
+
     void testNewProject(const QString& aFilePath);
     void closeAllProjects();
 

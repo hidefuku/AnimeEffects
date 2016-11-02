@@ -1,3 +1,6 @@
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QSettings>
 #include <QFileDialog>
 #include <QDockWidget>
 #include <QGraphicsDropShadowEffect>
@@ -57,7 +60,6 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
     // setup UI
     {
         this->setObjectName(QStringLiteral("MainWindow"));
-        this->resize(1280, 800);
 
         QFile stylesheet("data/stylesheet/standard.ssa");
         if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -217,6 +219,45 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
 MainWindow::~MainWindow()
 {
     closeAllProjects();
+}
+
+void MainWindow::showWithSettings()
+{
+#if defined(QT_NO_DEBUG)
+    QSettings settings;
+    auto winSize = settings.value("mainwindow/size");
+    auto isMax = settings.value("mainwindow/ismaximized");
+
+    if (winSize.isValid())
+    {
+        this->resize(winSize.toSize());
+    }
+
+    if (!isMax.isValid() || isMax.toBool())
+    {
+        this->showMaximized();
+    }
+    else
+    {
+        this->show();
+    }
+#else
+    this->showMaximized();
+#endif
+}
+
+void MainWindow::saveCurrentSettings(int aResultCode)
+{
+#if defined(QT_NO_DEBUG)
+    if (aResultCode == 0)
+    {
+        QSettings settings;
+        settings.setValue("mainwindow/size", this->size());
+        settings.setValue("mainwindow/ismaximized", this->isMaximized());
+    }
+#else
+    (void)aResultCode;
+#endif
 }
 
 void MainWindow::testNewProject(const QString& aFilePath)

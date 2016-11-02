@@ -521,6 +521,10 @@ int entryPoint(int argc, char *argv[])
     static AEErrorHandler aeErrorHandler;
     gXCErrorHandler = &aeErrorHandler;
 
+    // set organization and application name for the application setting
+    QCoreApplication::setOrganizationName("AnimeEffectsProject");
+    QCoreApplication::setApplicationName("AnimeEffects");
+
     {
         // load constant gui resources
         QScopedPointer<gui::GUIResources> resources(new gui::GUIResources(resourceDir));
@@ -533,7 +537,7 @@ int entryPoint(int argc, char *argv[])
 
         qDebug() << "show main window";
         // show main window
-        mainWindow->show();
+        mainWindow->showWithSettings();
         // set opengl device info
         system->setGLDeviceInfo(gl::DeviceInfo::instance());
 
@@ -545,6 +549,9 @@ int entryPoint(int argc, char *argv[])
 
         // execute application
         result = app.exec();
+
+        // save settings(window status, etc.)
+        mainWindow->saveCurrentSettings(result);
 
         // bind gl context for destructors
         gl::Global::makeCurrent();
