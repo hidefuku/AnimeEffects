@@ -8,6 +8,7 @@
 #include "gui/MainWindow.h"
 #include "gui/ResourceDialog.h"
 #include "gui/EasyDialog.h"
+#include "gui/KeyBindingDialog.h"
 
 namespace gui
 {
@@ -114,6 +115,20 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
         windowMenu->addAction(resource);
     }
 
+    QMenu* optionMenu = new QMenu("Option", this);
+    {
+        QAction* keyBind = new QAction("Key Binding...", this);
+
+        connect(keyBind, &QAction::triggered, [=](bool)
+        {
+            QScopedPointer<KeyBindingDialog> dialog(new KeyBindingDialog(this));
+            dialog->exec();
+            //if (dialog->result() != QDialog::Accepted) return;
+        });
+
+        optionMenu->addAction(keyBind);
+    }
+
     QMenu* helpMenu = new QMenu("Help", this);
     {
         QAction* aboutMe = new QAction("About Anime Effects...", this);
@@ -141,6 +156,7 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
     this->addAction(editMenu->menuAction());
     this->addAction(projMenu->menuAction());
     this->addAction(windowMenu->menuAction());
+    this->addAction(optionMenu->menuAction());
     this->addAction(helpMenu->menuAction());
 
     // reset status

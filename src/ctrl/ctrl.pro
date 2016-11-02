@@ -98,7 +98,8 @@ SOURCES += \
     bone/bone_NodeSelector.cpp \
     ffd/ffd_TaskResource.cpp \
     DriverResources.cpp \
-    Painter.cpp
+    Painter.cpp \
+    KeyBinding.cpp
 
 HEADERS += \
     Driver.h \
@@ -174,4 +175,5 @@ HEADERS += \
     bone/bone_NodeSelector.h \
     ffd/ffd_TaskResource.h \
     DriverResources.h \
-    Painter.h
+    Painter.h \
+    KeyBinding.h

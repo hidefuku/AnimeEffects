@@ -100,7 +100,8 @@ SOURCES += \
     tool/tool_FlowLayout.cpp \
     GUIResources.cpp \
     prop/prop_KeyKnocker.cpp \
-    prop/prop_KeyAccessor.cpp
+    prop/prop_KeyAccessor.cpp \
+    KeyBindingDialog.cpp
 
 HEADERS += \
     MainDisplayMode.h \
@@ -155,7 +156,8 @@ HEADERS += \
     MainDisplayStyle.h \
     GUIResources.h \
     prop/prop_KeyKnocker.h \
-    prop/prop_KeyAccessor.h
+    prop/prop_KeyAccessor.h \
+    KeyBindingDialog.h
 
 FORMS +=
 
