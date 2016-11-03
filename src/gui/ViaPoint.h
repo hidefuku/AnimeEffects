@@ -9,6 +9,7 @@
 namespace img { class ResourceNode; }
 namespace gui { class ResourceDialog; }
 namespace gui { class MainMenuBar; }
+namespace gui { class KeyCommandMap; }
 
 namespace gui
 {
@@ -33,6 +34,9 @@ public:
     void setGLDeviceInfo(const gl::DeviceInfo&);
     const gl::DeviceInfo& glDeviceInfo() const;
 
+    void setKeyCommandMap(KeyCommandMap* aMap);
+    KeyCommandMap* keyCommandMap() const { return mKeyCommandMap; }
+
     util::Signaler<void()> onVisualUpdated;
 
 private:
@@ -42,6 +46,7 @@ private:
     ResourceDialog* mResDialog;
     QPlainTextEdit* mLogView;
     gl::DeviceInfo mGLDeviceInfo;
+    KeyCommandMap* mKeyCommandMap;
 };
 
 } // namespace gui

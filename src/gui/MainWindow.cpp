@@ -40,6 +40,8 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
     , mSystem(aSystem)
     , mResources(aResources)
     , mViaPoint(this)
+    , mKeyCommandMap()
+    , mKeyCommandInvoker()
     , mMainMenuBar()
     , mMainDisplayStyle()
     , mMainDisplay()
@@ -73,6 +75,21 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
         this->setTabShape(QTabWidget::Rounded);
         this->setDockOptions(QMainWindow::AnimatedDocks);
         this->setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+    }
+
+    {
+        mKeyCommandMap.reset(new KeyCommandMap(*this));
+
+        QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+                           QApplication::organizationName(),
+                           QApplication::applicationName());
+        settings.beginGroup("keybindings");
+        mKeyCommandMap->readFrom(settings);
+        settings.endGroup();
+
+        mViaPoint.setKeyCommandMap(mKeyCommandMap.data());
+
+        mKeyCommandInvoker.reset(new KeyCommandInvoker(*mKeyCommandMap));
     }
 
     {
@@ -203,7 +220,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
 
     this->setFocusPolicy(Qt::StrongFocus);
 
-#if 1
+#if 0
     auto scUndo = new QShortcut(QKeySequence("Ctrl+Z"), this);
     auto scRedo = new QShortcut(QKeySequence("Ctrl+Shift+Z"), this);
     //scUndo->setContext(Qt::WidgetWithChildrenShortcut);
@@ -213,6 +230,15 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
 
     this->connect(scUndo, &QShortcut::activated, [=](){ this->onUndoTriggered(); });
     this->connect(scRedo, &QShortcut::activated, [=](){ this->onRedoTriggered(); });
+#else
+    {
+        auto key = mKeyCommandMap->get("Undo");
+        if (key) key->invoker = [=](){ this->onUndoTriggered(); };
+    }
+    {
+        auto key = mKeyCommandMap->get("Redo");
+        if (key) key->invoker = [=](){ this->onRedoTriggered(); };
+    }
 #endif
 }
 
@@ -353,6 +379,24 @@ void MainWindow::keyPressEvent(QKeyEvent* aEvent)
     */
 }
 #endif
+
+void MainWindow::keyPressEvent(QKeyEvent* aEvent)
+{
+    //qDebug() << "input key =" << aEvent->key() << "text =" << aEvent->text();
+
+    QMainWindow::keyPressEvent(aEvent);
+
+    mKeyCommandInvoker->onKeyPressed(aEvent);
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent* aEvent)
+{
+    //qDebug() << "release key =" << aEvent->key() << "text =" << aEvent->text();
+
+    QMainWindow::keyReleaseEvent(aEvent);
+
+    mKeyCommandInvoker->onKeyReleased(aEvent);
+}
 
 void MainWindow::onUndoTriggered()
 {

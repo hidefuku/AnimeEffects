@@ -70,4 +70,44 @@ bool KeyBinding::conflictsWith(const KeyBinding& aRhs) const
     return mKeyCode == aRhs.mKeyCode && mModifiers == aRhs.mModifiers;
 }
 
+bool KeyBinding::matchesExactlyWith(const KeyBinding& aRhs) const
+{
+    return mKeyCode == aRhs.mKeyCode && mModifiers == aRhs.mModifiers;
+}
+
+void KeyBinding::setSerialValue(const QString& aValue)
+{
+    const QStringList v = aValue.split(',');
+    if (v.size() < 2) return;
+
+    bool success = false;
+
+    const int key = v[0].toInt(&success);
+    if (!success) return;
+
+    const int mod = v[1].toInt(&success);
+    if (!success) return;
+
+    mKeyCode = key;
+    mModifiers = Qt::NoModifier;
+    if (mod & 0x01) mModifiers |= Qt::ControlModifier;
+    if (mod & 0x02) mModifiers |= Qt::ShiftModifier;
+    if (mod & 0x04) mModifiers |= Qt::AltModifier;
+
+    if (!isValidBinding())
+    {
+        mKeyCode = 0;
+        mModifiers = Qt::NoModifier;
+    }
+}
+
+QString KeyBinding::serialValue() const
+{
+    int mod = 0;
+    mod |= mModifiers.testFlag(Qt::ControlModifier) ? 0x01 : 0x00;
+    mod |= mModifiers.testFlag(Qt::ShiftModifier) ? 0x02 : 0x00;
+    mod |= mModifiers.testFlag(Qt::AltModifier) ? 0x04 : 0x00;
+    return QString::number(mKeyCode) + "," + QString::number(mod);
+}
+
 } // namespace ctrl

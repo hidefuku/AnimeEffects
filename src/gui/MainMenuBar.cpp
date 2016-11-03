@@ -119,11 +119,12 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
     {
         QAction* keyBind = new QAction("Key Binding...", this);
 
-        connect(keyBind, &QAction::triggered, [=](bool)
+        connect(keyBind, &QAction::triggered, [&](bool)
         {
-            QScopedPointer<KeyBindingDialog> dialog(new KeyBindingDialog(this));
+            XC_PTR_ASSERT(aViaPoint.keyCommandMap());
+            QScopedPointer<KeyBindingDialog> dialog(
+                        new KeyBindingDialog(*aViaPoint.keyCommandMap(), this));
             dialog->exec();
-            //if (dialog->result() != QDialog::Accepted) return;
         });
 
         optionMenu->addAction(keyBind);

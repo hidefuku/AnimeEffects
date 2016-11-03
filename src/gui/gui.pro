@@ -101,7 +101,9 @@ SOURCES += \
     GUIResources.cpp \
     prop/prop_KeyKnocker.cpp \
     prop/prop_KeyAccessor.cpp \
-    KeyBindingDialog.cpp
+    KeyBindingDialog.cpp \
+    KeyCommandMap.cpp \
+    KeyCommandInvoker.cpp
 
 HEADERS += \
     MainDisplayMode.h \
@@ -157,7 +159,9 @@ HEADERS += \
     GUIResources.h \
     prop/prop_KeyKnocker.h \
     prop/prop_KeyAccessor.h \
-    KeyBindingDialog.h
+    KeyBindingDialog.h \
+    KeyCommandMap.h \
+    KeyCommandInvoker.h
 
 FORMS +=
 

@@ -3,8 +3,10 @@
 
 #include <QFormLayout>
 #include <QLineEdit>
+#include <QTabWidget>
 #include "ctrl/KeyBinding.h"
 #include "gui/EasyDialog.h"
+#include "gui/KeyCommandMap.h"
 
 namespace gui
 {
@@ -12,38 +14,39 @@ namespace gui
 class KeyBindingDialog : public EasyDialog
 {
 public:
-    KeyBindingDialog(QWidget* aParent);
+    KeyBindingDialog(KeyCommandMap& aMap, QWidget* aParent);
 
 private:
     class KeyEdit : public QLineEdit
     {
     public:
-        KeyEdit(const QString& aCommandName, KeyBindingDialog& aParent);
+        KeyEdit(KeyCommandMap::KeyCommand& aOrigin,
+                KeyBindingDialog& aParent);
 
-        const QString& commandName() const { return mCommandName; }
+        const QString& label() const { return mOrigin.label; }
+        const QString& text() const { return mText; }
         ctrl::KeyBinding& keyBinding() { return mBinding; }
         const ctrl::KeyBinding& keyBinding() const { return mBinding; }
-        void setGroup(const QString& aGroup) { mGroup = aGroup; }
-        const QString& group() const { return mGroup; }
-        void setConflictInfo(const QString& aInfo);
+        const QString& group() const { return mOrigin.group; }
+        void updateText(const QString& aConflictInfo);
+        void flushToOrigin();
 
     private:
         virtual void keyPressEvent(QKeyEvent* aEvent);
 
         KeyBindingDialog& mParent;
-        QString mGroup;
-        QString mCommandName;
+        KeyCommandMap::KeyCommand& mOrigin;
         ctrl::KeyBinding mBinding;
+        QString mText;
     };
 
-    QWidget* createGeneralTable();
-    QWidget* createViewTable();
-    QWidget* createToolsTable();
-    void pushKeyEdit(QFormLayout* aLayout, KeyEdit* aKeyEdit);
-    void updateConflicts();
-    QString getConflictInfo(const KeyEdit& aEdit) const;
+    QFormLayout* createTab(const QString& aTitle);
+    void updateKeyTexts();
+    void saveSettings();
 
+    KeyCommandMap& mKeyCommandMap;
     QVector<KeyEdit*> mKeys;
+    QTabWidget* mTabs;
     QString mCurrentGroup;
 };
 

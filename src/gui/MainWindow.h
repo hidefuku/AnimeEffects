@@ -16,6 +16,8 @@
 #include "gui/GUIResources.h"
 #include "gui/ViaPoint.h"
 #include "gui/ProjectTabBar.h"
+#include "gui/KeyCommandMap.h"
+#include "gui/KeyCommandInvoker.h"
 
 namespace gui
 {
@@ -45,13 +47,17 @@ public:
     void onRedoTriggered();
 
 private:
+    virtual void keyPressEvent(QKeyEvent* aEvent);
+    virtual void keyReleaseEvent(QKeyEvent* aEvent);
+
     void resetProjectRefs(core::Project* aProject);
-    //virtual void keyPressEvent(QKeyEvent* aEvent);
     void onProjectTabChanged(core::Project&);
 
     ctrl::System& mSystem;
     GUIResources& mResources;
     ViaPoint mViaPoint;
+    QScopedPointer<KeyCommandMap> mKeyCommandMap;
+    QScopedPointer<KeyCommandInvoker> mKeyCommandInvoker;
     MainMenuBar* mMainMenuBar;
     QScopedPointer<MainDisplayStyle> mMainDisplayStyle;
     MainDisplayWidget* mMainDisplay;

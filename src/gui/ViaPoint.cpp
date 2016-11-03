@@ -10,6 +10,7 @@ ViaPoint::ViaPoint(QWidget* aParent)
     , mResDialog()
     , mLogView()
     , mGLDeviceInfo()
+    , mKeyCommandMap()
 {
 }
 
@@ -80,6 +81,11 @@ const gl::DeviceInfo& ViaPoint::glDeviceInfo() const
 {
     XC_ASSERT(mGLDeviceInfo.isValid());
     return mGLDeviceInfo;
+}
+
+void ViaPoint::setKeyCommandMap(KeyCommandMap* aMap)
+{
+    mKeyCommandMap = aMap;
 }
 
 } // namespace gui

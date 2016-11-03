@@ -7,18 +7,21 @@
 #include <QKeySequence>
 #include <QTabWidget>
 #include <QFrame>
+#include <QApplication>
+#include "XC.h"
 #include "gui/KeyBindingDialog.h"
 
 namespace gui
 {
 
 //-------------------------------------------------------------------------------------------------
-KeyBindingDialog::KeyEdit::KeyEdit(const QString& aCommandName, KeyBindingDialog& aParent)
+KeyBindingDialog::KeyEdit::KeyEdit(KeyCommandMap::KeyCommand& aOrigin,
+                                   KeyBindingDialog& aParent)
     : QLineEdit(&aParent)
     , mParent(aParent)
-    , mGroup()
-    , mCommandName(aCommandName)
-    , mBinding()
+    , mOrigin(aOrigin)
+    , mBinding(aOrigin.binding)
+    , mText(aOrigin.binding.text())
 {
     this->setAttribute(Qt::WA_InputMethodEnabled, false); // disable IME
 }
@@ -38,111 +41,97 @@ void KeyBindingDialog::KeyEdit::keyPressEvent(QKeyEvent* aEvent)
         {
             mBinding = ctrl::KeyBinding();
         }
+        mText = mBinding.text();
     }
-    this->setText(mBinding.text());
-
-    mParent.updateConflicts();
+    mParent.updateKeyTexts();
 }
 
-void KeyBindingDialog::KeyEdit::setConflictInfo(const QString& aInfo)
+void KeyBindingDialog::KeyEdit::updateText(const QString& aConflictInfo)
 {
-    if (aInfo.isEmpty())
+    if (aConflictInfo.isEmpty())
     {
-        this->setText(mBinding.text());
+        this->setText(mText);
     }
     else
     {
-        this->setText(mBinding.text() + " (conflicted with " + aInfo + ")");
+        this->setText(mText + " (conflicted with " + aConflictInfo + ")");
     }
 }
 
+void KeyBindingDialog::KeyEdit::flushToOrigin()
+{
+    mOrigin.binding = mBinding;
+}
+
 //-------------------------------------------------------------------------------------------------
-KeyBindingDialog::KeyBindingDialog(QWidget* aParent)
+KeyBindingDialog::KeyBindingDialog(KeyCommandMap& aMap, QWidget* aParent)
     : EasyDialog("Key Binding Dialog", aParent)
+    , mKeyCommandMap(aMap)
     , mKeys()
+    , mTabs(new QTabWidget(this))
     , mCurrentGroup()
 {
-    auto tab = new QTabWidget(this);
-    tab->addTab(createGeneralTable(), "General");
-    tab->addTab(createViewTable(), "View");
-    tab->addTab(createToolsTable(), "Tools");
-    this->setMainWidget(tab, false);
+    QMap<QString, QFormLayout*> groups;
 
-    this->setOkCancel();
+    for (auto itr = mKeyCommandMap.map().begin(); itr != mKeyCommandMap.map().end(); ++itr)
+    {
+        auto unit = itr.value();
+        XC_PTR_ASSERT(unit);
+
+        // reserve group tab
+        auto form = groups[unit->group];
+        if (!form)
+        {
+            form = createTab(unit->group);
+            groups[unit->group] = form;
+        }
+
+        // create key editor
+        auto keyEdit = new KeyEdit(*unit, *this);
+        mKeys.push_back(keyEdit);
+        form->addRow(keyEdit->label(), keyEdit);
+    }
+
+    this->setMainWidget(mTabs, false);
+    this->setOkCancel([=](int aResult)->bool
+    {
+        if (aResult == 0)
+        {
+            this->saveSettings();
+        }
+        return true;
+    });
+
+    updateKeyTexts();
 }
 
-QWidget* KeyBindingDialog::createGeneralTable()
+QFormLayout* KeyBindingDialog::createTab(const QString& aTitle)
 {
-    mCurrentGroup = "General";
+    auto scroll = new QScrollArea(this);
+    scroll->setWidgetResizable(true);
+
+    auto frame = new QFrame();
+    scroll->setWidget(frame);
 
     auto form = new QFormLayout();
     form->setLabelAlignment(Qt::AlignRight);
-    pushKeyEdit(form, new KeyEdit("Undo a command", *this));
-    pushKeyEdit(form, new KeyEdit("Redo a command", *this));
-
-    auto scroll = new QScrollArea(this);
-    //scroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    //scroll->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    scroll->setWidgetResizable(true);
-    auto frame = new QFrame();
-    scroll->setWidget(frame);
     frame->setLayout(form);
-    return scroll;
+
+    mTabs->addTab(scroll, aTitle);
+
+    return form;
 }
 
-QWidget* KeyBindingDialog::createViewTable()
-{
-    mCurrentGroup = "View";
-
-    auto form = new QFormLayout();
-    form->setLabelAlignment(Qt::AlignRight);
-    pushKeyEdit(form, new KeyEdit("Rotate canvas", *this));
-
-    auto scroll = new QScrollArea(this);
-    scroll->setWidgetResizable(true);
-    auto frame = new QFrame();
-    scroll->setWidget(frame);
-    frame->setLayout(form);
-    return scroll;
-}
-
-QWidget* KeyBindingDialog::createToolsTable()
-{
-    mCurrentGroup = "Tools";
-
-    auto form = new QFormLayout();
-    form->setLabelAlignment(Qt::AlignRight);
-    pushKeyEdit(form, new KeyEdit("Select SRT", *this));
-
-    auto scroll = new QScrollArea(this);
-    scroll->setWidgetResizable(true);
-    auto frame = new QFrame();
-    scroll->setWidget(frame);
-    frame->setLayout(form);
-    return scroll;
-}
-
-void KeyBindingDialog::pushKeyEdit(QFormLayout* aLayout, KeyEdit* aKeyEdit)
-{
-    aKeyEdit->setGroup(mCurrentGroup);
-    mKeys.push_back(aKeyEdit);
-    aLayout->addRow(mKeys.back()->commandName(), mKeys.back());
-}
-
-void KeyBindingDialog::updateConflicts()
+void KeyBindingDialog::updateKeyTexts()
 {
     if (mKeys.empty()) return;
 
-    mKeys.front()->setConflictInfo("");
-    auto itr = mKeys.begin();
-    ++itr;
-
-    for (; itr != mKeys.end(); ++itr)
+    for (auto itr = mKeys.begin(); itr != mKeys.end(); ++itr)
     {
-        auto key = *itr;
-        key->setConflictInfo("");
+        auto key1 = *itr;
+        key1->updateText("");
 
-        if (!key->keyBinding().isValidBinding())
+        if (!key1->keyBinding().isValidBinding())
         {
             continue;
         }
@@ -153,14 +142,29 @@ void KeyBindingDialog::updateConflicts()
             --it2;
             auto key2 = *it2;
 
-            if (key->keyBinding().conflictsWith(key2->keyBinding()))
+            if (key1->keyBinding().conflictsWith(key2->keyBinding()))
             {
-                key->setConflictInfo(key2->group() + "/" + key2->commandName());
-                key2->setConflictInfo(key->group() + "/" + key->commandName());
+                key1->updateText(key2->group() + "/" + key2->label());
+                key2->updateText(key1->group() + "/" + key1->label());
                 break;
             }
         }
     }
+}
+
+void KeyBindingDialog::saveSettings()
+{
+    for (auto key : mKeys)
+    {
+        key->flushToOrigin();
+    }
+
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope,
+                       QApplication::organizationName(),
+                       QApplication::applicationName());
+    settings.beginGroup("keybindings");
+    mKeyCommandMap.writeTo(settings);
+    settings.endGroup();
 }
 
 } // namespace gui
