@@ -1,10 +1,5 @@
 #include "gui/tool/tool_ViewPanel.h"
 
-namespace
-{
-static const int kButtonSize = 26;
-}
-
 namespace gui {
 namespace tool {
 
@@ -23,9 +18,7 @@ void ViewPanel::addButton(const QString& aIconName, bool aCheckable,
 {
     QPushButton* button = new QPushButton();
     button->setObjectName("viewButton");
-    button->setFixedSize(QSize(kButtonSize, kButtonSize));
     button->setIcon(mResources.icon(aIconName));
-    button->setIconSize(QSize(kButtonSize, kButtonSize));
     button->setCheckable(aCheckable);
     button->setToolTip(aToolTip);
 

@@ -2,7 +2,10 @@ QPushButton#toolButton {
 color: #3C3C3C;
 border: 1px solid #eaeaea;
 border-radius: 6px;
-padding: 2px;
+padding: -1px;
+width: 26px;
+height: 26px;
+icon-size: 26px;
 background: qlineargradient(
    x1:0, y1:0, x2:0, y2:1,
    stop: 0   #fefefe,
@@ -59,7 +62,10 @@ background: qlineargradient(
 QPushButton#viewButton {
 border: 1px solid #eaeaea;
 border-radius: 6px;
-padding: 2px;
+padding: -1px;
+width: 26px;
+height: 26px;
+icon-size: 26px;
 background: qlineargradient(
    x1:0, y1:0, x2:0, y2:1,
    stop: 0   #fefefe,

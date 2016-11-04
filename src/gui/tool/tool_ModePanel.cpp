@@ -1,10 +1,5 @@
 #include "gui/tool/tool_ModePanel.h"
 
-namespace
-{
-static const int kButtonSize = 26;
-}
-
 namespace gui {
 namespace tool {
 
@@ -27,9 +22,7 @@ void ModePanel::addButton(
 {
     QPushButton* button = new QPushButton(this);
     button->setObjectName("toolButton");
-    button->setFixedSize(QSize(kButtonSize, kButtonSize));
     button->setIcon(mResources.icon(aIconName));
-    button->setIconSize(QSize(kButtonSize, kButtonSize));
     button->setCheckable(true);
     button->setToolTip(aToolTip);
 
