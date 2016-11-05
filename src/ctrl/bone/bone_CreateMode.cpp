@@ -33,13 +33,13 @@ bool CreateMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& a
     bool updated = mFocuser.focusChanged();
 
     // clear selecting
-    if (aCursor.isRightReleaseState())
+    if (aCursor.emitsRightReleasedEvent())
     {
         mFocuser.clearSelection();
         updated = true;
     }
 
-    if (aCursor.isLeftReleaseState())
+    if (aCursor.emitsLeftReleasedEvent())
     {
         if (focus)
         {

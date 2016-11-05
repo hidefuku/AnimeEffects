@@ -51,7 +51,7 @@ bool SplitMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aC
 
     if (!mBeganSplit)
     {
-        if (aCursor.isLeftPressState())
+        if (aCursor.emitsLeftPressedEvent())
         {
             if (mFocuser.vtxFocus())
             {
@@ -88,7 +88,7 @@ bool SplitMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aC
         mRelayEnd = modelCursorPos;
         updateRelayPoints(aCamera);
 
-        if (aCursor.isLeftPressState())
+        if (aCursor.emitsLeftPressedEvent())
         {
             MeshVtx* tail = splitTriangle();
             if (tail)
@@ -102,7 +102,7 @@ bool SplitMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aC
                 updateRelayPoints(aCamera);
             }
         }
-        else if (aCursor.isRightPressState())
+        else if (aCursor.emitsRightPressedEvent())
         {
             mBeganSplit = false;
             mRelayPoints.clear();

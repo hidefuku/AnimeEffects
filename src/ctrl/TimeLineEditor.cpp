@@ -179,7 +179,7 @@ TimeLineEditor::UpdateFlags TimeLineEditor::updateCursor(const AbstractCursor& a
 
     const QPoint worldPoint = aCursor.worldPoint();
 
-    if (aCursor.isLeftPressState())
+    if (aCursor.emitsLeftPressedEvent())
     {
         // a selection range is exists.
         if (mState == State_EncloseKeys)
@@ -230,7 +230,7 @@ TimeLineEditor::UpdateFlags TimeLineEditor::updateCursor(const AbstractCursor& a
             }
         }
     }
-    else if (aCursor.isLeftMoveState())
+    else if (aCursor.emitsLeftDraggedEvent())
     {
         if (mState == State_MoveCurrent)
         {
@@ -255,7 +255,7 @@ TimeLineEditor::UpdateFlags TimeLineEditor::updateCursor(const AbstractCursor& a
             flags |= UpdateFlag_ModView;
         }
     }
-    else if (aCursor.isLeftReleaseState())
+    else if (aCursor.emitsLeftReleasedEvent())
     {
         if (mState != State_EncloseKeys || !mFocus.hasRange())
         {

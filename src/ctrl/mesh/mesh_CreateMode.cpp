@@ -53,7 +53,7 @@ bool CreateMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& a
     }
 
     return updated || mState != State_Idle ||
-            mFocuser.focusChanged() || aCursor.isRightPressState();
+            mFocuser.focusChanged() || aCursor.emitsRightPressedEvent();
 }
 
 void CreateMode::renderQt(const RenderInfo& aInfo, QPainter& aPainter)
@@ -148,14 +148,14 @@ bool CreateMode::procIdle(const AbstractCursor& aCursor)
     auto pos = getModelPos(aCursor);
     mCursorPos = pos;
 
-    if (aCursor.isRightPressState())
+    if (aCursor.emitsRightPressedEvent())
     {
         mFocuser.clearFocus();
         mFocuser.clearSelection();
         return true;
     }
 
-    if (aCursor.isLeftPressState())
+    if (aCursor.emitsLeftPressedEvent())
     {
         if (mFocuser.faceFocus())
         {
@@ -190,7 +190,7 @@ void CreateMode::procMove(const AbstractCursor& aCursor)
     auto pos = getModelPos(aCursor);
     mCursorPos = pos;
 
-    if (aCursor.isRightPressState())
+    if (aCursor.emitsRightPressedEvent())
     {
         mMoverRef = nullptr;
         mFocuser.clearFocus();
@@ -204,7 +204,7 @@ void CreateMode::procMove(const AbstractCursor& aCursor)
         moveVtx(*mLastFocus.vtx, getModelPos(aCursor));
     }
 
-    if (aCursor.isLeftReleaseState())
+    if (aCursor.emitsLeftReleasedEvent())
     {
         mMoverRef = nullptr;
         initIdle();
@@ -238,7 +238,7 @@ void CreateMode::procNew(const AbstractCursor& aCursor)
         mCursorPos = mFocuser.vtxFocus()->vec();
     }
 
-    if (aCursor.isRightPressState())
+    if (aCursor.emitsRightPressedEvent())
     {
         mFocuser.clearFocus();
         mFocuser.clearSelection();
@@ -246,7 +246,7 @@ void CreateMode::procNew(const AbstractCursor& aCursor)
         return;
     }
 
-    if (aCursor.isLeftPressState())
+    if (aCursor.emitsLeftPressedEvent())
     {
         if (mFocuser.vtxFocus())
         {
@@ -259,14 +259,14 @@ void CreateMode::procNew(const AbstractCursor& aCursor)
             mDanglingRef.push_back(nullptr);
         }
     }
-    else if (aCursor.isLeftMoveState())
+    else if (aCursor.emitsLeftDraggedEvent())
     {
         if (!mDanglingRef.back())
         {
             mDanglingPos.back() = pos;
         }
     }
-    else if (aCursor.isLeftReleaseState())
+    else if (aCursor.emitsLeftReleasedEvent())
     {
         if (mDanglingPos.count() >= 3)
         {
@@ -300,7 +300,7 @@ void CreateMode::procAdd(const AbstractCursor& aCursor)
         initIdle();
         return;
     }
-    else if (aCursor.isRightPressState())
+    else if (aCursor.emitsRightPressedEvent())
     {
         mFocuser.clearFocus();
         mFocuser.clearSelection();
@@ -330,7 +330,7 @@ void CreateMode::procAdd(const AbstractCursor& aCursor)
         }
     }
 
-    if (aCursor.isLeftPressState())
+    if (aCursor.emitsLeftPressedEvent())
     {
         auto edge = mFocuser.selectingEdge();
         if (!edge)
@@ -350,14 +350,14 @@ void CreateMode::procAdd(const AbstractCursor& aCursor)
             mDanglingRef.push_back(nullptr);
         }
     }
-    else if (aCursor.isLeftMoveState())
+    else if (aCursor.emitsLeftDraggedEvent())
     {
         if (!mDanglingRef.back())
         {
             mDanglingPos.back() = pos;
         }
     }
-    else if (aCursor.isLeftReleaseState())
+    else if (aCursor.emitsLeftReleasedEvent())
     {
         if (mDanglingPos.count() >= 3)
         {

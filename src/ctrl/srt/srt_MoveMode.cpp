@@ -33,7 +33,7 @@ bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCu
     // update symbol
     mSymbol.build(key, keyMtx, aCamera);
 
-    if (aCursor.isLeftPressState())
+    if (aCursor.emitsLeftPressedEvent())
     {
         mFocus = mSymbol.findFocus(aCursor.screenPos());
         auto focusVector = aCamera.toWorldVector(mFocus.second);
@@ -59,7 +59,7 @@ bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCu
             mod = true;
         }
     }
-    else if (aCursor.isLeftMoveState())
+    else if (aCursor.emitsLeftDraggedEvent())
     {
         SRTKey::Data newData;
         auto focusVector = aCamera.toWorldVector(mFocus.second);
@@ -123,7 +123,7 @@ bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCu
             mod = true;
         }
     }
-    else if (aCursor.isLeftReleaseState())
+    else if (aCursor.emitsLeftReleasedEvent())
     {
         clearState();
     }

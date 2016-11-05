@@ -43,7 +43,7 @@ bool CentroidMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor&
     mFocusing = aCamera.toScreenLength((center - curPos).length()) <= kCrossRadius;
     bool mod = (prevFocus != mFocusing);
 
-    if (aCursor.isLeftPressState())
+    if (aCursor.emitsLeftPressedEvent())
     {
         if (mFocusing && hasWorldInv)
         {        
@@ -54,7 +54,7 @@ bool CentroidMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor&
         }
         mod = true;
     }
-    else if (aCursor.isLeftMoveState())
+    else if (aCursor.emitsLeftDraggedEvent())
     {
         if (mMoving && hasWorldInv)
         {
@@ -64,7 +64,7 @@ bool CentroidMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor&
         }
         mod = true;
     }
-    else if (aCursor.isLeftReleaseState())
+    else if (aCursor.emitsLeftReleasedEvent())
     {
         mCommandRef = nullptr;
         mMoving = false;

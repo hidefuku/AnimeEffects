@@ -28,7 +28,7 @@ bool MoveJointMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor
     auto focus = mFocuser.update(aCamera, aCursor.screenPos());
     bool updated = mFocuser.focusChanged();
 
-    if (aCursor.isLeftPressState())
+    if (aCursor.emitsLeftPressedEvent())
     {
         mCommandRef = nullptr;
         mFocuser.clearFocus();
@@ -39,7 +39,7 @@ bool MoveJointMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor
         }
         updated = true;
     }
-    else if (aCursor.isLeftMoveState())
+    else if (aCursor.emitsLeftDraggedEvent())
     {
         Bone2* selected = mFocuser.selectingBone();
         if (selected)
@@ -48,7 +48,7 @@ bool MoveJointMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor
         }
         updated = true;
     }
-    else if (aCursor.isLeftReleaseState())
+    else if (aCursor.emitsLeftReleasedEvent())
     {
         mCommandRef = nullptr;
         mFocuser.clearSelection();

@@ -36,17 +36,17 @@ bool EraseInflMode::updateCursor(const CameraInfo&, const AbstractCursor& aCurso
 {
     mBrush.setCenter(aCursor.worldPos());
 
-    if (aCursor.isLeftPressState())
+    if (aCursor.emitsLeftPressedEvent())
     {
         mIsBrushDrawing = true;
         mCommandRef = nullptr;
         updatePaint();
     }
-    else if (aCursor.isLeftMoveState())
+    else if (aCursor.emitsLeftDraggedEvent())
     {
         updatePaint();
     }
-    else if (aCursor.isLeftReleaseState())
+    else if (aCursor.emitsLeftReleasedEvent())
     {
         mIsBrushDrawing = false;
         mCommandRef = nullptr;

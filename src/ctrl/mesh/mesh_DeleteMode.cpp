@@ -35,7 +35,7 @@ bool DeleteMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& a
     bool updated = false;
     mFocuser.update(aCamera, aCursor);
 
-    if (aCursor.isLeftPressState())
+    if (aCursor.emitsLeftPressedEvent())
     {
         if (mFocuser.vtxFocus())
         {

@@ -32,7 +32,7 @@ bool DeleteMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& a
     auto focus = mFocuser.update(aCamera, aCursor.screenPos());
     bool updated = mFocuser.focusChanged();
 
-    if (aCursor.isLeftPressState())
+    if (aCursor.emitsLeftPressedEvent())
     {
         if (focus)
         {

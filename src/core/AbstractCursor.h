@@ -50,23 +50,23 @@ public:
     inline QVector2D worldPos() const { return mWorldPos; }
     inline QVector2D worldVel() const { return mWorldVel; }
 
-    inline bool isPressing(Button aButton) const { return mIsPressing.at(aButton); }
-    inline bool isLeftPressing() const { return mIsPressing[Button_Left]; }
-    inline bool isMiddlePressing() const { return mIsPressing[Button_Middle]; }
-    inline bool isRightPressing() const { return mIsPressing[Button_Right]; }
+    inline bool isPressed(Button aButton) const { return mIsPressed.at(aButton); }
+    inline bool isPressedLeft() const { return mIsPressed[Button_Left]; }
+    inline bool isPressedMiddle() const { return mIsPressed[Button_Middle]; }
+    inline bool isPressedRight() const { return mIsPressed[Button_Right]; }
 
-    bool isLeftPressState() const;
-    bool isLeftMoveState() const;
-    bool isLeftReleaseState() const;
-    bool isRightPressState() const;
-    bool isRightMoveState() const;
-    bool isRightReleaseState() const;
-    bool isPressState() const;
+    bool emitsLeftPressedEvent() const;
+    bool emitsLeftDraggedEvent() const;
+    bool emitsLeftReleasedEvent() const;
+    bool emitsRightPressedEvent() const;
+    bool emitsRightDraggedEvent() const;
+    bool emitsRightReleasedEvent() const;
+    bool emitsPressedEvent() const;
 
 private:
     Event mEventType;
     Button mEventButton;
-    std::array<bool, Button_TERM> mIsPressing;
+    std::array<bool, Button_TERM> mIsPressed;
     std::array<bool, Button_TERM> mIsDouble;
     QPoint mScreenPoint;
     QVector2D mScreenPos;

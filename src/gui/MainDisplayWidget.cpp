@@ -294,7 +294,7 @@ void MainDisplayWidget::mouseMoveEvent(QMouseEvent* aEvent)
             //if (!mUsingTablet) qDebug() << "move" << aEvent->pos();
         }
 
-        if (mHandRotation && mAbstractCursor.isLeftPressing())
+        if (mHandRotation && mAbstractCursor.isPressedLeft())
         {
             auto imgSize = mRenderInfo->camera.imageSize();
             auto imgCenter = QVector2D(0.5f * imgSize.width(), 0.5f * imgSize.height());
@@ -425,7 +425,7 @@ void MainDisplayWidget::updateCursor(const core::AbstractCursor& aCursor)
     bool updateRendering = false;
 
     // move camera by the open hand cursor
-    if (mHandTranslation && mRenderInfo && aCursor.isLeftMoveState())
+    if (mHandTranslation && mRenderInfo && aCursor.emitsLeftDraggedEvent())
     {
         auto pos = mRenderInfo->camera.pos();
         mRenderInfo->camera.setPos(pos + aCursor.screenVel());
@@ -433,9 +433,9 @@ void MainDisplayWidget::updateCursor(const core::AbstractCursor& aCursor)
     }
 
     QEvent::Type tabletType = QEvent::None;
-    if (aCursor.isLeftPressState()) tabletType = QEvent::TabletPress;
-    else if (aCursor.isLeftMoveState()) tabletType = QEvent::TabletMove;
-    else if (aCursor.isLeftReleaseState()) tabletType = QEvent::TabletRelease;
+    if (aCursor.emitsLeftPressedEvent()) tabletType = QEvent::TabletPress;
+    else if (aCursor.emitsLeftDraggedEvent()) tabletType = QEvent::TabletMove;
+    else if (aCursor.emitsLeftReleasedEvent()) tabletType = QEvent::TabletRelease;
 
     if (!mUsingTablet && tabletType != QEvent::None)
     {

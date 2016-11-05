@@ -259,7 +259,7 @@ bool FFDEditor::updateCursor(const CameraInfo&, const AbstractCursor& aCursor)
     {
         mStatus.brush.setCenter(aCursor.worldPos());
 
-        if (aCursor.isLeftPressState())
+        if (aCursor.emitsLeftPressedEvent())
         {
             mStatus.commandRef = nullptr;
             if (mStatus.hasValidBrush() && hasValidTarget())
@@ -274,7 +274,7 @@ bool FFDEditor::updateCursor(const CameraInfo&, const AbstractCursor& aCursor)
         mStatus.brush.setCenter(aCursor.worldPos());
 
         // deform
-        if (aCursor.isLeftMoveState())
+        if (aCursor.emitsLeftDraggedEvent())
         {
             // execute task
             if (!executeDrawTask(prevCenter, aCursor.worldVel()))
@@ -282,7 +282,7 @@ bool FFDEditor::updateCursor(const CameraInfo&, const AbstractCursor& aCursor)
                 clearState();
             }
         }
-        else if (aCursor.isLeftReleaseState())
+        else if (aCursor.emitsLeftReleasedEvent())
         {
             clearState();
         }

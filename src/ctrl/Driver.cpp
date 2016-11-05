@@ -81,7 +81,7 @@ bool Driver::updateCursor(const core::AbstractCursor& aCursor, const core::PenIn
     (void)aPenInfo;
 
     // stop animation
-    if (aCursor.isPressState())
+    if (aCursor.emitsPressedEvent())
     {
         mProject.animator().stop();
     }

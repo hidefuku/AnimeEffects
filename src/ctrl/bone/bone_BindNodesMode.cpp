@@ -40,7 +40,7 @@ bool BindNodesMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor
 
     if (!mKeyOwner.owns())
     {
-        if (aCursor.isLeftPressState())
+        if (aCursor.emitsLeftPressedEvent())
         {
             mFocuser.clearFocus();
             auto newSelectNode = mNodeSelector.click(aCamera);
@@ -65,10 +65,10 @@ bool BindNodesMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor
             }
             updated = true;
         }
-        else if (aCursor.isLeftMoveState())
+        else if (aCursor.emitsLeftDraggedEvent())
         {
         }
-        else if (aCursor.isLeftReleaseState())
+        else if (aCursor.emitsLeftReleasedEvent())
         {
             updated = true;
         }
