@@ -4,8 +4,10 @@
 namespace gui
 {
 
-ToolWidget::ToolWidget(QWidget* aParent, GUIResources& aResources, const QSize& aSizeHint)
+ToolWidget::ToolWidget(ViaPoint& aViaPoint, GUIResources& aResources,
+                       const QSize& aSizeHint, QWidget* aParent)
     : QWidget(aParent)
+    , mViaPoint(aViaPoint)
     , mResources(aResources)
     , mSizeHint(aSizeHint)
     , mViewPanel()
@@ -16,7 +18,6 @@ ToolWidget::ToolWidget(QWidget* aParent, GUIResources& aResources, const QSize& 
     , mFFDPanel()
     , mBonePanel()
     , mMeshPanel()
-    , mMainViewSetting()
 {
     createViewPanel();
 
@@ -64,32 +65,32 @@ void ToolWidget::createViewPanel()
 
     mViewPanel->addButton("showmesh", true, "Show Layer Mesh", [=](bool aChecked)
     {
-        this->mMainViewSetting.showLayerMesh = aChecked;
-        this->onViewSettingChanged(this->mMainViewSetting);
+        this->viewSetting().showLayerMesh = aChecked;
+        this->onViewSettingChanged(this->viewSetting());
     });
     mViewPanel->addButton("cutimages", true, "Cut Images by the Frame", [=](bool aChecked)
     {
-        this->mMainViewSetting.cutImagesByTheFrame = aChecked;
-        this->onViewSettingChanged(this->mMainViewSetting);
+        this->viewSetting().cutImagesByTheFrame = aChecked;
+        this->onViewSettingChanged(this->viewSetting());
     });
     mViewPanel->addButton("rotateac", false, "Rotate the View Anticlockwise", [=](bool)
     {
-        this->mMainViewSetting.rotateViewDeg =
+        this->viewSetting().rotateViewDeg =
                 util::MathUtil::normalizeAngleDeg(
-                    this->mMainViewSetting.rotateViewDeg - 10);
-        this->onViewSettingChanged(this->mMainViewSetting);
+                    this->viewSetting().rotateViewDeg - 10);
+        this->onViewSettingChanged(this->viewSetting());
     });
     mViewPanel->addButton("resetrot", false, "Reset Rotation of the View", [=](bool)
     {
-        this->mMainViewSetting.rotateViewDeg = 0;
-        this->onViewSettingChanged(this->mMainViewSetting);
+        this->viewSetting().rotateViewDeg = 0;
+        this->onViewSettingChanged(this->viewSetting());
     });
     mViewPanel->addButton("rotatecw", false, "Rotate the View Clockwise", [=](bool)
     {
-        this->mMainViewSetting.rotateViewDeg =
+        this->viewSetting().rotateViewDeg =
                 util::MathUtil::normalizeAngleDeg(
-                    this->mMainViewSetting.rotateViewDeg + 10);
-        this->onViewSettingChanged(this->mMainViewSetting);
+                    this->viewSetting().rotateViewDeg + 10);
+        this->onViewSettingChanged(this->viewSetting());
     });
 }
 

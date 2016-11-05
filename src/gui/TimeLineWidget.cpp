@@ -183,29 +183,37 @@ void TimeLineWidget::onProjectAttributeUpdated()
 void TimeLineWidget::mouseMoveEvent(QMouseEvent* aEvent)
 {
     QScrollArea::mouseMoveEvent(aEvent);
-    mAbstractCursor.setMouseMove(aEvent, mCameraInfo);
-    updateCursor(mAbstractCursor);
+    if (mAbstractCursor.setMouseMove(aEvent, mCameraInfo))
+    {
+        updateCursor(mAbstractCursor);
+    }
 }
 
 void TimeLineWidget::mousePressEvent(QMouseEvent* aEvent)
 {
     QScrollArea::mousePressEvent(aEvent);
-    mAbstractCursor.setMousePress(aEvent, mCameraInfo);
-    updateCursor(mAbstractCursor);
+    if (mAbstractCursor.setMousePress(aEvent, mCameraInfo))
+    {
+        updateCursor(mAbstractCursor);
+    }
 }
 
 void TimeLineWidget::mouseReleaseEvent(QMouseEvent* aEvent)
 {
     QScrollArea::mouseReleaseEvent(aEvent);
-    mAbstractCursor.setMouseRelease(aEvent, mCameraInfo);
-    updateCursor(mAbstractCursor);
+    if (mAbstractCursor.setMouseRelease(aEvent, mCameraInfo))
+    {
+        updateCursor(mAbstractCursor);
+    }
 }
 
 void TimeLineWidget::mouseDoubleClickEvent(QMouseEvent* aEvent)
 {
     QScrollArea::mouseDoubleClickEvent(aEvent);
-    mAbstractCursor.setMouseDoubleClick(aEvent, mCameraInfo);
-    updateCursor(mAbstractCursor);
+    if (mAbstractCursor.setMouseDoubleClick(aEvent, mCameraInfo))
+    {
+        updateCursor(mAbstractCursor);
+    }
 }
 
 void TimeLineWidget::wheelEvent(QWheelEvent* aEvent)

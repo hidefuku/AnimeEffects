@@ -52,8 +52,8 @@ bool CreateMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& a
     default: XC_ASSERT(0); break;
     }
 
-    return updated || mState != State_Idle || mFocuser.focusChanged() ||
-            aCursor.button() != AbstractCursor::Button_None;
+    return updated || mState != State_Idle ||
+            mFocuser.focusChanged() || aCursor.isRightPressState();
 }
 
 void CreateMode::renderQt(const RenderInfo& aInfo, QPainter& aPainter)

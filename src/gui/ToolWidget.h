@@ -9,6 +9,7 @@
 #include "gui/GUIResources.h"
 #include "gui/MainDisplayMode.h"
 #include "gui/MainViewSetting.h"
+#include "gui/ViaPoint.h"
 #include "gui/tool/tool_ViewPanel.h"
 #include "gui/tool/tool_ModePanel.h"
 #include "gui/tool/tool_SRTPanel.h"
@@ -22,7 +23,8 @@ namespace gui
 class ToolWidget : public QWidget
 {
 public:
-    ToolWidget(QWidget* aParent, GUIResources& aResources, const QSize& aSizeHint);
+    ToolWidget(ViaPoint& aViaPoint, GUIResources& aResources,
+               const QSize& aSizeHint, QWidget* aParent);
 
     void setDriver(ctrl::Driver* aDriver);
 
@@ -34,6 +36,8 @@ private:
     virtual QSize sizeHint() const { return mSizeHint; }
     virtual void resizeEvent(QResizeEvent* aEvent);
 
+    MainViewSetting& viewSetting() { return mViaPoint.mainViewSetting(); }
+    const MainViewSetting& viewSetting() const { return mViaPoint.mainViewSetting(); }
     void createViewPanel();
     void createModePanel();
     void setPanelActivity(bool aIsActive);
@@ -42,6 +46,7 @@ private:
     void onModePanelPushed(ctrl::ToolType, bool);
     void onParamUpdated(bool aLayoutChanged);
 
+    ViaPoint& mViaPoint;
     GUIResources& mResources;
     const QSize mSizeHint;
     tool::ViewPanel* mViewPanel;
@@ -53,8 +58,6 @@ private:
     tool::FFDPanel* mFFDPanel;
     tool::BonePanel* mBonePanel;
     tool::MeshPanel* mMeshPanel;
-
-    MainViewSetting mMainViewSetting;
 };
 
 } // namespace gui

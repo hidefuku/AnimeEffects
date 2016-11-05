@@ -1,5 +1,6 @@
 #include <functional>
 #include <QMouseEvent>
+#include <QOpenGLFunctions>
 #include "XC.h"
 #include "util/Finally.h"
 #include "gl/Util.h"
@@ -7,10 +8,9 @@
 #include "gui/ProjectHook.h"
 #include "gui/ViaPoint.h"
 #include "gui/ProjectTabBar.h"
-
+#include "gui/KeyCommandMap.h"
 #include "gl/Framebuffer.h"
 #include "gl/Texture.h"
-#include <QOpenGLFunctions>
 #include "core/ClippingFrame.h"
 
 namespace gui
@@ -35,7 +35,7 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mDriver()
     , mProjectTabBar()
     , mUsingTablet(false)
-    , mHandMove(false)
+    , mHandTranslation(false)
     , mViewSetting()
 {
 #ifdef USE_GL_CORE_PROFILE
@@ -49,6 +49,28 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     this->setObjectName(QStringLiteral("MainDisplayWidget"));
     this->setMouseTracking(true);
     this->setAutoFillBackground(false); // avoid auto fill on QPainter::begin()
+
+    // key binding
+    if (mViaPoint.keyCommandMap())
+    {
+        auto key = mViaPoint.keyCommandMap()->get("RotateCanvas");
+        if (key)
+        {
+            key->invoker = [=]()
+            {
+                this->mAbstractCursor.suspendEvent([=]()
+                {
+                    this->updateCursor(this->mAbstractCursor);
+                });
+                this->mHandRotation = true;
+            };
+            key->releaser = [=]()
+            {
+                this->mAbstractCursor.resumeEvent();
+                this->mHandRotation = false;
+            };
+        }
+    }
 }
 
 MainDisplayWidget::~MainDisplayWidget()
@@ -266,9 +288,24 @@ void MainDisplayWidget::mouseMoveEvent(QMouseEvent* aEvent)
 {
     if (mRenderInfo)
     {
-        mAbstractCursor.setMouseMove(aEvent, mRenderInfo->camera);
-        updateCursor(mAbstractCursor);
-        //if (!mUsingTablet) qDebug() << "move" << aEvent->pos();
+        if (mAbstractCursor.setMouseMove(aEvent, mRenderInfo->camera))
+        {
+            updateCursor(mAbstractCursor);
+            //if (!mUsingTablet) qDebug() << "move" << aEvent->pos();
+        }
+
+        if (mHandRotation && mAbstractCursor.isLeftPressing())
+        {
+            auto imgSize = mRenderInfo->camera.imageSize();
+            auto imgCenter = QVector2D(0.5f * imgSize.width(), 0.5f * imgSize.height());
+            auto center = mRenderInfo->camera.toScreenPos(imgCenter);
+            auto curPos = mAbstractCursor.screenPos();
+            auto prePos = mAbstractCursor.screenPos() - mAbstractCursor.screenVel();
+            auto rotate = -util::MathUtil::getAngleDifferenceDeg(curPos - center, prePos - center);
+
+            mViaPoint.mainViewSetting().rotateViewDeg += rotate;
+            onViewSettingChanged(mViaPoint.mainViewSetting());
+        }
     }
 }
 
@@ -276,9 +313,11 @@ void MainDisplayWidget::mousePressEvent(QMouseEvent* aEvent)
 {
     if (mRenderInfo)
     {
-        mAbstractCursor.setMousePress(aEvent, mRenderInfo->camera);
-        updateCursor(mAbstractCursor);
-        //if (!mUsingTablet) qDebug() << "press";
+        if (mAbstractCursor.setMousePress(aEvent, mRenderInfo->camera))
+        {
+            updateCursor(mAbstractCursor);
+            //if (!mUsingTablet) qDebug() << "press";
+        }
     }
 }
 
@@ -286,9 +325,11 @@ void MainDisplayWidget::mouseReleaseEvent(QMouseEvent* aEvent)
 {
     if (mRenderInfo)
     {
-        mAbstractCursor.setMouseRelease(aEvent, mRenderInfo->camera);
-        updateCursor(mAbstractCursor);
-        //if (!mUsingTablet) qDebug() << "release";
+        if (mAbstractCursor.setMouseRelease(aEvent, mRenderInfo->camera))
+        {
+            updateCursor(mAbstractCursor);
+            //if (!mUsingTablet) qDebug() << "release";
+        }
     }
 }
 
@@ -301,6 +342,7 @@ void MainDisplayWidget::wheelEvent(QWheelEvent* aEvent)
     }
 }
 
+#if 0
 void MainDisplayWidget::keyPressEvent(QKeyEvent* aEvent)
 {
     //qDebug() << "maindisplay: input key =" << aEvent->key() << "text =" << aEvent->text();
@@ -311,6 +353,7 @@ void MainDisplayWidget::keyPressEvent(QKeyEvent* aEvent)
         aEvent->ignore();
     }
 }
+#endif
 
 void MainDisplayWidget::tabletEvent(QTabletEvent* aEvent)
 {
@@ -344,12 +387,12 @@ void MainDisplayWidget::onToolChanged(ctrl::ToolType aType)
     if (aType == ctrl::ToolType_Cursor)
     {
         this->setCursor(Qt::OpenHandCursor);
-        mHandMove = true;
+        mHandTranslation = true;
     }
     else
     {
         this->setCursor(Qt::ArrowCursor);
-        mHandMove = false;
+        mHandTranslation = false;
     }
 }
 
@@ -382,7 +425,7 @@ void MainDisplayWidget::updateCursor(const core::AbstractCursor& aCursor)
     bool updateRendering = false;
 
     // move camera by the open hand cursor
-    if (mHandMove && mRenderInfo && aCursor.isLeftMoveState())
+    if (mHandTranslation && mRenderInfo && aCursor.isLeftMoveState())
     {
         auto pos = mRenderInfo->camera.pos();
         mRenderInfo->camera.setPos(pos + aCursor.screenVel());

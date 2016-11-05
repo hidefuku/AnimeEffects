@@ -43,6 +43,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
     , mKeyCommandMap()
     , mKeyCommandInvoker()
     , mMainMenuBar()
+    , mMainViewSetting()
     , mMainDisplayStyle()
     , mMainDisplay()
     , mProjectTabBar()
@@ -77,6 +78,12 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
         this->setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
     }
 
+    // initialize via point
+    {
+        mViaPoint.setMainViewSetting(mMainViewSetting);
+    }
+
+    // key binding
     {
         mKeyCommandMap.reset(new KeyCommandMap(*this));
 
@@ -92,12 +99,14 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
         mKeyCommandInvoker.reset(new KeyCommandInvoker(*mKeyCommandMap));
     }
 
+    // create main menu bar
     {
         mMainMenuBar = new MainMenuBar(*this, mViaPoint, this);
         mViaPoint.setMainMenuBar(mMainMenuBar);
         this->setMenuBar(mMainMenuBar);
     }
 
+    // create main display
     {
         mMainDisplayStyle.reset(new MainDisplayStyle(*this, mResources));
         mMainDisplay = new MainDisplayWidget(mViaPoint, this);
@@ -108,6 +117,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
         mProjectTabBar->onCurrentChanged.connect(this, &MainWindow::onProjectTabChanged);
     }
 
+    // create targeting widget
     {
         QDockWidget* dockWidget = new QDockWidget(this);
         dockWidget->setWindowTitle("Target Widget");
@@ -119,6 +129,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
         dockWidget->setWidget(mTarget);
     }
 
+    // create property widget
     {
         QDockWidget* dockWidget = new QDockWidget(this);
         dockWidget->setWindowTitle("Property Widget");
@@ -159,6 +170,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
 #endif
     }
 
+    // create tool widget
     {
         QDockWidget* dockWidget = new QDockWidget(this);
         dockWidget->setWindowTitle("Tool Widget");
@@ -170,10 +182,11 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
         {
             dockWidget->setStyleSheet(QTextStream(&stylesheet).readAll());
         }
-        mTool = new ToolWidget(dockWidget, mResources, QSize(192, 136));
+        mTool = new ToolWidget(mViaPoint, mResources, QSize(192, 136), dockWidget);
         dockWidget->setWidget(mTool);
     }
 
+    // create driver holder
     {
         mDriverHolder.reset(new DriverHolder());
     }
@@ -384,18 +397,16 @@ void MainWindow::keyPressEvent(QKeyEvent* aEvent)
 {
     //qDebug() << "input key =" << aEvent->key() << "text =" << aEvent->text();
 
-    QMainWindow::keyPressEvent(aEvent);
-
     mKeyCommandInvoker->onKeyPressed(aEvent);
+    QMainWindow::keyPressEvent(aEvent);
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent* aEvent)
 {
     //qDebug() << "release key =" << aEvent->key() << "text =" << aEvent->text();
 
-    QMainWindow::keyReleaseEvent(aEvent);
-
     mKeyCommandInvoker->onKeyReleased(aEvent);
+    QMainWindow::keyReleaseEvent(aEvent);
 }
 
 void MainWindow::onUndoTriggered()

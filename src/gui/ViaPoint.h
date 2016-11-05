@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QPlainTextEdit>
+#include <QScopedPointer>
 #include "util/NonCopyable.h"
 #include "gl/DeviceInfo.h"
 #include "core/Project.h"
@@ -10,6 +11,7 @@ namespace img { class ResourceNode; }
 namespace gui { class ResourceDialog; }
 namespace gui { class MainMenuBar; }
 namespace gui { class KeyCommandMap; }
+namespace gui { class MainViewSetting; }
 
 namespace gui
 {
@@ -37,6 +39,10 @@ public:
     void setKeyCommandMap(KeyCommandMap* aMap);
     KeyCommandMap* keyCommandMap() const { return mKeyCommandMap; }
 
+    void setMainViewSetting(MainViewSetting& aSetting);
+    MainViewSetting& mainViewSetting();
+    const MainViewSetting& mainViewSetting() const;
+
     util::Signaler<void()> onVisualUpdated;
 
 private:
@@ -47,6 +53,7 @@ private:
     QPlainTextEdit* mLogView;
     gl::DeviceInfo mGLDeviceInfo;
     KeyCommandMap* mKeyCommandMap;
+    MainViewSetting* mMainViewSetting;
 };
 
 } // namespace gui

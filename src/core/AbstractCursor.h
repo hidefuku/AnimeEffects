@@ -1,6 +1,7 @@
 #ifndef CORE_ABSTRACTCURSOR_H
 #define CORE_ABSTRACTCURSOR_H
 
+#include <functional>
 #include <QMouseEvent>
 #include <QPoint>
 #include "core/CameraInfo.h"
@@ -11,56 +12,70 @@ namespace core
 class AbstractCursor
 {
 public:
-    enum Status
+    enum Event
     {
-        Status_Press,
-        Status_Move,
-        Status_Release
+        Event_Press,
+        Event_Move,
+        Event_Release,
+        Event_TERM
     };
 
     enum Button
     {
-        Button_None,
         Button_Left,
         Button_Middle,
-        Button_Right
+        Button_Right,
+        Button_TERM
     };
 
     AbstractCursor();
 
-    void setMousePress(QMouseEvent* aEvent, const CameraInfo& aCameraInfo);
-    void setMouseMove(QMouseEvent* aEvent, const CameraInfo& aCameraInfo);
-    void setMouseRelease(QMouseEvent* aEvent, const CameraInfo& aCameraInfo);
-    void setMouseDoubleClick(QMouseEvent* aEvent, const CameraInfo& aCameraInfo);
+    /// update cursor by mouse events.
+    /// these functions will return true when the caller should reflect the new cursor event.
+    /// @{
+    bool setMousePress(QMouseEvent* aEvent, const CameraInfo& aCameraInfo);
+    bool setMouseMove(QMouseEvent* aEvent, const CameraInfo& aCameraInfo);
+    bool setMouseRelease(QMouseEvent* aEvent, const CameraInfo& aCameraInfo);
+    bool setMouseDoubleClick(QMouseEvent* aEvent, const CameraInfo& aCameraInfo);
+    /// @}
+    void suspendEvent(const std::function<void()>& aEventReflector);
+    void resumeEvent();
 
-    inline Button button() const { return mButton; }
-    inline Status status() const { return mStatus; }
+    inline Button eventButton() const { return mEventButton; }
+    inline Event eventType() const { return mEventType; }
     inline QPoint screenPoint() const { return mScreenPoint; }
     inline QVector2D screenPos() const { return mScreenPos; }
     inline QVector2D screenVel() const { return mScreenVel; }
     inline QPoint worldPoint() const { return mWorldPos.toPoint(); }
     inline QVector2D worldPos() const { return mWorldPos; }
     inline QVector2D worldVel() const { return mWorldVel; }
-    inline bool isDouble() const { return mIsDouble; }
 
-    inline bool isLeftPressState() const { return mStatus == Status_Press && mButton == Button_Left; }
-    inline bool isLeftMoveState() const { return mStatus == Status_Move && mButton == Button_Left; }
-    inline bool isLeftReleaseState() const { return mStatus == Status_Release && mButton == Button_Left; }
-    inline bool isRightPressState() const { return mStatus == Status_Press && mButton == Button_Right; }
-    inline bool isRightMoveState() const { return mStatus == Status_Move && mButton == Button_Right; }
-    inline bool isRightReleaseState() const { return mStatus == Status_Release && mButton == Button_Right; }
-    inline bool isPressState() const { return mStatus == Status_Press; }
+    inline bool isPressing(Button aButton) const { return mIsPressing.at(aButton); }
+    inline bool isLeftPressing() const { return mIsPressing[Button_Left]; }
+    inline bool isMiddlePressing() const { return mIsPressing[Button_Middle]; }
+    inline bool isRightPressing() const { return mIsPressing[Button_Right]; }
+
+    bool isLeftPressState() const;
+    bool isLeftMoveState() const;
+    bool isLeftReleaseState() const;
+    bool isRightPressState() const;
+    bool isRightMoveState() const;
+    bool isRightReleaseState() const;
+    bool isPressState() const;
 
 private:
-    Status mStatus;
-    Button mButton;
+    Event mEventType;
+    Button mEventButton;
+    std::array<bool, Button_TERM> mIsPressing;
+    std::array<bool, Button_TERM> mIsDouble;
     QPoint mScreenPoint;
     QVector2D mScreenPos;
     QVector2D mScreenVel;
     QVector2D mWorldPos;
     QVector2D mWorldVel;
-    bool mIsPressing;
-    bool mIsDouble;
+
+    int mSuspendedCount;
+    std::array<bool, Button_TERM> mBlankAfterSuspending;
 };
 
 } // namespace core

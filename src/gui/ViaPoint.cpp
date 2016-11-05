@@ -11,6 +11,7 @@ ViaPoint::ViaPoint(QWidget* aParent)
     , mLogView()
     , mGLDeviceInfo()
     , mKeyCommandMap()
+    , mMainViewSetting()
 {
 }
 
@@ -86,6 +87,23 @@ const gl::DeviceInfo& ViaPoint::glDeviceInfo() const
 void ViaPoint::setKeyCommandMap(KeyCommandMap* aMap)
 {
     mKeyCommandMap = aMap;
+}
+
+void ViaPoint::setMainViewSetting(MainViewSetting& aSetting)
+{
+    mMainViewSetting = &aSetting;
+}
+
+MainViewSetting& ViaPoint::mainViewSetting()
+{
+    XC_PTR_ASSERT(mMainViewSetting);
+    return *mMainViewSetting;
+}
+
+const MainViewSetting& ViaPoint::mainViewSetting() const
+{
+    XC_PTR_ASSERT(mMainViewSetting);
+    return *mMainViewSetting;
 }
 
 } // namespace gui

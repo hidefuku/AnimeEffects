@@ -12,8 +12,8 @@ class KeyCommandInvoker
 public:
     KeyCommandInvoker(KeyCommandMap& aMap);
 
-    void onKeyPressed(QKeyEvent* aEvent);
-    void onKeyReleased(QKeyEvent* aEvent);
+    void onKeyPressed(const QKeyEvent* aEvent);
+    void onKeyReleased(const QKeyEvent* aEvent);
 
 private:
     KeyCommandMap& mMap;

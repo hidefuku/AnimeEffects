@@ -1,3 +1,4 @@
+#include <QDebug>
 #include "gui/KeyCommandInvoker.h"
 #include "gui/KeyCommandMap.h"
 
@@ -10,11 +11,11 @@ KeyCommandInvoker::KeyCommandInvoker(KeyCommandMap& aMap)
 {
 }
 
-void KeyCommandInvoker::onKeyPressed(QKeyEvent* aEvent)
+void KeyCommandInvoker::onKeyPressed(const QKeyEvent* aEvent)
 {
-    mLastCommand = nullptr;
-
     if (aEvent->isAutoRepeat()) return;
+
+    mLastCommand = nullptr;
 
     const ctrl::KeyBinding keyBind(aEvent->key(), aEvent->modifiers());
     if (!keyBind.isValidBinding()) return;
@@ -35,8 +36,11 @@ void KeyCommandInvoker::onKeyPressed(QKeyEvent* aEvent)
     }
 }
 
-void KeyCommandInvoker::onKeyReleased(QKeyEvent* aEvent)
+void KeyCommandInvoker::onKeyReleased(const QKeyEvent* aEvent)
 {
+    //qDebug() << "rls" << aEvent->key() << aEvent->modifiers() << aEvent->isAutoRepeat();
+    if (aEvent->isAutoRepeat()) return;
+
     if (mLastCommand && mLastCommand->releaser)
     {
         const ctrl::KeyBinding keyBind(aEvent->key(), aEvent->modifiers());
