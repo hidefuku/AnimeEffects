@@ -16,8 +16,11 @@ public:
     void onKeyReleased(const QKeyEvent* aEvent);
 
 private:
+    void releaseLastCommand();
+
     KeyCommandMap& mMap;
     KeyCommandMap::KeyCommand* mLastCommand;
+    ctrl::KeyBinding mLastKey;
 };
 
 } // namespace gui

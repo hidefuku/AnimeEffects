@@ -22,6 +22,7 @@ KeyBindingDialog::KeyEdit::KeyEdit(KeyCommandMap::KeyCommand& aOrigin,
     , mOrigin(aOrigin)
     , mBinding(aOrigin.binding)
     , mText(aOrigin.binding.text())
+    , mAllowsSubKey(false)
 {
     this->setAttribute(Qt::WA_InputMethodEnabled, false); // disable IME
 }
@@ -30,20 +31,38 @@ void KeyBindingDialog::KeyEdit::keyPressEvent(QKeyEvent* aEvent)
 {
     QLineEdit::keyPressEvent(aEvent);
 
-    const ctrl::KeyBinding keyBind(aEvent->key(), aEvent->modifiers());
     if (!aEvent->isAutoRepeat())
     {
-        if (keyBind.isValidBinding())
-        {
-            mBinding = keyBind;
-        }
-        else if (aEvent->key() == Qt::Key_Delete || aEvent->key() == Qt::Key_Backspace)
-        {
+        auto keyCode = aEvent->key();
+        const ctrl::KeyBinding keyBind(keyCode, aEvent->modifiers());
+
+        if (keyCode == Qt::Key_Delete || keyCode == Qt::Key_Backspace)
+        { // clear the binding code
             mBinding = ctrl::KeyBinding();
+        }
+        else
+        {
+            if (mAllowsSubKey && mBinding.isValidBinding() && !mBinding.hasSubKeyCode() &&
+                    keyBind.isValidBinding() && !keyBind.hasAnyModifiers())
+            { // assign a sub key to the previous binding code
+                mBinding.setSubKeyCode(keyCode);
+                mAllowsSubKey = false;
+            }
+            else if (keyBind.isValidBinding())
+            { // assign a new binding code
+                mBinding = keyBind;
+                mAllowsSubKey = true;
+            }
         }
         mText = mBinding.text();
     }
     mParent.updateKeyTexts();
+}
+
+void KeyBindingDialog::KeyEdit::focusOutEvent(QFocusEvent* aEvent)
+{
+    QLineEdit::focusOutEvent(aEvent);
+    mAllowsSubKey = false;
 }
 
 void KeyBindingDialog::KeyEdit::updateText(const QString& aConflictInfo)
@@ -61,6 +80,7 @@ void KeyBindingDialog::KeyEdit::updateText(const QString& aConflictInfo)
 void KeyBindingDialog::KeyEdit::flushToOrigin()
 {
     mOrigin.binding = mBinding;
+    mAllowsSubKey = false;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -73,21 +93,20 @@ KeyBindingDialog::KeyBindingDialog(KeyCommandMap& aMap, QWidget* aParent)
 {
     QMap<QString, QFormLayout*> groups;
 
-    for (auto itr = mKeyCommandMap.map().begin(); itr != mKeyCommandMap.map().end(); ++itr)
+    for (auto command : mKeyCommandMap.commands())
     {
-        auto unit = itr.value();
-        XC_PTR_ASSERT(unit);
+        XC_PTR_ASSERT(command);
 
         // reserve group tab
-        auto form = groups[unit->group];
+        auto form = groups[command->group];
         if (!form)
         {
-            form = createTab(unit->group);
-            groups[unit->group] = form;
+            form = createTab(command->group);
+            groups[command->group] = form;
         }
 
         // create key editor
-        auto keyEdit = new KeyEdit(*unit, *this);
+        auto keyEdit = new KeyEdit(*command, *this);
         mKeys.push_back(keyEdit);
         form->addRow(keyEdit->label(), keyEdit);
     }

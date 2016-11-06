@@ -4,27 +4,20 @@
 namespace ctrl
 {
 
-KeyBinding::KeyBinding()
-    : mKeyCode(0)
-    , mModifiers(Qt::NoModifier)
+//-------------------------------------------------------------------------------------------------
+bool KeyBinding::getKeyValidity(int aKeyCode)
 {
-}
-
-KeyBinding::KeyBinding(int aKeyCode, Qt::KeyboardModifiers aModifiers)
-    : mKeyCode(aKeyCode)
-    , mModifiers()
-{
-    mModifiers = aModifiers & (Qt::ControlModifier | Qt::ShiftModifier | Qt::AltModifier);
-}
-
-bool KeyBinding::isValidBinding() const
-{
-    if (0x20 <= mKeyCode && mKeyCode <= 0x7E)
+    if (Qt::Key_Space <= aKeyCode && aKeyCode <= Qt::Key_AsciiTilde)
     {
         return true;
     }
 
-    switch (mKeyCode)
+    if (Qt::Key_F1 <= aKeyCode && aKeyCode <= Qt::Key_F35)
+    {
+        return true;
+    }
+
+    switch (aKeyCode)
     {
     case Qt::Key_Left:
     case Qt::Key_Up:
@@ -34,6 +27,33 @@ bool KeyBinding::isValidBinding() const
     default:
         return false;
     }
+}
+
+//-------------------------------------------------------------------------------------------------
+KeyBinding::KeyBinding()
+    : mKeyCode(-1)
+    , mSubKeyCode(-1)
+    , mModifiers(Qt::NoModifier)
+{
+}
+
+KeyBinding::KeyBinding(int aKeyCode, Qt::KeyboardModifiers aModifiers, int aSubKeyCode)
+    : mKeyCode(aKeyCode)
+    , mSubKeyCode(aSubKeyCode)
+    , mModifiers()
+{
+    mModifiers = aModifiers & (Qt::ControlModifier | Qt::ShiftModifier | Qt::AltModifier);
+}
+
+void KeyBinding::setSubKeyCode(int aSubKeyCode)
+{
+    mSubKeyCode = getKeyValidity(aSubKeyCode) ? aSubKeyCode : -1;
+}
+
+bool KeyBinding::isValidBinding() const
+{
+    return getKeyValidity(mKeyCode) &&
+            (mSubKeyCode == -1 || getKeyValidity(mSubKeyCode));
 }
 
 bool KeyBinding::hasControlModifier() const
@@ -51,6 +71,11 @@ bool KeyBinding::hasAltModifier() const
     return mModifiers & Qt::AltModifier;
 }
 
+bool KeyBinding::hasAnyModifiers() const
+{
+    return mModifiers != Qt::NoModifier;
+}
+
 QString KeyBinding::text() const
 {
     QString t;
@@ -58,21 +83,29 @@ QString KeyBinding::text() const
     if (hasShiftModifier()) t += "Shift + ";
     if (hasAltModifier()) t += "Alt + ";
 
-    if (mKeyCode != 0)
+    if (mKeyCode != -1)
     {
         t += QKeySequence(mKeyCode).toString();
+    }
+    if (mSubKeyCode != -1)
+    {
+        t += QString(", ") + QKeySequence(mSubKeyCode).toString();
     }
     return t;
 }
 
 bool KeyBinding::conflictsWith(const KeyBinding& aRhs) const
 {
-    return mKeyCode == aRhs.mKeyCode && mModifiers == aRhs.mModifiers;
+    return mKeyCode == aRhs.mKeyCode &&
+            mSubKeyCode == aRhs.mSubKeyCode &&
+            mModifiers == aRhs.mModifiers;
 }
 
 bool KeyBinding::matchesExactlyWith(const KeyBinding& aRhs) const
 {
-    return mKeyCode == aRhs.mKeyCode && mModifiers == aRhs.mModifiers;
+    return mKeyCode == aRhs.mKeyCode &&
+            mSubKeyCode == aRhs.mSubKeyCode &&
+            mModifiers == aRhs.mModifiers;
 }
 
 void KeyBinding::setSerialValue(const QString& aValue)
@@ -88,7 +121,15 @@ void KeyBinding::setSerialValue(const QString& aValue)
     const int mod = v[1].toInt(&success);
     if (!success) return;
 
+    int subKey = -1;
+    if (v.size() >= 3)
+    {
+        subKey = v[2].toInt(&success);
+        if (!success) return;
+    }
+
     mKeyCode = key;
+    mSubKeyCode = subKey;
     mModifiers = Qt::NoModifier;
     if (mod & 0x01) mModifiers |= Qt::ControlModifier;
     if (mod & 0x02) mModifiers |= Qt::ShiftModifier;
@@ -96,7 +137,8 @@ void KeyBinding::setSerialValue(const QString& aValue)
 
     if (!isValidBinding())
     {
-        mKeyCode = 0;
+        mKeyCode = -1;
+        mSubKeyCode = -1;
         mModifiers = Qt::NoModifier;
     }
 }
@@ -107,7 +149,7 @@ QString KeyBinding::serialValue() const
     mod |= mModifiers.testFlag(Qt::ControlModifier) ? 0x01 : 0x00;
     mod |= mModifiers.testFlag(Qt::ShiftModifier) ? 0x02 : 0x00;
     mod |= mModifiers.testFlag(Qt::AltModifier) ? 0x04 : 0x00;
-    return QString::number(mKeyCode) + "," + QString::number(mod);
+    return QString::number(mKeyCode) + "," + QString::number(mod) + "," + QString::number(mSubKeyCode);
 }
 
 } // namespace ctrl

@@ -5,7 +5,8 @@ namespace gui
 
 //-------------------------------------------------------------------------------------------------
 KeyCommandMap::KeyCommand::KeyCommand()
-    : group()
+    : key()
+    , group()
     , label()
     , binding()
     , invoker()
@@ -14,10 +15,12 @@ KeyCommandMap::KeyCommand::KeyCommand()
 }
 
 KeyCommandMap::KeyCommand::KeyCommand(
+        const QString& aKey,
         const QString& aGroup,
         const QString& aLabel,
         const ctrl::KeyBinding& aBinding)
-    : group(aGroup)
+    : key(aKey)
+    , group(aGroup)
     , label(aLabel)
     , binding(aBinding)
     , invoker()
@@ -28,24 +31,26 @@ KeyCommandMap::KeyCommand::KeyCommand(
 //-------------------------------------------------------------------------------------------------
 KeyCommandMap::KeyCommandMap(QWidget& aParent)
     : mCommands()
+    , mSubKeyCommands()
+    , mSearchMap()
     , mParent(aParent)
 {
-    mCommands["Undo"] =
-            new KeyCommand(
-                "General", "Undo a command",
-                ctrl::KeyBinding(Qt::Key_Z, Qt::ControlModifier));
-    mCommands["Redo"] =
-            new KeyCommand(
-                "General", "Redo a command",
-                ctrl::KeyBinding(Qt::Key_Z, Qt::ControlModifier | Qt::ShiftModifier));
-    mCommands["RotateCanvas"] =
-            new KeyCommand(
-                "View", "Rotate canvas",
-                ctrl::KeyBinding(Qt::Key_Space, Qt::ControlModifier));
-    mCommands["SelectSRT"] =
-            new KeyCommand(
-                "Tools", "Select srt editor",
-                ctrl::KeyBinding());
+    addNewKey("Undo", "General", "Undo last action",
+              ctrl::KeyBinding(Qt::Key_Z, Qt::ControlModifier));
+
+    addNewKey("Redo", "General", "Redo last action",
+              ctrl::KeyBinding(Qt::Key_Z, Qt::ControlModifier | Qt::ShiftModifier));
+
+    addNewKey("RotateCanvas", "View", "Rotate canvas",
+              ctrl::KeyBinding(Qt::Key_Space, Qt::ControlModifier));
+
+    addNewKey("ResetCanvasAngle", "View", "Reset canvas angle",
+              ctrl::KeyBinding(Qt::Key_Space, Qt::ControlModifier, Qt::Key_F1));
+
+    addNewKey("SelectSRT", "Tools", "Select srt editor",
+              ctrl::KeyBinding());
+
+    resetSubKeyCommands();
 }
 
 KeyCommandMap::~KeyCommandMap()
@@ -53,31 +58,54 @@ KeyCommandMap::~KeyCommandMap()
     qDeleteAll(mCommands);
 }
 
+void KeyCommandMap::addNewKey(const QString& aKey, const QString& aGroup,
+                              const QString& aName, const ctrl::KeyBinding& aBinding)
+{
+    auto command = new KeyCommand(aKey, aGroup, aName, aBinding);
+    mSearchMap[aKey] = command;
+    mCommands.push_back(command);
+}
+
 void KeyCommandMap::readFrom(const QSettings& aSrc)
 {
-    for (auto itr = mCommands.begin(); itr != mCommands.end(); ++itr)
+    for (auto command : mCommands)
     {
-        readValue(aSrc, itr.key());
+        readValue(aSrc, *command);
     }
+    resetSubKeyCommands();
 }
 
 void KeyCommandMap::writeTo(QSettings& aDest)
 {
-    for (auto itr = mCommands.begin(); itr != mCommands.end(); ++itr)
+    for (auto command : mCommands)
     {
-        writeValue(aDest, itr.key());
+        writeValue(aDest, *command);
     }
+    resetSubKeyCommands();
 }
 
-void KeyCommandMap::readValue(const QSettings& aSrc, const QString& aId)
+void KeyCommandMap::readValue(const QSettings& aSrc, KeyCommand& aCommand)
 {
-    auto v = aSrc.value(aId);
-    mCommands[aId]->binding.setSerialValue(v.isValid() ? v.toString() : QString());
+    auto v = aSrc.value(aCommand.key);
+    aCommand.binding.setSerialValue(v.isValid() ? v.toString() : QString());
 }
 
-void KeyCommandMap::writeValue(QSettings& aDest, const QString& aId)
+void KeyCommandMap::writeValue(QSettings& aDest, const KeyCommand& aCommand)
 {
-    aDest.setValue(aId, mCommands[aId]->binding.serialValue());
+    aDest.setValue(aCommand.key, aCommand.binding.serialValue());
+}
+
+void KeyCommandMap::resetSubKeyCommands()
+{
+    mSubKeyCommands.clear();
+
+    for (auto command : mCommands)
+    {
+        if (command->binding.hasSubKeyCode())
+        {
+            mSubKeyCommands.push_back(command);
+        }
+    }
 }
 
 } // namespace gui

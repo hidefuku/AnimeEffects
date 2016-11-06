@@ -10,17 +10,23 @@ namespace ctrl
 class KeyBinding
 {
     int mKeyCode;
+    int mSubKeyCode;
     Qt::KeyboardModifiers mModifiers;
+    static bool getKeyValidity(int aKeyCode);
 
 public:
     KeyBinding();
-    KeyBinding(int aKeyCode, Qt::KeyboardModifiers aModifiers = Qt::NoModifier);
+    KeyBinding(int aKeyCode, Qt::KeyboardModifiers aModifiers = Qt::NoModifier, int aSubKeyCode = -1);
 
     int keyCode() const { return mKeyCode; }
+    void setSubKeyCode(int aSubKeyCode);
+    int subKeyCode() const { return mSubKeyCode; }
+    bool hasSubKeyCode() const { return mSubKeyCode != -1; }
     bool isValidBinding() const;
     bool hasControlModifier() const;
     bool hasShiftModifier() const;
     bool hasAltModifier() const;
+    bool hasAnyModifiers() const;
     QString text() const;
     bool conflictsWith(const KeyBinding& aRhs) const;
     bool matchesExactlyWith(const KeyBinding& aRhs) const;

@@ -56,23 +56,39 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     // key binding
     if (mViaPoint.keyCommandMap())
     {
-        auto key = mViaPoint.keyCommandMap()->get("RotateCanvas");
-        if (key)
+        // rotate canvas
         {
-            key->invoker = [=]()
+            auto key = mViaPoint.keyCommandMap()->get("RotateCanvas");
+            if (key)
             {
-                this->mAbstractCursor.suspendEvent([=]()
+                key->invoker = [=]()
                 {
-                    this->updateCursor(this->mAbstractCursor);
-                });
-                this->mHandRotation = true;
-                this->mHandRotPressure = false;
-            };
-            key->releaser = [=]()
+                    this->mAbstractCursor.suspendEvent([=]()
+                    {
+                        this->updateCursor(this->mAbstractCursor);
+                    });
+                    this->mHandRotation = true;
+                    this->mHandRotPressure = false;
+                };
+                key->releaser = [=]()
+                {
+                    this->mHandRotation = false;
+                    this->mAbstractCursor.resumeEvent();
+                };
+            }
+        }
+
+        // reset canvas angle
+        {
+            auto key = mViaPoint.keyCommandMap()->get("ResetCanvasAngle");
+            if (key)
             {
-                this->mHandRotation = false;
-                this->mAbstractCursor.resumeEvent();
-            };
+                key->invoker = [=]()
+                {
+                    this->mViaPoint.mainViewSetting().rotateViewRad = 0.0f;
+                    this->onViewSettingChanged(this->mViaPoint.mainViewSetting());
+                };
+            }
         }
     }
 }

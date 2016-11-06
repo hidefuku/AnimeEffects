@@ -396,7 +396,6 @@ void MainWindow::keyPressEvent(QKeyEvent* aEvent)
 void MainWindow::keyPressEvent(QKeyEvent* aEvent)
 {
     //qDebug() << "input key =" << aEvent->key() << "text =" << aEvent->text();
-
     mKeyCommandInvoker->onKeyPressed(aEvent);
     QMainWindow::keyPressEvent(aEvent);
 }
@@ -404,7 +403,6 @@ void MainWindow::keyPressEvent(QKeyEvent* aEvent)
 void MainWindow::keyReleaseEvent(QKeyEvent* aEvent)
 {
     //qDebug() << "release key =" << aEvent->key() << "text =" << aEvent->text();
-
     mKeyCommandInvoker->onKeyReleased(aEvent);
     QMainWindow::keyReleaseEvent(aEvent);
 }

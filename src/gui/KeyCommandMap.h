@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <QMap>
+#include <QList>
 #include <QShortcut>
 #include <QSettings>
 #include "ctrl/KeyBinding.h"
@@ -16,9 +17,11 @@ public:
     struct KeyCommand
     {
         KeyCommand();
-        KeyCommand(const QString& aGroup,
+        KeyCommand(const QString& aKey,
+                   const QString& aGroup,
                    const QString& aLabel,
                    const ctrl::KeyBinding& aBinding);
+        QString key;
         QString group;
         QString label;
         ctrl::KeyBinding binding;
@@ -27,6 +30,7 @@ public:
     };
 
     typedef QMap<QString, KeyCommand*> MapType;
+    typedef QList<KeyCommand*> ListType;
 
     KeyCommandMap(QWidget& aParent);
     ~KeyCommandMap();
@@ -34,17 +38,22 @@ public:
     void readFrom(const QSettings& aSrc);
     void writeTo(QSettings& aDest);
 
-    KeyCommand* get(const QString& aIdentifier) { return mCommands[aIdentifier]; }
-    const KeyCommand* get(const QString& aIdentifier) const { return mCommands[aIdentifier]; }
+    KeyCommand* get(const QString& aIdentifier) { return mSearchMap[aIdentifier]; }
+    const KeyCommand* get(const QString& aIdentifier) const { return mSearchMap[aIdentifier]; }
 
-    MapType& map() { return mCommands; }
-    const MapType& map() const { return mCommands; }
+    const ListType& commands() const { return mCommands; }
+    const ListType& subKeyCommands() const { return mSubKeyCommands; }
 
 private:
-    void readValue(const QSettings& aSrc, const QString& aId);
-    void writeValue(QSettings& aDest, const QString& aId);
+    void addNewKey(const QString& aKey, const QString& aGroup,
+                   const QString& aName, const ctrl::KeyBinding& aBinding);
+    void readValue(const QSettings& aSrc, KeyCommand& aCommand);
+    void writeValue(QSettings& aDest, const KeyCommand& aCommand);
+    void resetSubKeyCommands();
 
-    MapType mCommands;
+    ListType mCommands;
+    ListType mSubKeyCommands;
+    MapType mSearchMap;
     QWidget& mParent;
 };
 

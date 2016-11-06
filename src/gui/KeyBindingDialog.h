@@ -33,11 +33,13 @@ private:
 
     private:
         virtual void keyPressEvent(QKeyEvent* aEvent);
+        virtual void focusOutEvent(QFocusEvent *event);
 
         KeyBindingDialog& mParent;
         KeyCommandMap::KeyCommand& mOrigin;
         ctrl::KeyBinding mBinding;
         QString mText;
+        bool mAllowsSubKey;
     };
 
     QFormLayout* createTab(const QString& aTitle);

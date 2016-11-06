@@ -67,7 +67,6 @@ private:
     virtual void mouseReleaseEvent(QMouseEvent* event);
     virtual void wheelEvent(QWheelEvent* event);
     virtual void tabletEvent(QTabletEvent* event);
-    //virtual void keyPressEvent(QKeyEvent* event);
 
     void updateCursor(const core::AbstractCursor& aCursor);
     void updatePenInfo(QEvent::Type aType, const QPoint& aPos, float aPressure);
