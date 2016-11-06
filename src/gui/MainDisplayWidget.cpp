@@ -36,6 +36,9 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mProjectTabBar()
     , mUsingTablet(false)
     , mHandTranslation(false)
+    , mHandRotation(false)
+    , mHandRotPressure(false)
+    , mHandRotAngle(0)
     , mViewSetting()
 {
 #ifdef USE_GL_CORE_PROFILE
@@ -63,11 +66,12 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
                     this->updateCursor(this->mAbstractCursor);
                 });
                 this->mHandRotation = true;
+                this->mHandRotPressure = false;
             };
             key->releaser = [=]()
             {
-                this->mAbstractCursor.resumeEvent();
                 this->mHandRotation = false;
+                this->mAbstractCursor.resumeEvent();
             };
         }
     }
@@ -294,17 +298,26 @@ void MainDisplayWidget::mouseMoveEvent(QMouseEvent* aEvent)
             //if (!mUsingTablet) qDebug() << "move" << aEvent->pos();
         }
 
-        if (mHandRotation && mAbstractCursor.isPressedLeft())
+        if (mHandRotation)
         {
-            auto imgSize = mRenderInfo->camera.imageSize();
-            auto imgCenter = QVector2D(0.5f * imgSize.width(), 0.5f * imgSize.height());
-            auto center = mRenderInfo->camera.toScreenPos(imgCenter);
-            auto curPos = mAbstractCursor.screenPos();
-            auto prePos = mAbstractCursor.screenPos() - mAbstractCursor.screenVel();
-            auto rotate = -util::MathUtil::getAngleDifferenceDeg(curPos - center, prePos - center);
+            if (mAbstractCursor.isPressedLeft())
+            {
+                auto& view = mViaPoint.mainViewSetting();
+                auto angle = currentHandAngle();
 
-            mViaPoint.mainViewSetting().rotateViewDeg += rotate;
-            onViewSettingChanged(mViaPoint.mainViewSetting());
+                if (!mHandRotPressure)
+                {
+                    mHandRotPressure = true;
+                    mHandRotAngle = view.rotateViewRad - angle;
+                }
+                view.rotateViewRad = util::MathUtil::normalizeAngleRad(mHandRotAngle + angle);
+                onViewSettingChanged(view);
+            }
+            else
+            {
+                mHandRotPressure = false;
+                mHandRotAngle = 0.0f;
+            }
         }
     }
 }
@@ -402,8 +415,7 @@ void MainDisplayWidget::onViewSettingChanged(const MainViewSetting& aSetting)
 
     if (mRenderInfo)
     {
-        mRenderInfo->camera.setRotate(
-                    util::MathUtil::getRadianFromDegree(aSetting.rotateViewDeg));
+        mRenderInfo->camera.setRotate(aSetting.rotateViewRad);
     }
     updateRender();
 }
@@ -494,6 +506,16 @@ void MainDisplayWidget::updatePenInfo(QEvent::Type aType, const QPoint& aPos, fl
 
     mPenInfo.pos = camera.toWorldPos(mPenInfo.screenPos);
     mPenInfo.vel = camera.toWorldVector(mPenInfo.screenVel);
+}
+
+float MainDisplayWidget::currentHandAngle() const
+{
+    if (!mRenderInfo) return 0;
+    auto imgSize = mRenderInfo->camera.imageSize();
+    auto imgCenter = QVector2D(0.5f * imgSize.width(), 0.5f * imgSize.height());
+    auto center = mRenderInfo->camera.toScreenPos(imgCenter);
+    auto curPos = mAbstractCursor.screenPos();
+    return util::MathUtil::getAngleRad(curPos - center);
 }
 
 } // namespace gui

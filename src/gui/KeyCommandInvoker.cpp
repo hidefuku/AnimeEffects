@@ -15,7 +15,15 @@ void KeyCommandInvoker::onKeyPressed(const QKeyEvent* aEvent)
 {
     if (aEvent->isAutoRepeat()) return;
 
-    mLastCommand = nullptr;
+    // release the previous command
+    if (mLastCommand)
+    {
+        if (mLastCommand->releaser)
+        {
+            mLastCommand->releaser();
+        }
+        mLastCommand = nullptr;
+    }
 
     const ctrl::KeyBinding keyBind(aEvent->key(), aEvent->modifiers());
     if (!keyBind.isValidBinding()) return;
@@ -29,6 +37,7 @@ void KeyCommandInvoker::onKeyPressed(const QKeyEvent* aEvent)
                 command->binding.isValidBinding() &&
                 command->binding.matchesExactlyWith(keyBind))
         {
+            // invoke
             mLastCommand = command;
             command->invoker();
             break;
@@ -41,14 +50,13 @@ void KeyCommandInvoker::onKeyReleased(const QKeyEvent* aEvent)
     //qDebug() << "rls" << aEvent->key() << aEvent->modifiers() << aEvent->isAutoRepeat();
     if (aEvent->isAutoRepeat()) return;
 
-    if (mLastCommand && mLastCommand->releaser)
+    if (mLastCommand)
     {
-        const ctrl::KeyBinding keyBind(aEvent->key(), aEvent->modifiers());
-        if (!keyBind.isValidBinding() || !mLastCommand->binding.matchesExactlyWith(keyBind))
+        if (mLastCommand->releaser)
         {
             mLastCommand->releaser();
-            mLastCommand = nullptr;
         }
+        mLastCommand = nullptr;
     }
 }
 

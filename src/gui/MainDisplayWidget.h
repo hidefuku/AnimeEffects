@@ -71,6 +71,7 @@ private:
 
     void updateCursor(const core::AbstractCursor& aCursor);
     void updatePenInfo(QEvent::Type aType, const QPoint& aPos, float aPressure);
+    float currentHandAngle() const;
 
     ViaPoint& mViaPoint;
     util::LinkPointer<core::Project> mProject;
@@ -90,6 +91,8 @@ private:
     bool mUsingTablet;
     bool mHandTranslation;
     bool mHandRotation;
+    bool mHandRotPressure;
+    float mHandRotAngle;
     MainViewSetting mViewSetting;
 };
 

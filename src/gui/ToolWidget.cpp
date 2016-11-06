@@ -75,21 +75,21 @@ void ToolWidget::createViewPanel()
     });
     mViewPanel->addButton("rotateac", false, "Rotate the View Anticlockwise", [=](bool)
     {
-        this->viewSetting().rotateViewDeg =
-                util::MathUtil::normalizeAngleDeg(
-                    this->viewSetting().rotateViewDeg - 10);
+        this->viewSetting().rotateViewRad =
+                util::MathUtil::normalizeAngleRad(
+                    (float)(this->viewSetting().rotateViewRad - M_PI / 18.0));
         this->onViewSettingChanged(this->viewSetting());
     });
     mViewPanel->addButton("resetrot", false, "Reset Rotation of the View", [=](bool)
     {
-        this->viewSetting().rotateViewDeg = 0;
+        this->viewSetting().rotateViewRad = 0.0f;
         this->onViewSettingChanged(this->viewSetting());
     });
     mViewPanel->addButton("rotatecw", false, "Rotate the View Clockwise", [=](bool)
     {
-        this->viewSetting().rotateViewDeg =
-                util::MathUtil::normalizeAngleDeg(
-                    this->viewSetting().rotateViewDeg + 10);
+        this->viewSetting().rotateViewRad =
+                util::MathUtil::normalizeAngleRad(
+                    (float)(this->viewSetting().rotateViewRad + M_PI / 18.0));
         this->onViewSettingChanged(this->viewSetting());
     });
 }

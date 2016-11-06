@@ -9,13 +9,13 @@ public:
     MainViewSetting()
         : showLayerMesh()
         , cutImagesByTheFrame()
-        , rotateViewDeg()
+        , rotateViewRad()
     {
     }
 
     bool showLayerMesh;
     bool cutImagesByTheFrame;
-    int rotateViewDeg;
+    float rotateViewRad;
 };
 
 } // namespace gui
