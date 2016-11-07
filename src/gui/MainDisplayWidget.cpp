@@ -35,10 +35,10 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mDriver()
     , mProjectTabBar()
     , mUsingTablet(false)
-    , mHandTranslation(false)
-    , mHandRotation(false)
-    , mHandRotPressure(false)
-    , mHandRotAngle(0)
+    , mMoveCanvasByTool(false)
+    , mRotateCanvas(false)
+    , mResetCanvasBaseAngle(true)
+    , mCanvasBaseAngle(0)
     , mViewSetting()
 {
 #ifdef USE_GL_CORE_PROFILE
@@ -56,6 +56,26 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     // key binding
     if (mViaPoint.keyCommandMap())
     {
+        // move canvas
+        {
+            auto key = mViaPoint.keyCommandMap()->get("MoveCanvas");
+            if (key)
+            {
+                key->invoker = [=]()
+                {
+                    this->mAbstractCursor.suspendEvent(
+                                [=]() { this->updateCursor(this->mAbstractCursor); });
+                    this->mMoveCanvasByKey = true;
+                    this->mResetCanvasBaseAngle = true;
+                };
+                key->releaser = [=]()
+                {
+                    this->mMoveCanvasByKey = false;
+                    this->mAbstractCursor.resumeEvent();
+                };
+            }
+        }
+
         // rotate canvas
         {
             auto key = mViaPoint.keyCommandMap()->get("RotateCanvas");
@@ -63,16 +83,14 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
             {
                 key->invoker = [=]()
                 {
-                    this->mAbstractCursor.suspendEvent([=]()
-                    {
-                        this->updateCursor(this->mAbstractCursor);
-                    });
-                    this->mHandRotation = true;
-                    this->mHandRotPressure = false;
+                    this->mAbstractCursor.suspendEvent(
+                                [=]() { this->updateCursor(this->mAbstractCursor); });
+                    this->mRotateCanvas = true;
+                    this->mResetCanvasBaseAngle = true;
                 };
                 key->releaser = [=]()
                 {
-                    this->mHandRotation = false;
+                    this->mRotateCanvas = false;
                     this->mAbstractCursor.resumeEvent();
                 };
             }
@@ -314,25 +332,43 @@ void MainDisplayWidget::mouseMoveEvent(QMouseEvent* aEvent)
             //if (!mUsingTablet) qDebug() << "move" << aEvent->pos();
         }
 
-        if (mHandRotation)
+        const bool moveCanvas = mMoveCanvasByTool || mMoveCanvasByKey;
+
+        // translate canvas
+        if (moveCanvas)
         {
             if (mAbstractCursor.isPressedLeft())
+            {
+                auto pos = mRenderInfo->camera.pos();
+                mRenderInfo->camera.setPos(pos + mAbstractCursor.screenVel());
+                updateRender();
+            }
+        }
+
+        // rotate canvas
+        if (moveCanvas || mRotateCanvas)
+        {
+            const bool isPressed = moveCanvas ?
+                        mAbstractCursor.isPressedRight() :
+                        mAbstractCursor.isPressedLeft();
+
+            if (isPressed)
             {
                 auto& view = mViaPoint.mainViewSetting();
                 auto angle = currentHandAngle();
 
-                if (!mHandRotPressure)
+                if (mResetCanvasBaseAngle)
                 {
-                    mHandRotPressure = true;
-                    mHandRotAngle = view.rotateViewRad - angle;
+                    mResetCanvasBaseAngle = false;
+                    mCanvasBaseAngle = view.rotateViewRad - angle;
                 }
-                view.rotateViewRad = util::MathUtil::normalizeAngleRad(mHandRotAngle + angle);
+                view.rotateViewRad = util::MathUtil::normalizeAngleRad(mCanvasBaseAngle + angle);
                 onViewSettingChanged(view);
             }
             else
             {
-                mHandRotPressure = false;
-                mHandRotAngle = 0.0f;
+                mResetCanvasBaseAngle = true;
+                mCanvasBaseAngle = 0.0f;
             }
         }
     }
@@ -416,12 +452,12 @@ void MainDisplayWidget::onToolChanged(ctrl::ToolType aType)
     if (aType == ctrl::ToolType_Cursor)
     {
         this->setCursor(Qt::OpenHandCursor);
-        mHandTranslation = true;
+        mMoveCanvasByTool = true;
     }
     else
     {
         this->setCursor(Qt::ArrowCursor);
-        mHandTranslation = false;
+        mMoveCanvasByTool = false;
     }
 }
 
@@ -450,16 +486,6 @@ void MainDisplayWidget::onProjectAttributeUpdated()
 
 void MainDisplayWidget::updateCursor(const core::AbstractCursor& aCursor)
 {
-    bool updateRendering = false;
-
-    // move camera by the open hand cursor
-    if (mHandTranslation && mRenderInfo && aCursor.emitsLeftDraggedEvent())
-    {
-        auto pos = mRenderInfo->camera.pos();
-        mRenderInfo->camera.setPos(pos + aCursor.screenVel());
-        updateRendering = true;
-    }
-
     QEvent::Type tabletType = QEvent::None;
     if (aCursor.emitsLeftPressedEvent()) tabletType = QEvent::TabletPress;
     else if (aCursor.emitsLeftDraggedEvent()) tabletType = QEvent::TabletMove;
@@ -475,13 +501,8 @@ void MainDisplayWidget::updateCursor(const core::AbstractCursor& aCursor)
         XC_PTR_ASSERT(mRenderInfo);
         if (mDriver->updateCursor(mAbstractCursor, mPenInfo, mRenderInfo->camera))
         {
-            updateRendering = true;
+            updateRender();
         }
-    }
-
-    if (updateRendering)
-    {
-        updateRender();
     }
 }
 

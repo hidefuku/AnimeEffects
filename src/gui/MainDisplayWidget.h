@@ -88,10 +88,11 @@ private:
     ctrl::Driver* mDriver;
     ProjectTabBar* mProjectTabBar;
     bool mUsingTablet;
-    bool mHandTranslation;
-    bool mHandRotation;
-    bool mHandRotPressure;
-    float mHandRotAngle;
+    bool mMoveCanvasByTool;
+    bool mMoveCanvasByKey;
+    bool mRotateCanvas;
+    bool mResetCanvasBaseAngle;
+    float mCanvasBaseAngle;
     MainViewSetting mViewSetting;
 };
 

@@ -44,11 +44,14 @@ KeyCommandMap::KeyCommandMap(QWidget& aParent)
     addNewKey("SaveProject", "General", "Save project",
               ctrl::KeyBinding(Qt::Key_S, Qt::ControlModifier));
 
-    addNewKey("RotateCanvas", "View", "Rotate canvas",
+    addNewKey("MoveCanvas", "View", "Move canvas",
               ctrl::KeyBinding(Qt::Key_Space, Qt::ControlModifier));
 
+    addNewKey("RotateCanvas", "View", "Rotate canvas",
+              ctrl::KeyBinding(Qt::Key_Space, Qt::ControlModifier | Qt::ShiftModifier));
+
     addNewKey("ResetCanvasAngle", "View", "Reset canvas angle",
-              ctrl::KeyBinding(Qt::Key_Space, Qt::ControlModifier, Qt::Key_F1));
+              ctrl::KeyBinding(Qt::Key_Space, Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_F1));
 
     addNewKey("SelectSRT", "Tools", "Select srt editor",
               ctrl::KeyBinding());
