@@ -45,6 +45,10 @@ QString ProjectTabBar::getTabName(const core::Project& aProject) const
     {
         name = QFileInfo(name).fileName();
     }
+    if (aProject.commandStack().isEdited())
+    {
+        name += "*";
+    }
     return name;
 }
 
@@ -57,6 +61,9 @@ bool ProjectTabBar::pushProject(core::Project& aProject)
         const int index = this->addTab(getTabName(aProject));
         this->setCurrentIndex(index);
         mSignal = true;
+
+        aProject.commandStack().setOnEditStatusChanged(
+                    [=](bool) { this->updateTabNames(); });
         return true;
     }
     return false;
@@ -86,6 +93,8 @@ void ProjectTabBar::removeProject(core::Project& aProject)
             }
         }
         mSignal = true;
+
+        aProject.commandStack().setOnEditStatusChanged(nullptr);
     }
 }
 

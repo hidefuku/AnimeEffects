@@ -41,6 +41,9 @@ KeyCommandMap::KeyCommandMap(QWidget& aParent)
     addNewKey("Redo", "General", "Redo last action",
               ctrl::KeyBinding(Qt::Key_Z, Qt::ControlModifier | Qt::ShiftModifier));
 
+    addNewKey("SaveProject", "General", "Save project",
+              ctrl::KeyBinding(Qt::Key_S, Qt::ControlModifier));
+
     addNewKey("RotateCanvas", "View", "Rotate canvas",
               ctrl::KeyBinding(Qt::Key_Space, Qt::ControlModifier));
 

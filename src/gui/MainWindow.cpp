@@ -252,6 +252,10 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
         auto key = mKeyCommandMap->get("Redo");
         if (key) key->invoker = [=](){ this->onRedoTriggered(); };
     }
+    {
+        auto key = mKeyCommandMap->get("SaveProject");
+        if (key) key->invoker = [=](){ this->onSaveProjectTriggered(); };
+    }
 #endif
 }
 
@@ -516,6 +520,8 @@ void MainWindow::onSaveProjectTriggered()
 
             mCurrent->setFileName(fileName);
         }
+
+        // save
         mSystem.saveProject(*mCurrent);
 
         mProjectTabBar->updateTabNames();

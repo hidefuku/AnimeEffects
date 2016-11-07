@@ -1,6 +1,7 @@
 #ifndef CMND_STACK_H
 #define CMND_STACK_H
 
+#include <functional>
 #include <QUndoStack>
 #include <QVector>
 #include <QList>
@@ -30,6 +31,10 @@ public:
     void clear();
 
     bool isModifiable(const Base* aBase) const;
+
+    void resetEditingOrigin();
+    bool isEdited() const;
+    void setOnEditStatusChanged(const std::function<void(bool)>&);
 
 private:
     class Macro : public Base
@@ -65,6 +70,7 @@ private:
     void resumeUndo() { --mSuspendCount; }
 
     void pushImpl(Base* aCommand);
+    void updateEditStatus();
 
     const int mLimit;
     QList<Base*> mCommands;
@@ -72,6 +78,9 @@ private:
     Macro* mMacro;
     int mSuspendCount;
     Base* mModifiable;
+    int mEditingOrigin;
+    bool mIsEdited;
+    std::function<void(bool)> mOnEditStatusChanged;
 };
 
 } // namespace cmnd

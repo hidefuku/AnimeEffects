@@ -131,11 +131,15 @@ bool System::saveProject(core::Project& aProject)
             return false;
         }
 
-        if (safeRename(cachePath, outputPath))
+        if (!safeRename(cachePath, outputPath))
         {
-            qDebug() << "save a project file. " << outputPath;
-            return true;
+            qDebug() << "failed to rename a project file.\n" << outputPath;
+            return false;
         }
+
+        project->commandStack().resetEditingOrigin();
+        qDebug() << "save a project file. " << outputPath;
+        return true;
     }
     return false;
 }

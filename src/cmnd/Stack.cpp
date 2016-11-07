@@ -8,9 +8,12 @@ Stack::Stack()
     : mLimit(32)
     , mCommands()
     , mCurrent(mCommands.end())
-    , mMacro(NULL)
+    , mMacro()
     , mSuspendCount(0)
-    , mModifiable(NULL)
+    , mModifiable()
+    , mEditingOrigin(0)
+    , mIsEdited()
+    , mOnEditStatusChanged()
 {
 }
 
@@ -94,13 +97,18 @@ void Stack::pushImpl(Base* aCommand)
     mCommands.push_back(aCommand);
 
     // invoke
-    if (!aCommand->isUseless())
     {
-        aCommand->tryExec();
+        if (!aCommand->isUseless())
+        {
+            aCommand->tryExec();
+        }
+        --mEditingOrigin; // update editing origin
     }
 
     // update current
     mCurrent = mCommands.end();
+
+    updateEditStatus();
 }
 
 QString Stack::undo()
@@ -111,15 +119,23 @@ QString Stack::undo()
         while (mCurrent != mCommands.begin())
         {
             --mCurrent;
+
+            bool success = false;
             if (!(*mCurrent)->isUseless())
             {
-                if ((*mCurrent)->tryUndo())
-                {
-                    return (*mCurrent)->name();
-                }
+                success = (*mCurrent)->tryUndo();
+            }
+            ++mEditingOrigin; // update editing origin
+
+            if (success)
+            {
+                updateEditStatus();
+                return (*mCurrent)->name();
             }
         }
     }
+
+    updateEditStatus();
     return QString();
 }
 
@@ -130,22 +146,26 @@ QString Stack::redo()
         mModifiable = NULL;
         while (mCurrent != mCommands.end())
         {
+            bool success = false;
+            QString name;
+
             if (!(*mCurrent)->isUseless())
             {
-                const bool isValid = (*mCurrent)->tryRedo();
-                const QString name = (*mCurrent)->name();
-                ++mCurrent;
-                if (isValid)
-                {
-                    return name;
-                }
+                success = (*mCurrent)->tryRedo();
+                name = (*mCurrent)->name();
             }
-            else
+            ++mCurrent; // update current
+            --mEditingOrigin; // update editing origin
+
+            if (success)
             {
-                ++mCurrent;
+                updateEditStatus();
+                return name;
             }
         }
     }
+
+    updateEditStatus();
     return QString();
 }
 
@@ -161,6 +181,37 @@ bool Stack::isModifiable(const Base* aBase) const
 {
     if (!mModifiable) return false;
     return mModifiable == aBase;
+}
+
+void Stack::resetEditingOrigin()
+{
+    mEditingOrigin = 0;
+    updateEditStatus();
+}
+
+bool Stack::isEdited() const
+{
+    return mIsEdited;
+}
+
+void Stack::setOnEditStatusChanged(const std::function<void(bool)>& aFunction)
+{
+    mOnEditStatusChanged = aFunction;
+}
+
+void Stack::updateEditStatus()
+{
+    const bool isEdited = (mEditingOrigin != 0);
+
+    if (mIsEdited != isEdited)
+    {
+        mIsEdited = isEdited;
+
+        if (mOnEditStatusChanged)
+        {
+            mOnEditStatusChanged(isEdited);
+        }
+    }
 }
 
 //-------------------------------------------------------------------------------------------------
