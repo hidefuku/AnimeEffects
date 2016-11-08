@@ -103,7 +103,8 @@ SOURCES += \
     prop/prop_KeyAccessor.cpp \
     KeyBindingDialog.cpp \
     KeyCommandMap.cpp \
-    KeyCommandInvoker.cpp
+    KeyCommandInvoker.cpp \
+    CanvasMover.cpp
 
 HEADERS += \
     MainDisplayMode.h \
@@ -161,7 +162,8 @@ HEADERS += \
     prop/prop_KeyAccessor.h \
     KeyBindingDialog.h \
     KeyCommandMap.h \
-    KeyCommandInvoker.h
+    KeyCommandInvoker.h \
+    CanvasMover.h
 
 FORMS +=
 

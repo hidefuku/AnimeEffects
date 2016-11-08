@@ -18,6 +18,7 @@
 #include "ctrl/Driver.h"
 #include "ctrl/Painter.h"
 #include "gui/MainViewSetting.h"
+#include "gui/CanvasMover.h"
 namespace gui { class ProjectTabBar; }
 namespace gui { class ViaPoint; }
 
@@ -87,13 +88,10 @@ private:
     ctrl::Driver* mDriver;
     ProjectTabBar* mProjectTabBar;
     bool mUsingTablet;
-    bool mMoveCanvasByTool;
-    bool mMoveCanvasByKey;
-    bool mRotateCanvas;
-    bool mResetCanvasBaseAngle;
-    float mCanvasBaseAngle;
-    core::CameraInfo mCanvasBasePosture;
     MainViewSetting mViewSetting;
+    CanvasMover mCanvasMover;
+    bool mMovingCanvasByTool;
+    bool mMovingCanvasByKey;
 };
 
 } // namespace gui

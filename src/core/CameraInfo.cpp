@@ -2,13 +2,6 @@
 #include "util/MathUtil.h"
 #include "core/CameraInfo.h"
 
-namespace
-{
-static const int kWheelValue = 120;
-static const int kMinScaleIndex = -30 * kWheelValue;
-static const int kMaxScaleIndex =  30 * kWheelValue;
-}
-
 namespace core
 {
 
@@ -18,7 +11,6 @@ CameraInfo::CameraInfo()
     , mCenter()
     , mLeftTopPos()
     , mScale(1.0f)
-    , mScaleIndex(0)
     , mRotate(0.0f)
 {
 }
@@ -44,7 +36,7 @@ void CameraInfo::setScale(float aScale)
 {
     XC_ASSERT(aScale > 0.0f);
     mScale = aScale;
-    mScaleIndex = (int)(mScale * kWheelValue);
+    //mScaleIndex = (int)(mScale * kWheelValue);
     mLeftTopPos = mCenter - toScreenVector(centerOffset());
 }
 
@@ -152,38 +144,6 @@ QMatrix4x4 CameraInfo::viewMatrix() const
                kNearPlane, kFarPlane);
 
     return view * scr;
-}
-
-void CameraInfo::updateByWheel(int aDelta, const QVector2D& aOriginPos)
-{
-    float preScale = std::max(mScale, 0.00001f);
-
-    mScaleIndex -= aDelta;
-    mScaleIndex = std::max(kMinScaleIndex, std::min(kMaxScaleIndex, mScaleIndex));
-
-    if (mScaleIndex > 0)
-    {
-        mScale = (float)std::pow(1.1, (double)mScaleIndex / kWheelValue);
-    }
-    else if (mScaleIndex < 0)
-    {
-        mScale = (float)std::pow(0.9, -(double)mScaleIndex / kWheelValue);
-    }
-    else
-    {
-        mScale = 1.0f;
-    }
-
-    setCenter((mScale / preScale) * (mCenter - aOriginPos) + aOriginPos);
-    //XC_DEBUG_REPORT() << "wheel delta :" << aEvent->delta();
-}
-
-void CameraInfo::rotateByScreenCenter(float aRadian)
-{
-    using util::MathUtil;
-    auto scrCenter = screenCenter();
-    mRotate = MathUtil::normalizeAngleRad(mRotate + aRadian);
-    setCenter(scrCenter + MathUtil::getRotateVectorRad(mCenter - scrCenter, aRadian));
 }
 
 } // namespace core

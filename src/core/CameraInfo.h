@@ -59,9 +59,6 @@ public:
 
     QMatrix4x4 viewMatrix() const;
 
-    void updateByWheel(int aDelta, const QVector2D& aOriginPos);
-    void rotateByScreenCenter(float aRadian);
-
 private:
     QVector2D centerOffset() const
     {
@@ -73,7 +70,6 @@ private:
     QVector2D mCenter;
     QVector2D mLeftTopPos;
     float mScale;
-    int mScaleIndex;
     float mRotate;
 };
 
