@@ -21,6 +21,7 @@ void ViewPanel::addButton(const QString& aIconName, bool aCheckable,
     button->setIcon(mResources.icon(aIconName));
     button->setCheckable(aCheckable);
     button->setToolTip(aToolTip);
+    button->setFocusPolicy(Qt::NoFocus);
 
     mButtons.push_back(button);
     mLayout.addWidget(button);

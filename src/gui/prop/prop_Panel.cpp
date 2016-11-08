@@ -17,6 +17,7 @@ Panel::Panel(const QString& aTitle, QWidget* aParent)
     this->setObjectName("propertyPanel");
     this->setTitle(aTitle);
     this->setCheckable(true);
+    this->setFocusPolicy(Qt::NoFocus);
     this->setLayout(mLayout);
 
     this->connect(this, &QGroupBox::clicked, this, &Panel::onClicked);

@@ -87,6 +87,7 @@ QPushButton* PlayBackWidget::createButton(
     button->setIconSize(QSize(kButtonSize, kButtonSize));
     button->setCheckable(aIsCheckable);
     button->setToolTip(aToolTip);
+    button->setFocusPolicy(Qt::NoFocus);
     button->setGeometry(0, 2 + kButtonSize * aColumn, kButtonSize, kButtonSize);
     return button;
 }

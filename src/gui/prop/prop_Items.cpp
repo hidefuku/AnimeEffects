@@ -16,13 +16,13 @@ CheckItem::CheckItem(QWidget* aParent)
     , mIsEnable(true)
 {
     mBox = new QCheckBox(aParent);
+    mBox->setFocusPolicy(Qt::NoFocus);
 
     mStamp = mBox->isChecked();
 
     mBox->connect(mBox, &QCheckBox::clicked, [=]()
     {
         this->onEditingFinished();
-        mBox->clearFocus();
     });
 }
 
@@ -62,7 +62,6 @@ ComboItem::ComboItem(QWidget* aParent)
     , mSignal(true)
 {
     mBox = new QComboBox(aParent);
-
     mStamp = mBox->currentIndex();
 
     mBox->connect(mBox, util::SelectArgs<int>::from(&QComboBox::currentIndexChanged), [=]()
@@ -109,6 +108,7 @@ Combo2DItem::Combo2DItem(QWidget* aParent)
     for (int i = 0; i < 2; ++i)
     {
         mBox[i] = new QComboBox(aParent);
+
         mLayout->addWidget(mBox[i]);
         mBox[i]->connect(mBox[i], util::SelectArgs<int>::from(&QComboBox::currentIndexChanged), [=]()
         {
@@ -246,16 +246,6 @@ DecimalItem::DecimalItem(QWidget* aParent)
         this->onEditingFinished();
         mBox->clearFocus();
     });
-    /*
-    mBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    int w = mBox->size().width();
-    if (w % 64 != 0)
-    {
-        w = ((w / 64) + 1) * 64;
-        mBox->resize(w, mBox->height());
-    }
-    mBox->resize(64, 64);
-    */
 }
 
 void DecimalItem::setRange(double aMin, double aMax)
@@ -326,18 +316,6 @@ void Vector2DItem::setRange(float aMin, float aMax)
 {
     mBox[0]->setRange(aMin, aMax);
     mBox[1]->setRange(aMin, aMax);
-
-    /*
-    for (int i = 0; i < 2; ++i)
-    {
-        int w = mBox[i]->size().width();
-        if (w % 64 != 0)
-        {
-            w = ((w / 64) + 1) * 64;
-            mBox[i]->resize(w, mBox[i]->height());
-        }
-    }
-    */
 }
 
 void Vector2DItem::onEditingFinished()
@@ -373,10 +351,12 @@ BrowseItem::BrowseItem(QWidget* aParent)
 
     mLine = new QLineEdit(aParent);
     mLine->setEnabled(false);
+    mLine->setFocusPolicy(Qt::NoFocus);
     mLayout->addWidget(mLine);
     mButton = new QPushButton(aParent);
     mButton->connect(mButton, &QPushButton::pressed, [=](){ this->onButtonPushed(); });
     mButton->setObjectName("browser");
+    mButton->setFocusPolicy(Qt::NoFocus);
     mLayout->addWidget(mButton);
 }
 

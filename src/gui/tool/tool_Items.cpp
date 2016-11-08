@@ -22,6 +22,7 @@ SingleOutItem::SingleOutItem(int aButtonCount, const QSize& aButtonSize, QWidget
     {
         mButtons[i] = new QPushButton(aParent);
         mButtons[i]->setCheckable(true);
+        mButtons[i]->setFocusPolicy(Qt::NoFocus);
         mGroup->addButton(mButtons[i]);
     }
 }
@@ -116,6 +117,7 @@ SliderItem::SliderItem(const QString& aLabel, const QPalette& aPalette, QWidget*
     mLabel->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 
     mSlider = new QSlider(Qt::Horizontal, aParent);
+    mSlider->setFocusPolicy(Qt::NoFocus);
     mSlider->connect(mSlider, &QSlider::valueChanged, [=](int aValue)
     {
         this->updateText(aValue);

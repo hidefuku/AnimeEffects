@@ -11,6 +11,7 @@ AttrGroup::AttrGroup(const QString& aTitle, int aLabelWidth)
     , mItems()
 {
     this->setObjectName("attrGroup");
+    this->setFocusPolicy(Qt::NoFocus);
 
     mLayout->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
     //mLayout->setRowWrapPolicy(QFormLayout::WrapAllRows);

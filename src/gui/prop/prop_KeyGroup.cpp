@@ -13,6 +13,7 @@ KeyGroup::KeyGroup(const QString& aTitle, int aLabelWidth)
     , mLabelWidth(aLabelWidth)
 {
     this->setObjectName("keyGroup");
+    this->setFocusPolicy(Qt::NoFocus);
 
     mLayout->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
     //mLayout->setRowWrapPolicy(QFormLayout::WrapAllRows);
