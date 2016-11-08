@@ -113,7 +113,7 @@ void TimeLineInnerWidget::updateTimeCursorPos()
     {
         auto pos = mEditor->currentTimeCursorPos();
         mTimeCursor.setCursorPos(
-                    QPoint(pos.x(), pos.y() - (int)mCamera->pos().y()),
+                    QPoint(pos.x(), pos.y() - (int)mCamera->leftTopPos().y()),
                     mCamera->screenHeight());
     }
 }
@@ -146,7 +146,7 @@ void TimeLineInnerWidget::updateLinesRecursive(QTreeWidgetItem* aItem)
     obj::Item* objItem = obj::Item::cast(aItem);
     if (objItem)
     {
-        int screenTop = mCamera ? -mCamera->pos().y() : 0;
+        int screenTop = mCamera ? -mCamera->leftTopPos().y() : 0;
 
         const QRect vrect = objItem->visualRect();
         const int t = vrect.top() + screenTop;

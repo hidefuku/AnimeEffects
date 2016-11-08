@@ -98,7 +98,7 @@ void TimeLineWidget::updateCamera()
 {
     mCameraInfo.setScreenWidth(this->rect().width());
     mCameraInfo.setScreenHeight(this->rect().height());
-    mCameraInfo.setPos(QVector2D(viewportTransform()));
+    mCameraInfo.setLeftTopPos(QVector2D(viewportTransform()));
     mCameraInfo.setScale(1.0f);
 
     mInner->updateCamera(mCameraInfo);

@@ -9,13 +9,17 @@ public:
     MainViewSetting()
         : showLayerMesh()
         , cutImagesByTheFrame()
-        , rotateViewRad()
+        , rotateViewACW()
+        , resetRotateView()
+        , rotateViewCW()
     {
     }
 
     bool showLayerMesh;
     bool cutImagesByTheFrame;
-    float rotateViewRad;
+    bool rotateViewACW;
+    bool resetRotateView;
+    bool rotateViewCW;
 };
 
 } // namespace gui

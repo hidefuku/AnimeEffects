@@ -86,7 +86,7 @@ void TimeLineRenderer::renderLines(const QVector<TimeLineRow>& aRows, const QRec
 
 void TimeLineRenderer::renderHeader(int aHeight, int aFps)
 {
-    const QRect cameraRect(-mCamera.pos().toPoint(), mCamera.screenSize());
+    const QRect cameraRect(-mCamera.leftTopPos().toPoint(), mCamera.screenSize());
 
     mPainter.setRenderHint(QPainter::Antialiasing, false);
 
@@ -133,7 +133,7 @@ void TimeLineRenderer::renderHeader(int aHeight, int aFps)
 
 void TimeLineRenderer::renderHandle(const QPoint& aPoint, int aRange)
 {
-    const QPoint pos = aPoint + QPoint(0, -(int)mCamera.pos().y());
+    const QPoint pos = aPoint + QPoint(0, -(int)mCamera.leftTopPos().y());
     const int range = aRange;
 
     const QBrush kBrushBody(QColor(230, 230, 230, 180));

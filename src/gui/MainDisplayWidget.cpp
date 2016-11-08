@@ -36,9 +36,11 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mProjectTabBar()
     , mUsingTablet(false)
     , mMoveCanvasByTool(false)
+    , mMoveCanvasByKey(false)
     , mRotateCanvas(false)
     , mResetCanvasBaseAngle(true)
     , mCanvasBaseAngle(0)
+    , mCanvasBasePosture()
     , mViewSetting()
 {
 #ifdef USE_GL_CORE_PROFILE
@@ -103,8 +105,9 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
             {
                 key->invoker = [=]()
                 {
-                    this->mViaPoint.mainViewSetting().rotateViewRad = 0.0f;
+                    this->mViaPoint.mainViewSetting().resetRotateView = true;
                     this->onViewSettingChanged(this->mViaPoint.mainViewSetting());
+                    this->mViaPoint.mainViewSetting().resetRotateView = false;
                 };
             }
         }
@@ -335,35 +338,36 @@ void MainDisplayWidget::mouseMoveEvent(QMouseEvent* aEvent)
         const bool moveCanvas = mMoveCanvasByTool || mMoveCanvasByKey;
 
         // translate canvas
-        if (moveCanvas)
+        if (moveCanvas && mAbstractCursor.isPressedLeft())
         {
-            if (mAbstractCursor.isPressedLeft())
-            {
-                auto pos = mRenderInfo->camera.pos();
-                mRenderInfo->camera.setPos(pos + mAbstractCursor.screenVel());
-                updateRender();
-            }
+            auto pos = mRenderInfo->camera.center();
+            mRenderInfo->camera.setCenter(pos + mAbstractCursor.screenVel());
+            mResetCanvasBaseAngle = true;
+            updateRender();
         }
+        else if (moveCanvas || mRotateCanvas)
+        { // rotate canvas
 
-        // rotate canvas
-        if (moveCanvas || mRotateCanvas)
-        {
             const bool isPressed = moveCanvas ?
                         mAbstractCursor.isPressedRight() :
                         mAbstractCursor.isPressedLeft();
 
             if (isPressed)
             {
-                auto& view = mViaPoint.mainViewSetting();
-                auto angle = currentHandAngle();
+                auto scrCenter = mRenderInfo->camera.screenCenter();
+                auto cursorPos = mAbstractCursor.screenPos();
+                auto prevCursorPos = cursorPos - mAbstractCursor.screenVel();
 
                 if (mResetCanvasBaseAngle)
                 {
                     mResetCanvasBaseAngle = false;
-                    mCanvasBaseAngle = view.rotateViewRad - angle;
+                    mCanvasBaseAngle = util::MathUtil::getAngleRad(prevCursorPos - scrCenter);
+                    mCanvasBasePosture = mRenderInfo->camera;
                 }
-                view.rotateViewRad = util::MathUtil::normalizeAngleRad(mCanvasBaseAngle + angle);
-                onViewSettingChanged(view);
+                auto newAngle = util::MathUtil::getAngleRad(cursorPos - scrCenter);
+                mRenderInfo->camera = mCanvasBasePosture;
+                mRenderInfo->camera.rotateByScreenCenter(newAngle - mCanvasBaseAngle);
+                updateRender();
             }
             else
             {
@@ -400,6 +404,8 @@ void MainDisplayWidget::mouseReleaseEvent(QMouseEvent* aEvent)
 
 void MainDisplayWidget::wheelEvent(QWheelEvent* aEvent)
 {
+    if (mMoveCanvasByKey || mMoveCanvasByTool || mRotateCanvas) return;
+
     if (mRenderInfo)
     {
         mRenderInfo->camera.updateByWheel(aEvent->delta(), QVector2D(aEvent->pos()));
@@ -467,8 +473,20 @@ void MainDisplayWidget::onViewSettingChanged(const MainViewSetting& aSetting)
 
     if (mRenderInfo)
     {
-        mRenderInfo->camera.setRotate(aSetting.rotateViewRad);
+        if (mViewSetting.resetRotateView)
+        {
+            mRenderInfo->camera.setRotate(0.0f);
+        }
+        else if (mViewSetting.rotateViewACW)
+        {
+            mRenderInfo->camera.rotateByScreenCenter((float)(-M_PI / 18.0));
+        }
+        else if (mViewSetting.rotateViewCW)
+        {
+            mRenderInfo->camera.rotateByScreenCenter((float)(M_PI / 18.0));
+        }
     }
+
     updateRender();
 }
 
@@ -543,16 +561,6 @@ void MainDisplayWidget::updatePenInfo(QEvent::Type aType, const QPoint& aPos, fl
 
     mPenInfo.pos = camera.toWorldPos(mPenInfo.screenPos);
     mPenInfo.vel = camera.toWorldVector(mPenInfo.screenVel);
-}
-
-float MainDisplayWidget::currentHandAngle() const
-{
-    if (!mRenderInfo) return 0;
-    auto imgSize = mRenderInfo->camera.imageSize();
-    auto imgCenter = QVector2D(0.5f * imgSize.width(), 0.5f * imgSize.height());
-    auto center = mRenderInfo->camera.toScreenPos(imgCenter);
-    auto curPos = mAbstractCursor.screenPos();
-    return util::MathUtil::getAngleRad(curPos - center);
 }
 
 } // namespace gui

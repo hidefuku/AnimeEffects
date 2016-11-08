@@ -285,7 +285,7 @@ bool Exporter::update()
 
     // render
     core::RenderInfo renderInfo;
-    renderInfo.camera.setPos(QVector2D());
+    renderInfo.camera.setLeftTopPos(QVector2D());
     renderInfo.camera.setScreenSize(originSize);
     renderInfo.camera.setScale(1.0f);
     renderInfo.time = timeInfo;

@@ -245,10 +245,18 @@ void Driver::drawOutline(const core::RenderInfo& aRenderInfo, QPainter& aPainter
 
     auto quad = aRenderInfo.camera.screenImageQuadangle();
 
+#if 0 // qpainter bug? Some strange lines are rendered when very big values are assigned.
     aPainter.drawLine(quad[0].toPointF(), quad[1].toPointF());
     aPainter.drawLine(quad[1].toPointF(), quad[2].toPointF());
     aPainter.drawLine(quad[2].toPointF(), quad[3].toPointF());
     aPainter.drawLine(quad[3].toPointF(), quad[0].toPointF());
+#else
+    const QPointF poly[5] = {
+        quad[0].toPointF(), quad[1].toPointF(),
+        quad[2].toPointF(), quad[3].toPointF(),
+        quad[0].toPointF() };
+    aPainter.drawConvexPolygon(poly, 5);
+#endif
 }
 
 void Driver::updateParam(const SRTParam& aParam)

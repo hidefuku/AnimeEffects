@@ -434,7 +434,7 @@ void TimeLineEditor::render(QPainter& aPainter, const CameraInfo& aCamera, const
 {
     if (aCamera.screenWidth() < 2 * kTimeLineMargin) return;
 
-    const QRect camRect(-aCamera.pos().toPoint(), aCamera.screenSize());
+    const QRect camRect(-aCamera.leftTopPos().toPoint(), aCamera.screenSize());
     const QRect cullRect(aCullRect.marginsAdded(QMargins(2, 2, 2, 2))); // use culling
 
     const int margin = kTimeLineMargin;
