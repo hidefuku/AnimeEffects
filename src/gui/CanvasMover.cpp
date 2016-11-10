@@ -91,7 +91,6 @@ bool CanvasMover::updateByMove(const QVector2D& aCursorPos, const QVector2D& aMo
 
                 mCamera->setRotate(util::MathUtil::normalizeAngleRad(mOriginCanvasAngle + rotate));
                 mCamera->setCenter(scrCenter + offset);
-
                 return true;
             }
             else
@@ -105,7 +104,7 @@ bool CanvasMover::updateByMove(const QVector2D& aCursorPos, const QVector2D& aMo
 
 bool CanvasMover::updateByWheel(const QVector2D& aCursorPos, int aDelta)
 {
-    if (mCamera && !mMoving && !mRotating)
+    if (mCamera)
     {
         auto center = mCamera->center();
         auto preScale = std::max(mCamera->scale(), kMinScale);
@@ -128,6 +127,7 @@ bool CanvasMover::updateByWheel(const QVector2D& aCursorPos, int aDelta)
 
         mCamera->setScale(scale);
         mCamera->setCenter((scale / preScale) * (center - aCursorPos) + aCursorPos);
+        mResetRotationOrigin = true;
 
         return true;
     }

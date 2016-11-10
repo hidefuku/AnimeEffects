@@ -6,6 +6,7 @@ in vec2  inTexCoord;
 //in vec3  inNormal;
 
 uniform mat4 uViewMatrix;
+uniform vec2 uScreenSize;
 
 out vec2 vTexCoord;
 out vec2 vDestCoord;
@@ -16,7 +17,7 @@ void main(void)
     vec3 screenPos = pos.xyz / pos.w;
 
     gl_Position = pos;
-    vDestCoord = vec2((screenPos.x + 1.0) * 0.5, (screenPos.y + 1.0) * 0.5);
+    vDestCoord = vec2(uScreenSize.x * (screenPos.x + 1.0) * 0.5, uScreenSize.y * (screenPos.y + 1.0) * 0.5);
     vTexCoord = inTexCoord;
 }
 
@@ -72,6 +73,16 @@ vec4 blendColor(const vec4 src, const vec4 dst)
 {
 #if 1
     vec4 result;
+    result.a = src.a;
+    float idstA = 1.0 - dst.a;
+
+    result.r = dst.a * BLEND_FUNC(dst.r, src.r) + idstA * src.r;
+    result.g = dst.a * BLEND_FUNC(dst.g, src.g) + idstA * src.g;
+    result.b = dst.a * BLEND_FUNC(dst.b, src.b) + idstA * src.b;
+    return result;
+
+#elif 1
+    vec4 result;
     float a0 = src.a * dst.a;
     float a1 = src.a * (1.0 - dst.a);
     float a2 = dst.a * (1.0 - src.a);
@@ -97,10 +108,11 @@ vec4 blendColor(const vec4 src, const vec4 dst)
 void main(void)
 {
     vec4 color = uColor * texture(uTexture, vTexCoord);
-    vec4 destColor = texture(uDestTexture, vDestCoord);
+    ivec2 destCoord = ivec2(vDestCoord);
+    vec4 destColor = texelFetch(uDestTexture, destCoord, 0);
 
 #if IS_CLIPPEE
-    uvec2 clippingData = texture(uClippingTexture, vDestCoord).xy;
+    uvec2 clippingData = texelFetch(uClippingTexture, destCoord, 0).xy;
     if (uClippingId == int(clippingData.x))
     {
         color.a *= float(clippingData.y) / 255.0;
@@ -108,7 +120,8 @@ void main(void)
     }
     else
     {
-        oFragColor = destColor;
+        //oFragColor = destColor;
+        discard;
     }
 #else
     oFragColor = blendColor(color, destColor);

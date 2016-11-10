@@ -16,6 +16,7 @@
 #include "core/FFDKeyUpdater.h"
 #include "core/ImageKeyUpdater.h"
 #include "core/ClippingFrame.h"
+#include "core/DestinationTexturizer.h"
 
 namespace core
 {
@@ -192,6 +193,10 @@ void LayerNode::renderClipper(
     frame.bind();
     frame.setupDrawBuffers();
 
+    // blend func
+    ggl.glEnable(GL_BLEND);
+    ggl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     // bind textures
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_2D, textureId);
@@ -210,6 +215,7 @@ void LayerNode::renderClipper(
         shader.setAttributeArray("inTexCoord", mCurrentMesh->texCoords(), mCurrentMesh->vertexCount());
 
         shader.setUniformValue("uViewMatrix", viewMatrix);
+        shader.setUniformValue("uScreenSize", QSizeF(aInfo.camera.screenSize()));
         shader.setUniformValue("uColor", color);
         shader.setUniformValue("uClipperId", (int)aClipperId);
         shader.setUniformValue("uTexture", 0);
@@ -230,6 +236,9 @@ void LayerNode::renderClipper(
     // unbind texture
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_2D, 0);
+
+    // blend func
+    ggl.glDisable(GL_BLEND);
 
     // release framebuffer
     frame.release();
@@ -290,10 +299,22 @@ void LayerNode::renderShape(
 
     auto textureId = expans.areaTexture()->id();
     auto blendMode = expans.blendMode();
+    const QMatrix4x4 viewMatrix = aInfo.camera.viewMatrix();
+
 
     auto& shader = aInfo.isGrid ?
                 mShaderHolder.gridShader() :
                 mShaderHolder.shader(blendMode, isClippee);
+
+    // update destination color
+    XC_PTR_ASSERT(aInfo.destTexturizer);
+    auto destTextureId = aInfo.destTexturizer->texture().id();
+    if (!aInfo.isGrid && blendMode != img::BlendMode_Normal)
+    {
+        aInfo.destTexturizer->update(
+                    aInfo.framebuffer, aInfo.dest, viewMatrix,
+                    *mCurrentMesh, mMeshTransformer.positions());
+    }
 
     if (aInfo.isGrid)
     {
@@ -301,10 +322,14 @@ void LayerNode::renderShape(
     }
     else
     {
+        // blend func
+        ggl.glEnable(GL_BLEND);
+        ggl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         ggl.glActiveTexture(GL_TEXTURE0);
         ggl.glBindTexture(GL_TEXTURE_2D, textureId);
         ggl.glActiveTexture(GL_TEXTURE1);
-        ggl.glBindTexture(GL_TEXTURE_2D, aInfo.dest);
+        ggl.glBindTexture(GL_TEXTURE_2D, destTextureId);
 
         if (isClippee)
         {
@@ -314,8 +339,6 @@ void LayerNode::renderShape(
     }
 
     {
-        const QMatrix4x4 viewMatrix = aInfo.camera.viewMatrix();
-
         const float opacity = expans.worldOpacity();
         QColor color(255, 255, 255, xc_clamp((int)(255 * opacity), 0, 255));
         if (aInfo.isGrid) color = QColor(Qt::black);
@@ -326,6 +349,7 @@ void LayerNode::renderShape(
         shader.setAttributeArray("inTexCoord", mCurrentMesh->texCoords(), mCurrentMesh->vertexCount());
 
         shader.setUniformValue("uViewMatrix", viewMatrix);
+        shader.setUniformValue("uScreenSize", QSizeF(aInfo.camera.screenSize()));
         shader.setUniformValue("uColor", color);
         shader.setUniformValue("uTexture", 0);
         shader.setUniformValue("uDestTexture", 1);
@@ -352,6 +376,9 @@ void LayerNode::renderShape(
     {
         ggl.glActiveTexture(GL_TEXTURE0);
         ggl.glBindTexture(GL_TEXTURE_2D, 0);
+
+        // blend func
+        ggl.glDisable(GL_BLEND);
     }
 
     ggl.glFlush();

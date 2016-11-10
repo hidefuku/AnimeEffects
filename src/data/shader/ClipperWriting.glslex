@@ -5,6 +5,7 @@ in vec4  inPosition;
 in vec2  inTexCoord;
 
 uniform mat4 uViewMatrix;
+uniform vec2 uScreenSize;
 
 out vec2 vTexCoord;
 out vec2 vDestCoord;
@@ -15,7 +16,7 @@ void main(void)
     vec3 screenPos = pos.xyz / pos.w;
 
     gl_Position = pos;
-    vDestCoord = vec2((screenPos.x + 1.0) * 0.5, (screenPos.y + 1.0) * 0.5);
+    vDestCoord = vec2(uScreenSize.x * (screenPos.x + 1.0) * 0.5, uScreenSize.y * (screenPos.y + 1.0) * 0.5);
     vTexCoord = inTexCoord;
 }
 
@@ -42,7 +43,8 @@ out uvec2 oClip;
 void main(void)
 {
     vec4 color = uColor * texture(uTexture, vTexCoord);
-    uvec2 destData = texture(uDestTexture, vDestCoord).xy;
+    ivec2 destCoord = ivec2(vDestCoord);
+    uvec2 destData = texelFetch(uDestTexture, destCoord, 0).xy;
 
 #if IS_CLIPPEE
     if (uint(uClippingId) == destData.x)

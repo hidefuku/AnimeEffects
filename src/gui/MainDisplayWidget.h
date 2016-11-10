@@ -6,15 +6,16 @@
 #include <QScopedPointer>
 #include <QTabBar>
 #include <QReadWriteLock>
+#include "util/LinkPointer.h"
 #include "gl/Global.h"
 #include "gl/Root.h"
 #include "gl/VertexArrayObject.h"
 #include "gl/EasyTextureDrawer.h"
 #include "core/Project.h"
 #include "core/AbstractCursor.h"
-#include "util/LinkPointer.h"
 #include "core/TimeInfo.h"
 #include "core/ClippingFrame.h"
+#include "core/DestinationTexturizer.h"
 #include "ctrl/Driver.h"
 #include "ctrl/Painter.h"
 #include "gui/MainViewSetting.h"
@@ -79,6 +80,7 @@ private:
     QScopedPointer<gl::VertexArrayObject> mDefaultVAO;
     QScopedPointer<QOpenGLFramebufferObject> mFramebuffer;
     QScopedPointer<core::ClippingFrame> mClippingFrame;
+    QScopedPointer<core::DestinationTexturizer> mDestinationTexturizer;
     QScopedPointer<gl::EasyTextureDrawer> mTextureDrawer;
     QScopedPointer<ctrl::PainterHandle> mPainterHandle;
     QReadWriteLock mRenderingLock;

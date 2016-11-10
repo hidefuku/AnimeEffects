@@ -6,6 +6,7 @@
 #include "core/CameraInfo.h"
 #include "core/TimeInfo.h"
 namespace core { class ClippingFrame; }
+namespace core { class DestinationTexturizer; }
 
 namespace core
 {
@@ -23,6 +24,7 @@ public:
         , originMesh(false)
         , clippingId(0)
         , clippingFrame()
+        , destTexturizer()
     {
     }
 
@@ -35,6 +37,7 @@ public:
     bool originMesh;
     uint8 clippingId;
     ClippingFrame* clippingFrame;
+    DestinationTexturizer* destTexturizer;
 };
 
 } // namespace core

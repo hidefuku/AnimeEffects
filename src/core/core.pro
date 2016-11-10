@@ -89,7 +89,8 @@ SOURCES += \
     ImageKeyUpdater.cpp \
     ResourceUpdatingWorkspace.cpp \
     BoneExpans.cpp \
-    FolderNode.cpp
+    FolderNode.cpp \
+    DestinationTexturizer.cpp
 
 HEADERS += \
     AbstractCursor.h \
@@ -149,4 +150,5 @@ HEADERS += \
     ImageKeyUpdater.h \
     ResourceUpdatingWorkspace.h \
     BoneExpans.h \
-    FolderNode.h
+    FolderNode.h \
+    DestinationTexturizer.h

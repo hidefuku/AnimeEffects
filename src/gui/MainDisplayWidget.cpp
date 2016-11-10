@@ -26,6 +26,7 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mDefaultVAO()
     , mFramebuffer()
     , mClippingFrame()
+    , mDestinationTexturizer()
     , mTextureDrawer()
     , mPainterHandle()
     , mRenderingLock()
@@ -113,6 +114,7 @@ MainDisplayWidget::~MainDisplayWidget()
 {
     mPainterHandle.reset();
     mTextureDrawer.reset();
+    mDestinationTexturizer.reset();
     mClippingFrame.reset();
     mFramebuffer.reset();
     mDefaultVAO.reset();
@@ -197,6 +199,10 @@ void MainDisplayWidget::initializeGL()
     mClippingFrame.reset(new core::ClippingFrame());
     mClippingFrame->resize(this->size());
 
+    // create texturizer for destination colors of the framebuffer
+    mDestinationTexturizer.reset(new core::DestinationTexturizer());
+    mDestinationTexturizer->resize(this->size());
+
     // create texture drawer for copying framebuffer to display
     mTextureDrawer.reset(new gl::EasyTextureDrawer());
     if (!mTextureDrawer->init())
@@ -240,6 +246,7 @@ void MainDisplayWidget::paintGL()
         mRenderInfo->nonPosed = false;
         mRenderInfo->clippingId = 0;
         mRenderInfo->clippingFrame = mClippingFrame.data();
+        mRenderInfo->destTexturizer = mDestinationTexturizer.data();
         XC_ASSERT(mRenderInfo->framebuffer != 0);
         XC_ASSERT(mRenderInfo->dest != 0);
     }
@@ -303,9 +310,11 @@ void MainDisplayWidget::paintEvent(QPaintEvent* aEvent)
 
 void MainDisplayWidget::resizeGL(int w, int h)
 {
+    const QSize newSize(w, h);
+
     if (mRenderInfo)
     {
-        mRenderInfo->camera.setScreenSize(QSize(w, h));
+        mRenderInfo->camera.setScreenSize(newSize);
         mCanvasMover.onScreenResized();
     }
     mFramebuffer.reset();
@@ -313,11 +322,13 @@ void MainDisplayWidget::resizeGL(int w, int h)
 
     mClippingFrame.reset();
     mClippingFrame.reset(new core::ClippingFrame());
-    mClippingFrame->resize(QSize(w, h));
+    mClippingFrame->resize(newSize);
+
+    mDestinationTexturizer->resize(newSize);
 
     if (mProjectTabBar)
     {
-        mProjectTabBar->updateTabPosition(QSize(w, h));
+        mProjectTabBar->updateTabPosition(newSize);
     }
     GL_CHECK_ERROR();
 }
