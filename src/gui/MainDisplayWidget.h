@@ -46,6 +46,7 @@ public:
 public:
     void onVisualUpdated();
     void onToolChanged(ctrl::ToolType);
+    void onFinalizeTool(ctrl::ToolType);
     void onViewSettingChanged(const MainViewSetting&);
     void onProjectAttributeUpdated();
 

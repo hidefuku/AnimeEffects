@@ -211,6 +211,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
         via.onVisualUpdated.connect(&disp, &MainDisplayWidget::onVisualUpdated);
 
         tool.onToolChanged.connect(&disp, &MainDisplayWidget::onToolChanged);
+        tool.onFinalizeTool.connect(&disp, &MainDisplayWidget::onFinalizeTool);
         tool.onViewSettingChanged.connect(&disp, &MainDisplayWidget::onViewSettingChanged);
 
         objTree.onSelectionChanged.connect(&driver, &DriverHolder::onSelectionChanged);

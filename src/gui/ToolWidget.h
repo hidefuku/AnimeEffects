@@ -30,6 +30,7 @@ public:
 
     util::Signaler<void()> onVisualUpdated;
     util::Signaler<void(ctrl::ToolType)> onToolChanged;
+    util::Signaler<void(ctrl::ToolType)> onFinalizeTool;
     util::Signaler<void(const MainViewSetting&)> onViewSettingChanged;
 
 private:

@@ -53,7 +53,22 @@ KeyCommandMap::KeyCommandMap(QWidget& aParent)
     addNewKey("ResetCanvasAngle", "View", "Reset canvas angle",
               ctrl::KeyBinding(Qt::Key_Space, Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_F1));
 
-    addNewKey("SelectSRT", "Tools", "Select srt editor",
+    addNewKey("SelectCursor", "Tools", "Select cursor",
+              ctrl::KeyBinding());
+
+    addNewKey("SelectSRT", "Tools", "Select SRT editor",
+              ctrl::KeyBinding());
+
+    addNewKey("SelectBone", "Tools", "Select bone editor",
+              ctrl::KeyBinding());
+
+    addNewKey("SelectPose", "Tools", "Select pose editor",
+              ctrl::KeyBinding());
+
+    addNewKey("SelectMesh", "Tools", "Select mesh editor",
+              ctrl::KeyBinding());
+
+    addNewKey("SelectFFD", "Tools", "Select FFD editor",
               ctrl::KeyBinding());
 
     resetSubKeyCommands();

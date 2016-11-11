@@ -441,6 +441,12 @@ void MainDisplayWidget::onToolChanged(ctrl::ToolType aType)
     }
 }
 
+void MainDisplayWidget::onFinalizeTool(ctrl::ToolType)
+{
+    mAbstractCursor.suspendEvent([=]() { updateCursor(mAbstractCursor); });
+    mAbstractCursor.resumeEvent();
+}
+
 void MainDisplayWidget::onViewSettingChanged(const MainViewSetting& aSetting)
 {
     mViewSetting = aSetting;

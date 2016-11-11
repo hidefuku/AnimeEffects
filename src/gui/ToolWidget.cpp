@@ -1,4 +1,5 @@
 #include "gui/ToolWidget.h"
+#include "gui/KeyCommandMap.h"
 #include "XC.h"
 
 namespace gui
@@ -41,6 +42,35 @@ ToolWidget::ToolWidget(ViaPoint& aViaPoint, GUIResources& aResources,
     mMeshPanel->hide();
 
     updateGeometry();
+
+    // key binding
+    if (mViaPoint.keyCommandMap())
+    {
+        {
+            auto key = mViaPoint.keyCommandMap()->get("SelectCursor");
+            if (key) key->invoker = [=]() { this->mModePanel->pushButton(ctrl::ToolType_Cursor); };
+        }
+        {
+            auto key = mViaPoint.keyCommandMap()->get("SelectSRT");
+            if (key) key->invoker = [=]() { this->mModePanel->pushButton(ctrl::ToolType_SRT); };
+        }
+        {
+            auto key = mViaPoint.keyCommandMap()->get("SelectBone");
+            if (key) key->invoker = [=]() { this->mModePanel->pushButton(ctrl::ToolType_Bone); };
+        }
+        {
+            auto key = mViaPoint.keyCommandMap()->get("SelectPose");
+            if (key) key->invoker = [=]() { this->mModePanel->pushButton(ctrl::ToolType_Pose); };
+        }
+        {
+            auto key = mViaPoint.keyCommandMap()->get("SelectMesh");
+            if (key) key->invoker = [=]() { this->mModePanel->pushButton(ctrl::ToolType_Mesh); };
+        }
+        {
+            auto key = mViaPoint.keyCommandMap()->get("SelectFFD");
+            if (key) key->invoker = [=]() { this->mModePanel->pushButton(ctrl::ToolType_FFD); };
+        }
+    }
 }
 
 void ToolWidget::setDriver(ctrl::Driver* aDriver)
@@ -96,19 +126,10 @@ void ToolWidget::createViewPanel()
 void ToolWidget::createModePanel()
 {
     if (mModePanel) delete mModePanel;
-    mModePanel = new tool::ModePanel(this, mResources);
-
-    auto delegate = [=](ctrl::ToolType aType, bool aChecked)
+    mModePanel = new tool::ModePanel(this, mResources, [=](ctrl::ToolType aType, bool aChecked)
     {
         this->onModePanelPushed(aType, aChecked);
-    };
-
-    mModePanel->addButton(ctrl::ToolType_Cursor,    "cursor",    delegate, "Camera Cursor");
-    mModePanel->addButton(ctrl::ToolType_SRT,       "srt",       delegate, "Scale Rotate Translate");
-    mModePanel->addButton(ctrl::ToolType_Bone,      "bone",      delegate, "Bone Creating");
-    mModePanel->addButton(ctrl::ToolType_Pose,      "pose",      delegate, "Bone Posing");
-    mModePanel->addButton(ctrl::ToolType_Mesh,      "mesh",      delegate, "Mesh Creating");
-    mModePanel->addButton(ctrl::ToolType_FFD,       "ffd",       delegate, "Free Form Deform");
+    });
 }
 
 void ToolWidget::setPanelActivity(bool aIsActive)
@@ -143,10 +164,17 @@ void ToolWidget::setButtonActivity(ctrl::ToolType aType, bool aIsActive)
 
 void ToolWidget::onModePanelPushed(ctrl::ToolType aType, bool aChecked)
 {
+    if (mDriver && mToolType != ctrl::ToolType_TERM)
+    {
+        onFinalizeTool(mToolType);
+    }
+
     mToolType = aChecked ? aType : ctrl::ToolType_TERM;
+
     if (mDriver)
     {
         mDriver->setTool(mToolType);
+
         onToolChanged(mToolType);
 
         mSRTPanel->hide();
