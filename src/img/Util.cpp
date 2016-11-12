@@ -185,6 +185,22 @@ std::pair<XCMemBlock, QRect> Util::createTextureImage(
     return std::pair<XCMemBlock, QRect>(image, rect);
 }
 
+std::pair<XCMemBlock, QRect> Util::createTextureImage(const QImage& aImage)
+{
+    const size_t length = (size_t)aImage.byteCount();
+
+    XCMemBlock workImage;
+    workImage.size = length;
+    workImage.data = new uint8[length];
+    memcpy(workImage.data, aImage.bits(), length);
+
+    // modulate color bit
+    auto image = recreateForBiLinearSampling(workImage, aImage.size());
+    const QRect rect(QPoint(0, 0), aImage.size() + QSize(2, 2));
+
+    return std::pair<XCMemBlock, QRect>(image, rect);
+}
+
 ResourceNode* Util::createResourceNodes(PSDFormat& aFormat, bool aLoadImage)
 {
     // build tree by a psd format
@@ -221,6 +237,19 @@ ResourceNode* Util::createResourceNodes(PSDFormat& aFormat, bool aLoadImage)
                 resNode->data().setPos(image.second.topLeft());
                 resNode->data().grabImage(image.first, image.second.size(), Format_RGBA8);
             }
+            else
+            {
+                auto header = aFormat.header();
+                auto layerPtr = &layer;
+
+                resNode->data().setImageLoader([=]()->bool
+                {
+                    auto image = createTextureImage(header, *layerPtr);
+                    resNode->data().setPos(image.second.topLeft());
+                    resNode->data().grabImage(image.first, image.second.size(), Format_RGBA8);
+                    return true;
+                });
+            }
 
             // push tree
             resCurrent->children().pushBack(resNode);
@@ -244,6 +273,33 @@ ResourceNode* Util::createResourceNodes(PSDFormat& aFormat, bool aLoadImage)
         }
     }
     return resStack.front();
+}
+
+ResourceNode* Util::createResourceNode(const QImage& aImage, const QString& aName, bool aLoadImage)
+{
+    // create resource
+    auto resNode = new ResourceNode(aName);
+    resNode->data().setPos(QPoint(0, 0));
+    resNode->data().setIsLayer(true);
+    resNode->data().setBlendMode(img::BlendMode_Normal);
+
+    if (aLoadImage)
+    {
+        auto image = aImage.convertToFormat(QImage::Format_RGBA8888);
+        auto texImage = createTextureImage(image);
+        resNode->data().grabImage(texImage.first, texImage.second.size(), Format_RGBA8);
+    }
+    else
+    {
+        resNode->data().setImageLoader([=]()->bool
+        {
+            auto image = aImage.convertToFormat(QImage::Format_RGBA8888);
+            auto texImage = createTextureImage(image);
+            resNode->data().grabImage(texImage.first, texImage.second.size(), Format_RGBA8);
+            return true;
+        });
+    }
+    return resNode;
 }
 
 } // namespace img

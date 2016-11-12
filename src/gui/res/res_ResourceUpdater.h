@@ -19,20 +19,23 @@ public:
     void reload(Item& aItem);
 
 private:
+    img::ResourceNode* createResourceTree(const QString& aFilePath, bool aLoadImage);
+    img::ResourceNode* createQImageTree(const QString& aFilePath, bool aLoadImage) const;
+    img::ResourceNode* createPsdTree(const QString& aFilePath, bool aLoadImage);
+
     void reloadImages(
             cmnd::Stack& aStack,
             ModificationNotifier& aNotifier,
-            const img::PSDFormat::Header& aHeader,
             img::ResourceNode& aCurNode,
             img::ResourceNode& aNewNode);
 
     bool tryReloadCorrespondingImages(
-            const img::PSDFormat::Header& aHeader,
             QTreeWidgetItem& aTarget,
             img::ResourceNode* aNewTree);
 
     ViaPoint& mViaPoint;
     core::Project& mProject;
+    std::unique_ptr<img::PSDFormat> mPSDFormat;
 };
 
 } // namespace res

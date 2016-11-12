@@ -12,6 +12,7 @@ ResourceData::ResourceData(const QString& aIdentifier, const ResourceNode* aSeri
     , mIsLayer()
     , mIdentifier(aIdentifier)
     , mBlendMode(BlendMode_Normal)
+    , mImageLoader()
     , mSerialAddress(aSerialAddress)
 {
 }

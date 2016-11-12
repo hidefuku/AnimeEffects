@@ -117,7 +117,7 @@ void ResourceDialog::onAddResourceTriggered(bool)
     if (!mProject) return;
 
     const QString fileName = QFileDialog::getOpenFileName(
-                this, "Open File", "", "ImageFile (*.psd)");
+                this, "Open File", "", "ImageFile (*.psd *.jpg *.jpeg *.png *.gif)");
     if (fileName.isEmpty()) return;
 
     res::ResourceUpdater updater(mViaPoint, *mProject);

@@ -1,3 +1,4 @@
+#include <utility>
 #include <iostream>
 #include <QFileInfo>
 #include <QMessageBox>
@@ -101,6 +102,7 @@ public:
 ResourceUpdater::ResourceUpdater(ViaPoint& aViaPoint, core::Project& aProject)
     : mViaPoint(aViaPoint)
     , mProject(aProject)
+    , mPSDFormat()
 {
 }
 
@@ -108,32 +110,8 @@ void ResourceUpdater::load(const QString& aFilePath)
 {
     if (aFilePath.isEmpty()) return;
 
-    // open file
-    std::ifstream file(aFilePath.toLocal8Bit(), std::ios::binary);
-    if (file.fail())
-    {
-        QMessageBox msgBox;
-        msgBox.setText("can not found a resource file.");
-        msgBox.exec();
-        return;
-    }
-
-    // read psd
-    img::PSDReader reader(file);
-    if (reader.resultCode() != img::PSDReader::ResultCode_Success)
-    {
-        const QString errorText =
-                "error(" + QString::number(reader.resultCode()) + ") " +
-                QString::fromStdString(reader.resultMessage());
-        QMessageBox msgBox;
-        msgBox.setText(errorText);
-        msgBox.exec();
-        return;
-    }
-    file.close();
-
-    // create resource tree
-    auto newTree = img::Util::createResourceNodes(*reader.format(), true);
+    auto newTree = createResourceTree(aFilePath, true);
+    if (!newTree) return;
 
     {
         auto& stack = mProject.commandStack();
@@ -148,23 +126,44 @@ void ResourceUpdater::load(const QString& aFilePath)
     }
 }
 
-void ResourceUpdater::reload(Item& aItem)
+img::ResourceNode* ResourceUpdater::createResourceTree(const QString& aFilePath, bool aLoadImage)
 {
-    auto& holder = mProject.resourceHolder();
+    const QFileInfo fileInfo(aFilePath);
+    if (!fileInfo.isFile()) return nullptr;
 
-    img::ResourceNode& node = aItem.node();
-    img::ResourceNode& topNode = util::TreeUtil::getTreeRoot(node);
-    QString filePath = holder.findFilePath(topNode);
-    if (filePath.isEmpty()) return;
+    if (fileInfo.suffix() == "psd")
+    {
+        return createPsdTree(aFilePath, aLoadImage);
+    }
+    else
+    {
+        return createQImageTree(aFilePath, aLoadImage);
+    }
 
+}
+
+img::ResourceNode* ResourceUpdater::createQImageTree(const QString& aFilePath, bool aLoadImage) const
+{
+    const QFileInfo fileInfo(aFilePath);
+    if (!fileInfo.isFile()) return nullptr;
+
+    QImage image(aFilePath);
+    if (image.isNull())
+    {
+        QMessageBox::warning(nullptr, "QImage Error", "Failed to load image file.");
+        return nullptr;
+    }
+    return img::Util::createResourceNode(image, fileInfo.fileName(), aLoadImage);
+}
+
+img::ResourceNode* ResourceUpdater::createPsdTree(const QString& aFilePath, bool aLoadImage)
+{
     // open file
-    std::ifstream file(filePath.toLocal8Bit(), std::ios::binary);
+    std::ifstream file(aFilePath.toLocal8Bit(), std::ios::binary);
     if (file.fail())
     {
-        QMessageBox msgBox;
-        msgBox.setText("can not found a resource file.");
-        msgBox.exec();
-        return;
+        QMessageBox::warning(nullptr, "FileIO Error", "Can not found a PSD file.");
+        return nullptr;
     }
 
     // read psd
@@ -174,25 +173,34 @@ void ResourceUpdater::reload(Item& aItem)
         const QString errorText =
                 "error(" + QString::number(reader.resultCode()) + ") " +
                 QString::fromStdString(reader.resultMessage());
-        QMessageBox msgBox;
-        msgBox.setText(errorText);
-        msgBox.exec();
-        return;
+        QMessageBox::warning(nullptr, "PSD Parse Error", errorText);
+        return nullptr;
     }
     file.close();
 
+    mPSDFormat = std::move(reader.format());
+
     // create resource tree
-    QScopedPointer<img::ResourceNode> newTree(
-                img::Util::createResourceNodes(*reader.format(), false));
+    return img::Util::createResourceNodes(*mPSDFormat, aLoadImage);
+}
+
+void ResourceUpdater::reload(Item& aItem)
+{
+    auto& holder = mProject.resourceHolder();
+
+    img::ResourceNode& node = aItem.node();
+    img::ResourceNode& topNode = util::TreeUtil::getTreeRoot(node);
+    QString filePath = holder.findFilePath(topNode);
+    if (filePath.isEmpty()) return;
+
+    QScopedPointer<img::ResourceNode> newTree(createResourceTree(filePath, false));
 
     RESOURCE_UPDATER_DUMP("begin reload");
 
     // reload images
-    if (!tryReloadCorrespondingImages(reader.format()->header(), aItem, newTree.data()))
+    if (!tryReloadCorrespondingImages(aItem, newTree.data()))
     {
-        QMessageBox msgBox;
-        msgBox.setText("failed to reload images");
-        msgBox.exec();
+        QMessageBox::warning(nullptr, "Undefined Error", "Failed to reload images.");
         return;
     }
     RESOURCE_UPDATER_DUMP("end reload");
@@ -261,19 +269,7 @@ std::pair<bool, QVector<QString>> allChildrenCanBeIdentified(
     return result;
 }
 
-cmnd::Base* createImageSetter(
-        img::ResourceNode& aCurNode,
-        const img::PSDFormat::Header& aHeader,
-        const img::PSDFormat::Layer& aLayer)
-{
-    auto image = img::Util::createTextureImage(aHeader, aLayer);
-    return new ImageSetter(aCurNode, image.first, image.second);
-}
-
-img::ResourceNode* createNewAppendNode(
-        ModificationNotifier& aNotifier,
-        const img::PSDFormat::Header& aHeader,
-        img::ResourceNode& aNode)
+img::ResourceNode* createNewAppendNode(ModificationNotifier& aNotifier, img::ResourceNode& aNode)
 {
     using img::PSDFormat;
 
@@ -285,17 +281,13 @@ img::ResourceNode* createNewAppendNode(
 
     if (newNode->data().isLayer())
     {
-        auto newLayer = static_cast<PSDFormat::Layer*>(aNode.data().userData());
-        XC_PTR_ASSERT(newLayer);
-        auto image = img::Util::createTextureImage(aHeader, *newLayer);
-        newNode->data().setPos(image.second.topLeft());
-        newNode->data().grabImage(image.first, image.second.size(), img::Format_RGBA8);
-        newNode->data().setBlendMode(img::getBlendModeFromPSD(newLayer->blendMode));
+        auto success = newNode->data().loadImage();
+        XC_ASSERT(success); (void)success;
     }
 
     for (auto child : aNode.children())
     {
-        auto newChild = createNewAppendNode(aNotifier, aHeader, *child);
+        auto newChild = createNewAppendNode(aNotifier, *child);
         newNode->children().pushBack(newChild);
     }
 
@@ -303,37 +295,20 @@ img::ResourceNode* createNewAppendNode(
 }
 
 void ResourceUpdater::reloadImages(
-        cmnd::Stack& aStack,
-        ModificationNotifier& aNotifier,
-        const img::PSDFormat::Header& aHeader,
-        img::ResourceNode& aCurNode,
-        img::ResourceNode& aNewNode)
+        cmnd::Stack& aStack, ModificationNotifier& aNotifier,
+        img::ResourceNode& aCurNode, img::ResourceNode& aNewNode)
 {
     using img::PSDFormat;
 
     RESOURCE_UPDATER_DUMP("reload image %s", aCurNode.data().identifier().toLatin1().data());
 
-#if 0
-    aNotifier.event().pushTarget(aCurNode);
-
-    if (aCurNode.data().isLayer())
-    {
-        // reload image
-        auto newLayer = static_cast<PSDFormat::Layer*>(aNewNode.data().userData());
-        XC_PTR_ASSERT(newLayer);
-        aStack.push(createImageSetter(aCurNode, aHeader, *newLayer));
-    }
-#else
     if (aCurNode.data().isLayer())
     {
         XC_ASSERT(aNewNode.data().isLayer());
 
         // load new image
-        auto newLayer = static_cast<PSDFormat::Layer*>(aNewNode.data().userData());
-        XC_PTR_ASSERT(newLayer);
-        auto newImage = img::Util::createTextureImage(aHeader, *newLayer);
-        aNewNode.data().setPos(newImage.second.topLeft());
-        aNewNode.data().grabImage(newImage.first, newImage.second.size(), img::Format_RGBA8);
+        auto success = aNewNode.data().loadImage();
+        XC_ASSERT(success); (void)success;
 
         // if layer data be modified
         if (!aCurNode.data().hasSameLayerDataWith(aNewNode.data()))
@@ -342,15 +317,16 @@ void ResourceUpdater::reloadImages(
             aNotifier.event().pushTarget(aCurNode);
 
             // push reload image command
+            XCMemBlock newImagePtr = aNewNode.data().image().block();
+            const QRect newImageRect(aNewNode.data().pos(), aNewNode.data().image().pixelSize());
             aNewNode.data().releaseImage();
-            aStack.push(new ImageSetter(aCurNode, newImage.first, newImage.second));
+            aStack.push(new ImageSetter(aCurNode, newImagePtr, newImageRect));
         }
         else
         {
             aNewNode.data().freeImage();
         }
     }
-#endif
 
     // each child
     for (auto child : aNewNode.children())
@@ -362,21 +338,19 @@ void ResourceUpdater::reloadImages(
         {
             // reload node
             XC_PTR_ASSERT(corresponds.second);
-            reloadImages(aStack, aNotifier, aHeader, *corresponds.second, *child);
+            reloadImages(aStack, aNotifier, *corresponds.second, *child);
         }
         else
         {
             // append new node
-            auto newChild = createNewAppendNode(aNotifier, aHeader, *child);
+            auto newChild = createNewAppendNode(aNotifier, *child);
             aStack.push(new cmnd::PushBackNewTreeObject<img::ResourceNode>(&aCurNode.children(), newChild));
         }
     }
 }
 
 bool ResourceUpdater::tryReloadCorrespondingImages(
-        const img::PSDFormat::Header& aHeader,
-        QTreeWidgetItem& aTarget,
-        img::ResourceNode* aNewTree)
+        QTreeWidgetItem& aTarget, img::ResourceNode* aNewTree)
 {
     if (!aNewTree) return false;
 
@@ -421,7 +395,7 @@ bool ResourceUpdater::tryReloadCorrespondingImages(
         macro.grabListener(notifier);
 
         // create reload commands
-        reloadImages(stack, *notifier, aHeader, targetNode, *newNode);
+        reloadImages(stack, *notifier, targetNode, *newNode);
 
         // create key updating commands
         stack.push(mProject.objectTree().createResourceUpdater(notifier->event()));

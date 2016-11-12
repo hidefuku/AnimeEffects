@@ -1,6 +1,7 @@
 #ifndef IMG_RESOURCEDATA_H
 #define IMG_RESOURCEDATA_H
 
+#include <functional>
 #include "img/Buffer.h"
 #include "img/BlendMode.h"
 namespace img { class ResourceNode; }
@@ -11,6 +12,8 @@ namespace img
 class ResourceData
 {
 public:
+    typedef std::function<bool()> ImageLoader;
+
     ResourceData(const QString& aIdentifier, const ResourceNode* aSerialAddress);
     virtual ~ResourceData() {}
 
@@ -34,6 +37,9 @@ public:
 
     bool hasSameLayerDataWith(const ResourceData& aData); // it's heavy
 
+    void setImageLoader(const ImageLoader& aLoader) { mImageLoader = aLoader; }
+    bool loadImage() { return (mImageLoader && mImageLoader()); }
+
 private:
     img::Buffer mBuffer;
     QPoint mPos;
@@ -41,6 +47,7 @@ private:
     bool mIsLayer;
     QString mIdentifier;
     BlendMode mBlendMode;
+    ImageLoader mImageLoader;
     const ResourceNode* mSerialAddress;
 };
 
