@@ -428,8 +428,15 @@ void ObjectTreeWidget::onContextMenuRequested(const QPoint& aPos)
         menu.addSeparator();
         menu.addAction(mObjectAction);
         menu.addAction(mFolderAction);
-        menu.addSeparator();
-        menu.addAction(mDeleteAction);
+
+        {
+            obj::Item* objItem = obj::Item::cast(mActionItem);
+            if (objItem && objItem->node().parent())
+            {
+                menu.addSeparator();
+                menu.addAction(mDeleteAction);
+            }
+        }
 
         menu.exec(this->mapToGlobal(aPos));
     }
@@ -449,20 +456,46 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
     if (mActionItem)
     {
         obj::Item* objItem = obj::Item::cast(mActionItem);
-        if (!objItem) return;
 
-        core::ObjectNode& node = objItem->node();
-        core::ObjectNode* parent = node.parent();
-        if (!parent) return;
+        core::ObjectNode* parent = nullptr;
+        int index = -1;
+        float depth = 0.0f;
 
-        auto index = parent->children().indexOf(&node);
-        if (index < 0) return;
+        QTreeWidgetItem* parentItem = nullptr;
+        int itemIndex = -1;
 
-        QTreeWidgetItem* parentItem = mActionItem->parent();
-        if (!parentItem) return;
+        // top node
+        if (!objItem || !objItem->node().parent())
+        {
+            parent = mProject->objectTree().topNode();
+            XC_PTR_ASSERT(parent);
 
-        const int itemIndex = parentItem->indexOfChild(objItem);
-        if (itemIndex < 0) return;
+            index = (int)parent->children().size();
+            if (index > 0)
+            {
+                auto prevNode = parent->children().back();
+                depth = prevNode->depth() - 1.0f;
+            }
+            parentItem = mActionItem;
+            itemIndex = parentItem->childCount();
+        }
+        else // sub node
+        {
+            auto prevNode = &(objItem->node());
+            depth = prevNode->depth() + 1.0f;
+
+            parent = prevNode->parent();
+            if (!parent) return;
+
+            index = parent->children().indexOf(prevNode);
+            if (index < 0) return;
+
+            parentItem = mActionItem->parent();
+            if (!parentItem) return;
+
+            itemIndex = parentItem->indexOfChild(objItem);
+            if (itemIndex < 0) return;
+        }
 
         // show resource dialog
         QScopedPointer<ResourceDialog> dialog(
@@ -474,34 +507,37 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
         // create command
         if (dialog->hasValidNode())
         {
+            // get resource
             auto resNode = dialog->nodeList().first();
             if (!resNode) return;
-
             XC_ASSERT(resNode->data().hasImage());
-            //const QRect resRect(resNode->data().pos(), resNode->data().image().pixelSize());
-
-            cmnd::ScopedMacro macro(mProject->commandStack(), "create object");
-            {
-                auto coreNotifier = new core::ObjectTreeNotifier(*mProject);
-                coreNotifier->event().setType(core::ObjectTreeEvent::Type_Add);
-                coreNotifier->event().pushTarget(parent, node);
-                macro.grabListener(coreNotifier);
-            }
-            macro.grabListener(new obj::RestructureNotifier(*this));
 
             // create node
             core::LayerNode* ptr = new core::LayerNode(
                         resNode->data().identifier(),
                         mProject->objectTree().shaderHolder());
-            ptr->setDepth(node.depth() + 1.0f);
+            ptr->setDepth(depth);
             ptr->setVisibility(true);
             ptr->setDefaultImage(resNode->handle());
             ptr->setDefaultPos(QVector2D());
             ptr->setDefaultOpacity(1.0f); // @todo support default opacity
+
+
+            cmnd::ScopedMacro macro(mProject->commandStack(), "create object");
+            // notifier
+            {
+                auto coreNotifier = new core::ObjectTreeNotifier(*mProject);
+                coreNotifier->event().setType(core::ObjectTreeEvent::Type_Add);
+                coreNotifier->event().pushTarget(parent, *ptr);
+                macro.grabListener(coreNotifier);
+            }
+            macro.grabListener(new obj::RestructureNotifier(*this));
+
+            // create commands
             mProject->commandStack().push(new cmnd::GrabNewObject<core::LayerNode>(ptr));
             mProject->commandStack().push(new cmnd::InsertTree<core::ObjectNode>(&(parent->children()), index, ptr));
 
-            // create item
+            // create gui commands
             auto itemPtr = createFileItem(*ptr);
             mProject->commandStack().push(new cmnd::GrabNewObject<obj::Item>(itemPtr));
             mProject->commandStack().push(new obj::InsertItem(*parentItem, itemIndex, *itemPtr));
@@ -514,41 +550,71 @@ void ObjectTreeWidget::onFolderActionTriggered(bool)
     if (mActionItem)
     {
         obj::Item* objItem = obj::Item::cast(mActionItem);
-        if (!objItem) return;
 
-        core::ObjectNode& node = objItem->node();
-        core::ObjectNode* parent = node.parent();
-        if (!parent) return;
+        core::ObjectNode* parent = nullptr;
+        int index = -1;
+        float depth = 0.0f;
 
-        auto index = parent->children().indexOf(&node);
-        if (index < 0) return;
+        QTreeWidgetItem* parentItem = nullptr;
+        int itemIndex = -1;
 
-        QTreeWidgetItem* parentItem = mActionItem->parent();
-        if (!parentItem) return;
+        // top node
+        if (!objItem || !objItem->node().parent())
+        {
+            parent = mProject->objectTree().topNode();
+            XC_PTR_ASSERT(parent);
 
-        const int itemIndex = parentItem->indexOfChild(objItem);
-        if (itemIndex < 0) return;
+            index = (int)parent->children().size();
+            if (index > 0)
+            {
+                auto prevNode = parent->children().back();
+                depth = prevNode->depth() - 1.0f;
+            }
+            parentItem = mActionItem;
+            itemIndex = parentItem->childCount();
+        }
+        else // sub node
+        {
+            auto prevNode = &(objItem->node());
+            depth = prevNode->depth() + 1.0f;
+
+            parent = prevNode->parent();
+            if (!parent) return;
+
+            index = parent->children().indexOf(prevNode);
+            if (index < 0) return;
+
+            parentItem = mActionItem->parent();
+            if (!parentItem) return;
+
+            itemIndex = parentItem->indexOfChild(objItem);
+            if (itemIndex < 0) return;
+        }
 
         // create command
         {
             cmnd::ScopedMacro macro(mProject->commandStack(), "create object folder");
+
+            // create node
+            core::FolderNode* ptr = new core::FolderNode("folder0");
+            ptr->setDepth(depth);
+            ptr->setDefaultPos(QVector2D());
+            ptr->setDefaultOpacity(1.0f); // @todo support default opacity
+
+            // notifier
             {
                 auto coreNotifier = new core::ObjectTreeNotifier(*mProject);
                 coreNotifier->event().setType(core::ObjectTreeEvent::Type_Add);
-                coreNotifier->event().pushTarget(parent, node);
+                coreNotifier->event().pushTarget(parent, *ptr);
                 macro.grabListener(coreNotifier);
             }
             macro.grabListener(new obj::RestructureNotifier(*this));
 
-            // create node
-            core::FolderNode* ptr = new core::FolderNode("folder0");
-            ptr->setDepth(node.depth() + 1.0f);
-            ptr->setDefaultPos(QVector2D());
-            ptr->setDefaultOpacity(1.0f); // @todo support default opacity
+            // push commands
             mProject->commandStack().push(new cmnd::GrabNewObject<core::FolderNode>(ptr));
             mProject->commandStack().push(new cmnd::InsertTree<core::ObjectNode>(&(parent->children()), index, ptr));
 
-            // create item
+            // push gui item commands
             auto itemPtr = createFolderItem(*ptr);
             mProject->commandStack().push(new cmnd::GrabNewObject<obj::Item>(itemPtr));
             mProject->commandStack().push(new obj::InsertItem(*parentItem, itemIndex, *itemPtr));
@@ -568,9 +634,6 @@ void ObjectTreeWidget::onDeleteActionTriggered(bool)
         core::ObjectNode* parent = node.parent();
         if (!parent) return;
 
-        //auto index = parent->children().indexOf(&node);
-        //if (index < 0) return;
-
         QTreeWidgetItem* parentItem = mActionItem->parent();
         if (!parentItem) return;
 
@@ -589,8 +652,6 @@ void ObjectTreeWidget::onDeleteActionTriggered(bool)
             macro.grabListener(new obj::RestructureNotifier(*this));
 
             // delete node
-            //mProject->commandStack().push(new cmnd::RemoveTree<core::ObjectNode>(&(parent->children()), index));
-            //mProject->commandStack().push(new cmnd::GrabDeleteObject<core::ObjectNode>(&node));
             mProject->commandStack().push(mProject->objectTree().createNodeDeleter(node));
 
             // delete item

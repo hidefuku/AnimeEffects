@@ -20,16 +20,19 @@ void ObjectTreeNotifier::onExecuted()
         {
             XC_PTR_ASSERT(target.node);
 
-            // removed root
+            // add parents as roots
             if (target.parent && !roots.contains(target.parent))
             {
                 roots.push_back(target.parent);
             }
 
-            // inserted root
-            if (target.node->parent() && !roots.contains(target.node->parent()))
+            if (mEvent.type() == ObjectTreeEvent::Type_Move)
             {
-                roots.push_back(target.node->parent());
+                // add new parents as roots
+                if (target.node->parent() && !roots.contains(target.node->parent()))
+                {
+                    roots.push_back(target.node->parent());
+                }
             }
         }
     }
