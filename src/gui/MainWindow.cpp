@@ -97,6 +97,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
         mViaPoint.setKeyCommandMap(mKeyCommandMap.data());
 
         mKeyCommandInvoker.reset(new KeyCommandInvoker(*mKeyCommandMap));
+        mViaPoint.setKeyCommandInvoker(mKeyCommandInvoker.data());
     }
 
     // create main menu bar

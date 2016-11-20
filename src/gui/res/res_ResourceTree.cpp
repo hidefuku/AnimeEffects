@@ -30,6 +30,7 @@ ResourceTree::ResourceTree(ViaPoint& aViaPoint, bool aUseCustomContext, QWidget*
     this->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
     this->setHorizontalScrollMode(QAbstractItemView::ScrollPerItem);
     this->setColumnCount(kColumnCount);
+    this->setFocusPolicy(Qt::NoFocus);
 
     this->connect(this, &QTreeWidget::itemSelectionChanged,
                   this, &ResourceTree::onItemSelectionChanged);

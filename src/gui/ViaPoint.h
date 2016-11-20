@@ -11,6 +11,7 @@ namespace img { class ResourceNode; }
 namespace gui { class ResourceDialog; }
 namespace gui { class MainMenuBar; }
 namespace gui { class KeyCommandMap; }
+namespace gui { class KeyCommandInvoker; }
 namespace gui { class MainViewSetting; }
 
 namespace gui
@@ -39,6 +40,10 @@ public:
     void setKeyCommandMap(KeyCommandMap* aMap);
     KeyCommandMap* keyCommandMap() const { return mKeyCommandMap; }
 
+    void setKeyCommandInvoker(KeyCommandInvoker* aInvoker);
+    void throwKeyPressingToKeyCommandInvoker(const QKeyEvent* aEvent);
+    void throwKeyReleasingToKeyCommandInvoker(const QKeyEvent* aEvent);
+
     void setMainViewSetting(MainViewSetting& aSetting);
     MainViewSetting& mainViewSetting();
     const MainViewSetting& mainViewSetting() const;
@@ -53,6 +58,7 @@ private:
     QPlainTextEdit* mLogView;
     gl::DeviceInfo mGLDeviceInfo;
     KeyCommandMap* mKeyCommandMap;
+    KeyCommandInvoker* mKeyCommandInvoker;
     MainViewSetting* mMainViewSetting;
 };
 

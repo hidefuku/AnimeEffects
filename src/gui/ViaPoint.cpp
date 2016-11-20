@@ -1,5 +1,6 @@
 #include "gui/ViaPoint.h"
 #include "gui/ResourceDialog.h"
+#include "gui/KeyCommandInvoker.h"
 
 namespace gui
 {
@@ -11,6 +12,7 @@ ViaPoint::ViaPoint(QWidget* aParent)
     , mLogView()
     , mGLDeviceInfo()
     , mKeyCommandMap()
+    , mKeyCommandInvoker()
     , mMainViewSetting()
 {
 }
@@ -87,6 +89,27 @@ const gl::DeviceInfo& ViaPoint::glDeviceInfo() const
 void ViaPoint::setKeyCommandMap(KeyCommandMap* aMap)
 {
     mKeyCommandMap = aMap;
+}
+
+void ViaPoint::setKeyCommandInvoker(KeyCommandInvoker* aInvoker)
+{
+    mKeyCommandInvoker = aInvoker;
+}
+
+void ViaPoint::throwKeyPressingToKeyCommandInvoker(const QKeyEvent* aEvent)
+{
+    if (mKeyCommandInvoker)
+    {
+        mKeyCommandInvoker->onKeyPressed(aEvent);
+    }
+}
+
+void ViaPoint::throwKeyReleasingToKeyCommandInvoker(const QKeyEvent* aEvent)
+{
+    if (mKeyCommandInvoker)
+    {
+        mKeyCommandInvoker->onKeyReleased(aEvent);
+    }
 }
 
 void ViaPoint::setMainViewSetting(MainViewSetting& aSetting)

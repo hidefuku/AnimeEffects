@@ -27,6 +27,9 @@ public:
     const NodeList& nodeList() const { return mNodeList; }
 
 private:
+    virtual void keyPressEvent(QKeyEvent* aEvent);
+    virtual void keyReleaseEvent(QKeyEvent* aEvent);
+
     void onAddResourceTriggered(bool);
 
     ViaPoint& mViaPoint;

@@ -124,5 +124,25 @@ void ResourceDialog::onAddResourceTriggered(bool)
     updater.load(fileName);
 }
 
+void ResourceDialog::keyPressEvent(QKeyEvent* aEvent)
+{
+    EasyDialog::keyPressEvent(aEvent);
+
+    if (!this->isModal())
+    {
+        mViaPoint.throwKeyPressingToKeyCommandInvoker(aEvent);
+    }
+}
+
+void ResourceDialog::keyReleaseEvent(QKeyEvent* aEvent)
+{
+    EasyDialog::keyReleaseEvent(aEvent);
+
+    if (!this->isModal())
+    {
+        mViaPoint.throwKeyReleasingToKeyCommandInvoker(aEvent);
+    }
+}
+
 } // namespace gui
 
