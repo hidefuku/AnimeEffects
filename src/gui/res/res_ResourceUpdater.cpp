@@ -514,5 +514,50 @@ bool ResourceUpdater::tryReloadCorrespondingImages(
     return true;
 }
 
+//-------------------------------------------------------------------------------------------------
+void ResourceUpdater::remove(Item& aItem)
+{
+    auto& holder = mProject.resourceHolder();
+
+    img::ResourceNode& node = aItem.node();
+    img::ResourceNode& topNode = util::TreeUtil::getTreeRoot(node);
+
+    // check reference
+    {
+        img::ResourceNode::ConstIterator itr(&topNode);
+        while (itr.hasNext())
+        {
+            if (itr.next()->isKeeped())
+            {
+                QMessageBox::warning(nullptr, "Operation Error", "Some layers are referenced by objects yet.");
+                return;
+            }
+        }
+    }
+
+    int index = 0;
+    for (auto& tree : holder.imageTrees())
+    {
+        if (tree.topNode == &topNode) break;
+        ++index;
+    }
+    if (index >= (int)holder.imageTrees().size()) return;
+
+    {
+        auto& stack = mProject.commandStack();
+        auto& holder = mProject.resourceHolder();
+
+        cmnd::ScopedMacro macro(stack, "delete resources");
+
+        // notifier
+        macro.grabListener(new DeleteNotifier(mViaPoint, mProject));
+
+        stack.push(new TreeDeleter(holder, index));
+    }
+
+
+
+}
+
 } // namespace res
 } // namespace gui

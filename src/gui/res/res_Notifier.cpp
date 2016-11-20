@@ -6,6 +6,7 @@ using namespace core;
 namespace gui {
 namespace res {
 
+//-------------------------------------------------------------------------------------------------
 ChangeFilePathNotifier::ChangeFilePathNotifier(ViaPoint& aViaPoint,
                                                const img::ResourceNode& aNode)
     : mViaPoint(aViaPoint)
@@ -21,6 +22,7 @@ void ChangeFilePathNotifier::notify(bool)
     }
 }
 
+//-------------------------------------------------------------------------------------------------
 ModificationNotifier::ModificationNotifier(
         ViaPoint& aViaPoint,
         core::Project& aProject,
@@ -45,6 +47,7 @@ void ModificationNotifier::notify(bool aIsUndo)
     mViaPoint.onVisualUpdated();
 }
 
+//-------------------------------------------------------------------------------------------------
 AddNewOneNotifier::AddNewOneNotifier(
         ViaPoint& aViaPoint, core::Project& aProject)
     : mViaPoint(aViaPoint)
@@ -53,6 +56,22 @@ AddNewOneNotifier::AddNewOneNotifier(
 }
 
 void AddNewOneNotifier::notify(bool)
+{
+    if (mViaPoint.resourceDialog())
+    {
+        mViaPoint.resourceDialog()->updateResources();
+    }
+}
+
+//-------------------------------------------------------------------------------------------------
+DeleteNotifier::DeleteNotifier(
+        ViaPoint& aViaPoint, core::Project& aProject)
+    : mViaPoint(aViaPoint)
+    , mProject(aProject)
+{
+}
+
+void DeleteNotifier::notify(bool)
 {
     if (mViaPoint.resourceDialog())
     {

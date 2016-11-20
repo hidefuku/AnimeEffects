@@ -17,6 +17,7 @@ public:
     ResourceUpdater(ViaPoint& aViaPoint, core::Project& aProject);
     void load(const QString& aFilePath);
     void reload(Item& aItem);
+    void remove(Item& aItem);
 
 private:
     img::ResourceNode* createResourceTree(const QString& aFilePath, bool aLoadImage);

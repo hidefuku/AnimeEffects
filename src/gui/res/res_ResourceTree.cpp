@@ -18,6 +18,7 @@ ResourceTree::ResourceTree(ViaPoint& aViaPoint, bool aUseCustomContext, QWidget*
     , mActionItem()
     , mChangePathAction()
     , mReloadAction()
+    , mDeleteAction()
 {
     //this->setSelectionMode(QAbstractItemView::ExtendedSelection);
     this->setObjectName("resourceTree");
@@ -44,9 +45,14 @@ ResourceTree::ResourceTree(ViaPoint& aViaPoint, bool aUseCustomContext, QWidget*
         mChangePathAction = new QAction("change file path", this);
         mChangePathAction->connect(mChangePathAction, &QAction::triggered,
                                    this, &ResourceTree::onChangePathActionTriggered);
+
         mReloadAction = new QAction("reload images", this);
         mReloadAction->connect(mReloadAction, &QAction::triggered,
                                this, &ResourceTree::onReloadActionTriggered);
+
+        mDeleteAction = new QAction("delete", this);
+        mDeleteAction->connect(mDeleteAction, &QAction::triggered,
+                               this, &ResourceTree::onDeleteActionTriggered);
     }
 }
 
@@ -191,10 +197,16 @@ void ResourceTree::onContextMenuRequested(const QPoint& aPos)
         if (item && item->isTopNode())
         {
             menu.addAction(mChangePathAction);
+            menu.addSeparator();
         }
-        menu.addSeparator();
 
         menu.addAction(mReloadAction);
+
+        if (item && item->isTopNode())
+        {
+            menu.addSeparator();
+            menu.addAction(mDeleteAction);
+        }
 
         menu.exec(this->mapToGlobal(aPos));
     }
@@ -245,6 +257,17 @@ void ResourceTree::onReloadActionTriggered(bool)
 
     ResourceUpdater updater(mViaPoint, *mProject);
     updater.reload(*item);
+}
+
+void ResourceTree::onDeleteActionTriggered(bool)
+{
+    if (!mProject) return;
+
+    Item* item = Item::cast(mActionItem);
+    if (!item) return;
+
+    ResourceUpdater updater(mViaPoint, *mProject);
+    updater.remove(*item);
 }
 
 } // namespace res

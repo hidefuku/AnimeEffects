@@ -104,6 +104,35 @@ private:
     core::Project& mProject;
 };
 
+class DeleteNotifier : public cmnd::Listener
+{
+public:
+    DeleteNotifier(
+            ViaPoint& aViaPoint,
+            core::Project& aProject);
+
+    void notify(bool aIsUndo = false);
+
+    virtual void onExecuted()
+    {
+        notify();
+    }
+
+    virtual void onUndone()
+    {
+        notify(true);
+    }
+
+    virtual void onRedone()
+    {
+        notify();
+    }
+
+private:
+    ViaPoint& mViaPoint;
+    core::Project& mProject;
+};
+
 } // namespace res
 } // namespace gui
 

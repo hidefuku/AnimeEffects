@@ -61,6 +61,8 @@ void ResourceHolder::insertImageTree(const ImageTree& aTree, int aIndex)
         }
         ++index;
     }
+    XC_ASSERT(index == aIndex);
+    mImageTrees.push_back(aTree);
 }
 
 void ResourceHolder::removeImageTree(int aIndex)
@@ -75,6 +77,7 @@ void ResourceHolder::removeImageTree(int aIndex)
         }
         ++index;
     }
+    XC_ASSERT(0);
 }
 
 ResourceHolder::ImageTree ResourceHolder::imageTree(int aIndex) const

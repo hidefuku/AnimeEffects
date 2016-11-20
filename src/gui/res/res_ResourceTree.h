@@ -39,6 +39,7 @@ private:
     void onContextMenuRequested(const QPoint& aPos);
     void onChangePathActionTriggered(bool aIsTriggered);
     void onReloadActionTriggered(bool aIsTriggered);
+    void onDeleteActionTriggered(bool aIsTriggered);
 
     ViaPoint& mViaPoint;
     core::Project* mProject;
@@ -46,6 +47,7 @@ private:
     QTreeWidgetItem* mActionItem;
     QAction* mChangePathAction;
     QAction* mReloadAction;
+    QAction* mDeleteAction;
 };
 
 } // namespace res
