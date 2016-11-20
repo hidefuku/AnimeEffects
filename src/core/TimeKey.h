@@ -5,6 +5,7 @@
 #include "util/TreeNodeBase.h"
 #include "util/TreeIterator.h"
 #include "util/NonCopyable.h"
+#include "cmnd/SleepableObject.h"
 #include "core/Serializer.h"
 #include "core/Deserializer.h"
 #include "core/TimeKeyType.h"
@@ -14,6 +15,7 @@ namespace core
 
 class TimeKey
         : public util::TreeNodeBase<TimeKey>
+        , public cmnd::SleepableObject
         , private util::NonCopyable
 {
 public:
@@ -27,6 +29,9 @@ public:
 
     virtual TimeKeyType type() const = 0;
     virtual bool canHoldChild() const { return false; }
+
+    virtual void sleep() {}
+    virtual void awake() {}
 
     int frame() const { return mFrame; }
     void setFrame(int aFrame) { mFrame = aFrame; }

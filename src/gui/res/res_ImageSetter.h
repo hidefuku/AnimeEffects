@@ -36,12 +36,7 @@ public:
 
     void exec()
     {
-        mAnotherHandle = mNode.handle();
-
-        mNode.resetData();
-        mNode.data() = *mAnotherHandle;
-        mNode.data().setPos(mRect.topLeft());
-        mNode.data().grabImage(mBlock, mRect.size(), img::Format_RGBA8);
+        mAnotherHandle = mNode.updateHandle(mBlock, mRect);
         mDoneOnce = true;
     }
 

@@ -206,7 +206,7 @@ void ResourceTree::onChangePathActionTriggered(bool)
     if (item && item->isTopNode())
     {
         const QString fileName = QFileDialog::getOpenFileName(
-                    this, "Open File", "", "ImageFile (*.psd)");
+                    this, "Open File", "", "ImageFile (*.psd *.jpg *.jpeg *.png *.gif)");
         if (fileName.isEmpty()) return;
 
         if (mHolder)

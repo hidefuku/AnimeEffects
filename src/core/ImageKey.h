@@ -60,12 +60,16 @@ public:
     virtual bool serialize(Serializer& aOut) const;
     virtual bool deserialize(Deserializer& aIn);
 
+    virtual void sleep();
+    virtual void awake();
+
 private:
     void resetGridMesh();
     void resetTextureCache();
 
     Data mData;
     Cache mCache;
+    int mSleepCount;
 };
 
 } // namespace core

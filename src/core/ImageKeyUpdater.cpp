@@ -68,7 +68,8 @@ protected:
             : key(aKey)
             , prevImage()
             , nextImage()
-        {}
+        {
+        }
         ImageKey* key;
         img::ResourceHandle prevImage;
         img::ResourceHandle nextImage;
@@ -160,6 +161,69 @@ cmnd::Stable* ImageKeyUpdater::createResourceUpdater(
         const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions)
 {
     return new ImageChanger(aKey, aNewResource, aWorkspace, aCreateTransitions);
+}
+
+//-------------------------------------------------------------------------------------------------
+class ImageSleeper : public cmnd::Stable
+{
+    ObjectNode& mNode;
+    QList<ImageKey*> mTargets;
+
+public:
+    ImageSleeper(ObjectNode& aNode)
+        : mNode(aNode)
+        , mTargets()
+    {
+    }
+
+    virtual void exec()
+    {
+        ObjectNode::Iterator itr(&mNode);
+        while (itr.hasNext())
+        {
+            auto node = itr.next();
+            if (!node || !node->timeLine()) continue;
+            TimeLine& timeLine = *(node->timeLine());
+
+            // push default key
+            auto dfltKey = (ImageKey*)timeLine.defaultKey(TimeKeyType_Image);
+            if (dfltKey) mTargets.push_back(dfltKey);
+
+            auto& map = timeLine.map(TimeKeyType_Image);
+            for (auto itr = map.begin(); itr != map.end(); ++itr)
+            {
+                TimeKey* key = itr.value();
+                TIMEKEY_PTR_TYPE_ASSERT(key, Image);
+                // push key
+                mTargets.push_back((ImageKey*)key);
+            }
+
+        }
+
+        redo();
+    }
+
+    virtual void redo()
+    {
+        for (auto& target : mTargets)
+        {
+            target->sleep();
+        }
+    }
+
+    virtual void undo()
+    {
+        for (auto& target : mTargets)
+        {
+            target->awake();
+        }
+    }
+};
+
+//-------------------------------------------------------------------------------------------------
+cmnd::Base* ImageKeyUpdater::createResourceSleeperForDelete(ObjectNode& aNode)
+{
+    return new ImageSleeper(aNode);
 }
 
 } // namespace core

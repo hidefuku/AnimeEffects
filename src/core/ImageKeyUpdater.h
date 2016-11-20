@@ -20,6 +20,8 @@ public:
     static cmnd::Stable* createResourceUpdater(
             ImageKey& aKey, img::ResourceNode& aNewResource,
             const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions);
+
+    static cmnd::Base* createResourceSleeperForDelete(ObjectNode& aNode);
 };
 
 } // namespace core

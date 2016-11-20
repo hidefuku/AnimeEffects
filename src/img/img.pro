@@ -32,7 +32,8 @@ SOURCES += \
     Util.cpp \
     BlendMode.cpp \
     GridMeshCreator.cpp \
-    ResourceData.cpp
+    ResourceData.cpp \
+    ResourceHandle.cpp
 
 HEADERS += \
     Buffer.h \

@@ -17,6 +17,7 @@ class ResourceHolder
 public:
     struct ImageTree
     {
+        ImageTree() : topNode(), filePath() {}
         img::ResourceNode* topNode;
         QString filePath;
     };
@@ -29,9 +30,12 @@ public:
     void pushImageTree(
             img::ResourceNode& aTopNode,
             const QString& aAbsFilePath);
-
     ImageTree popImageTree();
 
+    void insertImageTree(const ImageTree& aTree, int aIndex);
+    void removeImageTree(int aIndex);
+
+    ImageTree imageTree(int aIndex) const;
     const std::list<ImageTree>& imageTrees() const { return mImageTrees; }
 
     QString changeFilePath(

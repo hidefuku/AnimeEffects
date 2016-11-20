@@ -242,11 +242,11 @@ ResourceNode* Util::createResourceNodes(PSDFormat& aFormat, bool aLoadImage)
                 auto header = aFormat.header();
                 auto layerPtr = &layer;
 
-                resNode->data().setImageLoader([=]()->bool
+                resNode->data().setImageLoader([=](ResourceData& aData)->bool
                 {
                     auto image = createTextureImage(header, *layerPtr);
-                    resNode->data().setPos(image.second.topLeft());
-                    resNode->data().grabImage(image.first, image.second.size(), Format_RGBA8);
+                    aData.setPos(image.second.topLeft());
+                    aData.grabImage(image.first, image.second.size(), Format_RGBA8);
                     return true;
                 });
             }
@@ -291,11 +291,11 @@ ResourceNode* Util::createResourceNode(const QImage& aImage, const QString& aNam
     }
     else
     {
-        resNode->data().setImageLoader([=]()->bool
+        resNode->data().setImageLoader([=](ResourceData& aData)->bool
         {
             auto image = aImage.convertToFormat(QImage::Format_RGBA8888);
             auto texImage = createTextureImage(image);
-            resNode->data().grabImage(texImage.first, texImage.second.size(), Format_RGBA8);
+            aData.grabImage(texImage.first, texImage.second.size(), Format_RGBA8);
             return true;
         });
     }

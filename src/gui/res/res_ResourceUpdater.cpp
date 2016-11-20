@@ -99,6 +99,50 @@ public:
 };
 
 //-------------------------------------------------------------------------------------------------
+class TreeDeleter : public cmnd::Stable
+{
+    core::ResourceHolder& mHolder;
+    core::ResourceHolder::ImageTree mTree;
+    int mIndex;
+    bool mDone;
+public:
+    TreeDeleter(core::ResourceHolder& aHolder, int aIndex)
+        : mHolder(aHolder)
+        , mTree()
+        , mIndex(aIndex)
+        , mDone(false)
+    {
+    }
+
+    ~TreeDeleter()
+    {
+        if (mDone)
+        {
+            delete mTree.topNode;
+        }
+    }
+
+    virtual void exec()
+    {
+        mTree = mHolder.imageTree(mIndex);
+        XC_PTR_ASSERT(mTree.topNode);
+        redo();
+    }
+
+    virtual void undo()
+    {
+        mHolder.insertImageTree(mTree, mIndex);
+        mDone = false;
+    }
+
+    virtual void redo()
+    {
+        mHolder.removeImageTree(mIndex);
+        mDone = true;
+    }
+};
+
+//-------------------------------------------------------------------------------------------------
 ResourceUpdater::ResourceUpdater(ViaPoint& aViaPoint, core::Project& aProject)
     : mViaPoint(aViaPoint)
     , mProject(aProject)
@@ -106,6 +150,7 @@ ResourceUpdater::ResourceUpdater(ViaPoint& aViaPoint, core::Project& aProject)
 {
 }
 
+//-------------------------------------------------------------------------------------------------
 void ResourceUpdater::load(const QString& aFilePath)
 {
     if (aFilePath.isEmpty()) return;
@@ -153,7 +198,7 @@ img::ResourceNode* ResourceUpdater::createQImageTree(const QString& aFilePath, b
         QMessageBox::warning(nullptr, "QImage Error", "Failed to load image file.");
         return nullptr;
     }
-    return img::Util::createResourceNode(image, fileInfo.fileName(), aLoadImage);
+    return img::Util::createResourceNode(image, "topnode", aLoadImage);
 }
 
 img::ResourceNode* ResourceUpdater::createPsdTree(const QString& aFilePath, bool aLoadImage)
@@ -184,6 +229,7 @@ img::ResourceNode* ResourceUpdater::createPsdTree(const QString& aFilePath, bool
     return img::Util::createResourceNodes(*mPSDFormat, aLoadImage);
 }
 
+//-------------------------------------------------------------------------------------------------
 void ResourceUpdater::reload(Item& aItem)
 {
     auto& holder = mProject.resourceHolder();
@@ -194,13 +240,13 @@ void ResourceUpdater::reload(Item& aItem)
     if (filePath.isEmpty()) return;
 
     QScopedPointer<img::ResourceNode> newTree(createResourceTree(filePath, false));
+    if (!newTree) return;
 
     RESOURCE_UPDATER_DUMP("begin reload");
 
     // reload images
     if (!tryReloadCorrespondingImages(aItem, newTree.data()))
     {
-        QMessageBox::warning(nullptr, "Undefined Error", "Failed to reload images.");
         return;
     }
     RESOURCE_UPDATER_DUMP("end reload");
@@ -239,10 +285,10 @@ std::pair<int, img::ResourceNode*> findCorrespondingNode(
     }
 }
 
-std::pair<bool, QVector<QString>> allChildrenCanBeIdentified(
+std::pair<bool, QVector<img::ResourceNode*>> allChildrenCanBeIdentified(
         img::ResourceNode& aCurNode, img::ResourceNode& aNewNode)
 {
-    std::pair<bool, QVector<QString>> result;
+    std::pair<bool, QVector<img::ResourceNode*>> result;
     result.first = true;
 
     for (auto child : aNewNode.children())
@@ -251,7 +297,7 @@ std::pair<bool, QVector<QString>> allChildrenCanBeIdentified(
         if (corresponds.first > 1)
         {
             result.first = false;
-            result.second.push_back(child->data().identifier());
+            result.second.push_back(child);
         }
         else if (corresponds.first == 1)
         {
@@ -274,8 +320,7 @@ img::ResourceNode* createNewAppendNode(ModificationNotifier& aNotifier, img::Res
     using img::PSDFormat;
 
     auto newNode = new img::ResourceNode(aNode.data().identifier());
-    newNode->data().setPos(aNode.data().pos());
-    newNode->data().setIsLayer(aNode.data().isLayer());
+    newNode->data().copyFrom(aNode.data());
 
     aNotifier.event().pushTarget(*newNode);
 
@@ -283,6 +328,7 @@ img::ResourceNode* createNewAppendNode(ModificationNotifier& aNotifier, img::Res
     {
         auto success = newNode->data().loadImage();
         XC_ASSERT(success); (void)success;
+        XC_ASSERT(newNode->data().hasImage());
     }
 
     for (auto child : aNode.children())
@@ -294,13 +340,17 @@ img::ResourceNode* createNewAppendNode(ModificationNotifier& aNotifier, img::Res
     return newNode;
 }
 
-void ResourceUpdater::reloadImages(
+//-------------------------------------------------------------------------------------------------
+void ResourceUpdater::createImageReloaderRecursive(
         cmnd::Stack& aStack, ModificationNotifier& aNotifier,
         img::ResourceNode& aCurNode, img::ResourceNode& aNewNode)
 {
     using img::PSDFormat;
 
     RESOURCE_UPDATER_DUMP("reload image %s", aCurNode.data().identifier().toLatin1().data());
+
+    // update abandon setting
+    aCurNode.setAbandon(false);
 
     if (aCurNode.data().isLayer())
     {
@@ -338,7 +388,7 @@ void ResourceUpdater::reloadImages(
         {
             // reload node
             XC_PTR_ASSERT(corresponds.second);
-            reloadImages(aStack, aNotifier, *corresponds.second, *child);
+            createImageReloaderRecursive(aStack, aNotifier, *corresponds.second, *child);
         }
         else
         {
@@ -349,10 +399,43 @@ void ResourceUpdater::reloadImages(
     }
 }
 
+//-------------------------------------------------------------------------------------------------
+void ResourceUpdater::createAbandonedImageRemoverRecursive(cmnd::Stack& aStack, img::ResourceNode& aNode)
+{
+    bool isKeeped = aNode.isKeeped();
+
+    if (!isKeeped)
+    {
+        img::ResourceNode::ConstIterator itr(&aNode);
+        while (itr.hasNext())
+        {
+            if (itr.next()->isKeeped())
+            {
+                isKeeped = true;
+                break;
+            }
+        }
+    }
+
+    if (!isKeeped && aNode.isAbandoned())
+    {
+        XC_PTR_ASSERT(aNode.parent()); // topnode will never be abandoned
+        aStack.push(new cmnd::RemoveTreeByObj<img::ResourceNode>(&aNode.parent()->children(), &aNode));
+        aStack.push(new cmnd::GrabDeleteObject<img::ResourceNode>(&aNode));
+        return;
+    }
+
+    for (auto child : aNode.children())
+    {
+        createAbandonedImageRemoverRecursive(aStack, *child);
+    }
+}
+
+//-------------------------------------------------------------------------------------------------
 bool ResourceUpdater::tryReloadCorrespondingImages(
         QTreeWidgetItem& aTarget, img::ResourceNode* aNewTree)
 {
-    if (!aNewTree) return false;
+    XC_PTR_ASSERT(aNewTree);
 
     auto item = res::Item::cast(&aTarget);
     XC_PTR_ASSERT(item);
@@ -370,15 +453,39 @@ bool ResourceUpdater::tryReloadCorrespondingImages(
     for (auto node : pos)
     {
         auto corresponds = findCorrespondingNode(newNode->children(), *node);
-
-        if (corresponds.first != 1) return false;
+        if (corresponds.first != 1)
+        {
+            auto text = QString("Failed to find a corresponding node.") + " (" + node->data().identifier() + ")";
+            QMessageBox::warning(nullptr, "Corresponding Error", text);
+            return false;
+        }
         XC_PTR_ASSERT(corresponds.second);
         newNode = corresponds.second;
     }
 
     // check reloadable
     auto beIdentified = allChildrenCanBeIdentified(targetNode, *newNode);
-    if (!beIdentified.first) return false;
+    if (!beIdentified.first)
+    {
+        auto text = QString("Failed to identify nodes by following duplications.\n");
+        for (auto& duplicated : beIdentified.second)
+        {
+            text += duplicated->treePath() + "\n";
+        }
+        QMessageBox::warning(nullptr, "Corresponding Error", text);
+        return false;
+    }
+
+    // reset abandon settings
+    {
+        img::ResourceNode::Iterator itr(&targetNode);
+        while (itr.hasNext())
+        {
+            auto node = itr.next();
+            if (!node->parent()) continue; // topnode never be abandoned
+            node->setAbandon(true);
+        }
+    }
 
     // reload
     {
@@ -395,11 +502,15 @@ bool ResourceUpdater::tryReloadCorrespondingImages(
         macro.grabListener(notifier);
 
         // create reload commands
-        reloadImages(stack, *notifier, targetNode, *newNode);
+        createImageReloaderRecursive(stack, *notifier, targetNode, *newNode);
+
+        // create remove abandoned commands
+        createAbandonedImageRemoverRecursive(stack, targetNode);
 
         // create key updating commands
         stack.push(mProject.objectTree().createResourceUpdater(notifier->event()));
     }
+
     return true;
 }
 

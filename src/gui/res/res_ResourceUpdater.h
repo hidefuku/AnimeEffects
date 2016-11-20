@@ -23,11 +23,14 @@ private:
     img::ResourceNode* createQImageTree(const QString& aFilePath, bool aLoadImage) const;
     img::ResourceNode* createPsdTree(const QString& aFilePath, bool aLoadImage);
 
-    void reloadImages(
+    void createImageReloaderRecursive(
             cmnd::Stack& aStack,
             ModificationNotifier& aNotifier,
             img::ResourceNode& aCurNode,
             img::ResourceNode& aNewNode);
+
+    void createAbandonedImageRemoverRecursive(
+            cmnd::Stack& aStack, img::ResourceNode& aNode);
 
     bool tryReloadCorrespondingImages(
             QTreeWidgetItem& aTarget,

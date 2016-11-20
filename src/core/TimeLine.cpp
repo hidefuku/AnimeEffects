@@ -228,6 +228,7 @@ void TimeLine::pushRemoveCommands(
         XC_ASSERT(child == cmap.value(cframe));
         aCommands.push(new cmnd::PopBackTree<TimeKey>(&key->children()));
         aCommands.push(new cmnd::RemoveMap<int, TimeKey*>(cmap, cframe));
+        aCommands.push(new cmnd::Sleep(child));
         aCommands.push(new cmnd::GrabDeleteObject<TimeKey>(child));
     }
 
@@ -239,6 +240,7 @@ void TimeLine::pushRemoveCommands(
 
     // remove
     aCommands.push(new cmnd::RemoveMap<int, TimeKey*>(map, aFrame));
+    aCommands.push(new cmnd::Sleep(key));
     aCommands.push(new cmnd::GrabDeleteObject<TimeKey>(key));
 }
 

@@ -11,6 +11,7 @@
 #include "core/ObjectTreeEvent.h"
 #include "core/TimeCacheAccessor.h"
 #include "core/BoneKeyUpdater.h"
+#include "core/ImageKeyUpdater.h"
 
 namespace core
 {
@@ -136,6 +137,7 @@ cmnd::Vector ObjectTree::createNodeDeleter(ObjectNode& aNode)
     if (index < 0) return commands; // fail safe code
 
     commands.push(BoneKeyUpdater::createNodeUnbinderForDelete(aNode));
+    commands.push(ImageKeyUpdater::createResourceSleeperForDelete(aNode));
     commands.push(new cmnd::RemoveTree<core::ObjectNode>(&(parent->children()), index));
     commands.push(new cmnd::GrabDeleteObject<core::ObjectNode>(&aNode));
 

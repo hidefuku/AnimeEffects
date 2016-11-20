@@ -49,6 +49,17 @@ void ResourceData::setBlendMode(BlendMode aMode)
     }
 }
 
+void ResourceData::copyFrom(const ResourceData& aData)
+{
+    mBuffer = aData.mBuffer;
+    mUserData = aData.mUserData;
+    mIdentifier = aData.mIdentifier;
+    mPos = aData.mPos;
+    mIsLayer = aData.mIsLayer;
+    mBlendMode = aData.mBlendMode;
+    mImageLoader = aData.mImageLoader;
+}
+
 bool ResourceData::hasSameLayerDataWith(const ResourceData& aData)
 {
     if (!isLayer() || !aData.isLayer()) return false;

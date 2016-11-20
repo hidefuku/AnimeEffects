@@ -12,7 +12,7 @@ namespace img
 class ResourceData
 {
 public:
-    typedef std::function<bool()> ImageLoader;
+    typedef std::function<bool(ResourceData& aData)> ImageLoader;
 
     ResourceData(const QString& aIdentifier, const ResourceNode* aSerialAddress);
     virtual ~ResourceData() {}
@@ -25,6 +25,7 @@ public:
     void setUserData(void* aData) { mUserData = aData; }
     void setIsLayer(bool aIsLayer) { mIsLayer = aIsLayer; }
     void setBlendMode(BlendMode aMode);
+    void copyFrom(const ResourceData& aData);
 
     bool isLayer() const { return mIsLayer; }
     bool hasImage() const { return mBuffer.data(); }
@@ -38,7 +39,7 @@ public:
     bool hasSameLayerDataWith(const ResourceData& aData); // it's heavy
 
     void setImageLoader(const ImageLoader& aLoader) { mImageLoader = aLoader; }
-    bool loadImage() { return (mImageLoader && mImageLoader()); }
+    bool loadImage() { return (mImageLoader && mImageLoader(*this)); }
 
 private:
     img::Buffer mBuffer;

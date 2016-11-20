@@ -34,7 +34,9 @@ ImageKey::Cache::Cache()
 ImageKey::ImageKey()
     : mData()
     , mCache()
+    , mSleepCount(0)
 {
+    mData.resource().setOriginKeeping(true);
 }
 
 void ImageKey::setImage(const img::ResourceHandle& aResource, img::BlendMode aMode)
@@ -80,6 +82,25 @@ void ImageKey::resetTextureCache()
         mCache.texture().create(pixelSize, imageData);
         mCache.texture().setFilter(GL_LINEAR);
         mCache.texture().setWrap(GL_CLAMP_TO_BORDER, QColor(0, 0, 0, 0));
+    }
+}
+
+void ImageKey::sleep()
+{
+    ++mSleepCount;
+    if (mSleepCount == 1)
+    {
+        mData.resource().setOriginKeeping(false);
+    }
+}
+
+void ImageKey::awake()
+{
+    XC_ASSERT(mSleepCount > 0);
+    --mSleepCount;
+    if (mSleepCount == 0)
+    {
+        mData.resource().setOriginKeeping(true);
     }
 }
 

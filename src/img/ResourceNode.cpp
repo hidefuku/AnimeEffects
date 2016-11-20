@@ -1,3 +1,4 @@
+#include <memory>
 #include "img/ResourceNode.h"
 
 namespace img
@@ -5,9 +6,9 @@ namespace img
 
 ResourceNode::ResourceNode(const QString& aIdentifier)
     : TreeNodeBase(this)
-    , mData()
+    , mHandle(new ResourceData(aIdentifier, this), new int(0))
+    , mIsAbandoned()
 {
-    mData = std::make_shared<ResourceData>(aIdentifier, this);
 }
 
 ResourceNode::~ResourceNode()
@@ -15,17 +16,24 @@ ResourceNode::~ResourceNode()
     qDeleteAll(children());
 }
 
-void ResourceNode::resetData()
+ResourceHandle ResourceNode::updateHandle(XCMemBlock aGrabbedImage, const QRect& aRect)
 {
-    auto id = mData->identifier();
-    mData = std::make_shared<ResourceData>(id, this);
+    ResourceHandle oldHandle = mHandle;
+    auto id = mHandle->identifier();
+
+    mHandle = ResourceHandle(new ResourceData(id, this), new int(0));
+    *mHandle = *oldHandle;
+    mHandle->setPos(aRect.topLeft());
+    mHandle->grabImage(aGrabbedImage, aRect.size(), img::Format_RGBA8);
+
+    return oldHandle;
 }
 
-void ResourceNode::swapData(ResourceHandle& aHandle)
+void ResourceNode::swapData(ResourceHandle& aRhs)
 {
-    XC_ASSERT(aHandle->identifier() == mData->identifier());
-    XC_ASSERT(aHandle->serialAddress() == mData->serialAddress());
-    mData.swap(aHandle);
+    XC_ASSERT(aRhs->identifier() == mHandle->identifier());
+    XC_ASSERT(aRhs->serialAddress() == mHandle->serialAddress());
+    mHandle.swapData(aRhs);
 }
 
 int ResourceNode::getCountOfSameSiblings() const
@@ -37,9 +45,9 @@ int ResourceNode::getCountOfSameSiblings() const
     {
         for (auto child : parent->children())
         {
-            if (child != this && child->mData->identifier() == this->mData->identifier())
+            if (child != this && child->mHandle->identifier() == this->mHandle->identifier())
             {
-                if (child->mData->isLayer() == this->mData->isLayer())
+                if (child->mHandle->isLayer() == this->mHandle->isLayer())
                 {
                     ++count;
                 }
@@ -47,6 +55,16 @@ int ResourceNode::getCountOfSameSiblings() const
         }
     }
     return count;
+}
+
+QString ResourceNode::treePath() const
+{
+    QStringList path;
+    for (auto p = this; p != nullptr; p = p->parent())
+    {
+        path.push_front(p->data().identifier());
+    }
+    return path.join("/");
 }
 
 } // namespace img

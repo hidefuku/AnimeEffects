@@ -36,7 +36,9 @@ void ResourceHolder::pushImageTree(
         const QString& aFilePath)
 {
     QDir dir(mRootPath);
-    ImageTree data = { &aGrabNode, dir.relativeFilePath(aFilePath) };
+    ImageTree data;
+    data.topNode = &aGrabNode;
+    data.filePath = dir.relativeFilePath(aFilePath);
     mImageTrees.push_back(data);
 }
 
@@ -45,6 +47,45 @@ ResourceHolder::ImageTree ResourceHolder::popImageTree()
     ImageTree tree = mImageTrees.back();
     mImageTrees.pop_back();
     return tree;
+}
+
+void ResourceHolder::insertImageTree(const ImageTree& aTree, int aIndex)
+{
+    int index = 0;
+    for (auto itr = mImageTrees.begin(); itr != mImageTrees.end(); ++itr)
+    {
+        if (index == aIndex)
+        {
+            mImageTrees.insert(itr, aTree);
+            return;
+        }
+        ++index;
+    }
+}
+
+void ResourceHolder::removeImageTree(int aIndex)
+{
+    int index = 0;
+    for (auto itr = mImageTrees.begin(); itr != mImageTrees.end(); ++itr)
+    {
+        if (index == aIndex)
+        {
+            mImageTrees.erase(itr);
+            return;
+        }
+        ++index;
+    }
+}
+
+ResourceHolder::ImageTree ResourceHolder::imageTree(int aIndex) const
+{
+    int index = 0;
+    for (auto itr = mImageTrees.begin(); itr != mImageTrees.end(); ++itr)
+    {
+        if (index == aIndex) return *itr;
+        ++index;
+    }
+    return ImageTree();
 }
 
 QString ResourceHolder::changeFilePath(
