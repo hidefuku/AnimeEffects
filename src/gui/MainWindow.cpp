@@ -268,7 +268,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::showWithSettings()
 {
-#if defined(QT_NO_DEBUG)
+#if defined(QT_NO_DEBUG) || 1
     QSettings settings;
     auto winSize = settings.value("mainwindow/size");
     auto isMax = settings.value("mainwindow/ismaximized");
@@ -293,7 +293,7 @@ void MainWindow::showWithSettings()
 
 void MainWindow::saveCurrentSettings(int aResultCode)
 {
-#if defined(QT_NO_DEBUG)
+#if defined(QT_NO_DEBUG) || 1
     if (aResultCode == 0)
     {
         QSettings settings;
