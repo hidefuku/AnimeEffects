@@ -299,6 +299,45 @@ QPoint ObjectTreeWidget::treeTopLeftPosition() const
 
 void ObjectTreeWidget::endEdit()
 {
+    class NameChanger : public cmnd::Stable
+    {
+        core::ObjectNode& mNode;
+        QTreeWidgetItem& mItem;
+        QString mPrevName;
+        QString mNextName;
+    public:
+        NameChanger(core::ObjectNode& aNode, QTreeWidgetItem& aItem, const QString& aName)
+            : mNode(aNode)
+            , mItem(aItem)
+            , mPrevName()
+            , mNextName(aName)
+        {
+        }
+
+        virtual QString name() const
+        {
+            return "change object name";
+        }
+
+        virtual void exec()
+        {
+            mPrevName = mNode.name();
+            redo();
+        }
+
+        virtual void redo()
+        {
+            mNode.setName(mNextName);
+            mItem.setText(kItemColumn, mNextName);
+        }
+
+        virtual void undo()
+        {
+            mNode.setName(mPrevName);
+            mItem.setText(kItemColumn, mPrevName);
+        }
+    };
+
     if (mActionItem)
     {
         this->closePersistentEditor(mActionItem, kItemColumn);
@@ -310,7 +349,7 @@ void ObjectTreeWidget::endEdit()
             const QString newName = objItem->text(kItemColumn);
             if (node.name() != newName)
             {
-                node.setName(newName);
+                mProject->commandStack().push(new NameChanger(node, *mActionItem, newName));
             }
         }
         mActionItem = nullptr;
