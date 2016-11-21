@@ -318,6 +318,8 @@ void MainWindow::testNewProject(const QString& aFilePath)
     {
         resetProjectRefs(project);
         mProjectTabBar->pushProject(*project);
+
+        mMainDisplay->resetCamera();
     }
 }
 
@@ -469,6 +471,8 @@ void MainWindow::onNewProjectTriggered()
     {
         resetProjectRefs(project);
         mProjectTabBar->pushProject(*project);
+
+        mMainDisplay->resetCamera();
     }
     else
     {
@@ -498,6 +502,8 @@ void MainWindow::onOpenProjectTriggered()
     {
         resetProjectRefs(project);
         mProjectTabBar->pushProject(*project);
+
+        mMainDisplay->resetCamera();
     }
     else
     {

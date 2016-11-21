@@ -37,6 +37,7 @@ public:
     void setDriver(ctrl::Driver* aDriver);
     void setProjectTabBar(ProjectTabBar* aTabBar);
     void updateRender();
+    void resetCamera();
 
     QReadWriteLock& renderingLock() { return mRenderingLock; }
     const QReadWriteLock& renderingLock() const { return mRenderingLock; }

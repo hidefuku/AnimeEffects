@@ -147,6 +147,26 @@ void MainDisplayWidget::setDriver(ctrl::Driver* aDriver)
     mDriver = aDriver;
 }
 
+void MainDisplayWidget::resetCamera()
+{
+    if (mRenderInfo)
+    {
+        auto& camera = mRenderInfo->camera;
+        auto scrSize = this->size();
+        auto imgSize = camera.imageSize();
+        camera.setCenter(QVector2D(scrSize.width() * 0.5f, scrSize.height() * 0.5f));
+        if (scrSize.width() > 0 && scrSize.height() > 0 && imgSize.width() > 0 && imgSize.height() > 0)
+        {
+            auto scaleX = (float)scrSize.width() / imgSize.width();
+            auto scaleY = (float)scrSize.height() / imgSize.height();
+            auto minScale = scaleX < scaleY ? scaleX : scaleY;
+            camera.setScale(minScale);
+        }
+
+        mCanvasMover.setCamera(&camera);
+    }
+}
+
 void MainDisplayWidget::setProjectTabBar(ProjectTabBar* aTabBar)
 {
     mProjectTabBar = aTabBar;

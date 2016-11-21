@@ -29,6 +29,33 @@ void CanvasMover::setCamera(core::CameraInfo* aCamera)
 {
     mCamera = aCamera;
     mResetRotationOrigin = true;
+
+    // calculate scale index
+    if (mCamera)
+    {
+        auto scale = mCamera->scale();
+        auto workScale = 1.0f;
+
+        mScaleIndex = 0;
+
+        if (scale > 1.0f)
+        {
+            while (scale > workScale && mScaleIndex < kMaxScaleIndex)
+            {
+                mScaleIndex += kWheelValue;
+                workScale = (float)std::pow(1.1, (double)mScaleIndex / kWheelValue);
+            }
+        }
+        else if (scale < 1.0f)
+        {
+            while (scale < workScale && mScaleIndex > kMinScaleIndex)
+            {
+                mScaleIndex -= kWheelValue;
+                workScale = (float)std::pow(0.9, -(double)mScaleIndex / kWheelValue);
+            }
+        }
+        mScaleIndex = xc_clamp(mScaleIndex, kMinScaleIndex, kMaxScaleIndex);
+    }
 }
 
 void CanvasMover::onScreenResized()
