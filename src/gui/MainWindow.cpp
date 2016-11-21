@@ -57,8 +57,8 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
     // setup default opengl format
     {
         QSurfaceFormat format;
-        format.setVersion(gl::Global::kMajorVersion, gl::Global::kMinorVersion);
 #ifdef USE_GL_CORE_PROFILE
+        format.setVersion(gl::Global::kMajorVersion, gl::Global::kMinorVersion);
         format.setProfile(QSurfaceFormat::CoreProfile);
 #endif
         format.setSamples(4);
