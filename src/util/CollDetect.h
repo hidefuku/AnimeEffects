@@ -42,6 +42,7 @@ public:
     static QVector2D getTriangleCenter(const Triangle2D& aTriangle);
 
     static bool intersects(const Segment2D& aSeg0, const Segment2D& aSeg1);
+    static bool intersects(const QRectF& aRect, const Segment2D& aSegment); ///@note aRect is filling
 
     static std::pair<bool, QVector2D> getIntersection(
             const Segment2D& aSeg0, const Segment2D& aSeg1);

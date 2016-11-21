@@ -1,3 +1,4 @@
+#include "util/CollDetect.h"
 #include "ctrl/Driver.h"
 
 namespace
@@ -250,12 +251,23 @@ void Driver::drawOutline(const core::RenderInfo& aRenderInfo, QPainter& aPainter
     aPainter.drawLine(quad[1].toPointF(), quad[2].toPointF());
     aPainter.drawLine(quad[2].toPointF(), quad[3].toPointF());
     aPainter.drawLine(quad[3].toPointF(), quad[0].toPointF());
-#else
+#elif 0
     const QPointF poly[5] = {
         quad[0].toPointF(), quad[1].toPointF(),
         quad[2].toPointF(), quad[3].toPointF(),
         quad[0].toPointF() };
     aPainter.drawConvexPolygon(poly, 5);
+#else
+    const QRectF scrRect(QPointF(0, 0), aRenderInfo.camera.screenSize());
+
+    for (int i = 0; i < 4; ++i)
+    {
+        const int k = (i + 1) % 4;
+        if (util::CollDetect::intersects(scrRect, util::Segment2D(quad[i], quad[k] - quad[i])))
+        {
+            aPainter.drawLine(quad[i].toPointF(), quad[k].toPointF());
+        }
+    }
 #endif
 }
 

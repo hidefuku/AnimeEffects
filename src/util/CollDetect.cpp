@@ -185,6 +185,24 @@ bool CollDetect::intersects(const Segment2D& aSeg0, const Segment2D& aSeg1)
     return true;
 }
 
+bool CollDetect::intersects(const QRectF& aRect, const Segment2D& aSegment)
+{
+    if (aRect.contains(aSegment.start.toPointF())) return true;
+    if (aRect.contains(aSegment.end().toPointF())) return true;
+
+    const QVector2D tl(aRect.topLeft());
+    const QVector2D tr(aRect.topRight());
+    const QVector2D br(aRect.bottomRight());
+    const QVector2D bl(aRect.bottomLeft());
+
+    if (util::CollDetect::intersects(util::Segment2D(tl, tr - tl), aSegment)) return true;
+    if (util::CollDetect::intersects(util::Segment2D(tr, br - tr), aSegment)) return true;
+    if (util::CollDetect::intersects(util::Segment2D(br, bl - br), aSegment)) return true;
+    if (util::CollDetect::intersects(util::Segment2D(bl, tl - bl), aSegment)) return true;
+
+    return false;
+}
+
 std::pair<bool, QVector2D> CollDetect::getIntersection(
         const Segment2D& aSeg0, const Segment2D& aSeg1)
 {
