@@ -2,6 +2,7 @@
 #define IMG_RESOURCEDATA_H
 
 #include <functional>
+#include <QPoint>
 #include "img/Buffer.h"
 #include "img/BlendMode.h"
 namespace img { class ResourceNode; }

@@ -42,7 +42,7 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mMovingCanvasByKey(false)
 {
 #ifdef USE_GL_CORE_PROFILE
-    // setup opengl format (for gl removed)
+    // setup opengl format
     QSurfaceFormat format = this->format();
     format.setVersion(gl::Global::kMajorVersion, gl::Global::kMinorVersion);
     format.setProfile(QSurfaceFormat::CoreProfile);

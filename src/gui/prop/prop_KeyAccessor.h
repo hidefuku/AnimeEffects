@@ -46,7 +46,7 @@ public:
 
 private:
     bool isValid() const { return mProject && mTarget && mTarget->timeLine(); }
-    const int getFrame() const { return mProject->animator().currentFrame().get(); }
+    int getFrame() const { return mProject->animator().currentFrame().get(); }
 
     core::Project* mProject;
     core::ObjectNode* mTarget;

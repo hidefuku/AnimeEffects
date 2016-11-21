@@ -8,6 +8,7 @@
 #include <QElapsedTimer>
 #include <QMessageBox>
 #include "util/IProgressReporter.h"
+#include "gl/Global.h"
 #include "ctrl/Exporter.h"
 #include "gui/MainWindow.h"
 #include "gui/ExportDialog.h"
@@ -56,6 +57,10 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
     // setup default opengl format
     {
         QSurfaceFormat format;
+        format.setVersion(gl::Global::kMajorVersion, gl::Global::kMinorVersion);
+#ifdef USE_GL_CORE_PROFILE
+        format.setProfile(QSurfaceFormat::CoreProfile);
+#endif
         format.setSamples(4);
         QSurfaceFormat::setDefaultFormat(format);
     }
@@ -526,6 +531,10 @@ void MainWindow::onSaveProjectTriggered()
             QString fileName = QFileDialog::getSaveFileName(this, "Save File", "", "ProjectFile (*.anie)");
             if (fileName.isEmpty()) return;
 
+            if (QFileInfo(fileName).suffix().isEmpty())
+            {
+                fileName += ".anie";
+            }
             mCurrent->setFileName(fileName);
         }
 

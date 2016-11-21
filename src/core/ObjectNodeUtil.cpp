@@ -4,6 +4,7 @@
 namespace
 {
 
+#if 0
 QRectF fGetContainedRect(const QRectF& aLhs, const QRectF& aRhs)
 {
     QRectF rect = aLhs;
@@ -13,6 +14,7 @@ QRectF fGetContainedRect(const QRectF& aLhs, const QRectF& aRhs)
     rect.setBottom(std::max(rect.bottom(), aRhs.bottom()));
     return rect;
 }
+#endif
 
 bool fCompareRenderDepth(core::Renderer* a, core::Renderer* b)
 {

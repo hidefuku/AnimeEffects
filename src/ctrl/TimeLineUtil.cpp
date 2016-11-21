@@ -244,8 +244,8 @@ void assignImageKeyResource(
     });
 }
 
-void TimeLineUtil::assignImageKeyOffset(
-        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
+void assignImageKeyOffset(
+        Project& aProject, ObjectNode& aTarget, int aFrame,
         const QVector2D& aNewData)
 {
     assignKeyBy<ImageKey, TimeKeyType_Image>(
