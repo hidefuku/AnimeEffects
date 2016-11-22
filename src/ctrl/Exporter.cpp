@@ -55,6 +55,7 @@ Exporter::Exporter(core::Project& aProject)
     : mProject(aProject)
     , mFramebuffers()
     , mClippingFrame()
+    , mDestinationTexturizer()
     , mTextureDrawer()
     , mOriginTimeInfo()
     , mOverwriteConfirmer()
@@ -125,10 +126,15 @@ bool Exporter::execute(const CommonParam& aCommon, const VideoParam& aVideo)
     mOriginTimeInfo = mProject.currentTimeInfo();
 
     {
+#if defined(_WIN32) || defined(_WIN64)
         const QString program(".\\data\\ffmpeg\\bin\\ffmpeg.exe");
+#else
+        const QString program("ffmpeg");
+#endif
+        const QString out = " \"" + filePath.absoluteFilePath() + "\"";
         const QString ifps = " -r " + QString::number(mCommonParam.fps);
         const QString ofps = " -r " + QString::number(mCommonParam.fps);
-        const QString out = " \"" + filePath.absoluteFilePath() + "\"";
+
         const QString ocodec =
                 !mVideoParam.codec.isEmpty() ?
                     " -vcodec " + mVideoParam.codec : "";
@@ -217,6 +223,10 @@ bool Exporter::start()
         // clipping frame
         mClippingFrame.reset(new core::ClippingFrame());
         mClippingFrame->resize(mProject.attribute().imageSize());
+
+        // create texturizer for destination colors of the framebuffer
+        mDestinationTexturizer.reset(new core::DestinationTexturizer());
+        mDestinationTexturizer->resize(mProject.attribute().imageSize());
     }
 
     mExporting = true;
@@ -294,6 +304,7 @@ bool Exporter::update()
     renderInfo.isGrid = false;
     renderInfo.clippingId = 0;
     renderInfo.clippingFrame = mClippingFrame.data();
+    renderInfo.destTexturizer = mDestinationTexturizer.data();
 
     XC_ASSERT(renderInfo.framebuffer != 0);
     XC_ASSERT(renderInfo.dest != 0);

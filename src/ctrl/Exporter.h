@@ -16,6 +16,7 @@
 #include "core/TimeInfo.h"
 #include "core/TimeKeyBlender.h"
 #include "core/ClippingFrame.h"
+#include "core/DestinationTexturizer.h"
 
 namespace ctrl
 {
@@ -78,6 +79,7 @@ private:
     core::Project& mProject;
     FramebufferList mFramebuffers;
     QScopedPointer<core::ClippingFrame> mClippingFrame;
+    QScopedPointer<core::DestinationTexturizer> mDestinationTexturizer;
     gl::EasyTextureDrawer mTextureDrawer;
     core::TimeInfo mOriginTimeInfo;
     OverwriteConfirmer mOverwriteConfirmer;

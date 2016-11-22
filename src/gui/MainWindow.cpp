@@ -622,15 +622,21 @@ void MainWindow::onExportVideoTriggered()
     EventSuspender suspender(*mMainDisplay, *mTarget);
 
     // get export file name
-    const QString fileName = QFileDialog::getSaveFileName(
+    QString fileName = QFileDialog::getSaveFileName(
                 this,
                 tr("Exporting File"),
                 QString(), // dir
                 tr("Videos (*.ogv)"));
+    const QFileInfo fileInfo(fileName);
 
     // make sure existing
     if (fileName.isEmpty()) return;
-    if (!QFileInfo(fileName).dir().exists()) return;
+    if (!fileInfo.dir().exists()) return;
+
+    if (fileInfo.suffix().isEmpty())
+    {
+        fileName += ".ogv";
+    }
 
     // export param
     ctrl::Exporter::CommonParam cparam;
