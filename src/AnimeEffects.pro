@@ -11,7 +11,7 @@ CONFIG += ordered
 
 # copy directory
 win32 {
-copydata.commands = $(COPY_DIR) $$shell_path($$PWD/data) $$shell_path($$OUT_PWD/data)
+copydata.commands = $(COPY_DIR) $$shell_path($$PWD/../data) $$shell_path($$OUT_PWD/data)
 copytools.commands = $(COPY_DIR) $$shell_path($$PWD/../tools) $$shell_path($$OUT_PWD/tools)
 first.depends = $(first) copydata copytools
 export(first.depends)
@@ -20,7 +20,7 @@ export(copytools.commands)
 QMAKE_EXTRA_TARGETS += first copydata copytools
 }
 unix {
-copydata.commands = rsync -ru $$shell_path($$PWD/data) $$shell_path($$OUT_PWD)
+copydata.commands = rsync -ru $$shell_path($$PWD/../data) $$shell_path($$OUT_PWD)
 copytools.commands = rsync -ru $$shell_path($$PWD/../tools) $$shell_path($$OUT_PWD)
 first.depends = $(first) copydata copytools
 export(first.depends)
