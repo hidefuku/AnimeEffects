@@ -1,0 +1,4 @@
+!*.exe
+
+# ignore ffmpeg for license fear
+ffmpeg*

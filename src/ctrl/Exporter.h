@@ -91,6 +91,7 @@ private:
     VideoParam mVideoParam;
     bool mVideoExporting;
     QScopedPointer<QProcess> mFFMpeg;
+    bool mFFMpegErrorOccurred;
 
     bool mExporting;
     int mIndex;

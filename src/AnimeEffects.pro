@@ -12,15 +12,19 @@ CONFIG += ordered
 # copy directory
 win32 {
 copydata.commands = $(COPY_DIR) $$shell_path($$PWD/data) $$shell_path($$OUT_PWD/data)
-first.depends = $(first) copydata
+copytools.commands = $(COPY_DIR) $$shell_path($$PWD/../tools) $$shell_path($$OUT_PWD/tools)
+first.depends = $(first) copydata copytools
 export(first.depends)
 export(copydata.commands)
-QMAKE_EXTRA_TARGETS += first copydata
+export(copytools.commands)
+QMAKE_EXTRA_TARGETS += first copydata copytools
 }
 unix {
 copydata.commands = rsync -ru $$shell_path($$PWD/data) $$shell_path($$OUT_PWD)
-first.depends = $(first) copydata
+copytools.commands = rsync -ru $$shell_path($$PWD/../tools) $$shell_path($$OUT_PWD)
+first.depends = $(first) copydata copytools
 export(first.depends)
 export(copydata.commands)
-QMAKE_EXTRA_TARGETS += first copydata
+export(copytools.commands)
+QMAKE_EXTRA_TARGETS += first copydata copytools
 }

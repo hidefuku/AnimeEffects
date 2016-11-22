@@ -66,6 +66,7 @@ Exporter::Exporter(core::Project& aProject)
     , mVideoParam()
     , mVideoExporting()
     , mFFMpeg()
+    , mFFMpegErrorOccurred()
     , mExporting(false)
     , mIndex(0)
     , mDigitCount(0)
@@ -124,12 +125,17 @@ bool Exporter::execute(const CommonParam& aCommon, const VideoParam& aVideo)
     mVideoParam = aVideo;
     mVideoExporting = true;
     mOriginTimeInfo = mProject.currentTimeInfo();
+    mFFMpegErrorOccurred = false;
 
     {
 #if defined(_WIN32) || defined(_WIN64)
-        const QString program(".\\data\\ffmpeg\\bin\\ffmpeg.exe");
+        const QFileInfo localEncoderInfo("./tools/ffmpeg.exe");
+        const bool hasLocalEncoder = localEncoderInfo.exists() && localEncoderInfo.isExecutable();
+        const QString program = hasLocalEncoder ? QString(".\\tools\\ffmpeg") : QString("ffmpeg");
 #else
-        const QString program("ffmpeg");
+        const QFileInfo localEncoderInfo("./tools/ffmpeg");
+        const bool hasLocalEncoder = localEncoderInfo.exists() && localEncoderInfo.isExecutable();
+        const QString program = hasLocalEncoder ? QString("./tools/ffmpeg") : QString("ffmpeg");
 #endif
         const QString out = " \"" + filePath.absoluteFilePath() + "\"";
         const QString ifps = " -r " + QString::number(mCommonParam.fps);
@@ -159,7 +165,15 @@ bool Exporter::execute(const CommonParam& aCommon, const VideoParam& aVideo)
         {
             qDebug() << QString(process->readAll().data());
         });
+        mFFMpeg->connect(process, &QProcess::errorOccurred, [=](QProcess::ProcessError aError)
+        {
+            qDebug() << "error occurred" << aError;
+            this->mFFMpegErrorOccurred = true;
+        });
+
         mFFMpeg->start(command, QIODevice::ReadWrite);
+
+        if (mFFMpegErrorOccurred) return false;
     }
 
     return execute();
@@ -364,6 +378,11 @@ bool Exporter::exportImage(const QImage& aFboImage, int aIndex)
         aFboImage.save(&buffer, "PNG");
         buffer.close();
         mFFMpeg->write(byteArray);
+
+        if (mFFMpegErrorOccurred)
+        {
+            return false;
+        }
     }
     else
     {
