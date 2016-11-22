@@ -33,3 +33,6 @@
 
 # Build Directory
 build*/
+
+# Data
+src/data/ffmpeg
