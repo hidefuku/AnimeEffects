@@ -15,6 +15,16 @@ CameraInfo::CameraInfo()
 {
 }
 
+void CameraInfo::reset(const QSize& aScreenSize, const QSize& aImageSize, const QPoint& aLeftTopPos)
+{
+    mScreenSize = aScreenSize;
+    mImageSize = aImageSize;
+    mScale = 1.0f;
+    mRotate = 0.0f;
+    mLeftTopPos = QVector2D(aLeftTopPos);
+    mCenter = mLeftTopPos + centerOffset();
+}
+
 void CameraInfo::setLeftTopPos(const QVector2D& aPos)
 {
     mLeftTopPos = aPos;

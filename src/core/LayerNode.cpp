@@ -193,10 +193,6 @@ void LayerNode::renderClipper(
     frame.bind();
     frame.setupDrawBuffers();
 
-    // blend func
-    ggl.glEnable(GL_BLEND);
-    ggl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     // bind textures
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_2D, textureId);
@@ -236,9 +232,6 @@ void LayerNode::renderClipper(
     // unbind texture
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_2D, 0);
-
-    // blend func
-    ggl.glDisable(GL_BLEND);
 
     // release framebuffer
     frame.release();
@@ -324,7 +317,7 @@ void LayerNode::renderShape(
     {
         // blend func
         ggl.glEnable(GL_BLEND);
-        ggl.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        ggl.glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
 
         ggl.glActiveTexture(GL_TEXTURE0);
         ggl.glBindTexture(GL_TEXTURE_2D, textureId);

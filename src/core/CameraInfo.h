@@ -17,6 +17,8 @@ class CameraInfo
 public:
     CameraInfo();
 
+    void reset(const QSize& aScreenSize, const QSize& aImageSize, const QPoint& aLeftTopPos);
+
     inline void setScreenWidth(int aWidth) { mScreenSize.setWidth(aWidth); }
     inline void setScreenHeight(int aHeight) { mScreenSize.setHeight(aHeight); }
     inline void setScreenSize(const QSize& aSize) { mScreenSize = aSize; }

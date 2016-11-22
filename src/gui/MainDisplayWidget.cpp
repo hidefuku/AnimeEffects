@@ -244,6 +244,9 @@ void MainDisplayWidget::paintGL()
     mClippingFrame->resetClippingId();
     GL_CHECK_ERROR();
 
+    mDestinationTexturizer->clearTexture();
+    GL_CHECK_ERROR();
+
     if (!mFramebuffer->bind())
     {
         XC_FATAL_ERROR("OpenGL Error", "Failed to bind framebuffer.", "");

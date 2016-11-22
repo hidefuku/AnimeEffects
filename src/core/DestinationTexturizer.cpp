@@ -1,4 +1,5 @@
 #include "gl/Global.h"
+#include "gl/Util.h"
 #include "core/DestinationTexturizer.h"
 
 namespace
@@ -38,6 +39,28 @@ void DestinationTexturizer::resize(const QSize& aSize)
     XC_ASSERT(mFramebuffer->isComplete());
 }
 
+void DestinationTexturizer::clearTexture()
+{
+    XC_ASSERT(mTexture->size().isValid());
+
+    auto& ggl = gl::Global::functions();
+
+    mFramebuffer->bind();
+
+    // setup drawbuffers
+    const GLenum attachments[] = { GL_COLOR_ATTACHMENT0 };
+    ggl.glDrawBuffers(1, attachments);
+
+    gl::Util::resetRenderState();
+    gl::Util::setViewportAsActualPixels(mTexture->size());
+    gl::Util::clearColorBuffer(0.0f, 0.0f, 0.0f, 0.0f);
+
+    mFramebuffer->release();
+
+    ggl.glFlush();
+    GL_CHECK_ERROR();
+}
+
 void DestinationTexturizer::update(
         GLuint aFramebuffer, GLuint aFrameTexture, const QMatrix4x4& aViewMatrix,
         const LayerMesh& aMesh, gl::BufferObject& aPositions)
@@ -46,12 +69,12 @@ void DestinationTexturizer::update(
 
     auto& ggl = gl::Global::functions();
 
+    // bind framebuffer
+    mFramebuffer->bind();
+
     // setup drawbuffers
     const GLenum attachments[] = { GL_COLOR_ATTACHMENT0 };
     ggl.glDrawBuffers(1, attachments);
-
-    // bind framebuffer
-    mFramebuffer->bind();
 
     // bind textures
     ggl.glActiveTexture(GL_TEXTURE0);

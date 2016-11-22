@@ -17,6 +17,8 @@ public:
 
     void resize(const QSize& aSize);
 
+    void clearTexture();
+
     void update(
             GLuint aFramebuffer, GLuint aFrameTexture, const QMatrix4x4& aViewMatrix,
             const LayerMesh& aMesh, gl::BufferObject& aPositions);

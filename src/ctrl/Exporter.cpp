@@ -282,6 +282,9 @@ bool Exporter::update()
     mClippingFrame->clearTexture();
     mClippingFrame->resetClippingId();
 
+    // clear destination texture
+    mDestinationTexturizer->clearTexture();
+
     // bind framebuffer
     if (!mFramebuffers.front()->bind())
     {
@@ -295,9 +298,7 @@ bool Exporter::update()
 
     // render
     core::RenderInfo renderInfo;
-    renderInfo.camera.setLeftTopPos(QVector2D());
-    renderInfo.camera.setScreenSize(originSize);
-    renderInfo.camera.setScale(1.0f);
+    renderInfo.camera.reset(originSize, originSize, QPoint());
     renderInfo.time = timeInfo;
     renderInfo.framebuffer = mFramebuffers.front()->handle();
     renderInfo.dest = mFramebuffers.front()->texture();
