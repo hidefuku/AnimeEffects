@@ -317,7 +317,8 @@ void MainWindow::testNewProject(const QString& aFilePath)
     menu::ProgressReporter progress(false, this);
 
     core::Project::Attribute attribute;
-    auto project = mSystem.newProject(aFilePath, attribute, new ProjectHook(), progress);
+    auto project = mSystem.newProject(
+                aFilePath, attribute, new ProjectHook(), progress, false);
 
     if (project)
     {
@@ -447,14 +448,12 @@ void MainWindow::onNewProjectTriggered()
     // stop animation and main display rendering
     EventSuspender suspender(*mMainDisplay, *mTarget);
 
-    QString fileName = QFileDialog::getOpenFileName(this, "Open File", "", "ImageFile (*.psd)");
-    if (fileName.isEmpty()) return;
-
     // input attribute
     core::Project::Attribute attribute;
+    QString fileName;
+    bool specifiesCanvasSize = false;
     {
-        QScopedPointer<NewProjectDialog> dialog(
-                    new NewProjectDialog(fileName, this));
+        QScopedPointer<NewProjectDialog> dialog(new NewProjectDialog(this));
 
         dialog->exec();
         if (dialog->result() != QDialog::Accepted)
@@ -462,6 +461,8 @@ void MainWindow::onNewProjectTriggered()
             return;
         }
         attribute = dialog->attribute();
+        fileName = dialog->fileName();
+        specifiesCanvasSize = dialog->specifiesCanvasSize();
     }
 
     // clear old project
@@ -470,7 +471,9 @@ void MainWindow::onNewProjectTriggered()
     menu::ProgressReporter progress(false, this);
 
     // create
-    auto project = mSystem.newProject(fileName, attribute, new ProjectHook(), progress);
+    auto project = mSystem.newProject(
+                fileName, attribute, new ProjectHook(),
+                progress, specifiesCanvasSize);
 
     if (project)
     {

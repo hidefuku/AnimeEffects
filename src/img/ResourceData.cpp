@@ -1,4 +1,5 @@
 #include <algorithm>
+#include "util/MathUtil.h"
 #include "img/ResourceNode.h"
 #include "img/ResourceHandle.h"
 
@@ -58,6 +59,16 @@ void ResourceData::copyFrom(const ResourceData& aData)
     mIsLayer = aData.mIsLayer;
     mBlendMode = aData.mBlendMode;
     mImageLoader = aData.mImageLoader;
+}
+
+QRect ResourceData::rect() const
+{
+    return QRect(mPos, mBuffer.pixelSize());
+}
+
+QVector2D ResourceData::center() const
+{
+    return util::MathUtil::getCenter(rect());
 }
 
 bool ResourceData::hasSameLayerDataWith(const ResourceData& aData)

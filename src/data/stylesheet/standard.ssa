@@ -217,6 +217,20 @@ QPushButton#standardButton:pressed {
 padding-top: 6px;
 }
 
+QPushButton#browser {
+border: 1px solid #a0a0a0;
+border-radius: 2px;
+padding: 2px;
+width: 18px;
+height: 15px;
+}
+QPushButton#browser::enabled {
+image: url(data/icon/filew.png);
+}
+QPushButton#browser::disabled {
+image: url(data/icon/file.png);
+}
+
 QTreeView#objectTree {
 background: #F8F8F8;
 show-decoration-selected: 1;

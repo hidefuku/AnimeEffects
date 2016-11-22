@@ -23,7 +23,8 @@ public:
             const QString& aFileName,
             const core::Project::Attribute& aAttr,
             core::Project::Hook* aHookGrabbed,
-            util::IProgressReporter& aReporter);
+            util::IProgressReporter& aReporter,
+            bool aSpecifiesCanvasSize);
 
     core::Project* openProject(
             const QString& aFileName,

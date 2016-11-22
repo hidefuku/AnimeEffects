@@ -37,10 +37,13 @@ public:
     BlendMode blendMode() const { return mBlendMode; }
     const ResourceNode* serialAddress() const { return mSerialAddress; }
 
-    bool hasSameLayerDataWith(const ResourceData& aData); // it's heavy
-
     void setImageLoader(const ImageLoader& aLoader) { mImageLoader = aLoader; }
     bool loadImage() { return (mImageLoader && mImageLoader(*this)); }
+
+    QRect rect() const;
+    QVector2D center() const;
+
+    bool hasSameLayerDataWith(const ResourceData& aData); // it's heavy
 
 private:
     img::Buffer mBuffer;

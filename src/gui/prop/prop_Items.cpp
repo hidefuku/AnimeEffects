@@ -354,7 +354,7 @@ BrowseItem::BrowseItem(QWidget* aParent)
     mLine->setFocusPolicy(Qt::NoFocus);
     mLayout->addWidget(mLine);
     mButton = new QPushButton(aParent);
-    mButton->connect(mButton, &QPushButton::pressed, [=](){ this->onButtonPushed(); });
+    mButton->connect(mButton, &QPushButton::clicked, [=](){ this->onButtonPushed(); });
     mButton->setObjectName("browser");
     mButton->setFocusPolicy(Qt::NoFocus);
     mLayout->addWidget(mButton);

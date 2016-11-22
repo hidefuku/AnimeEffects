@@ -196,7 +196,7 @@ std::pair<XCMemBlock, QRect> Util::createTextureImage(const QImage& aImage)
 
     // modulate color bit
     auto image = recreateForBiLinearSampling(workImage, aImage.size());
-    const QRect rect(QPoint(0, 0), aImage.size() + QSize(2, 2));
+    const QRect rect(QPoint(-1, -1), aImage.size() + QSize(2, 2));
 
     return std::pair<XCMemBlock, QRect>(image, rect);
 }
@@ -287,6 +287,7 @@ ResourceNode* Util::createResourceNode(const QImage& aImage, const QString& aNam
     {
         auto image = aImage.convertToFormat(QImage::Format_RGBA8888);
         auto texImage = createTextureImage(image);
+        resNode->data().setPos(texImage.second.topLeft());
         resNode->data().grabImage(texImage.first, texImage.second.size(), Format_RGBA8);
     }
     else
@@ -295,6 +296,7 @@ ResourceNode* Util::createResourceNode(const QImage& aImage, const QString& aNam
         {
             auto image = aImage.convertToFormat(QImage::Format_RGBA8888);
             auto texImage = createTextureImage(image);
+            aData.setPos(texImage.second.topLeft());
             aData.grabImage(texImage.first, texImage.second.size(), Format_RGBA8);
             return true;
         });

@@ -15,26 +15,35 @@ namespace ctrl
 class ImageFileLoader
 {
 public:
-    ImageFileLoader();
-    bool load(const QFileInfo& aPath, core::Project& aProject,
-              const gl::DeviceInfo& aGLDeviceInfo,
+    ImageFileLoader(const gl::DeviceInfo& aDeviceInfo);
+
+    void setCanvasSize(const QSize& aSize, bool aForce);
+
+    bool load(const QString& aPath, core::Project& aProject,
               util::IProgressReporter& aReporter);
 
     const QString& log() const { return mLog; }
 
 private:
-    bool loadPsd(
-            core::Project& aProject,
-            util::IProgressReporter& aReporter);
+    bool createEmptyCanvas(core::Project& aProject,
+                           const QString& aTopName,
+                           const QSize& aCanvasSize);
+
+    bool loadPsd(core::Project& aProject,
+                 util::IProgressReporter& aReporter);
+
+    bool loadImage(core::Project& aProject,
+                   util::IProgressReporter& aReporter);
 
     static QRect calculateBoundingRectFromChildren(const core::ObjectNode& aNode);
-    void setDefaultPositions(core::ObjectNode& aNode);
+    void setDefaultPositionsFromInitialRects(core::ObjectNode& aNode);
     bool checkTextureSizeError(uint32 aWidth, uint32 aHeight);
 
     QString mLog;
-    QScopedPointer<std::ifstream> mFile;
     QFileInfo mFileInfo;
     gl::DeviceInfo mGLDeviceInfo;
+    QSize mCanvasSize;
+    bool mForceCanvasSize;
 };
 
 } // namespace ctrl

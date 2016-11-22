@@ -10,12 +10,16 @@ namespace gui
 class NewProjectDialog : public EasyDialog
 {
 public:
-    NewProjectDialog(const QString& aPath, QWidget* aParent);
+    NewProjectDialog(QWidget* aParent);
+    QString fileName() const { return mFileName; }
     const core::Project::Attribute& attribute() const { return mAttribute; }
+    bool specifiesCanvasSize() const { return mSpecifiesCanvasSize; }
 
 private:
     QWidget* createOption();
+    QString mFileName;
     core::Project::Attribute mAttribute;
+    bool mSpecifiesCanvasSize;
 };
 
 } // namespace gui

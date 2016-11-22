@@ -44,7 +44,8 @@ core::Project* System::newProject(
         const QString& aFileName,
         const core::Project::Attribute& aAttr,
         core::Project::Hook* aHookGrabbed,
-        util::IProgressReporter& aReporter)
+        util::IProgressReporter& aReporter,
+        bool aSpecifiesCanvasSize)
 {
     QScopedPointer<core::Project::Hook> hookScope(aHookGrabbed);
 
@@ -56,8 +57,10 @@ core::Project* System::newProject(
     projectScope->attribute() = aAttr;
     projectScope->resourceHolder().setRootPath(QFileInfo(aFileName).path());
 
-    ctrl::ImageFileLoader loader;
-    if (loader.load(QFileInfo(aFileName), *projectScope, mGLDeviceInfo, aReporter))
+    ctrl::ImageFileLoader loader(mGLDeviceInfo);
+    loader.setCanvasSize(aAttr.imageSize(), aSpecifiesCanvasSize);
+
+    if (loader.load(aFileName, *projectScope, aReporter))
     {
         mProjects.push_back(projectScope.take());
         return mProjects.back();
