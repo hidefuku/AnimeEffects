@@ -1,5 +1,4 @@
 QFrame#holder {
-font-family: Meiryo UI;font-style: normal;font-size: 9pt;font-weight:normal;
 background-color: #fafafa;
 border-radius:2px;
 }
@@ -57,7 +56,6 @@ image: url(data/icon/branchopen.png);
 }
 
 QGroupBox#keyGroup {
-font-family: Meiryo UI;font-style: normal;font-size: 9pt;font-weight:normal;
 background-color: #f8f8f8;
 border:1px solid transparent;
 border-radius:4px;
@@ -73,7 +71,6 @@ padding-top: 2px;
 }
 
 QGroupBox#attrGroup {
-font-family: Meiryo UI;font-style: normal;font-size: 9pt;font-weight:normal;
 background-color: #f8f8f8;
 border:1px solid transparent;
 border-radius:4px;
@@ -89,7 +86,6 @@ padding-top: 2px;
 }
 
 QGroupBox#keyKnocker {
-font-family: Meiryo UI;font-style: normal;font-size: 9pt;font-weight:normal;
 background-color: #f8f8f8;
 border:1px solid transparent;
 border-radius:4px;
@@ -135,7 +131,7 @@ image: url(data/icon/file.png);
 }
 
 QGroupBox#propertyPanel {
-font-family: Meiryo UI;font-style: normal;font-size: 10pt;font-weight:normal;
+font-size: 10pt;
 background-color: #d0d0d0;
 border:1px solid transparent;
 border-radius:8px;

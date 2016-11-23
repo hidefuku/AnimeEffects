@@ -64,18 +64,3 @@ background: qlineargradient(
    stop: 1   #FAFCFF
 );
 }
-
-QGroupBox {
-color: #3C3C3C;
-font-family: Meiryo UI;font-style: normal;font-size: 10pt;font-weight:normal;
-background-color: #3C3C3C;
-border:1px solid transparent;
-border-radius:8px;
-margin-top: 2ex;
-}
-
-QGroupBox::title {
-subcontrol-origin: margin;
-subcontrol-position:top left;
-padding:0 10px;
-}

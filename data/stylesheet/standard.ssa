@@ -1,5 +1,8 @@
 QWidget {
-font-family: Meiryo UI;font-style: normal;font-size: 9pt;font-weight:normal;
+font-family: Meiryo UI;
+font-style: normal;
+font-size: 9pt;
+font-weight:normal;
 }
 
 QMenuBar {
@@ -53,7 +56,6 @@ border: 1px solid #d0d0d0;
 }
 
 QPlainTextEdit {
-font-family: Meiryo UI;font-style: normal;font-size: 9pt;font-weight:normal;
 background-color: #f4f4f4;
 color: #303030;
 border: 1px solid #d0d0d0;
