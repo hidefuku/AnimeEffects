@@ -126,7 +126,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
     // create targeting widget
     {
         QDockWidget* dockWidget = new QDockWidget(this);
-        dockWidget->setWindowTitle("Target Widget");
+        dockWidget->setWindowTitle(tr("Target Dock"));
         dockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
         dockWidget->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
         this->addDockWidget(Qt::BottomDockWidgetArea, dockWidget);
@@ -138,7 +138,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
     // create property widget
     {
         QDockWidget* dockWidget = new QDockWidget(this);
-        dockWidget->setWindowTitle("Property Widget");
+        dockWidget->setWindowTitle(tr("Property Dock"));
         dockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
         dockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
         this->addDockWidget(Qt::RightDockWidgetArea, dockWidget);
@@ -179,7 +179,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
     // create tool widget
     {
         QDockWidget* dockWidget = new QDockWidget(this);
-        dockWidget->setWindowTitle("Tool Widget");
+        dockWidget->setWindowTitle(tr("Tool Dock"));
         dockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
         this->addDockWidget(Qt::LeftDockWidgetArea, dockWidget);
 

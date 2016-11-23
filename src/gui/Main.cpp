@@ -277,7 +277,8 @@ void operator delete[](void* aPtr)
 #endif
 
 #include <QApplication>
-#include <QtCore/QDebug>
+#include <QTranslator>
+#include <QLocale>
 #include <QScopedPointer>
 #include <QDir>
 #include <QMessageBox>
@@ -524,6 +525,23 @@ int entryPoint(int argc, char *argv[])
     // set organization and application name for the application setting
     QCoreApplication::setOrganizationName("AnimeEffectsProject");
     QCoreApplication::setApplicationName("AnimeEffects");
+
+    // language
+    {
+        QString translation;
+        auto language = QLocale::system().language();
+        if (language == QLocale::Japanese)
+        {
+            translation = "translation_ja";
+        }
+
+        if (!translation.isEmpty())
+        {
+            auto translator = new QTranslator();
+            translator->load(translation, "data/locale");
+            app.installTranslator(translator);
+        }
+    }
 
     {
         // load constant gui resources

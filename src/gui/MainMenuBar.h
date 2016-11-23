@@ -11,6 +11,7 @@ namespace gui
 
 class MainMenuBar : public QMenuBar
 {
+    Q_OBJECT
 public:
     MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* aParent);
     void setProject(core::Project* aProject);

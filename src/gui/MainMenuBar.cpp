@@ -22,7 +22,7 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
 {
     MainWindow* mainWindow = &aMainWindow;
 
-    QMenu* fileMenu = new QMenu("File", this);
+    QMenu* fileMenu = new QMenu(tr("File"), this);
     {
         QAction* newProject   = new QAction("New Project...", this);
         QAction* openProject  = new QAction("Open Project...", this);
@@ -66,7 +66,7 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
         fileMenu->addAction(closeProject);
     }
 
-    QMenu* editMenu = new QMenu("Edit", this);
+    QMenu* editMenu = new QMenu(tr("Edit"), this);
     {
         QAction* undo = new QAction("Undo", this);
         QAction* redo = new QAction("Redo", this);
@@ -81,7 +81,7 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
         editMenu->addAction(redo);
     }
 
-    QMenu* projMenu = new QMenu("Project", this);
+    QMenu* projMenu = new QMenu(tr("Project"), this);
     {
         QAction* canvSize = new QAction("Canvas Size...", this);
         QAction* maxFrame = new QAction("Max Frame...", this);
@@ -100,7 +100,7 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
         projMenu->addAction(loopAnim);
     }
 
-    QMenu* windowMenu = new QMenu("Window", this);
+    QMenu* windowMenu = new QMenu(tr("Window"), this);
     {
         QAction* resource = new QAction("Resource Window", this);
         resource->setCheckable(true);
@@ -124,7 +124,7 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
         windowMenu->addAction(resource);
     }
 
-    QMenu* optionMenu = new QMenu("Option", this);
+    QMenu* optionMenu = new QMenu(tr("Option"), this);
     {
         QAction* keyBind = new QAction("Key Binding...", this);
 
@@ -139,7 +139,7 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
         optionMenu->addAction(keyBind);
     }
 
-    QMenu* helpMenu = new QMenu("Help", this);
+    QMenu* helpMenu = new QMenu(tr("Help"), this);
     {
         QAction* aboutMe = new QAction("About Anime Effects...", this);
         connect(aboutMe, &QAction::triggered, [=]()
