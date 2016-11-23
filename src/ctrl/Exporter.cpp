@@ -71,6 +71,8 @@ Exporter::Exporter(core::Project& aProject)
     , mIndex(0)
     , mDigitCount(0)
     , mProgress(0.0f)
+    , mLog()
+    , mIsCanceled()
 {
 }
 
@@ -96,17 +98,27 @@ void Exporter::setProgressReporter(util::IProgressReporter& aReporter)
 bool Exporter::execute(const CommonParam& aCommon, const PngParam& aPng)
 {
     // check param
-    if (!aCommon.isValid()) return false;
+    if (!aCommon.isValid())
+    {
+        mLog = "Invalid common parameters.";
+        return false;
+    }
 
     // check directory
     QFileInfo path(aCommon.path);
-    if (!path.exists() || !path.isDir()) return false;
+    if (!path.exists() || !path.isDir())
+    {
+        mLog = "Invalid directory path.";
+        return false;
+    }
 
     mCommonParam = aCommon;
     mPngParam = aPng;
     mVideoExporting = false;
     mOriginTimeInfo = mProject.currentTimeInfo();
     mOverwriteConfirmation = false;
+    mLog.clear();
+    mIsCanceled = false;
 
     return execute();
 }
@@ -114,18 +126,29 @@ bool Exporter::execute(const CommonParam& aCommon, const PngParam& aPng)
 bool Exporter::execute(const CommonParam& aCommon, const VideoParam& aVideo)
 {
     // check param
-    if (!aCommon.isValid()) return false;
+    if (!aCommon.isValid())
+    {
+        mLog = "Invalid common parameters.";
+        return false;
+    }
 
     // check file overwriting
     mOverwriteConfirmation = false;
     QFileInfo filePath(aCommon.path);
-    if (!checkOverwriting(filePath)) return false;
+    if (!checkOverwriting(filePath))
+    {
+        mLog = "Exporting was canceled.";
+        mIsCanceled = true;
+        return false;
+    }
 
     mCommonParam = aCommon;
     mVideoParam = aVideo;
     mVideoExporting = true;
     mOriginTimeInfo = mProject.currentTimeInfo();
     mFFMpegErrorOccurred = false;
+    mLog.clear();
+    mIsCanceled = false;
 
     {
 #if defined(_WIN32) || defined(_WIN64)
@@ -165,15 +188,18 @@ bool Exporter::execute(const CommonParam& aCommon, const VideoParam& aVideo)
         {
             qDebug() << QString(process->readAll().data());
         });
-        mFFMpeg->connect(process, &QProcess::errorOccurred, [=](QProcess::ProcessError aError)
+        mFFMpeg->connect(process, &QProcess::errorOccurred, [=](QProcess::ProcessError)
         {
-            qDebug() << "error occurred" << aError;
             this->mFFMpegErrorOccurred = true;
         });
 
         mFFMpeg->start(command, QIODevice::ReadWrite);
 
-        if (mFFMpegErrorOccurred) return false;
+        if (mFFMpegErrorOccurred)
+        {
+            mLog = "FFmpeg error occurred.\n" + mFFMpeg->errorString();
+            return false;
+        }
     }
 
     return execute();
@@ -203,6 +229,8 @@ bool Exporter::execute()
             if (mProgressReporter->wasCanceled())
             {
                 finish();
+                mLog = "Exporting was canceled.";
+                mIsCanceled = true;
                 return false;
             }
         }
@@ -228,6 +256,7 @@ bool Exporter::start()
         // texture drawer
         if (!mTextureDrawer.init())
         {
+            mLog = "Failed to initialize TextureDrawer";
             return false;
         }
 
@@ -381,6 +410,7 @@ bool Exporter::exportImage(const QImage& aFboImage, int aIndex)
 
         if (mFFMpegErrorOccurred)
         {
+            mLog = "FFmpeg error occurred.\n" + mFFMpeg->errorString();
             return false;
         }
     }
@@ -493,7 +523,10 @@ bool Exporter::decidePngPath(int aIndex, QFileInfo& aPath)
     QFileInfo filePath(mCommonParam.path + "/" + mPngParam.name + number + ".png");
 
     // check overwrite
-    if (!checkOverwriting(filePath)) return false;
+    if (!checkOverwriting(filePath))
+    {
+        return false;
+    }
 
     aPath = filePath;
     return true;

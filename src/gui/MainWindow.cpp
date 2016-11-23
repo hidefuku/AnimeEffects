@@ -611,6 +611,12 @@ void MainWindow::onExportPngSeqTriggered()
     // execute
     if (!exporter.execute(cparam, pparam))
     {
+        progress.dialog().cancel();
+
+        if (!exporter.isCanceled())
+        {
+            QMessageBox::warning(nullptr, "Exporting Error", exporter.log());
+        }
         return;
     }
 }
@@ -685,6 +691,12 @@ void MainWindow::onExportVideoTriggered(const QString& aSuffix, QString aCodec)
     // execute
     if (!exporter.execute(cparam, vparam))
     {
+        progress.dialog().cancel();
+
+        if (!exporter.isCanceled())
+        {
+            QMessageBox::warning(nullptr, "Exporting Error", exporter.log());
+        }
         return;
     }
 }

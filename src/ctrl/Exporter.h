@@ -59,6 +59,9 @@ public:
     bool execute(const CommonParam& aCommon, const PngParam& aPng);
     bool execute(const CommonParam& aCommon, const VideoParam& aVideo);
 
+    const QString& log() const { return mLog; }
+    bool isCanceled() const { return mIsCanceled; }
+
 private:
     typedef std::unique_ptr<QOpenGLFramebufferObject> FramebufferPtr;
     typedef std::list<FramebufferPtr> FramebufferList;
@@ -97,6 +100,8 @@ private:
     int mIndex;
     int mDigitCount;
     float mProgress;
+    QString mLog;
+    bool mIsCanceled;
 };
 
 } // namespace ctrl
