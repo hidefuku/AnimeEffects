@@ -55,6 +55,10 @@ QCheckBox#keyIcon::indicator:checked {
 image: url(data/icon/branchopen.png);
 }
 
+QGroupBox {
+font-size: 9pt;
+}
+
 QGroupBox#keyGroup {
 background-color: #f8f8f8;
 border:1px solid transparent;

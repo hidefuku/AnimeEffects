@@ -281,6 +281,7 @@ void operator delete[](void* aPtr)
 #include <QLocale>
 #include <QScopedPointer>
 #include <QDir>
+#include <QFile>
 #include <QMessageBox>
 #include "XC.h"
 #include "gl/Global.h"
@@ -527,19 +528,48 @@ int entryPoint(int argc, char *argv[])
     QCoreApplication::setApplicationName("AnimeEffects");
 
     // language
+    QString preferFont;
     {
-        QString translation;
+        QString locAbb;
+#if 1
         auto language = QLocale::system().language();
         if (language == QLocale::Japanese)
         {
-            translation = "translation_ja";
+            locAbb = "ja";
         }
+#endif
 
-        if (!translation.isEmpty())
+        if (!locAbb.isEmpty())
         {
             auto translator = new QTranslator();
-            translator->load(translation, "data/locale");
+            translator->load("translation_" + locAbb, "data/locale");
             app.installTranslator(translator);
+        }
+
+        {
+#if defined(Q_OS_WIN)
+            const QString opt = "_win";
+#elif defined(Q_OS_MAC)
+            const QString opt = "_mac";
+#else
+            const QString opt = "";
+#endif
+
+            const QString preference = locAbb.isEmpty() ? "preference" : "preference_" + locAbb;
+            QFile file("./data/locale/" + preference + ".txt");
+            if (file.open(QIODevice::ReadOnly))
+            {
+                QTextStream in(&file);
+                while (!in.atEnd())
+                {
+                    auto kv = in.readLine().split('=');
+                    if (kv.count() != 2) continue;
+                    auto key = kv[0].trimmed();
+                    auto value = kv[1].trimmed();
+
+                    if (key == "font_family" + opt) preferFont = value;
+                }
+            }
         }
     }
 
@@ -551,7 +581,7 @@ int entryPoint(int argc, char *argv[])
         QScopedPointer<ctrl::System> system(new ctrl::System(resourceDir, cacheDir));
 
         // create main window
-        QScopedPointer<gui::MainWindow> mainWindow(new gui::MainWindow(*system, *resources));
+        QScopedPointer<gui::MainWindow> mainWindow(new gui::MainWindow(*system, *resources, preferFont));
 
         qDebug() << "show main window";
         // show main window

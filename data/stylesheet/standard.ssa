@@ -1,8 +1,5 @@
 QWidget {
-font-family: Meiryo UI;
-font-style: normal;
 font-size: 9pt;
-font-weight:normal;
 }
 
 QMenuBar {

@@ -28,7 +28,9 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(ctrl::System& aSystem, GUIResources& aResources);
+    MainWindow(ctrl::System& aSystem,
+               GUIResources& aResources,
+               const QString& aPreferFont);
     ~MainWindow();
 
     void showWithSettings();

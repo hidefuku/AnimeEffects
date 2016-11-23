@@ -36,7 +36,7 @@ public:
 namespace gui
 {
 
-MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
+MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const QString& aPreferFont)
     : QMainWindow(nullptr)
     , mSystem(aSystem)
     , mResources(aResources)
@@ -72,7 +72,13 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources)
         QFile stylesheet("data/stylesheet/standard.ssa");
         if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            this->setStyleSheet(QTextStream(&stylesheet).readAll());
+            QString fontOption;
+            if (!aPreferFont.isEmpty())
+            {
+                fontOption = "QWidget { font-family: " + aPreferFont + "; }\n";
+            }
+
+            this->setStyleSheet(fontOption + QTextStream(&stylesheet).readAll());
         }
 
         this->setMouseTracking(true);

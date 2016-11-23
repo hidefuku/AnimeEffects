@@ -1,0 +1,1 @@
+font_family_win = Meiryo UI
