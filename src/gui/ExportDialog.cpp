@@ -81,7 +81,7 @@ void ExportDialog::initializeParameter(const QString& aPath)
     if (mVideoExporting)
     {
         mCommonParam.path = aPath;
-        mVideoParam.format = "ogv";
+        mVideoParam.format = "";
         mVideoParam.codec = "";
         mVideoParam.bps = 1 * 1000 * 1000;
     }

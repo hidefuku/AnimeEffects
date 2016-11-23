@@ -32,11 +32,20 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
         QMenu* exportAs = new QMenu("Export As", this);
         {
             QAction* pngs = new QAction("PNG Sequence...", this);
+            QAction* mp4  = new QAction("MPEG-4 Video...", this);
+            QAction* webm = new QAction("WebM Video...", this);
             QAction* ogv  = new QAction("Ogg Video...", this);
+            QAction* avil = new QAction("Lossless AVI Video...", this);
             connect(pngs, &QAction::triggered, mainWindow, &MainWindow::onExportPngSeqTriggered);
-            connect(ogv, &QAction::triggered, mainWindow, &MainWindow::onExportVideoTriggered);
+            connect(mp4,  &QAction::triggered, [=](){ mainWindow->onExportVideoTriggered("mp4"); });
+            connect(webm, &QAction::triggered, [=](){ mainWindow->onExportVideoTriggered("webm"); });
+            connect(ogv,  &QAction::triggered, [=](){ mainWindow->onExportVideoTriggered("ogv"); });
+            connect(avil, &QAction::triggered, [=](){ mainWindow->onExportVideoTriggered("avi", "huffyuv"); });
             exportAs->addAction(pngs);
+            exportAs->addAction(mp4);
+            exportAs->addAction(webm);
             exportAs->addAction(ogv);
+            exportAs->addAction(avil);
         }
 
         mProjectActions.push_back(saveProject);

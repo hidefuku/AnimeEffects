@@ -614,19 +614,21 @@ void MainWindow::onExportPngSeqTriggered()
         return;
     }
 }
-void MainWindow::onExportVideoTriggered()
+void MainWindow::onExportVideoTriggered(const QString& aSuffix, QString aCodec)
 {
     if (!mCurrent) return;
 
     // stop animation and main display rendering
     EventSuspender suspender(*mMainDisplay, *mTarget);
 
+    const QString targetVideos = "Videos (*." + aSuffix + ")";
+
     // get export file name
     QString fileName = QFileDialog::getSaveFileName(
                 this,
                 tr("Exporting File"),
                 QString(), // dir
-                tr("Videos (*.ogv)"));
+                targetVideos);
     const QFileInfo fileInfo(fileName);
 
     // make sure existing
@@ -635,7 +637,12 @@ void MainWindow::onExportVideoTriggered()
 
     if (fileInfo.suffix().isEmpty())
     {
-        fileName += ".ogv";
+        fileName += "." + aSuffix; // makesure suffix
+    }
+    else if (fileInfo.suffix() != aSuffix)
+    {
+        QMessageBox::warning(nullptr, "Operation Error", "Invalid suffix specification.");
+        return;
     }
 
     // export param
@@ -651,7 +658,10 @@ void MainWindow::onExportVideoTriggered()
         cparam = dialog->commonParam();
         vparam = dialog->videoParam();
     }
+    vparam.format = aSuffix;
+    vparam.codec = aCodec;
 
+#if 0
     // gui for confirm overwrite
     auto overwriteConfirmer = [=](const QString&) -> bool
     {
@@ -663,6 +673,9 @@ void MainWindow::onExportVideoTriggered()
         int ret = msgBox.exec();
         return (ret == QMessageBox::Ok);
     };
+#else
+    auto overwriteConfirmer = [=](const QString&)->bool { return true; };
+#endif
 
     menu::ProgressReporter progress(true, this);
     ctrl::Exporter exporter(*mCurrent);

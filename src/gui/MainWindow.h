@@ -43,7 +43,7 @@ public:
     void onSaveProjectTriggered();
     void onCloseProjectTriggered();
     void onExportPngSeqTriggered();
-    void onExportVideoTriggered();
+    void onExportVideoTriggered(const QString& aSuffix, QString aCodec = QString());
     void onUndoTriggered();
     void onRedoTriggered();
 
