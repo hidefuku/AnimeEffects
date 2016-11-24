@@ -141,18 +141,27 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
 
     QMenu* helpMenu = new QMenu(tr("Help"), this);
     {
-        QAction* aboutMe = new QAction("About Anime Effects...", this);
+        QAction* aboutMe = new QAction("About AnimeEffects...", this);
         connect(aboutMe, &QAction::triggered, [=]()
         {
             QMessageBox msgBox;
             msgBox.setIcon(QMessageBox::Information);
-            msgBox.setText("Anime Effects (Version 0.9.0)");
+            auto versionString = QString::number(AE_MAJOR_VERSION) + "." + QString::number(AE_MINOR_VERSION);
+            auto formatVersionString = QString::number(AE_PROJECT_FORMAT_MAJOR_VERSION) + "." + QString::number(AE_PROJECT_FORMAT_MINOR_VERSION);
+            auto platform = QSysInfo::productType();
+            msgBox.setText(QString("AnimeEffects for ") + platform + " version " + versionString);
 
-            QString infoText;
-            infoText += "Build ABI : " + QSysInfo::buildAbi() + "\n";
-            //infoText += "Build CPU : " + QSysInfo::buildCpuArchitecture() + "\n";
-            //infoText += "Current CPU : " + QSysInfo::currentCpuArchitecture() + "\n";
-            msgBox.setInformativeText(infoText);
+            QString detail;
+            detail += "Version: " + versionString + "\n";
+            detail += "Platform: " + platform + " " + QSysInfo::productVersion() + "\n";
+            detail += "Build ABI: " + QSysInfo::buildAbi() + "\n";
+            detail += "Build CPU: " + QSysInfo::buildCpuArchitecture() + "\n";
+            detail += "Current CPU: " + QSysInfo::currentCpuArchitecture() + "\n";
+            detail += "Current GPU: " + QString(this->mViaPoint.glDeviceInfo().renderer.c_str()) + "\n";
+            detail += "GPU Vender: " + QString(this->mViaPoint.glDeviceInfo().vender.c_str()) + "\n";
+            detail += "OpenGL Version: " + QString(this->mViaPoint.glDeviceInfo().version.c_str()) + "\n";
+            detail += "Format Version: " + formatVersionString + "\n";
+            msgBox.setDetailedText(detail);
 
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setDefaultButton(QMessageBox::Ok);

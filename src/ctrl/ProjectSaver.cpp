@@ -57,8 +57,8 @@ bool ProjectSaver::writeHeader(util::StreamWriter& aOut)
 {
     static const std::array<uint8, 6> kSignature{ 'A', 'N', 'I', 'M', 'F', 'X' };
     static const std::array<uint8, 2> kEndian{ 0xff, 0x00 };
-    static const uint32 kMajorVersion = 0;
-    static const uint32 kMinorVersion = 1;
+    static const uint32 kMajorVersion = AE_PROJECT_FORMAT_MAJOR_VERSION;
+    static const uint32 kMinorVersion = AE_PROJECT_FORMAT_MINOR_VERSION;
     static const int kReserveSize = 16;
 
     // signature

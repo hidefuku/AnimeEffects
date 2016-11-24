@@ -1,6 +1,7 @@
 #include <QDir>
 #include <QFile>
 #include "gl/Global.h"
+#include "gl/DeviceInfo.h"
 #include "ctrl/System.h"
 #include "ctrl/ProjectSaver.h"
 #include "ctrl/ProjectLoader.h"
@@ -21,7 +22,6 @@ System::System(const QString& aResourceDir, const QString& aCacheDir)
     , mCacheDir(aCacheDir)
     , mProjects()
     , mAnimator()
-    , mGLDeviceInfo()
 {
 }
 
@@ -35,11 +35,6 @@ void System::setAnimator(Animator& aAnimator)
     mAnimator = &aAnimator;
 }
 
-void System::setGLDeviceInfo(const gl::DeviceInfo& aInfo)
-{
-    mGLDeviceInfo = aInfo;
-}
-
 core::Project* System::newProject(
         const QString& aFileName,
         const core::Project::Attribute& aAttr,
@@ -50,6 +45,8 @@ core::Project* System::newProject(
     QScopedPointer<core::Project::Hook> hookScope(aHookGrabbed);
 
     XC_ASSERT(mAnimator);
+    XC_ASSERT(gl::DeviceInfo::validInstanceExists());
+
     gl::Global::makeCurrent();
 
     QScopedPointer<core::Project> projectScope;
@@ -57,7 +54,7 @@ core::Project* System::newProject(
     projectScope->attribute() = aAttr;
     projectScope->resourceHolder().setRootPath(QFileInfo(aFileName).path());
 
-    ctrl::ImageFileLoader loader(mGLDeviceInfo);
+    ctrl::ImageFileLoader loader(gl::DeviceInfo::instance());
     loader.setCanvasSize(aAttr.imageSize(), aSpecifiesCanvasSize);
 
     if (loader.load(aFileName, *projectScope, aReporter))
@@ -78,7 +75,7 @@ core::Project* System::openProject(
     QScopedPointer<core::Project::Hook> hookScope(aHookGrabbed);
 
     XC_ASSERT(mAnimator);
-    XC_ASSERT(mGLDeviceInfo.isValid());
+    XC_ASSERT(gl::DeviceInfo::validInstanceExists());
 
     gl::Global::makeCurrent();
 
@@ -88,7 +85,7 @@ core::Project* System::openProject(
         projectScope.reset(new Project(aFileName, *mAnimator, hookScope.take()));
 
         ctrl::ProjectLoader loader;
-        if (loader.load(aFileName, *projectScope, mGLDeviceInfo, aReporter))
+        if (loader.load(aFileName, *projectScope, gl::DeviceInfo::instance(), aReporter))
         {
             mProjects.push_back(projectScope.take());
             return mProjects.back();

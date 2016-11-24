@@ -151,7 +151,7 @@ bool Exporter::execute(const CommonParam& aCommon, const VideoParam& aVideo)
     mIsCanceled = false;
 
     {
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(Q_OS_WIN)
         const QFileInfo localEncoderInfo("./tools/ffmpeg.exe");
         const bool hasLocalEncoder = localEncoderInfo.exists() && localEncoderInfo.isExecutable();
         const QString program = hasLocalEncoder ? QString(".\\tools\\ffmpeg") : QString("ffmpeg");

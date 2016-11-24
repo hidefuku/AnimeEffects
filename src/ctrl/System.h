@@ -17,7 +17,6 @@ public:
     ~System();
 
     void setAnimator(core::Animator& aAnimator);
-    void setGLDeviceInfo(const gl::DeviceInfo& aInfo);
 
     core::Project* newProject(
             const QString& aFileName,
@@ -51,7 +50,6 @@ private:
     const QString mCacheDir;
     QVector<core::Project*> mProjects;
     core::Animator* mAnimator;
-    gl::DeviceInfo mGLDeviceInfo;
 };
 
 } // namespace ctrl

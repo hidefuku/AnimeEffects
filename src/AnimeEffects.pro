@@ -21,7 +21,7 @@ export(copydata.commands)
 export(copytools.commands)
 QMAKE_EXTRA_TARGETS += first copydata copytools
 }
-unix {
+unix|macx {
 copydata.commands = rsync -ru $$shell_path($$PWD/../data) $$shell_path($$OUT_PWD)
 copytools.commands = rsync -ru $$shell_path($$PWD/../tools) $$shell_path($$OUT_PWD)
 first.depends = $(first) copydata copytools

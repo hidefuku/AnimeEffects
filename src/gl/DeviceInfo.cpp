@@ -4,8 +4,7 @@
 
 namespace
 {
-static bool sIsDeviceInfoInitialized = false;
-static gl::DeviceInfo sDeviceInfo;
+static const gl::DeviceInfo* sDeviceInfoPtr;
 } // namespace
 
 namespace gl
@@ -13,21 +12,40 @@ namespace gl
 
 const DeviceInfo& DeviceInfo::instance()
 {
-    XC_PTR_ASSERT(sIsDeviceInfoInitialized);
-    return sDeviceInfo;
+    XC_PTR_ASSERT(sDeviceInfoPtr);
+    return *sDeviceInfoPtr;
 }
 
-void DeviceInfo::createInstance()
+void DeviceInfo::setInstance(const DeviceInfo* aInstance)
+{
+    sDeviceInfoPtr = aInstance;
+}
+
+bool DeviceInfo::validInstanceExists()
+{
+    return sDeviceInfoPtr && sDeviceInfoPtr->isValid();
+}
+
+DeviceInfo::DeviceInfo()
+    : vender()
+    , renderer()
+    , version()
+    , maxTextureSize(0)
+    , maxRenderBufferSize(0)
+{
+}
+
+void DeviceInfo::load()
 {
     Global::makeCurrent();
     auto& ggl = Global::functions();
 
-    DeviceInfo info;
-    ggl.glGetIntegerv(GL_MAX_TEXTURE_SIZE, &info.maxTextureSize);
-    ggl.glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &info.maxRenderBufferSize);
+    vender   = std::string((const char*)ggl.glGetString(GL_VENDOR));
+    renderer = std::string((const char*)ggl.glGetString(GL_RENDERER));
+    version  = std::string((const char*)ggl.glGetString(GL_VERSION));
 
-    sDeviceInfo = info;
-    sIsDeviceInfoInitialized = true;
+    ggl.glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+    ggl.glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &maxRenderBufferSize);
 
 #if 0
     GLint val = 0;
@@ -56,12 +74,6 @@ void DeviceInfo::createInstance()
     //glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &maxAttach);
     //glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxAttach);
 #endif
-}
-
-DeviceInfo::DeviceInfo()
-    : maxTextureSize(0)
-    , maxRenderBufferSize(0)
-{
 }
 
 bool DeviceInfo::isValid() const

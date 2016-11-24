@@ -20,6 +20,7 @@ namespace gui
 MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     : QOpenGLWidget(aParent)
     , mViaPoint(aViaPoint)
+    , mGLDeviceInfo()
     , mProject()
     , mGLRoot()
     , mGLContextAccessor(this)
@@ -119,6 +120,7 @@ MainDisplayWidget::~MainDisplayWidget()
     mFramebuffer.reset();
     mDefaultVAO.reset();
 
+    gl::DeviceInfo::setInstance(nullptr);
     gl::Global::clearFunctions();
 }
 
@@ -203,8 +205,9 @@ void MainDisplayWidget::initializeGL()
     mGLRoot.setFunctions(*functions);
 
     // initialize opengl device info
-    gl::DeviceInfo::createInstance();
-    mViaPoint.setGLDeviceInfo(gl::DeviceInfo::instance());
+    mGLDeviceInfo.load();
+    gl::DeviceInfo::setInstance(&mGLDeviceInfo);
+    mViaPoint.setGLDeviceInfo(mGLDeviceInfo);
 
 #ifdef USE_GL_CORE_PROFILE
     // initialize default vao

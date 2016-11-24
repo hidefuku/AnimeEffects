@@ -76,6 +76,7 @@ private:
     void updatePenInfo(QEvent::Type aType, const QPoint& aPos, float aPressure);
 
     ViaPoint& mViaPoint;
+    gl::DeviceInfo mGLDeviceInfo;
     util::LinkPointer<core::Project> mProject;
     gl::Root mGLRoot;
     GLContextAccessor mGLContextAccessor;

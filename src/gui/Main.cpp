@@ -508,6 +508,7 @@ int entryPoint(int argc, char *argv[])
 
     // create qt application
     QApplication app(argc, argv);
+
     // unicode argments
     const QStringList uniArgs = app.arguments();
 
@@ -529,6 +530,7 @@ int entryPoint(int argc, char *argv[])
 
     // language
     QString preferFont;
+    QScopedPointer<QTranslator> translator;
     {
         QString locAbb;
 #if 1
@@ -541,9 +543,9 @@ int entryPoint(int argc, char *argv[])
 
         if (!locAbb.isEmpty())
         {
-            auto translator = new QTranslator();
+            translator.reset(new QTranslator());
             translator->load("translation_" + locAbb, "data/locale");
-            app.installTranslator(translator);
+            app.installTranslator(translator.data());
         }
 
         {
@@ -586,8 +588,6 @@ int entryPoint(int argc, char *argv[])
         qDebug() << "show main window";
         // show main window
         mainWindow->showWithSettings();
-        // set opengl device info
-        system->setGLDeviceInfo(gl::DeviceInfo::instance());
 
 #if !defined(QT_NO_DEBUG)
         qDebug() << "test new project";
