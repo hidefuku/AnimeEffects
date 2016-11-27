@@ -293,7 +293,7 @@ void TimeLineEditor::beginMoveKey(const TimeLineFocus::SingleFocus& aTarget)
                             *mProject, *aTarget.node, aTarget.pos);
         macro.grabListener(notifier);
 
-        mMoveRef = new TimeLineUtil::MoveKey(notifier->event());
+        mMoveRef = new TimeLineUtil::MoveFrameOfKey(notifier->event());
         mProject->commandStack().push(mMoveRef);
         mMoveFrame = aTarget.pos.index();
     }
@@ -313,7 +313,7 @@ bool TimeLineEditor::beginMoveKeys(const QPoint& aWorldPos)
             cmnd::ScopedMacro macro(mProject->commandStack(), "move time keys");
 
             macro.grabListener(notifier);
-            mMoveRef = new TimeLineUtil::MoveKey(notifier->event());
+            mMoveRef = new TimeLineUtil::MoveFrameOfKey(notifier->event());
             mProject->commandStack().push(mMoveRef);
             mMoveFrame = mTimeScale.frame(aWorldPos.x() - kTimeLineMargin);
             success = true;

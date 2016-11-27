@@ -9,6 +9,9 @@
 #include "core/TimeLine.h"
 #include "core/TimeLineEvent.h"
 #include "core/SRTKey.h"
+#include "core/MoveKey.h"
+#include "core/RotateKey.h"
+#include "core/ScaleKey.h"
 #include "core/OpaKey.h"
 #include "core/BoneKey.h"
 #include "core/PoseKey.h"
@@ -23,13 +26,13 @@ namespace TimeLineUtil
 {
 
 //-------------------------------------------------------------------------------------------------
-class MoveKey : public cmnd::Stable
+class MoveFrameOfKey : public cmnd::Stable
 {
     core::TimeLineEvent& mEvent;
     int mCurrent;
 
 public:
-    MoveKey(core::TimeLineEvent& aCommandEvent);
+    MoveFrameOfKey(core::TimeLineEvent& aCommandEvent);
     bool modifyMove(core::TimeLineEvent& aModEvent, int aAdd, const util::Range& aFrame);
 
     core::TimeLineEvent& event() { return mEvent; }
@@ -109,6 +112,18 @@ void assignSRTKeyData(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
         const core::SRTKey::Data& aNewData);
 
+void assignMoveKeyData(
+        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
+        const core::MoveKey::Data& aNewData);
+
+void assignRotateKeyData(
+        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
+        const core::RotateKey::Data& aNewData);
+
+void assignScaleKeyData(
+        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
+        const core::ScaleKey::Data& aNewData);
+
 void assignOpaKeyData(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
         const core::OpaKey::Data& aNewData);
@@ -132,6 +147,18 @@ void assignImageKeyOffset(
 void pushNewSRTKey(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
         core::SRTKey* aKey);
+
+void pushNewMoveKey(
+        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
+        core::MoveKey* aKey);
+
+void pushNewRotateKey(
+        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
+        core::RotateKey* aKey);
+
+void pushNewScaleKey(
+        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
+        core::ScaleKey* aKey);
 
 void pushNewOpaKey(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,

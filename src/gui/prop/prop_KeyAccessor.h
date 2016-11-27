@@ -18,10 +18,23 @@ public:
 
     // srt
     void assignSRTEasing(util::Easing::Param);
-    void assignSpline(int);
-    void assignTrans(const QVector2D&);
-    void assignRotate(float);
-    void assignScale(const QVector2D&);
+    void assignSRTSpline(int);
+    void assignSRTTrans(const QVector2D&);
+    void assignSRTRotate(float);
+    void assignSRTScale(const QVector2D&);
+
+    // move
+    void assignMoveEasing(util::Easing::Param);
+    void assignMoveSpline(int);
+    void assignMovePosition(const QVector2D&);
+
+    // rotate
+    void assignRotateEasing(util::Easing::Param);
+    void assignRotateAngle(float);
+
+    // scale
+    void assignScaleEasing(util::Easing::Param);
+    void assignScaleRate(const QVector2D&);
 
     // opa
     void assignOpaEasing(util::Easing::Param);
@@ -39,6 +52,9 @@ public:
 
     // new keys
     void knockNewSRT();
+    void knockNewMove();
+    void knockNewRotate();
+    void knockNewScale();
     void knockNewOpacity();
     void knockNewPose();
     void knockNewFFD();

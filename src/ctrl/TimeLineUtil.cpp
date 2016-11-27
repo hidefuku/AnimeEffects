@@ -22,13 +22,13 @@ namespace TimeLineUtil
 {
 
 //---------------------------------------------------------------------------------------
-MoveKey::MoveKey(TimeLineEvent& aCommandEvent)
+MoveFrameOfKey::MoveFrameOfKey(TimeLineEvent& aCommandEvent)
     : mEvent(aCommandEvent)
     , mCurrent(0)
 {
 }
 
-bool MoveKey::modifyMove(TimeLineEvent& aModEvent, int aAdd, const util::Range& aFrame)
+bool MoveFrameOfKey::modifyMove(TimeLineEvent& aModEvent, int aAdd, const util::Range& aFrame)
 {
     aModEvent.setType(TimeLineEvent::Type_MoveKey);
 
@@ -90,7 +90,7 @@ bool MoveKey::modifyMove(TimeLineEvent& aModEvent, int aAdd, const util::Range& 
     return true;
 }
 
-void MoveKey::undo()
+void MoveFrameOfKey::undo()
 {
     for (TimeLineEvent::Target& target : mEvent.targets())
     {
@@ -106,7 +106,7 @@ void MoveKey::undo()
     mCurrent = 0;
 }
 
-void MoveKey::redo()
+void MoveFrameOfKey::redo()
 {
     for (TimeLineEvent::Target& target : mEvent.targets())
     {
@@ -195,6 +195,30 @@ void assignSRTKeyData(
 {
     assignKeyData<SRTKey, TimeKeyType_SRT>(
                 aProject, aTarget, aFrame, aNewData, "assign srt key");
+}
+
+void assignMoveKeyData(
+        Project& aProject, ObjectNode& aTarget, int aFrame,
+        const MoveKey::Data& aNewData)
+{
+    assignKeyData<MoveKey, TimeKeyType_Move>(
+                aProject, aTarget, aFrame, aNewData, "assign move key");
+}
+
+void assignRotateKeyData(
+        Project& aProject, ObjectNode& aTarget, int aFrame,
+        const RotateKey::Data& aNewData)
+{
+    assignKeyData<RotateKey, TimeKeyType_Rotate>(
+                aProject, aTarget, aFrame, aNewData, "assign rotate key");
+}
+
+void assignScaleKeyData(
+        Project& aProject, ObjectNode& aTarget, int aFrame,
+        const ScaleKey::Data& aNewData)
+{
+    assignKeyData<ScaleKey, TimeKeyType_Scale>(
+                aProject, aTarget, aFrame, aNewData, "assign scale key");
 }
 
 void assignOpaKeyData(
@@ -298,6 +322,26 @@ void pushNewSRTKey(
 {
     pushNewKey<SRTKey, TimeKeyType_SRT>(
                 aProject, aTarget, aFrame, aKey, "push new srt key");
+}
+
+void pushNewMoveKey(
+        Project& aProject, ObjectNode& aTarget, int aFrame, MoveKey* aKey)
+{
+    pushNewKey<MoveKey, TimeKeyType_Move>(
+                aProject, aTarget, aFrame, aKey, "push new move key");
+}
+void pushNewRotateKey(
+        Project& aProject, ObjectNode& aTarget, int aFrame, RotateKey* aKey)
+{
+    pushNewKey<RotateKey, TimeKeyType_Rotate>(
+                aProject, aTarget, aFrame, aKey, "push new rotate key");
+}
+
+void pushNewScaleKey(
+        Project& aProject, ObjectNode& aTarget, int aFrame, ScaleKey* aKey)
+{
+    pushNewKey<ScaleKey, TimeKeyType_Scale>(
+                aProject, aTarget, aFrame, aKey, "push new scale key");
 }
 
 void pushNewOpaKey(

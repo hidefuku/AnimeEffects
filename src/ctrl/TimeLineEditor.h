@@ -97,7 +97,7 @@ private:
     TimeLineScale mTimeScale;
     TimeLineFocus mFocus;
 
-    TimeLineUtil::MoveKey* mMoveRef;
+    TimeLineUtil::MoveFrameOfKey* mMoveRef;
     int mMoveFrame;
     bool mOnUpdatingKey;
     bool mShowSelectionRange;

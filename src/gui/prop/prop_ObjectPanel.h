@@ -46,6 +46,61 @@ private:
         bool mKeyExists;
     };
 
+    class MovePanel
+    {
+    public:
+        MovePanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+        void setEnabled(bool);
+        void setKeyExists(bool);
+        void setKeyValue(const core::TimeKey* aKey);
+        bool keyExists() const;
+
+    private:
+        KeyAccessor& mAccessor;
+        KeyKnocker* mKnocker;
+        KeyGroup* mGroup;
+        EasingItem* mEasing;
+        ComboItem* mSpline;
+        Vector2DItem* mMove;
+        bool mKeyExists;
+    };
+
+    class RotatePanel
+    {
+    public:
+        RotatePanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+        void setEnabled(bool);
+        void setKeyExists(bool);
+        void setKeyValue(const core::TimeKey* aKey);
+        bool keyExists() const;
+
+    private:
+        KeyAccessor& mAccessor;
+        KeyKnocker* mKnocker;
+        KeyGroup* mGroup;
+        EasingItem* mEasing;
+        DecimalItem* mRotate;
+        bool mKeyExists;
+    };
+
+    class ScalePanel
+    {
+    public:
+        ScalePanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+        void setEnabled(bool);
+        void setKeyExists(bool);
+        void setKeyValue(const core::TimeKey* aKey);
+        bool keyExists() const;
+
+    private:
+        KeyAccessor& mAccessor;
+        KeyKnocker* mKnocker;
+        KeyGroup* mGroup;
+        EasingItem* mEasing;
+        Vector2DItem* mScale;
+        bool mKeyExists;
+    };
+
     class OpaPanel
     {
     public:
@@ -139,6 +194,9 @@ private:
     CheckItem* mClipped;
 
     QScopedPointer<SRTPanel> mSRTPanel;
+    QScopedPointer<MovePanel> mMovePanel;
+    QScopedPointer<RotatePanel> mRotatePanel;
+    QScopedPointer<ScalePanel> mScalePanel;
     QScopedPointer<OpaPanel> mOpaPanel;
     QScopedPointer<PosePanel> mPosePanel;
     QScopedPointer<FFDPanel> mFFDPanel;
