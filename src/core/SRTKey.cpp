@@ -83,7 +83,10 @@ bool SRTKey::deserialize(Deserializer &aIn)
         return aIn.errored("invalid easing param");
     }
 
-    aIn.read((int&)mData.spline);
+    int splineIdx = 0;
+    aIn.read(splineIdx);
+    mData.spline = (SplineType)splineIdx;
+
     aIn.read(mData.pos);
     aIn.read(mData.rotate);
     aIn.read(mData.scale);

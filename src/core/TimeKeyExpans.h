@@ -3,6 +3,9 @@
 
 #include "gl/Texture.h"
 #include "core/SRTExpans.h"
+#include "core/MoveKey.h"
+#include "core/RotateKey.h"
+#include "core/ScaleKey.h"
 #include "core/OpaKey.h"
 #include "core/BoneKey.h"
 #include "core/PoseKey.h"

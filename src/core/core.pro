@@ -90,7 +90,10 @@ SOURCES += \
     ResourceUpdatingWorkspace.cpp \
     BoneExpans.cpp \
     FolderNode.cpp \
-    DestinationTexturizer.cpp
+    DestinationTexturizer.cpp \
+    MoveKey.cpp \
+    RotateKey.cpp \
+    ScaleKey.cpp
 
 HEADERS += \
     AbstractCursor.h \
@@ -151,4 +154,7 @@ HEADERS += \
     ResourceUpdatingWorkspace.h \
     BoneExpans.h \
     FolderNode.h \
-    DestinationTexturizer.h
+    DestinationTexturizer.h \
+    MoveKey.h \
+    RotateKey.h \
+    ScaleKey.h

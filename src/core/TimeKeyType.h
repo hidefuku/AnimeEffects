@@ -7,6 +7,9 @@ namespace core
 enum TimeKeyType
 {
     TimeKeyType_SRT,
+    TimeKeyType_Move,
+    TimeKeyType_Rotate,
+    TimeKeyType_Scale,
     TimeKeyType_Opa,
     TimeKeyType_Bone,
     TimeKeyType_Pose,
