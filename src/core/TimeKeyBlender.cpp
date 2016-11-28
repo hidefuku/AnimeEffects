@@ -122,7 +122,7 @@ QMatrix4x4 TimeKeyBlender::getRelativeMatrix(
             auto line = current->timeLine();
             if (line)
             {
-                result = line->working().srt().data().localMatrix() * result;
+                result = line->working().srt().localMatrix() * result;
             }
 
             current = current->parent();
@@ -236,6 +236,17 @@ void TimeKeyBlender::updateCurrents(ObjectNode* aRootNode, const TimeInfo& aTime
             // build srt
             blendSRTKey(pos, aTime);
 
+#if 0
+            // build move
+            blendMoveKey(pos, aTime);
+            // build rotate
+            blendRotateKey(pos, aTime);
+            // build scale
+            blendScaleKey(pos, aTime);
+            // merge
+            mergeMoveRotateScale(pos, aTime);
+#endif
+
             // build opa
             blendOpaKey(pos, aTime);
 
@@ -343,16 +354,6 @@ void TimeKeyBlender::clearCaches(ObjectNode* aRootNode)
     }
 }
 
-SRTKey::Data TimeKeyBlender::getDefaultSRT(const ObjectNode& aNode)
-{
-    if (aNode.timeLine())
-    {
-        auto key = (SRTKey*)aNode.timeLine()->defaultKey(TimeKeyType_SRT);
-        if (key) return key->data();
-    }
-    return SRTKey::Data();
-}
-
 #if 0
 QMatrix4x4 TimeKeyBlender::getParentMatrix(PositionType aPos, int aCacheFrame)
 {
@@ -370,6 +371,17 @@ QMatrix4x4 TimeKeyBlender::getParentMatrix(PositionType aPos, int aCacheFrame)
 }
 #endif
 
+template<class tKey, TimeKeyType tType>
+typename tKey::Data getDefaultKeyData(const ObjectNode& aNode)
+{
+    if (aNode.timeLine())
+    {
+        auto key = (tKey*)aNode.timeLine()->defaultKey(tType);
+        if (key) return key->data();
+    }
+    return tKey::Data();
+}
+
 void TimeKeyBlender::blendSRTKey(PositionType aPos, const TimeInfo& aTime)
 {
     auto seekData = mSeeker->data(aPos);
@@ -381,7 +393,7 @@ void TimeKeyBlender::blendSRTKey(PositionType aPos, const TimeInfo& aTime)
     getSRTData(expans, node, aTime);
 
     // update matrix
-    expans.srt().parentMatrix() = QMatrix4x4();
+    expans.srt().setParentMatrix(QMatrix4x4());
     {
         auto pos = mSeeker->parent(aPos);
         while (pos)
@@ -396,7 +408,7 @@ void TimeKeyBlender::blendSRTKey(PositionType aPos, const TimeInfo& aTime)
             {
                 blendSRTKey(pos, aTime);
             }
-            expans.srt().parentMatrix() = data.expans->srt().worldMatrix();
+            expans.srt().setParentMatrix(data.expans->srt().worldMatrix());
             break;
         }
     }
@@ -412,15 +424,15 @@ void TimeKeyBlender::getSRTData(
 
     if (blend.isEmpty())
     { // no key is exists
-        srt.data() = getDefaultSRT(aNode);
+        srt.setData(getDefaultKeyData<SRTKey, TimeKeyType_SRT>(aNode));
     }
     else if (blend.hasSameFrame())
     { // a key is exists
-        srt.data() = ((const SRTKey*)blend.point(0).key)->data();
+        srt.setData(((const SRTKey*)blend.point(0).key)->data());
     }
     else if (blend.isSingle())
     { // perfect following
-        srt.data() = ((const SRTKey*)blend.singlePoint().key)->data();
+        srt.setData(((const SRTKey*)blend.singlePoint().key)->data());
     }
     else
     {
@@ -432,19 +444,18 @@ void TimeKeyBlender::getSRTData(
         const float frame = p1.relativeFrame - p0.relativeFrame;
         XC_ASSERT(frame != 0.0f);
 
-        srt.data().easing = k0->data().easing;
-        srt.data().spline = k0->data().spline;
+        auto easing = k0->data().easing;
 
         // calculate easing
         const float time = util::Easing::calculate(
-                    srt.data().easing, -p0.relativeFrame, 0.0f, 1.0f, frame);
+                    easing, -p0.relativeFrame, 0.0f, 1.0f, frame);
 
         // use spline cache
         if (srt.hasSplineCache(aTime.frame))
         {
-            srt.data().pos = srt.spline().getByLinear(time);
-            srt.data().rotate = k0->rotate() * (1.0f - time) + k1->rotate() * time;
-            srt.data().scale = k0->scale() * (1.0f - time) + k1->scale() * time;
+            srt.setPos(srt.spline().getByLinear(time).toVector2D());
+            srt.setRotate(k0->rotate() * (1.0f - time) + k1->rotate() * time);
+            srt.setScale(k0->scale() * (1.0f - time) + k1->scale() * time);
         }
         else
         {
@@ -453,9 +464,190 @@ void TimeKeyBlender::getSRTData(
             srt.spline().set(k0->pos(), k1->pos(), vels[0], vels[1]);
             srt.setSplineCache(util::Range(p0.frame, p1.frame));
 
-            srt.data().pos = srt.spline().getByLinear(time);
-            srt.data().rotate = k0->rotate() * (1.0f - time) + k1->rotate() * time;
-            srt.data().scale = k0->scale() * (1.0f - time) + k1->scale() * time;
+            srt.setPos(srt.spline().getByLinear(time).toVector2D());
+            srt.setRotate(k0->rotate() * (1.0f - time) + k1->rotate() * time);
+            srt.setScale(k0->scale() * (1.0f - time) + k1->scale() * time);
+        }
+    }
+}
+
+void TimeKeyBlender::blendMoveKey(PositionType aPos, const TimeInfo& aTime)
+{
+    auto seekData = mSeeker->data(aPos);
+    if (!seekData.objNode || !seekData.expans) return;
+    auto& node = *seekData.objNode;
+    auto& expans = *seekData.expans;
+    if (!node.timeLine()) return;
+
+    TimeKeyGatherer blend(node.timeLine()->map(TimeKeyType_Move), aTime);
+    expans.setKeyCache(TimeKeyType_Move, aTime.frame);
+    auto& srt = expans.srt();
+
+    if (blend.isEmpty())
+    { // no key is exists
+        srt.setPos(getDefaultKeyData<MoveKey, TimeKeyType_Move>(node).pos);
+    }
+    else if (blend.hasSameFrame())
+    { // a key is exists
+        srt.setPos(((const MoveKey*)blend.point(0).key)->data().pos);
+    }
+    else if (blend.isSingle())
+    { // perfect following
+        srt.setPos(((const MoveKey*)blend.singlePoint().key)->data().pos);
+    }
+    else
+    {
+        // blend keys
+        auto p0 = blend.point(0);
+        auto p1 = blend.point(1);
+        const MoveKey* k0 = (const MoveKey*)p0.key;
+        const MoveKey* k1 = (const MoveKey*)p1.key;
+        const float frame = p1.relativeFrame - p0.relativeFrame;
+        XC_ASSERT(frame != 0.0f);
+
+        auto easing = k0->data().easing;
+
+        // calculate easing
+        const float time = util::Easing::calculate(
+                    easing, -p0.relativeFrame, 0.0f, 1.0f, frame);
+
+        // use spline cache
+        if (srt.hasSplineCache(aTime.frame))
+        {
+            srt.setPos(srt.spline().getByLinear(time).toVector2D());
+        }
+        else
+        {
+            // linear blending
+            const std::array<QVector3D, 2> vels = catmullRomVelsForMove(blend);
+            srt.spline().set(k0->pos(), k1->pos(), vels[0], vels[1]);
+            srt.setSplineCache(util::Range(p0.frame, p1.frame));
+
+            srt.setPos(srt.spline().getByLinear(time).toVector2D());
+        }
+    }
+}
+
+void TimeKeyBlender::blendRotateKey(PositionType aPos, const TimeInfo& aTime)
+{
+    auto seekData = mSeeker->data(aPos);
+    if (!seekData.objNode || !seekData.expans) return;
+    auto& node = *seekData.objNode;
+    auto& expans = *seekData.expans;
+    if (!node.timeLine()) return;
+
+    TimeKeyGatherer blend(node.timeLine()->map(TimeKeyType_Rotate), aTime);
+    expans.setKeyCache(TimeKeyType_Rotate, aTime.frame);
+    auto& srt = expans.srt();
+
+    if (blend.isEmpty())
+    { // no key is exists
+        srt.setRotate(getDefaultKeyData<RotateKey, TimeKeyType_Rotate>(node).rotate);
+    }
+    else if (blend.hasSameFrame())
+    { // a key is exists
+        srt.setRotate(((const RotateKey*)blend.point(0).key)->data().rotate);
+    }
+    else if (blend.isSingle())
+    { // perfect following
+        srt.setRotate(((const RotateKey*)blend.singlePoint().key)->data().rotate);
+    }
+    else
+    {
+        // blend keys
+        auto p0 = blend.point(0);
+        auto p1 = blend.point(1);
+        const RotateKey* k0 = (const RotateKey*)p0.key;
+        const RotateKey* k1 = (const RotateKey*)p1.key;
+        const float frame = p1.relativeFrame - p0.relativeFrame;
+        XC_ASSERT(frame != 0.0f);
+
+        auto easing = k0->data().easing;
+
+        // calculate easing
+        const float time = util::Easing::calculate(
+                    easing, -p0.relativeFrame, 0.0f, 1.0f, frame);
+
+        srt.setRotate(k0->rotate() * (1.0f - time) + k1->rotate() * time);
+    }
+}
+
+void TimeKeyBlender::blendScaleKey(PositionType aPos, const TimeInfo& aTime)
+{
+    auto seekData = mSeeker->data(aPos);
+    if (!seekData.objNode || !seekData.expans) return;
+    auto& node = *seekData.objNode;
+    auto& expans = *seekData.expans;
+    if (!node.timeLine()) return;
+
+    TimeKeyGatherer blend(node.timeLine()->map(TimeKeyType_Scale), aTime);
+    expans.setKeyCache(TimeKeyType_Scale, aTime.frame);
+    auto& srt = expans.srt();
+
+    if (blend.isEmpty())
+    { // no key is exists
+        srt.setScale(getDefaultKeyData<ScaleKey, TimeKeyType_Scale>(node).scale);
+    }
+    else if (blend.hasSameFrame())
+    { // a key is exists
+        srt.setScale(((const ScaleKey*)blend.point(0).key)->data().scale);
+    }
+    else if (blend.isSingle())
+    { // perfect following
+        srt.setScale(((const ScaleKey*)blend.singlePoint().key)->data().scale);
+    }
+    else
+    {
+        // blend keys
+        auto p0 = blend.point(0);
+        auto p1 = blend.point(1);
+        const ScaleKey* k0 = (const ScaleKey*)p0.key;
+        const ScaleKey* k1 = (const ScaleKey*)p1.key;
+        const float frame = p1.relativeFrame - p0.relativeFrame;
+        XC_ASSERT(frame != 0.0f);
+
+        auto easing = k0->data().easing;
+
+        // calculate easing
+        const float time = util::Easing::calculate(
+                    easing, -p0.relativeFrame, 0.0f, 1.0f, frame);
+
+        srt.setScale(k0->scale() * (1.0f - time) + k1->scale() * time);
+    }
+}
+
+void TimeKeyBlender::mergeMoveRotateScale(PositionType aPos, const TimeInfo& aTime)
+{
+    auto seekData = mSeeker->data(aPos);
+    if (!seekData.objNode || !seekData.expans) return;
+    auto& expans = *seekData.expans;
+
+    // update matrix
+    expans.srt().setParentMatrix(QMatrix4x4());
+    {
+        auto pos = mSeeker->parent(aPos);
+        while (pos)
+        {
+            auto data = mSeeker->data(pos);
+            if (!data.expans)
+            {
+                pos = mSeeker->parent(pos);
+                continue;
+            }
+            if (!data.expans->hasKeyCache(TimeKeyType_Move, aTime.frame))
+            {
+                blendMoveKey(pos, aTime);
+            }
+            if (!data.expans->hasKeyCache(TimeKeyType_Rotate, aTime.frame))
+            {
+                blendRotateKey(pos, aTime);
+            }
+            if (!data.expans->hasKeyCache(TimeKeyType_Scale, aTime.frame))
+            {
+                blendScaleKey(pos, aTime);
+            }
+            expans.srt().setParentMatrix(data.expans->srt().worldMatrix());
+            break;
         }
     }
 }
@@ -985,6 +1177,56 @@ std::array<QVector3D, 2> TimeKeyBlender::catmullRomVels(const TimeKeyGatherer& a
         k0 = nullptr;
     }
     if (k2->data().spline == SRTKey::SplineType_Linear)
+    {
+        k3 = nullptr;
+    }
+
+    if (!k0)
+    {
+        const QVector3D linear = k2->pos() - k1->pos();
+
+        if (!k3)
+        {
+            result[1] = linear;
+            result[0]  = linear;
+        }
+        else
+        {
+            result[1] = 0.5f * (k3->pos() - k1->pos());
+            result[0]  = util::MathUtil::getAxisInversed(linear.normalized(), result[1]);
+        }
+    }
+    else
+    {
+        if (!k3)
+        {
+            const QVector3D linear = k2->pos() - k1->pos();
+
+            result[0]  = 0.5f * (k2->pos() - k0->pos());
+            result[1] = util::MathUtil::getAxisInversed(linear.normalized(), result[0]);
+        }
+        else
+        {
+            result[0]  = 0.5f * (k2->pos() - k0->pos());
+            result[1] = 0.5f * (k3->pos() - k1->pos());
+        }
+    }
+    return result;
+}
+
+std::array<QVector3D, 2> TimeKeyBlender::catmullRomVelsForMove(const TimeKeyGatherer& aBlend)
+{
+    const MoveKey* k0 = (const MoveKey*)aBlend.point(-1).key;
+    const MoveKey* k1 = (const MoveKey*)aBlend.point( 0).key;
+    const MoveKey* k2 = (const MoveKey*)aBlend.point( 1).key;
+    const MoveKey* k3 = (const MoveKey*)aBlend.point( 2).key;
+    std::array<QVector3D, 2> result;
+
+    if (k1->data().spline == MoveKey::SplineType_Linear)
+    {
+        k0 = nullptr;
+    }
+    if (k2->data().spline == MoveKey::SplineType_Linear)
     {
         k3 = nullptr;
     }

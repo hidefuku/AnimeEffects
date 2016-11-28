@@ -93,7 +93,8 @@ SOURCES += \
     DestinationTexturizer.cpp \
     MoveKey.cpp \
     RotateKey.cpp \
-    ScaleKey.cpp
+    ScaleKey.cpp \
+    SRTExpans.cpp
 
 HEADERS += \
     AbstractCursor.h \

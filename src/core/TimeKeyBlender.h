@@ -50,8 +50,8 @@ public:
     void clearCaches(TimeLineEvent& aEvent);
 
 private:
-    static SRTKey::Data getDefaultSRT(const ObjectNode& aNode);
     static std::array<QVector3D, 2> catmullRomVels(const TimeKeyGatherer& aBlend);
+    static std::array<QVector3D, 2> catmullRomVelsForMove(const TimeKeyGatherer& aBlend);
     static void getSRTData(
             TimeKeyExpans& aCurrent, const ObjectNode& aNode, const TimeInfo& aTime);
     static std::pair<TimeKey*, LayerMesh*> getAreaMeshImpl(ObjectNode& aNode, const TimeInfo& aTime);
@@ -60,6 +60,10 @@ private:
 
     //QMatrix4x4 getParentMatrix(PositionType aPos, const TimeInfo& aTime, int aCacheFrame);
     void blendSRTKey(PositionType aPos, const TimeInfo& aTime);
+    void blendMoveKey(PositionType aPos, const TimeInfo& aTime);
+    void blendRotateKey(PositionType aPos, const TimeInfo& aTime);
+    void blendScaleKey(PositionType aPos, const TimeInfo& aTime);
+    void mergeMoveRotateScale(PositionType aPos, const TimeInfo& aTime);
     void blendOpaKey(PositionType aPos, const TimeInfo& aTime);
     void blendBoneKey(PositionType aPos, const TimeInfo& aTime);
     void blendPoseKey(PositionType aPos, const TimeInfo& aTime);

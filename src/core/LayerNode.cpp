@@ -67,6 +67,33 @@ void LayerNode::setDefaultPos(const QVector2D& aPos)
     }
     key->data().pos = QVector3D(aPos);
     key->data().clampPos();
+
+    {
+        auto key = (MoveKey*)mTimeLine.defaultKey(TimeKeyType_Move);
+        if (!key)
+        {
+            key = new MoveKey();
+            mTimeLine.grabDefaultKey(TimeKeyType_Move, key);
+        }
+        key->data().pos = aPos;
+        key->data().clamp();
+    }
+    {
+        auto key = (RotateKey*)mTimeLine.defaultKey(TimeKeyType_Rotate);
+        if (!key)
+        {
+            key = new RotateKey();
+            mTimeLine.grabDefaultKey(TimeKeyType_Rotate, key);
+        }
+    }
+    {
+        auto key = (ScaleKey*)mTimeLine.defaultKey(TimeKeyType_Scale);
+        if (!key)
+        {
+            key = new ScaleKey();
+            mTimeLine.grabDefaultKey(TimeKeyType_Scale, key);
+        }
+    }
 }
 
 void LayerNode::setDefaultOpacity(float aValue)

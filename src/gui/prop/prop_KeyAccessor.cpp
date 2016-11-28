@@ -275,7 +275,7 @@ void KeyAccessor::knockNewMove()
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::MoveKey();
-    newKey->data().pos = mTarget->timeLine()->current().srt().data().pos.toVector2D();
+    newKey->data().pos = mTarget->timeLine()->current().srt().pos();
 
     ctrl::TimeLineUtil::pushNewMoveKey(*mProject, *mTarget, getFrame(), newKey);
 }
@@ -283,7 +283,7 @@ void KeyAccessor::knockNewRotate()
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::RotateKey();
-    newKey->data().rotate = mTarget->timeLine()->current().srt().data().rotate;
+    newKey->data().rotate = mTarget->timeLine()->current().srt().rotate();
 
     ctrl::TimeLineUtil::pushNewRotateKey(*mProject, *mTarget, getFrame(), newKey);
 }
@@ -291,7 +291,7 @@ void KeyAccessor::knockNewScale()
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::ScaleKey();
-    newKey->data().scale = mTarget->timeLine()->current().srt().data().scale;
+    newKey->data().scale = mTarget->timeLine()->current().srt().scale();
 
     ctrl::TimeLineUtil::pushNewScaleKey(*mProject, *mTarget, getFrame(), newKey);
 }
