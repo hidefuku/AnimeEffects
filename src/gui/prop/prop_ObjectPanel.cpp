@@ -695,11 +695,9 @@ void ObjectPanel::build()
     }
 
     mSRTPanel.reset(new SRTPanel(*this, mKeyAccessor, mLabelWidth));
-#if 0
     mMovePanel.reset(new MovePanel(*this, mKeyAccessor, mLabelWidth));
     mRotatePanel.reset(new RotatePanel(*this, mKeyAccessor, mLabelWidth));
     mScalePanel.reset(new ScalePanel(*this, mKeyAccessor, mLabelWidth));
-#endif
     mOpaPanel.reset(new OpaPanel(*this, mKeyAccessor, mLabelWidth));
     mPosePanel.reset(new PosePanel(*this, mKeyAccessor, mLabelWidth));
     mFFDPanel.reset(new FFDPanel(*this, mKeyAccessor, mLabelWidth));
@@ -750,14 +748,12 @@ void ObjectPanel::updateKeyExists()
 
         mSRTPanel->setEnabled(true);
         mSRTPanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_SRT, frame));
-#if 0
         mMovePanel->setEnabled(true);
         mMovePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Move, frame));
         mRotatePanel->setEnabled(true);
         mRotatePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Rotate, frame));
         mScalePanel->setEnabled(true);
         mScalePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Scale, frame));
-#endif
         mOpaPanel->setEnabled(true);
         mOpaPanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Opa, frame));
         mPosePanel->setEnabled(true);
@@ -770,11 +766,9 @@ void ObjectPanel::updateKeyExists()
     else
     {
         mSRTPanel->setEnabled(false);
-#if 0
         mMovePanel->setEnabled(false);
         mRotatePanel->setEnabled(false);
         mScalePanel->setEnabled(false);
-#endif
         mOpaPanel->setEnabled(false);
         mPosePanel->setEnabled(false);
         mFFDPanel->setEnabled(false);
@@ -792,7 +786,6 @@ void ObjectPanel::updateKeyValue()
         {
             mSRTPanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_SRT, frame));
         }
-#if 0
         if (mMovePanel->keyExists())
         {
             mMovePanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_Move, frame));
@@ -805,7 +798,6 @@ void ObjectPanel::updateKeyValue()
         {
             mScalePanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_Scale, frame));
         }
-#endif
         if (mOpaPanel->keyExists())
         {
             mOpaPanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_Opa, frame));

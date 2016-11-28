@@ -28,12 +28,14 @@ Symbol::Symbol()
 {
 }
 
-void Symbol::build(const SRTKey& aKey, const QMatrix4x4& aWorldMtx, const CameraInfo& aCamera)
+void Symbol::build(const QMatrix4x4& aLocalMtx,
+                   const QMatrix4x4& aWorldMtx,
+                   const CameraInfo& aCamera)
 {
     using util::MathUtil;
 
     const QSizeF size(100.0f, 100.0f);
-    const QMatrix4x4 matrix = aWorldMtx * aKey.data().localMatrix();
+    const QMatrix4x4 matrix = aWorldMtx * aLocalMtx;
 
     for (int i = 0; i < 4; ++i)
     {

@@ -9,8 +9,12 @@ namespace ctrl {
 namespace srt {
 
 KeyOwner::KeyOwner()
-    : key()
-    , ownsKey()
+    : moveKey()
+    , rotateKey()
+    , scaleKey()
+    , ownsMoveKey()
+    , ownsRotateKey()
+    , ownsScaleKey()
     , mtx()
     , invMtx()
     , invSRMtx()
@@ -20,33 +24,73 @@ KeyOwner::KeyOwner()
 {
 }
 
-void KeyOwner::pushOwnsKey(cmnd::Stack& aStack, TimeLine& aLine, int aFrame)
+KeyOwner::~KeyOwner()
 {
-    if (ownsKey)
+    deleteOwningKeys();
+}
+
+void KeyOwner::pushOwningMoveKey(cmnd::Stack& aStack, core::TimeLine& aLine, int aFrame)
+{
+    if (ownsMoveKey)
     {
-        aStack.push(new cmnd::GrabNewObject<SRTKey>(key));
-        aStack.push(aLine.createPusher(TimeKeyType_SRT, aFrame, key));
-        ownsKey = false;
+        aStack.push(new cmnd::GrabNewObject<MoveKey>(moveKey));
+        aStack.push(aLine.createPusher(TimeKeyType_Move, aFrame, moveKey));
+        ownsMoveKey = false;
     }
 }
 
-void KeyOwner::deleteOwnsKey()
+void KeyOwner::pushOwningRotateKey(cmnd::Stack& aStack, core::TimeLine& aLine, int aFrame)
 {
-    if (key && ownsKey)
+    if (ownsRotateKey)
     {
-        delete key;
+        aStack.push(new cmnd::GrabNewObject<RotateKey>(rotateKey));
+        aStack.push(aLine.createPusher(TimeKeyType_Rotate, aFrame, rotateKey));
+        ownsRotateKey = false;
     }
-    ownsKey = false;
-    key = nullptr;
+}
+
+void KeyOwner::pushOwningScaleKey(cmnd::Stack& aStack, core::TimeLine& aLine, int aFrame)
+{
+    if (ownsScaleKey)
+    {
+        aStack.push(new cmnd::GrabNewObject<ScaleKey>(scaleKey));
+        aStack.push(aLine.createPusher(TimeKeyType_Scale, aFrame, scaleKey));
+        ownsScaleKey = false;
+    }
+}
+
+void KeyOwner::deleteOwningKeys()
+{
+    if (moveKey && ownsMoveKey) delete moveKey;
+    ownsMoveKey = false;
+    moveKey = nullptr;
+
+    if (rotateKey && ownsRotateKey) delete rotateKey;
+    ownsRotateKey = false;
+    rotateKey = nullptr;
+
+    if (scaleKey && ownsScaleKey) delete scaleKey;
+    ownsScaleKey = false;
+    scaleKey = nullptr;
 }
 
 bool KeyOwner::updatePosture(const TimeKeyExpans& aExpans)
 {
-    XC_PTR_ASSERT(key);
+    XC_PTR_ASSERT(moveKey);
+    XC_PTR_ASSERT(rotateKey);
+    XC_PTR_ASSERT(scaleKey);
 
-    if (ownsKey)
+    if (ownsMoveKey)
     {
-        key->data() = aExpans.srt().data();
+        moveKey->data().pos = aExpans.srt().pos();
+    }
+    if (ownsRotateKey)
+    {
+        rotateKey->data().rotate = aExpans.srt().rotate();
+    }
+    if (ownsScaleKey)
+    {
+        scaleKey->data().scale = aExpans.srt().scale();
     }
 
     mtx = aExpans.srt().parentMatrix();
@@ -60,11 +104,22 @@ bool KeyOwner::updatePosture(const TimeKeyExpans& aExpans)
     invSRMtx = invMtx;
     invSRMtx.setColumn(3, QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
 
-    locMtx = key->data().localMatrix();
+    locMtx = aExpans.srt().localMatrix();
     locSRMtx = locMtx;
     locSRMtx.setColumn(3, QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
 
     return true;
+}
+
+QMatrix4x4 KeyOwner::getLocalMatrixFromKeys() const
+{
+    if (!(bool)(*this)) return QMatrix4x4();
+
+    SRTExpans expans;
+    expans.setPos(moveKey->pos());
+    expans.setRotate(rotateKey->rotate());
+    expans.setScale(scaleKey->scale());
+    return expans.localMatrix();
 }
 
 } // namespace srt

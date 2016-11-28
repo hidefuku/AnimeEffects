@@ -22,8 +22,18 @@ public:
     virtual void renderQt(const core::RenderInfo& aInfo, QPainter& aPainter);
 
 private:
+    typedef cmnd::ModifiableAssign<core::MoveKey::Data> AssignMoveCommand;
+    typedef cmnd::ModifiableAssign<core::RotateKey::Data> AssignRotateCommand;
+    typedef cmnd::ModifiableAssign<core::ScaleKey::Data> AssignScaleCommand;
+
     void clearState();
-    bool assignKey(core::SRTKey::Data& aNewData);
+    void assignMoveKey(core::MoveKey::Data& aNewData);
+    void assignRotateKey(core::RotateKey::Data& aNewData);
+    void assignScaleKey(core::ScaleKey::Data& aNewData);
+
+    void setAssignNotifier(cmnd::ScopedMacro& aMacro,
+                           core::TimeKeyType aKeyType, bool aOwnsKey);
+    void notifyAssignModification(core::TimeKeyType aKeyType);
 
     core::Project& mProject;
     core::ObjectNode& mTarget;
@@ -31,7 +41,9 @@ private:
 
     Symbol mSymbol;
     Symbol::FocusData mFocus;
-    cmnd::ModifiableAssign<core::SRTKey::Data>* mAssignRef;
+    AssignMoveCommand* mAssignMoveRef;
+    AssignRotateCommand* mAssignRotateRef;
+    AssignScaleCommand* mAssignScaleRef;
     util::PlacePointer<ScopedModifier> mSuspend;
     QVector2D mBaseVec;
     float mBaseValue;

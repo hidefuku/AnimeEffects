@@ -4,7 +4,6 @@
 #include <QMatrix4x4>
 #include "core/RenderInfo.h"
 #include "core/CameraInfo.h"
-#include "core/SRTKey.h"
 #include "ctrl/srt/srt_FocusType.h"
 
 namespace ctrl {
@@ -16,9 +15,15 @@ public:
     typedef std::pair<FocusType, QVector2D> FocusData;
 
     Symbol();
-    void build(const core::SRTKey& aKey, const QMatrix4x4& aWorldMtx, const core::CameraInfo& aCamera);
+
+    void build(const QMatrix4x4& aLocalMtx,
+               const QMatrix4x4& aWorldMtx,
+               const core::CameraInfo& aCamera);
+
     FocusData findFocus(const QVector2D& aWorldPos);
+
     void draw(const core::RenderInfo& aInfo, QPainter& aPainter, FocusType aFocus);
+
 private:
     QPointF c;
     QPointF p[4];

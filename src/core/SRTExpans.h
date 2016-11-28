@@ -16,6 +16,8 @@ class SRTExpans
 public:
     typedef util::FergusonCoonsSpline<QVector3D> SplineType;
 
+    static QMatrix4x4 getLocalSRMatrix(float aRotate, const QVector2D& aScale);
+
     SRTExpans();
 
     void setSplineCache(const util::Range& aFrame) { mSplineCache = aFrame; }

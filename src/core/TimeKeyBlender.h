@@ -25,10 +25,16 @@ public:
     typedef util::ITreeSeeker<SeekData, ObjectNode*> SeekerType;
     typedef SeekerType::Position PositionType;
 
-    static SRTExpans getSRTExpans(
-            ObjectNode& aNode, const TimeInfo& aTime);
-    static QMatrix4x4 getWorldMatrix(
-            ObjectNode& aNode, const TimeInfo& aTime);
+
+    ///@todo don't use work caches
+    static QMatrix4x4 getLocalSRMatrix(ObjectNode& aNode, const TimeInfo& aTime);
+
+
+
+    //static SRTExpans getSRTExpans(
+    //        ObjectNode& aNode, const TimeInfo& aTime);
+    //static QMatrix4x4 getWorldMatrix(
+    //        ObjectNode& aNode, const TimeInfo& aTime);
     static QMatrix4x4 getRelativeMatrix(
             ObjectNode& aNode, const TimeInfo& aTime,
             const ObjectNode* aParent);
@@ -60,9 +66,9 @@ private:
 
     //QMatrix4x4 getParentMatrix(PositionType aPos, const TimeInfo& aTime, int aCacheFrame);
     void blendSRTKey(PositionType aPos, const TimeInfo& aTime);
-    void blendMoveKey(PositionType aPos, const TimeInfo& aTime);
-    void blendRotateKey(PositionType aPos, const TimeInfo& aTime);
-    void blendScaleKey(PositionType aPos, const TimeInfo& aTime);
+    static void blendMoveKey(TimeKeyExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime);
+    static void blendRotateKey(TimeKeyExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime);
+    static void blendScaleKey(TimeKeyExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime);
     void mergeMoveRotateScale(PositionType aPos, const TimeInfo& aTime);
     void blendOpaKey(PositionType aPos, const TimeInfo& aTime);
     void blendBoneKey(PositionType aPos, const TimeInfo& aTime);

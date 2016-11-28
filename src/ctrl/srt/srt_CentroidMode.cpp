@@ -116,7 +116,7 @@ void CentroidMode::moveCentroid(const QVector2D& aNewCenter)
         event.setType(TimeLineEvent::Type_ChangeKeyValue);
         pushEventTarget(mTarget, event);
         mProject.onTimeLineModified(event, false);
-        mProject.onNodeAttributeModified(mTarget, false);
+        mProject.onNodeAttributeModified(mTarget, false); ///@todo Is there any means?
     }
     else
     {
@@ -132,7 +132,7 @@ void CentroidMode::moveCentroid(const QVector2D& aNewCenter)
         macro.grabListener(new ObjectNodeUtil::AttributeNotifier(mProject, mTarget));
 
         // create command
-        mCommandRef = new CentroidMover(mTarget, mBaseCenter, newCenter);
+        mCommandRef = new CentroidMover(mProject, mTarget, mBaseCenter, newCenter);
 
         // push command
         stack.push(mCommandRef);
@@ -143,10 +143,10 @@ void CentroidMode::pushEventTarget(core::ObjectNode& aTarget, TimeLineEvent& aEv
 {
     XC_PTR_ASSERT(aTarget.timeLine());
     {
-        auto& map = aTarget.timeLine()->map(TimeKeyType_SRT);
+        auto& map = aTarget.timeLine()->map(TimeKeyType_Move);
         for (auto itr = map.begin(); itr != map.end(); ++itr)
         {
-            aEvent.pushTarget(aTarget, TimeKeyType_SRT, itr.key());
+            aEvent.pushTarget(aTarget, TimeKeyType_Move, itr.key());
         }
     }
 
@@ -155,10 +155,10 @@ void CentroidMode::pushEventTarget(core::ObjectNode& aTarget, TimeLineEvent& aEv
         for (auto child : aTarget.children())
         {
             XC_PTR_ASSERT(child->timeLine());
-            auto& map = child->timeLine()->map(TimeKeyType_SRT);
+            auto& map = child->timeLine()->map(TimeKeyType_Move);
             for (auto itr = map.begin(); itr != map.end(); ++itr)
             {
-                aEvent.pushTarget(*child, TimeKeyType_SRT, itr.key());
+                aEvent.pushTarget(*child, TimeKeyType_Move, itr.key());
             }
         }
     }
@@ -167,7 +167,7 @@ void CentroidMode::pushEventTarget(core::ObjectNode& aTarget, TimeLineEvent& aEv
         auto& map = aTarget.timeLine()->map(TimeKeyType_Image);
         for (auto itr = map.begin(); itr != map.end(); ++itr)
         {
-            aEvent.pushTarget(aTarget, TimeKeyType_SRT, itr.key());
+            aEvent.pushTarget(aTarget, TimeKeyType_Image, itr.key());
         }
     }
 }

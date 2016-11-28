@@ -7,7 +7,6 @@
 #include "core/ObjectNode.h"
 #include "core/RenderInfo.h"
 #include "core/AbstractCursor.h"
-#include "core/SRTKey.h"
 #include "ctrl/IEditor.h"
 #include "ctrl/SRTParam.h"
 #include "ctrl/srt/srt_KeyOwner.h"

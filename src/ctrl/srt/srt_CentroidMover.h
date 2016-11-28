@@ -2,18 +2,23 @@
 #define CTRL_SRT_CENTROIDMOVER_H
 
 #include "cmnd/Stable.h"
-#include "core/SRTKey.h"
+#include "core/MoveKey.h"
 #include "core/ImageKey.h"
 #include "core/ObjectNode.h"
+#include "core/Project.h"
 
 namespace ctrl {
 namespace srt {
 
 class CentroidMover : public cmnd::Stable
 {
-    struct KeyData { core::SRTKey* ptr; QVector3D prev; QVector3D next; };
-    struct ChildKeyData { core::SRTKey* ptr; QVector3D prev; QVector3D next; };
+    struct KeyData { core::MoveKey* ptr; QVector2D prev; QVector2D next; };
+    struct ChildKeyData { core::MoveKey* ptr; QVector2D prev; QVector2D next; };
     struct ImageKeyData { core::ImageKey* ptr; QVector2D prev; QVector2D next; };
+
+    QMatrix4x4 getLocalSRMatrix(const core::TimeKey& aKey);
+
+    core::Project& mProject;
     core::ObjectNode& mTarget;
     QVector2D mPrev;
     QVector2D mNext;
@@ -24,7 +29,8 @@ class CentroidMover : public cmnd::Stable
     bool mExecuteOnce;
 
 public:
-    CentroidMover(core::ObjectNode& aTarget,
+    CentroidMover(core::Project& aProject,
+                  core::ObjectNode& aTarget,
                   const QVector2D& aPrev,
                   const QVector2D& aNext);
 

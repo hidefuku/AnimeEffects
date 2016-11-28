@@ -72,7 +72,27 @@ public:
 
 namespace core
 {
+//-------------------------------------------------------------------------------------------------
+QMatrix4x4 TimeKeyBlender::getLocalSRMatrix(ObjectNode& aNode, const TimeInfo& aTime)
+{
+    if (aNode.timeLine())
+    {
+        ObjectTreeSeeker seeker(true);
+        auto pos = seeker.position(&aNode);
+        TimeKeyBlender blender(seeker, pos);
+        auto seek = seeker.data(pos);
 
+        blender.blendRotateKey(*seek.expans, *seek.objNode, aTime);
+        blender.blendScaleKey(*seek.expans, *seek.objNode, aTime);
+
+        return SRTExpans::getLocalSRMatrix(
+                    seek.expans->srt().rotate(),
+                    seek.expans->srt().scale());
+    }
+    return QMatrix4x4();
+}
+
+#if 0
 //-------------------------------------------------------------------------------------------------
 SRTExpans TimeKeyBlender::getSRTExpans(
         ObjectNode& aNode, const TimeInfo& aTime)
@@ -100,6 +120,7 @@ QMatrix4x4 TimeKeyBlender::getWorldMatrix(
     }
     return QMatrix4x4();
 }
+#endif
 
 QMatrix4x4 TimeKeyBlender::getRelativeMatrix(
         ObjectNode& aNode, const TimeInfo& aTime, const ObjectNode* aParent)
@@ -108,7 +129,14 @@ QMatrix4x4 TimeKeyBlender::getRelativeMatrix(
     {
         ObjectTreeSeeker seeker(true);
         TimeKeyBlender blender(seeker, seeker.position(&aNode));
-        blender.blendSRTKey(seeker.position(&aNode), aTime);
+        //blender.blendSRTKey(seeker.position(&aNode), aTime);
+
+        auto pos = seeker.position(&aNode);
+        auto seek = seeker.data(pos);
+        blender.blendMoveKey(*seek.expans, *seek.objNode, aTime);
+        blender.blendRotateKey(*seek.expans, *seek.objNode, aTime);
+        blender.blendScaleKey(*seek.expans, *seek.objNode, aTime);
+        blender.mergeMoveRotateScale(pos, aTime);
 
         QMatrix4x4 result;
         ObjectNode* current = &aNode;
@@ -232,20 +260,22 @@ void TimeKeyBlender::updateCurrents(ObjectNode* aRootNode, const TimeInfo& aTime
         {
             auto pos = itr.next();
             XC_ASSERT(pos);
+            auto seek = mSeeker->data(pos);
 
             // build srt
-            blendSRTKey(pos, aTime);
+            //blendSRTKey(pos, aTime);
 
-#if 0
-            // build move
-            blendMoveKey(pos, aTime);
-            // build rotate
-            blendRotateKey(pos, aTime);
-            // build scale
-            blendScaleKey(pos, aTime);
+            if (seek.objNode && seek.expans)
+            {
+                // build move
+                blendMoveKey(*seek.expans, *seek.objNode, aTime);
+                // build rotate
+                blendRotateKey(*seek.expans, *seek.objNode, aTime);
+                // build scale
+                blendScaleKey(*seek.expans, *seek.objNode, aTime);
+            }
             // merge
             mergeMoveRotateScale(pos, aTime);
-#endif
 
             // build opa
             blendOpaKey(pos, aTime);
@@ -471,21 +501,17 @@ void TimeKeyBlender::getSRTData(
     }
 }
 
-void TimeKeyBlender::blendMoveKey(PositionType aPos, const TimeInfo& aTime)
+void TimeKeyBlender::blendMoveKey(TimeKeyExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime)
 {
-    auto seekData = mSeeker->data(aPos);
-    if (!seekData.objNode || !seekData.expans) return;
-    auto& node = *seekData.objNode;
-    auto& expans = *seekData.expans;
-    if (!node.timeLine()) return;
+    if (!aNode.timeLine()) return;
 
-    TimeKeyGatherer blend(node.timeLine()->map(TimeKeyType_Move), aTime);
-    expans.setKeyCache(TimeKeyType_Move, aTime.frame);
-    auto& srt = expans.srt();
+    TimeKeyGatherer blend(aNode.timeLine()->map(TimeKeyType_Move), aTime);
+    aExpans.setKeyCache(TimeKeyType_Move, aTime.frame);
+    auto& srt = aExpans.srt();
 
     if (blend.isEmpty())
     { // no key is exists
-        srt.setPos(getDefaultKeyData<MoveKey, TimeKeyType_Move>(node).pos);
+        srt.setPos(getDefaultKeyData<MoveKey, TimeKeyType_Move>(aNode).pos);
     }
     else if (blend.hasSameFrame())
     { // a key is exists
@@ -528,21 +554,17 @@ void TimeKeyBlender::blendMoveKey(PositionType aPos, const TimeInfo& aTime)
     }
 }
 
-void TimeKeyBlender::blendRotateKey(PositionType aPos, const TimeInfo& aTime)
+void TimeKeyBlender::blendRotateKey(TimeKeyExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime)
 {
-    auto seekData = mSeeker->data(aPos);
-    if (!seekData.objNode || !seekData.expans) return;
-    auto& node = *seekData.objNode;
-    auto& expans = *seekData.expans;
-    if (!node.timeLine()) return;
+    if (!aNode.timeLine()) return;
 
-    TimeKeyGatherer blend(node.timeLine()->map(TimeKeyType_Rotate), aTime);
-    expans.setKeyCache(TimeKeyType_Rotate, aTime.frame);
-    auto& srt = expans.srt();
+    TimeKeyGatherer blend(aNode.timeLine()->map(TimeKeyType_Rotate), aTime);
+    aExpans.setKeyCache(TimeKeyType_Rotate, aTime.frame);
+    auto& srt = aExpans.srt();
 
     if (blend.isEmpty())
     { // no key is exists
-        srt.setRotate(getDefaultKeyData<RotateKey, TimeKeyType_Rotate>(node).rotate);
+        srt.setRotate(getDefaultKeyData<RotateKey, TimeKeyType_Rotate>(aNode).rotate);
     }
     else if (blend.hasSameFrame())
     { // a key is exists
@@ -572,21 +594,17 @@ void TimeKeyBlender::blendRotateKey(PositionType aPos, const TimeInfo& aTime)
     }
 }
 
-void TimeKeyBlender::blendScaleKey(PositionType aPos, const TimeInfo& aTime)
+void TimeKeyBlender::blendScaleKey(TimeKeyExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime)
 {
-    auto seekData = mSeeker->data(aPos);
-    if (!seekData.objNode || !seekData.expans) return;
-    auto& node = *seekData.objNode;
-    auto& expans = *seekData.expans;
-    if (!node.timeLine()) return;
+    if (!aNode.timeLine()) return;
 
-    TimeKeyGatherer blend(node.timeLine()->map(TimeKeyType_Scale), aTime);
-    expans.setKeyCache(TimeKeyType_Scale, aTime.frame);
-    auto& srt = expans.srt();
+    TimeKeyGatherer blend(aNode.timeLine()->map(TimeKeyType_Scale), aTime);
+    aExpans.setKeyCache(TimeKeyType_Scale, aTime.frame);
+    auto& srt = aExpans.srt();
 
     if (blend.isEmpty())
     { // no key is exists
-        srt.setScale(getDefaultKeyData<ScaleKey, TimeKeyType_Scale>(node).scale);
+        srt.setScale(getDefaultKeyData<ScaleKey, TimeKeyType_Scale>(aNode).scale);
     }
     else if (blend.hasSameFrame())
     { // a key is exists
@@ -636,15 +654,32 @@ void TimeKeyBlender::mergeMoveRotateScale(PositionType aPos, const TimeInfo& aTi
             }
             if (!data.expans->hasKeyCache(TimeKeyType_Move, aTime.frame))
             {
-                blendMoveKey(pos, aTime);
+                mergeMoveRotateScale(pos, aTime);
+            }
+
+            if (!data.expans->hasKeyCache(TimeKeyType_Move, aTime.frame))
+            {
+                auto pseek = mSeeker->data(pos);
+                if (pseek.objNode && pseek.expans)
+                {
+                    blendMoveKey(*pseek.expans, *pseek.objNode, aTime);
+                }
             }
             if (!data.expans->hasKeyCache(TimeKeyType_Rotate, aTime.frame))
             {
-                blendRotateKey(pos, aTime);
+                auto pseek = mSeeker->data(pos);
+                if (pseek.objNode && pseek.expans)
+                {
+                    blendRotateKey(*pseek.expans, *pseek.objNode, aTime);
+                }
             }
             if (!data.expans->hasKeyCache(TimeKeyType_Scale, aTime.frame))
             {
-                blendScaleKey(pos, aTime);
+                auto pseek = mSeeker->data(pos);
+                if (pseek.objNode && pseek.expans)
+                {
+                    blendScaleKey(*pseek.expans, *pseek.objNode, aTime);
+                }
             }
             expans.srt().setParentMatrix(data.expans->srt().worldMatrix());
             break;

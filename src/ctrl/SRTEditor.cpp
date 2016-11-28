@@ -27,28 +27,55 @@ SRTEditor::~SRTEditor()
 
 bool SRTEditor::initializeKey(TimeLine& aLine)
 {
-    const TimeLine::MapType& map = aLine.map(TimeKeyType_SRT);
+    const TimeLine::MapType& moveMap   = aLine.map(TimeKeyType_Move);
+    const TimeLine::MapType& rotateMap = aLine.map(TimeKeyType_Rotate);
+    const TimeLine::MapType& scaleMap  = aLine.map(TimeKeyType_Scale);
     TimeKeyExpans& current = aLine.current();
     const int frame = mProject.animator().currentFrame().get();
 
-    if (map.contains(frame))
+    // moveKey
+    mKeyOwner.ownsMoveKey = !moveMap.contains(frame);
+    if (mKeyOwner.ownsMoveKey)
     {
-        // a key is exists
-        mKeyOwner.key = static_cast<SRTKey*>(map.value(frame));
-        XC_PTR_ASSERT(mKeyOwner.key);
-        mKeyOwner.ownsKey = false;
+        mKeyOwner.moveKey = new MoveKey();
+        mKeyOwner.moveKey->data().pos = current.srt().pos();
     }
     else
     {
-        // create new key
-        mKeyOwner.key = new SRTKey();
-        mKeyOwner.ownsKey = true;
-        mKeyOwner.key->data() = current.srt().data();
+        mKeyOwner.moveKey = static_cast<MoveKey*>(moveMap.value(frame));
     }
 
+    // rotateKey
+    mKeyOwner.ownsRotateKey = !rotateMap.contains(frame);
+    if (mKeyOwner.ownsRotateKey)
+    {
+        mKeyOwner.rotateKey = new RotateKey();
+        mKeyOwner.rotateKey->data().rotate = current.srt().rotate();
+    }
+    else
+    {
+        mKeyOwner.rotateKey = static_cast<RotateKey*>(rotateMap.value(frame));
+    }
+
+    // scaleKey
+    mKeyOwner.ownsScaleKey = !scaleMap.contains(frame);
+    if (mKeyOwner.ownsScaleKey)
+    {
+        mKeyOwner.scaleKey = new ScaleKey();
+        mKeyOwner.scaleKey->data().scale = current.srt().scale();
+    }
+    else
+    {
+        mKeyOwner.scaleKey = static_cast<ScaleKey*>(scaleMap.value(frame));
+    }
+
+    // check validity
+    XC_ASSERT(mKeyOwner);
+
+    // setup matrix
     if (!mKeyOwner.updatePosture(current))
     {
-        mKeyOwner.deleteOwnsKey();
+        mKeyOwner.deleteOwningKeys();
         return false;
     }
 
@@ -58,14 +85,14 @@ bool SRTEditor::initializeKey(TimeLine& aLine)
 void SRTEditor::finalize()
 {
     mCurrent.reset();
-    mKeyOwner.deleteOwnsKey();
+    mKeyOwner.deleteOwningKeys();
 }
 
 void SRTEditor::createMode()
 {
     mCurrent.reset();
 
-    if (!mTarget || !mKeyOwner.key) return;
+    if (!mTarget || !mKeyOwner) return;
 
     switch (mParam.mode)
     {

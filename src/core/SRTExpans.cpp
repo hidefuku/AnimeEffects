@@ -60,5 +60,12 @@ QMatrix4x4 SRTExpans::localSRMatrix() const
     return mtx;
 }
 
+QMatrix4x4 SRTExpans::getLocalSRMatrix(float aRotate, const QVector2D& aScale)
+{
+    QMatrix4x4 mtx;
+    mtx.rotate(util::MathUtil::getDegreeFromRadian(aRotate), QVector3D(0.0f, 0.0f, 1.0f));
+    mtx.scale(QVector3D(aScale, 1.0f));
+    return mtx;
+}
 
 } // namespace core

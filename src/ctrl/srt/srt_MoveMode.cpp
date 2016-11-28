@@ -1,6 +1,7 @@
 #include "util/MathUtil.h"
 #include "cmnd/ScopedMacro.h"
 #include "core/Constant.h"
+#include "core/TimeKeyBlender.h"
 #include "ctrl/TimeLineUtil.h"
 #include "ctrl/srt/srt_MoveMode.h"
 
@@ -15,7 +16,9 @@ MoveMode::MoveMode(Project& aProject, ObjectNode& aTarget, KeyOwner& aKeyOwner)
     , mKeyOwner(aKeyOwner)
     , mSymbol()
     , mFocus(FocusType_TERM, QVector2D())
-    , mAssignRef()
+    , mAssignMoveRef()
+    , mAssignRotateRef()
+    , mAssignScaleRef()
     , mSuspend()
     , mBaseVec()
     , mBaseValue()
@@ -25,13 +28,13 @@ MoveMode::MoveMode(Project& aProject, ObjectNode& aTarget, KeyOwner& aKeyOwner)
 
 bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCursor)
 {
-    auto& key = *mKeyOwner.key;
-    auto& keyMtx = mKeyOwner.mtx;
+    auto keyLocalMtx = mKeyOwner.getLocalMatrixFromKeys();
+    auto& keyWorldMtx = mKeyOwner.mtx;
 
     bool mod = false;
 
     // update symbol
-    mSymbol.build(key, keyMtx, aCamera);
+    mSymbol.build(keyLocalMtx, keyWorldMtx, aCamera);
 
     if (aCursor.emitsLeftPressedEvent())
     {
@@ -40,15 +43,19 @@ bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCu
         if (mFocus.first != FocusType_TERM)
         {
             mSuspend.construct(mProject);
-            mAssignRef = nullptr;
+            mAssignMoveRef = nullptr;
+            mAssignRotateRef = nullptr;
+            mAssignScaleRef = nullptr;
 
             if (mFocus.first == FocusType_Scale ||
                 mFocus.first == FocusType_ScaleX ||
                 mFocus.first == FocusType_ScaleY)
             {
-                mBaseVec = key.scale();
+                auto keyWorldPos = keyWorldMtx * QVector3D(mKeyOwner.moveKey->pos());
+                mBaseVec = mKeyOwner.scaleKey->scale();
+
                 const QVector3D pos = QVector3D(aCursor.worldPos());
-                const QVector2D vec = (pos - keyMtx * key.pos()).toVector2D();
+                const QVector2D vec = (pos - keyWorldPos).toVector2D();
                 const float length = QVector2D::dotProduct(vec, focusVector);
                 mBaseValue = std::max(Constant::normalizable(), length);
             }
@@ -61,71 +68,72 @@ bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCu
     }
     else if (aCursor.emitsLeftDraggedEvent())
     {
-        SRTKey::Data newData;
         auto focusVector = aCamera.toWorldVector(mFocus.second);
 
-        if (mFocus.first != srt::FocusType_TERM)
-        {
-            newData = key.data();
-        }
+        auto keyPos = mKeyOwner.moveKey->pos();
+        auto keyWorldPos = keyWorldMtx * QVector3D(keyPos);
+        auto cursorWorldPos = QVector3D(aCursor.worldPos());
+        auto cursorWorldVel = QVector3D(aCursor.worldVel());
 
         if (mFocus.first == srt::FocusType_Trans)
         {
-            newData.pos += mKeyOwner.invSRMtx * QVector3D(aCursor.worldVel());
-            newData.clampPos();
+            auto moveData = mKeyOwner.moveKey->data();
+            moveData.pos += (mKeyOwner.invSRMtx * cursorWorldVel).toVector2D();
+            moveData.clamp();
+            assignMoveKey(moveData);
         }
         else if (mFocus.first == srt::FocusType_Rotate)
         {
-            const QVector3D pos = mKeyOwner.invMtx * QVector3D(aCursor.worldPos());
-            const QVector2D vec = (pos - newData.pos).toVector2D();
+            auto rotData = mKeyOwner.rotateKey->data();
+            auto vec = (mKeyOwner.invMtx * cursorWorldPos).toVector2D() - keyPos;
             const float length = vec.length();
             if (length > 1.0f)
             {
-                const float rotate =
-                        util::MathUtil::getAngleDifferenceRad(mBaseVec, vec);
-                newData.rotate += rotate;
-                newData.clampRotate();
+                auto rotate = util::MathUtil::getAngleDifferenceRad(mBaseVec, vec);
+                rotData.rotate += rotate;
+                rotData.clamp();
                 mBaseVec = vec.normalized();
             }
+            assignRotateKey(rotData);
         }
         else if (mFocus.first == srt::FocusType_Scale)
         {
-            const QVector3D pos = QVector3D(aCursor.worldPos());
-            const QVector2D vec = (pos - keyMtx * newData.pos).toVector2D();
+            auto scaleData = mKeyOwner.scaleKey->data();
+            const QVector2D vec = (cursorWorldPos - keyWorldPos).toVector2D();
             const float length = QVector2D::dotProduct(vec, focusVector);
-            newData.scale.setX(mBaseVec.x() * (length / mBaseValue));
-            newData.scale.setY(mBaseVec.y() * (length / mBaseValue));
-            newData.clampScale();
+            scaleData.scale.setX(mBaseVec.x() * (length / mBaseValue));
+            scaleData.scale.setY(mBaseVec.y() * (length / mBaseValue));
+            scaleData.clamp();
+            assignScaleKey(scaleData);
         }
         else if (mFocus.first == srt::FocusType_ScaleX)
         {
-            const QVector3D pos = QVector3D(aCursor.worldPos());
-            const QVector2D vec = (pos - keyMtx * newData.pos).toVector2D();
+            auto scaleData = mKeyOwner.scaleKey->data();
+            const QVector2D vec = (cursorWorldPos - keyWorldPos).toVector2D();
             const float length = QVector2D::dotProduct(vec, focusVector);
-            newData.scale.setX(mBaseVec.x() * (length / mBaseValue));
-            newData.clampScale();
+            scaleData.scale.setX(mBaseVec.x() * (length / mBaseValue));
+            scaleData.clamp();
+            assignScaleKey(scaleData);
         }
         else if (mFocus.first == srt::FocusType_ScaleY)
         {
-            const QVector3D pos = QVector3D(aCursor.worldPos());
-            const QVector2D vec = (pos - keyMtx * newData.pos).toVector2D();
+            auto scaleData = mKeyOwner.scaleKey->data();
+            const QVector2D vec = (cursorWorldPos - keyWorldPos).toVector2D();
             const float length = QVector2D::dotProduct(vec, focusVector);
-            newData.scale.setY(mBaseVec.y() * (length / mBaseValue));
-            newData.clampScale();
+            scaleData.scale.setY(mBaseVec.y() * (length / mBaseValue));
+            scaleData.clamp();
+            assignScaleKey(scaleData);
         }
 
         if (mFocus.first != srt::FocusType_TERM)
         {
-            if (!assignKey(newData))
-            {
-                clearState();
-            }
             mod = true;
         }
     }
     else if (aCursor.emitsLeftReleasedEvent())
     {
         clearState();
+        mod = true;
     }
     else
     {
@@ -139,64 +147,114 @@ bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCu
 
 void MoveMode::renderQt(const core::RenderInfo& aInfo, QPainter& aPainter)
 {
-    mSymbol.build(*mKeyOwner.key, mKeyOwner.mtx, aInfo.camera);
+    mSymbol.build(mKeyOwner.getLocalMatrixFromKeys(), mKeyOwner.mtx, aInfo.camera);
     mSymbol.draw(aInfo, aPainter, mFocus.first);
 }
 
 void MoveMode::clearState()
 {
-    mAssignRef = nullptr;
+    mAssignMoveRef = nullptr;
+    mAssignRotateRef = nullptr;
+    mAssignScaleRef = nullptr;
     mFocus.first = FocusType_TERM;
     mSuspend.destruct();
 }
 
-bool MoveMode::assignKey(SRTKey::Data& aNewData)
+void MoveMode::setAssignNotifier(
+        cmnd::ScopedMacro& aMacro, TimeKeyType aKeyType, bool aOwnsKey)
+{
+    auto notifyType = aOwnsKey ?
+                TimeLineEvent::Type_PushKey :
+                TimeLineEvent::Type_ChangeKeyValue;
+    const int frame = mProject.animator().currentFrame().get();
+
+    auto notifier = new TimeLineUtil::Notifier(mProject);
+    notifier->event().setType(notifyType);
+    notifier->event().pushTarget(mTarget, aKeyType, frame);
+    aMacro.grabListener(notifier);
+}
+
+void MoveMode::notifyAssignModification(TimeKeyType aKeyType)
+{
+    const int frame = mProject.animator().currentFrame().get();
+
+    // singleshot notify
+    TimeLineEvent event;
+    event.setType(TimeLineEvent::Type_ChangeKeyValue);
+    event.pushTarget(mTarget, aKeyType, frame);
+    mProject.onTimeLineModified(event, false);
+}
+
+void MoveMode::assignMoveKey(MoveKey::Data& aNewData)
 {
     const int frame = mProject.animator().currentFrame().get();
     TimeLine& timeLine = *mTarget.timeLine();
     cmnd::Stack& stack = mProject.commandStack();
-    auto notifyType = mKeyOwner.owns() ?
-                TimeLineEvent::Type_PushKey :
-                TimeLineEvent::Type_ChangeKeyValue;
 
-    if (mAssignRef && mProject.commandStack().isModifiable(mAssignRef))
+    if (mAssignMoveRef && mProject.commandStack().isModifiable(mAssignMoveRef))
     {
-        XC_ASSERT(!mKeyOwner.owns());
-
         // modify command
-        mAssignRef->modifyValue(aNewData);
-
-        // singleshot notify
-        TimeLineEvent event;
-        event.setType(TimeLineEvent::Type_ChangeKeyValue);
-        event.pushTarget(mTarget, TimeKeyType_SRT, frame);
-        mProject.onTimeLineModified(event, false);
-
-        return true;
+        XC_ASSERT(!mKeyOwner.ownsMoveKey);
+        mAssignMoveRef->modifyValue(aNewData);
+        notifyAssignModification(TimeKeyType_Move);
     }
     else
     {
-        cmnd::ScopedMacro macro(stack, "update srt");
-
-        // set notifier
-        {
-            auto notifier = new TimeLineUtil::Notifier(mProject);
-            notifier->event().setType(notifyType);
-            notifier->event().pushTarget(mTarget, TimeKeyType_SRT, frame);
-            macro.grabListener(notifier);
-        }
-
+        cmnd::ScopedMacro macro(stack, "update move");
+        setAssignNotifier(macro, TimeKeyType_Move, mKeyOwner.ownsMoveKey);
         // push commands
-        mKeyOwner.pushOwnsKey(stack, timeLine, frame);
-
-        mAssignRef = new cmnd::ModifiableAssign<SRTKey::Data>(
-                    &(mKeyOwner.key->data()), aNewData);
-        stack.push(mAssignRef);
-
-        return true;
+        mKeyOwner.pushOwningMoveKey(stack, timeLine, frame);
+        mAssignMoveRef = new AssignMoveCommand(&(mKeyOwner.moveKey->data()), aNewData);
+        stack.push(mAssignMoveRef);
     }
+}
 
-    return false;
+void MoveMode::assignRotateKey(RotateKey::Data& aNewData)
+{
+    const int frame = mProject.animator().currentFrame().get();
+    TimeLine& timeLine = *mTarget.timeLine();
+    cmnd::Stack& stack = mProject.commandStack();
+
+    if (mAssignRotateRef && mProject.commandStack().isModifiable(mAssignRotateRef))
+    {
+        // modify command
+        XC_ASSERT(!mKeyOwner.ownsRotateKey);
+        mAssignRotateRef->modifyValue(aNewData);
+        notifyAssignModification(TimeKeyType_Rotate);
+    }
+    else
+    {
+        cmnd::ScopedMacro macro(stack, "update rotate");
+        setAssignNotifier(macro, TimeKeyType_Rotate, mKeyOwner.ownsRotateKey);
+        // push commands
+        mKeyOwner.pushOwningRotateKey(stack, timeLine, frame);
+        mAssignRotateRef = new AssignRotateCommand(&(mKeyOwner.rotateKey->data()), aNewData);
+        stack.push(mAssignRotateRef);
+    }
+}
+
+void MoveMode::assignScaleKey(ScaleKey::Data& aNewData)
+{
+    const int frame = mProject.animator().currentFrame().get();
+    TimeLine& timeLine = *mTarget.timeLine();
+    cmnd::Stack& stack = mProject.commandStack();
+
+    if (mAssignScaleRef && mProject.commandStack().isModifiable(mAssignScaleRef))
+    {
+        // modify command
+        XC_ASSERT(!mKeyOwner.ownsScaleKey);
+        mAssignScaleRef->modifyValue(aNewData);
+        notifyAssignModification(TimeKeyType_Scale);
+    }
+    else
+    {
+        cmnd::ScopedMacro macro(stack, "update scale");
+        setAssignNotifier(macro, TimeKeyType_Scale, mKeyOwner.ownsScaleKey);
+        // push commands
+        mKeyOwner.pushOwningScaleKey(stack, timeLine, frame);
+        mAssignScaleRef = new AssignScaleCommand(&(mKeyOwner.scaleKey->data()), aNewData);
+        stack.push(mAssignScaleRef);
+    }
 }
 
 } // namespace srt
