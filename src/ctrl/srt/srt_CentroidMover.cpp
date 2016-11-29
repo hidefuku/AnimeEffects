@@ -60,13 +60,11 @@ void CentroidMover::modifyValue(const QVector2D& aNext)
         {
             for (auto& key : mKeys)
             {
-                key.ptr->data().pos = key.next;
-                key.ptr->data().clamp();
+                key.ptr->setPos(key.next);
             }
             for (auto& key : mChildKeys)
             {
-                key.ptr->data().pos = key.next;
-                key.ptr->data().clamp();
+                key.ptr->setPos(key.next);
             }
             for (auto& key : mImageKeys)
             {
@@ -90,7 +88,7 @@ void CentroidMover::exec()
             auto key = itr.value();
             TIMEKEY_PTR_TYPE_ASSERT(key, Move);
             core::MoveKey* moveKey = (core::MoveKey*)key;
-            const QVector2D prev = moveKey->data().pos;
+            const QVector2D prev = moveKey->pos();
             const QVector2D next = prev + (getLocalSRMatrix(*moveKey) * keyMove3D).toVector2D();
             KeyData keyData = { moveKey, prev, next };
             mKeys.push_back(keyData);
@@ -101,7 +99,7 @@ void CentroidMover::exec()
         {
             TIMEKEY_PTR_TYPE_ASSERT(defaultKey, Move);
             core::MoveKey* moveKey = (core::MoveKey*)defaultKey;
-            const QVector2D prev = moveKey->data().pos;
+            const QVector2D prev = moveKey->pos();
             const QVector2D next = prev + (getLocalSRMatrix(*moveKey) * keyMove3D).toVector2D();
             KeyData keyData = { moveKey, prev, next };
             mKeys.push_back(keyData);
@@ -120,7 +118,7 @@ void CentroidMover::exec()
                 auto key = itr.value();
                 TIMEKEY_PTR_TYPE_ASSERT(key, Move);
                 core::MoveKey* moveKey = (core::MoveKey*)key;
-                const QVector2D prev = moveKey->data().pos;
+                const QVector2D prev = moveKey->pos();
                 const QVector2D next = prev - keyMove;
                 ChildKeyData keyData = { moveKey, prev, next };
                 mChildKeys.push_back(keyData);
@@ -131,7 +129,7 @@ void CentroidMover::exec()
             {
                 TIMEKEY_PTR_TYPE_ASSERT(defaultKey, Move);
                 core::MoveKey* moveKey = (core::MoveKey*)defaultKey;
-                const QVector2D prev = moveKey->data().pos;
+                const QVector2D prev = moveKey->pos();
                 const QVector2D next = prev - keyMove;
                 ChildKeyData keyData = { moveKey, prev, next };
                 mChildKeys.push_back(keyData);
@@ -175,13 +173,11 @@ void CentroidMover::undo()
 {
     for (auto& key : mKeys)
     {
-        key.ptr->data().pos = key.prev;
-        key.ptr->data().clamp();
+        key.ptr->setPos(key.prev);
     }
     for (auto& key : mChildKeys)
     {
-        key.ptr->data().pos = key.prev;
-        key.ptr->data().clamp();
+        key.ptr->setPos(key.prev);
     }
     for (auto& key : mImageKeys)
     {
@@ -194,13 +190,11 @@ void CentroidMover::redo()
 {
     for (auto& key : mKeys)
     {
-        key.ptr->data().pos = key.next;
-        key.ptr->data().clamp();
+        key.ptr->setPos(key.next);
     }
     for (auto& key : mChildKeys)
     {
-        key.ptr->data().pos = key.next;
-        key.ptr->data().clamp();
+        key.ptr->setPos(key.next);
     }
     for (auto& key : mImageKeys)
     {

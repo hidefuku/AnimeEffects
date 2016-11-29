@@ -78,8 +78,7 @@ bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCu
         if (mFocus.first == srt::FocusType_Trans)
         {
             auto moveData = mKeyOwner.moveKey->data();
-            moveData.pos += (mKeyOwner.invSRMtx * cursorWorldVel).toVector2D();
-            moveData.clamp();
+            moveData.addPos((mKeyOwner.invSRMtx * cursorWorldVel).toVector2D());
             assignMoveKey(moveData);
         }
         else if (mFocus.first == srt::FocusType_Rotate)
@@ -90,8 +89,7 @@ bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCu
             if (length > 1.0f)
             {
                 auto rotate = util::MathUtil::getAngleDifferenceRad(mBaseVec, vec);
-                rotData.rotate += rotate;
-                rotData.clamp();
+                rotData.addRotate(rotate);
                 mBaseVec = vec.normalized();
             }
             assignRotateKey(rotData);
@@ -101,9 +99,8 @@ bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCu
             auto scaleData = mKeyOwner.scaleKey->data();
             const QVector2D vec = (cursorWorldPos - keyWorldPos).toVector2D();
             const float length = QVector2D::dotProduct(vec, focusVector);
-            scaleData.scale.setX(mBaseVec.x() * (length / mBaseValue));
-            scaleData.scale.setY(mBaseVec.y() * (length / mBaseValue));
-            scaleData.clamp();
+            scaleData.setScaleX(mBaseVec.x() * (length / mBaseValue));
+            scaleData.setScaleY(mBaseVec.y() * (length / mBaseValue));
             assignScaleKey(scaleData);
         }
         else if (mFocus.first == srt::FocusType_ScaleX)
@@ -111,8 +108,7 @@ bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCu
             auto scaleData = mKeyOwner.scaleKey->data();
             const QVector2D vec = (cursorWorldPos - keyWorldPos).toVector2D();
             const float length = QVector2D::dotProduct(vec, focusVector);
-            scaleData.scale.setX(mBaseVec.x() * (length / mBaseValue));
-            scaleData.clamp();
+            scaleData.setScaleX(mBaseVec.x() * (length / mBaseValue));
             assignScaleKey(scaleData);
         }
         else if (mFocus.first == srt::FocusType_ScaleY)
@@ -120,8 +116,7 @@ bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCu
             auto scaleData = mKeyOwner.scaleKey->data();
             const QVector2D vec = (cursorWorldPos - keyWorldPos).toVector2D();
             const float length = QVector2D::dotProduct(vec, focusVector);
-            scaleData.scale.setY(mBaseVec.y() * (length / mBaseValue));
-            scaleData.clamp();
+            scaleData.setScaleY(mBaseVec.y() * (length / mBaseValue));
             assignScaleKey(scaleData);
         }
 

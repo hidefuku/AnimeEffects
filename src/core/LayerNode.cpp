@@ -66,8 +66,7 @@ void LayerNode::setDefaultPosture(const QVector2D& aPos)
             key = new MoveKey();
             mTimeLine.grabDefaultKey(TimeKeyType_Move, key);
         }
-        key->data().pos = aPos;
-        key->data().clamp();
+        key->data().setPos(aPos);
     }
     {
         auto key = (RotateKey*)mTimeLine.defaultKey(TimeKeyType_Rotate);
@@ -95,8 +94,7 @@ void LayerNode::setDefaultOpacity(float aValue)
         key = new OpaKey();
         mTimeLine.grabDefaultKey(TimeKeyType_Opa, key);
     }
-    key->data().opacity = aValue;
-    key->data().clamp();
+    key->setOpacity(aValue);
 }
 
 void LayerNode::setClipped(bool aIsClipped)

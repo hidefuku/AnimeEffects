@@ -38,7 +38,7 @@ bool SRTEditor::initializeKey(TimeLine& aLine)
     if (mKeyOwner.ownsMoveKey)
     {
         mKeyOwner.moveKey = new MoveKey();
-        mKeyOwner.moveKey->data().pos = current.srt().pos();
+        mKeyOwner.moveKey->setPos(current.srt().pos());
     }
     else
     {
@@ -50,7 +50,7 @@ bool SRTEditor::initializeKey(TimeLine& aLine)
     if (mKeyOwner.ownsRotateKey)
     {
         mKeyOwner.rotateKey = new RotateKey();
-        mKeyOwner.rotateKey->data().rotate = current.srt().rotate();
+        mKeyOwner.rotateKey->setRotate(current.srt().rotate());
     }
     else
     {
@@ -62,7 +62,7 @@ bool SRTEditor::initializeKey(TimeLine& aLine)
     if (mKeyOwner.ownsScaleKey)
     {
         mKeyOwner.scaleKey = new ScaleKey();
-        mKeyOwner.scaleKey->data().scale = current.srt().scale();
+        mKeyOwner.scaleKey->setScale(current.srt().scale());
     }
     else
     {

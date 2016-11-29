@@ -82,15 +82,15 @@ bool KeyOwner::updatePosture(const TimeKeyExpans& aExpans)
 
     if (ownsMoveKey)
     {
-        moveKey->data().pos = aExpans.srt().pos();
+        moveKey->setPos(aExpans.srt().pos());
     }
     if (ownsRotateKey)
     {
-        rotateKey->data().rotate = aExpans.srt().rotate();
+        rotateKey->setRotate(aExpans.srt().rotate());
     }
     if (ownsScaleKey)
     {
-        scaleKey->data().scale = aExpans.srt().scale();
+        scaleKey->setScale(aExpans.srt().scale());
     }
 
     mtx = aExpans.srt().parentMatrix();

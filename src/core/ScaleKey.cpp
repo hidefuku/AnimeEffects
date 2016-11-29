@@ -5,15 +5,15 @@ namespace core
 {
 //-------------------------------------------------------------------------------------------------
 ScaleKey::Data::Data()
-    : easing()
-    , scale(1.0f, 1.0f)
+    : mEasing()
+    , mScale(1.0f, 1.0f)
 {
 }
 
 void ScaleKey::Data::clamp()
 {
-    scale.setX(xc_clamp(scale.x(), Constant::scaleMin(), Constant::scaleMax()));
-    scale.setY(xc_clamp(scale.y(), Constant::scaleMin(), Constant::scaleMax()));
+    mScale.setX(xc_clamp(mScale.x(), Constant::scaleMin(), Constant::scaleMax()));
+    mScale.setY(xc_clamp(mScale.y(), Constant::scaleMin(), Constant::scaleMax()));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -24,8 +24,8 @@ ScaleKey::ScaleKey()
 
 bool ScaleKey::serialize(Serializer& aOut) const
 {
-    aOut.write(mData.easing);
-    aOut.write(mData.scale);
+    aOut.write(mData.easing());
+    aOut.write(mData.scale());
     return aOut.checkStream();
 }
 
@@ -34,13 +34,14 @@ bool ScaleKey::deserialize(Deserializer &aIn)
     aIn.pushLogScope("ScaleKey");
 
     // easing
-    if (!aIn.read(mData.easing))
+    if (!aIn.read(mData.easing()))
     {
         return aIn.errored("invalid easing param");
     }
 
-    aIn.read(mData.scale);
-    mData.clamp();
+    QVector2D scale;
+    aIn.read(scale);
+    mData.setScale(scale);
 
     aIn.popLogScope();
     return aIn.checkStream();

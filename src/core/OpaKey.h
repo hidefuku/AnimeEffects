@@ -10,19 +10,30 @@ namespace core
 class OpaKey : public TimeKey
 {
 public:
-    struct Data
+    class Data
     {
-        Data();
-        bool isZero() const;
+        util::Easing::Param mEasing;
+        float mOpacity;
         void clamp();
-        util::Easing::Param easing;
-        float opacity;
+    public:
+        Data();
+
+        util::Easing::Param& easing() { return mEasing; }
+        const util::Easing::Param& easing() const { return mEasing; }
+
+        void setOpacity(float aOpacity) { mOpacity = aOpacity; clamp(); }
+        const float& opacity() const { return mOpacity; }
+
+        bool isZero() const;
     };
 
     OpaKey();
 
     Data& data() { return mData; }
     const Data& data() const { return mData; }
+
+    void setOpacity(float aOpacity) { mData.setOpacity(aOpacity); }
+    const float& opacity() const { return mData.opacity(); }
 
     virtual TimeKeyType type() const { return TimeKeyType_Opa; }
     virtual bool serialize(Serializer& aOut) const;

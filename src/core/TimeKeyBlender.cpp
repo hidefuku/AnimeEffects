@@ -397,6 +397,23 @@ QMatrix4x4 TimeKeyBlender::getParentMatrix(PositionType aPos, int aCacheFrame)
 }
 #endif
 
+template<class tKey>
+float getEasingRateFromTwoKeys(const TimeKeyGatherer& aGatherer)
+{
+    // blend keys
+    auto p0 = aGatherer.point(0);
+    auto p1 = aGatherer.point(1);
+    XC_ASSERT(p0 && p1);
+    const float frame = p1.relativeFrame - p0.relativeFrame;
+    XC_ASSERT(frame != 0.0f);
+
+    const tKey* k0 = (const tKey*)p0.key;
+
+    // calculate easing
+    return util::Easing::calculate(
+                k0->data().easing(), -p0.relativeFrame, 0.0f, 1.0f, frame);
+}
+
 template<class tKey, TimeKeyType tType>
 typename tKey::Data getDefaultKeyData(const ObjectNode& aNode)
 {
@@ -418,15 +435,15 @@ void TimeKeyBlender::blendMoveKey(TimeKeyExpans& aExpans, const ObjectNode& aNod
 
     if (blend.isEmpty())
     { // no key is exists
-        srt.setPos(getDefaultKeyData<MoveKey, TimeKeyType_Move>(aNode).pos);
+        srt.setPos(getDefaultKeyData<MoveKey, TimeKeyType_Move>(aNode).pos());
     }
     else if (blend.hasSameFrame())
     { // a key is exists
-        srt.setPos(((const MoveKey*)blend.point(0).key)->data().pos);
+        srt.setPos(((const MoveKey*)blend.point(0).key)->data().pos());
     }
     else if (blend.isSingle())
     { // perfect following
-        srt.setPos(((const MoveKey*)blend.singlePoint().key)->data().pos);
+        srt.setPos(((const MoveKey*)blend.singlePoint().key)->data().pos());
     }
     else
     {
@@ -435,14 +452,11 @@ void TimeKeyBlender::blendMoveKey(TimeKeyExpans& aExpans, const ObjectNode& aNod
         auto p1 = blend.point(1);
         const MoveKey* k0 = (const MoveKey*)p0.key;
         const MoveKey* k1 = (const MoveKey*)p1.key;
-        const float frame = p1.relativeFrame - p0.relativeFrame;
-        XC_ASSERT(frame != 0.0f);
-
-        auto easing = k0->data().easing;
+        const MoveKey* kn = (const MoveKey*)blend.point(-1).key;
+        const MoveKey* k2 = (const MoveKey*)blend.point(2).key;
 
         // calculate easing
-        const float time = util::Easing::calculate(
-                    easing, -p0.relativeFrame, 0.0f, 1.0f, frame);
+        const float time = getEasingRateFromTwoKeys<MoveKey>(blend);
 
         // use spline cache
         if (srt.hasSplineCache(aTime.frame))
@@ -452,7 +466,7 @@ void TimeKeyBlender::blendMoveKey(TimeKeyExpans& aExpans, const ObjectNode& aNod
         else
         {
             // linear blending
-            const std::array<QVector3D, 2> vels = catmullRomVels(blend);
+            auto vels = MoveKey::getCatmullRomVels(kn, k0, k1, k2);
             srt.spline().set(k0->pos(), k1->pos(), vels[0], vels[1]);
             srt.setSplineCache(util::Range(p0.frame, p1.frame));
 
@@ -471,32 +485,22 @@ void TimeKeyBlender::blendRotateKey(TimeKeyExpans& aExpans, const ObjectNode& aN
 
     if (blend.isEmpty())
     { // no key is exists
-        srt.setRotate(getDefaultKeyData<RotateKey, TimeKeyType_Rotate>(aNode).rotate);
+        srt.setRotate(getDefaultKeyData<RotateKey, TimeKeyType_Rotate>(aNode).rotate());
     }
     else if (blend.hasSameFrame())
     { // a key is exists
-        srt.setRotate(((const RotateKey*)blend.point(0).key)->data().rotate);
+        srt.setRotate(((const RotateKey*)blend.point(0).key)->data().rotate());
     }
     else if (blend.isSingle())
     { // perfect following
-        srt.setRotate(((const RotateKey*)blend.singlePoint().key)->data().rotate);
+        srt.setRotate(((const RotateKey*)blend.singlePoint().key)->data().rotate());
     }
     else
     {
-        // blend keys
-        auto p0 = blend.point(0);
-        auto p1 = blend.point(1);
-        const RotateKey* k0 = (const RotateKey*)p0.key;
-        const RotateKey* k1 = (const RotateKey*)p1.key;
-        const float frame = p1.relativeFrame - p0.relativeFrame;
-        XC_ASSERT(frame != 0.0f);
-
-        auto easing = k0->data().easing;
-
+        const RotateKey* k0 = (const RotateKey*)blend.point(0).key;
+        const RotateKey* k1 = (const RotateKey*)blend.point(1).key;
         // calculate easing
-        const float time = util::Easing::calculate(
-                    easing, -p0.relativeFrame, 0.0f, 1.0f, frame);
-
+        const float time = getEasingRateFromTwoKeys<RotateKey>(blend);
         srt.setRotate(k0->rotate() * (1.0f - time) + k1->rotate() * time);
     }
 }
@@ -511,32 +515,22 @@ void TimeKeyBlender::blendScaleKey(TimeKeyExpans& aExpans, const ObjectNode& aNo
 
     if (blend.isEmpty())
     { // no key is exists
-        srt.setScale(getDefaultKeyData<ScaleKey, TimeKeyType_Scale>(aNode).scale);
+        srt.setScale(getDefaultKeyData<ScaleKey, TimeKeyType_Scale>(aNode).scale());
     }
     else if (blend.hasSameFrame())
     { // a key is exists
-        srt.setScale(((const ScaleKey*)blend.point(0).key)->data().scale);
+        srt.setScale(((const ScaleKey*)blend.point(0).key)->data().scale());
     }
     else if (blend.isSingle())
     { // perfect following
-        srt.setScale(((const ScaleKey*)blend.singlePoint().key)->data().scale);
+        srt.setScale(((const ScaleKey*)blend.singlePoint().key)->data().scale());
     }
     else
     {
-        // blend keys
-        auto p0 = blend.point(0);
-        auto p1 = blend.point(1);
-        const ScaleKey* k0 = (const ScaleKey*)p0.key;
-        const ScaleKey* k1 = (const ScaleKey*)p1.key;
-        const float frame = p1.relativeFrame - p0.relativeFrame;
-        XC_ASSERT(frame != 0.0f);
-
-        auto easing = k0->data().easing;
-
+        const ScaleKey* k0 = (const ScaleKey*)blend.point(0).key;
+        const ScaleKey* k1 = (const ScaleKey*)blend.point(1).key;
         // calculate easing
-        const float time = util::Easing::calculate(
-                    easing, -p0.relativeFrame, 0.0f, 1.0f, frame);
-
+        const float time = getEasingRateFromTwoKeys<ScaleKey>(blend);
         srt.setScale(k0->scale() * (1.0f - time) + k1->scale() * time);
     }
 }
@@ -626,28 +620,17 @@ void TimeKeyBlender::blendOpaKey(PositionType aPos, const TimeInfo& aTime)
     }
     else
     {
-        // blend keys
-        auto p0 = blend.point(0);
-        auto p1 = blend.point(1);
-        auto key0 = (const OpaKey*)p0.key;
-        auto key1 = (const OpaKey*)p1.key;
-        const float frame = p1.relativeFrame - p0.relativeFrame;
-        XC_ASSERT(frame != 0.0f);
-
+        const OpaKey* k0 = (const OpaKey*)blend.point(0).key;
+        const OpaKey* k1 = (const OpaKey*)blend.point(1).key;
         // calculate easing
-        expans.opa().easing = key0->data().easing;
-        const float time = util::Easing::calculate(
-                    expans.opa().easing, -p0.relativeFrame, 0.0f, 1.0f, frame);
-
+        const float time = getEasingRateFromTwoKeys<OpaKey>(blend);
         // blend
-        expans.opa().opacity =
-                key0->data().opacity * (1.0f - time) +
-                key1->data().opacity * time;
+        expans.opa().setOpacity(k0->opacity() * (1.0f - time) + k1->opacity() * time);
     }
 
     // multiply opacity of parents
     {
-        expans.setWorldOpacity(expans.opa().opacity);
+        expans.setWorldOpacity(expans.opa().opacity());
 
         auto ppos = mSeeker->parent(aPos);
         while (ppos)
@@ -668,7 +651,7 @@ void TimeKeyBlender::blendOpaKey(PositionType aPos, const TimeInfo& aTime)
 
             // world opacity
             expans.setWorldOpacity(
-                        pdata.expans->worldOpacity() * expans.opa().opacity);
+                        pdata.expans->worldOpacity() * expans.opa().opacity());
             break;
         }
     }
@@ -736,9 +719,6 @@ void TimeKeyBlender::blendPoseKey(PositionType aPos, const TimeInfo& aTime)
         XC_PTR_ASSERT(key0->parent());
         XC_PTR_ASSERT(key1->parent());
         XC_ASSERT(key0->parent() == key1->parent());
-        const float frame = p1.relativeFrame - p0.relativeFrame;
-        XC_ASSERT(frame != 0.0f);
-
         TIMEKEY_PTR_TYPE_ASSERT(key0->parent(), Bone);
         XC_ASSERT(key0->parent() == (TimeKey*)areaBoneKey);
 
@@ -746,8 +726,7 @@ void TimeKeyBlender::blendPoseKey(PositionType aPos, const TimeInfo& aTime)
         expans.pose() = key0->data();
 
         // calculate easing
-        const float time = util::Easing::calculate(
-                    expans.pose().easing(), -p0.relativeFrame, 0.0f, 1.0f, frame);
+        const float time = getEasingRateFromTwoKeys<PoseKey>(blend);
 
         // blend
         int index = 0;
@@ -854,16 +833,13 @@ void TimeKeyBlender::blendFFDKey(PositionType aPos, const TimeInfo& aTime)
         XC_ASSERT(count == key1->data().count());
         XC_ASSERT(key0->parent() == areaKey);
         XC_ASSERT(key1->parent() == areaKey);
-        const float frame = p1.relativeFrame - p0.relativeFrame;
-        XC_ASSERT(frame != 0.0f);
 
         // alloc if need
         expans.ffd().alloc(count);
 
         // calculate easing
         expans.ffd().easing() = key0->data().easing();
-        const float time = util::Easing::calculate(
-                    expans.ffd().easing(), -p0.relativeFrame, 0.0f, 1.0f, frame);
+        const float time = getEasingRateFromTwoKeys<FFDKey>(blend);
 
         // linear blend
         gl::Vector3* dst = expans.ffd().positions();
@@ -1104,56 +1080,6 @@ void TimeKeyBlender::setBindingMatrices(
     {
         setBindingMatrices(*child, aAffectedByBinding, aUnderOfBinding, aBindingMtx);
     }
-}
-
-std::array<QVector3D, 2> TimeKeyBlender::catmullRomVels(const TimeKeyGatherer& aBlend)
-{
-    const MoveKey* k0 = (const MoveKey*)aBlend.point(-1).key;
-    const MoveKey* k1 = (const MoveKey*)aBlend.point( 0).key;
-    const MoveKey* k2 = (const MoveKey*)aBlend.point( 1).key;
-    const MoveKey* k3 = (const MoveKey*)aBlend.point( 2).key;
-    std::array<QVector3D, 2> result;
-
-    if (k1->data().spline == MoveKey::SplineType_Linear)
-    {
-        k0 = nullptr;
-    }
-    if (k2->data().spline == MoveKey::SplineType_Linear)
-    {
-        k3 = nullptr;
-    }
-
-    if (!k0)
-    {
-        const QVector3D linear = k2->pos() - k1->pos();
-
-        if (!k3)
-        {
-            result[1] = linear;
-            result[0]  = linear;
-        }
-        else
-        {
-            result[1] = 0.5f * (k3->pos() - k1->pos());
-            result[0]  = util::MathUtil::getAxisInversed(linear.normalized(), result[1]);
-        }
-    }
-    else
-    {
-        if (!k3)
-        {
-            const QVector3D linear = k2->pos() - k1->pos();
-
-            result[0]  = 0.5f * (k2->pos() - k0->pos());
-            result[1] = util::MathUtil::getAxisInversed(linear.normalized(), result[0]);
-        }
-        else
-        {
-            result[0]  = 0.5f * (k2->pos() - k0->pos());
-            result[1] = 0.5f * (k3->pos() - k1->pos());
-        }
-    }
-    return result;
 }
 
 } // namespace core

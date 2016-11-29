@@ -19,19 +19,34 @@ public:
     };
     static const SplineType kDefaultSplineType;
 
-    struct Data
+    class Data
     {
-        util::Easing::Param easing;
-        SplineType spline;
-        QVector2D pos;
-        Data();
+        util::Easing::Param mEasing;
+        SplineType mSpline;
+        QVector2D mPos;
         void clamp();
+    public:
+        Data();
+
+        util::Easing::Param& easing() { return mEasing; }
+        const util::Easing::Param& easing() const { return mEasing; }
+
+        void setSpline(SplineType aType) { mSpline = aType; }
+        SplineType spline() const { return mSpline; }
+
+        void setPos(const QVector2D& aPos) { mPos = aPos; clamp(); }
+        void addPos(const QVector2D& aAdd) { mPos += aAdd; clamp(); }
+        const QVector2D& pos() const { return mPos; }
     };
+
+    static std::array<QVector2D, 2> getCatmullRomVels(
+            const MoveKey* aKey0, const MoveKey* aKey1,
+            const MoveKey* aKey2, const MoveKey* aKey3);
 
     MoveKey();
 
-    void setPos(const QVector2D& aPos) { mData.pos = aPos; }
-    const QVector2D& pos() const { return mData.pos; }
+    void setPos(const QVector2D& aPos) { mData.setPos(aPos); }
+    const QVector2D& pos() const { return mData.pos(); }
 
     Data& data() { return mData; }
     const Data& data() const { return mData; }

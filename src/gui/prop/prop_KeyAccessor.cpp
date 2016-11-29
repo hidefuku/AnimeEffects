@@ -83,7 +83,7 @@ void KeyAccessor::assignMoveEasing(util::Easing::Param aNext)
     XC_ASSERT(aNext.isValidParam());
     const int frame = getFrame();
     auto newData = getMoveKeyData(*mTarget, frame);
-    newData.easing = aNext;
+    newData.easing() = aNext;
 
     ctrl::TimeLineUtil::assignMoveKeyData(*mProject, *mTarget, frame, newData);
 }
@@ -94,7 +94,7 @@ void KeyAccessor::assignMoveSpline(int aNext)
     XC_ASSERT(0 <= aNext && aNext < core::MoveKey::SplineType_TERM);
     const int frame = getFrame();
     auto newData = getMoveKeyData(*mTarget, frame);
-    newData.spline = (core::MoveKey::SplineType)aNext;
+    newData.setSpline((core::MoveKey::SplineType)aNext);
 
     ctrl::TimeLineUtil::assignMoveKeyData(*mProject, *mTarget, frame, newData);
 }
@@ -104,7 +104,7 @@ void KeyAccessor::assignMovePosition(const QVector2D& aNewPos)
     ASSERT_AND_RETURN_INVALID_TARGET();
     const int frame = getFrame();
     auto newData = getMoveKeyData(*mTarget, frame);
-    newData.pos = aNewPos;
+    newData.setPos(aNewPos);
 
     ctrl::TimeLineUtil::assignMoveKeyData(*mProject, *mTarget, frame, newData);
 }
@@ -116,7 +116,7 @@ void KeyAccessor::assignRotateEasing(util::Easing::Param aNext)
     XC_ASSERT(aNext.isValidParam());
     const int frame = getFrame();
     auto newData = getRotateKeyData(*mTarget, frame);
-    newData.easing = aNext;
+    newData.easing() = aNext;
 
     ctrl::TimeLineUtil::assignRotateKeyData(*mProject, *mTarget, frame, newData);
 }
@@ -126,7 +126,7 @@ void KeyAccessor::assignRotateAngle(float aAngle)
     ASSERT_AND_RETURN_INVALID_TARGET();
     const int frame = getFrame();
     auto newData = getRotateKeyData(*mTarget, frame);
-    newData.rotate = aAngle;
+    newData.setRotate(aAngle);
 
     ctrl::TimeLineUtil::assignRotateKeyData(*mProject, *mTarget, frame, newData);
 }
@@ -138,7 +138,7 @@ void KeyAccessor::assignScaleEasing(util::Easing::Param aNext)
     XC_ASSERT(aNext.isValidParam());
     const int frame = getFrame();
     auto newData = getScaleKeyData(*mTarget, frame);
-    newData.easing = aNext;
+    newData.easing() = aNext;
 
     ctrl::TimeLineUtil::assignScaleKeyData(*mProject, *mTarget, frame, newData);
 }
@@ -148,7 +148,7 @@ void KeyAccessor::assignScaleRate(const QVector2D& aNewScale)
     ASSERT_AND_RETURN_INVALID_TARGET();
     const int frame = getFrame();
     auto newData = getScaleKeyData(*mTarget, frame);
-    newData.scale = aNewScale;
+    newData.setScale(aNewScale);
 
     ctrl::TimeLineUtil::assignScaleKeyData(*mProject, *mTarget, frame, newData);
 }
@@ -159,7 +159,7 @@ void KeyAccessor::assignOpacity(float aOpacity)
     ASSERT_AND_RETURN_INVALID_TARGET();
     const int frame = getFrame();
     auto newData = getOpaKeyData(*mTarget, frame);
-    newData.opacity = aOpacity;
+    newData.setOpacity(aOpacity);
 
     ctrl::TimeLineUtil::assignOpaKeyData(*mProject, *mTarget, frame, newData);
 }
@@ -170,7 +170,7 @@ void KeyAccessor::assignOpaEasing(util::Easing::Param aNext)
     XC_ASSERT(aNext.isValidParam());
     const int frame = getFrame();
     auto newData = getOpaKeyData(*mTarget, frame);
-    newData.easing = aNext;
+    newData.easing() = aNext;
 
     ctrl::TimeLineUtil::assignOpaKeyData(*mProject, *mTarget, frame, newData);
 }
@@ -206,7 +206,7 @@ void KeyAccessor::knockNewMove()
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::MoveKey();
-    newKey->data().pos = mTarget->timeLine()->current().srt().pos();
+    newKey->setPos(mTarget->timeLine()->current().srt().pos());
 
     ctrl::TimeLineUtil::pushNewMoveKey(*mProject, *mTarget, getFrame(), newKey);
 }
@@ -214,7 +214,7 @@ void KeyAccessor::knockNewRotate()
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::RotateKey();
-    newKey->data().rotate = mTarget->timeLine()->current().srt().rotate();
+    newKey->setRotate(mTarget->timeLine()->current().srt().rotate());
 
     ctrl::TimeLineUtil::pushNewRotateKey(*mProject, *mTarget, getFrame(), newKey);
 }
@@ -222,7 +222,7 @@ void KeyAccessor::knockNewScale()
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::ScaleKey();
-    newKey->data().scale = mTarget->timeLine()->current().srt().scale();
+    newKey->setScale(mTarget->timeLine()->current().srt().scale());
 
     ctrl::TimeLineUtil::pushNewScaleKey(*mProject, *mTarget, getFrame(), newKey);
 }

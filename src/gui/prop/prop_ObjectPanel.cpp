@@ -96,9 +96,9 @@ void ObjectPanel::MovePanel::setKeyValue(const core::TimeKey* aKey)
 {
     TIMEKEY_PTR_TYPE_ASSERT(aKey, Move);
     const core::MoveKey::Data data = ((const core::MoveKey*)aKey)->data();
-    mEasing->setValue(data.easing, false);
-    mSpline->setValue(data.spline, false);
-    mMove->setValue(data.pos);
+    mEasing->setValue(data.easing(), false);
+    mSpline->setValue(data.spline(), false);
+    mMove->setValue(data.pos());
 }
 
 bool ObjectPanel::MovePanel::keyExists() const
@@ -161,8 +161,8 @@ void ObjectPanel::RotatePanel::setKeyValue(const core::TimeKey* aKey)
 {
     TIMEKEY_PTR_TYPE_ASSERT(aKey, Rotate);
     const core::RotateKey::Data data = ((const core::RotateKey*)aKey)->data();
-    mEasing->setValue(data.easing, false);
-    mRotate->setValue(data.rotate);
+    mEasing->setValue(data.easing(), false);
+    mRotate->setValue(data.rotate());
 }
 
 bool ObjectPanel::RotatePanel::keyExists() const
@@ -225,8 +225,8 @@ void ObjectPanel::ScalePanel::setKeyValue(const core::TimeKey* aKey)
 {
     TIMEKEY_PTR_TYPE_ASSERT(aKey, Scale);
     const core::ScaleKey::Data data = ((const core::ScaleKey*)aKey)->data();
-    mEasing->setValue(data.easing, false);
-    mScale->setValue(data.scale);
+    mEasing->setValue(data.easing(), false);
+    mScale->setValue(data.scale());
 }
 
 bool ObjectPanel::ScalePanel::keyExists() const
@@ -290,8 +290,8 @@ void ObjectPanel::OpaPanel::setKeyValue(const core::TimeKey* aKey)
 {
     TIMEKEY_PTR_TYPE_ASSERT(aKey, Opa);
     const core::OpaKey::Data& data = ((const core::OpaKey*)aKey)->data();
-    mEasing->setValue(data.easing, false);
-    mOpacity->setValue(data.opacity);
+    mEasing->setValue(data.easing(), false);
+    mOpacity->setValue(data.opacity());
 }
 
 bool ObjectPanel::OpaPanel::keyExists() const

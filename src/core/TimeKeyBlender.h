@@ -56,7 +56,6 @@ public:
     void clearCaches(TimeLineEvent& aEvent);
 
 private:
-    static std::array<QVector3D, 2> catmullRomVels(const TimeKeyGatherer& aBlend);
     static std::pair<TimeKey*, LayerMesh*> getAreaMeshImpl(ObjectNode& aNode, const TimeInfo& aTime);
     static MeshKey* getMeshKey(const ObjectNode& aNode, const TimeInfo& aTime);
     static ImageKey* getImageKey(const ObjectNode& aNode, const TimeInfo& aTime);
