@@ -27,17 +27,8 @@ FolderNode::~FolderNode()
     qDeleteAll(children());
 }
 
-void FolderNode::setDefaultPos(const QVector2D& aPos)
+void FolderNode::setDefaultPosture(const QVector2D& aPos)
 {
-    auto key = (SRTKey*)mTimeLine.defaultKey(TimeKeyType_SRT);
-    if (!key)
-    {
-        key = new SRTKey();
-        mTimeLine.grabDefaultKey(TimeKeyType_SRT, key);
-    }
-    key->data().pos = QVector3D(aPos);
-    key->data().clampPos();
-
     {
         auto key = (MoveKey*)mTimeLine.defaultKey(TimeKeyType_Move);
         if (!key)

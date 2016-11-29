@@ -52,7 +52,6 @@ SOURCES += \
     ObjectTree.cpp \
     Project.cpp \
     TimeLine.cpp \
-    SRTKey.cpp \
     FFDKey.cpp \
     HeightMap.cpp \
     Deserializer.cpp \
@@ -112,7 +111,6 @@ HEADERS += \
     TimeInfo.h \
     TimeKey.h \
     TimeLine.h \
-    SRTKey.h \
     Animator.h \
     TimeLineEvent.h \
     TimeKeyPos.h \

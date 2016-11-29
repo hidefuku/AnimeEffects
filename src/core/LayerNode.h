@@ -31,8 +31,8 @@ public:
     // default image
     void setDefaultImage(const img::ResourceHandle& aHandle);
     void setDefaultImage(const img::ResourceHandle& aHandle, img::BlendMode aBlendMode);
-    // default position
-    void setDefaultPos(const QVector2D& aPos);
+    // default posture
+    void setDefaultPosture(const QVector2D& aPos);
     // default opacity
     void setDefaultOpacity(float aValue);
 

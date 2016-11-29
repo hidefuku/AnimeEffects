@@ -2,12 +2,6 @@
 #include "cmnd/BasicCommands.h"
 #include "cmnd/ScopedMacro.h"
 #include "core/TimeKeyType.h"
-#include "core/SRTKey.h"
-#include "core/OpaKey.h"
-#include "core/BoneKey.h"
-#include "core/PoseKey.h"
-#include "core/FFDKey.h"
-#include "core/MeshKey.h"
 #include "core/ImageKeyUpdater.h"
 #include "core/FFDKeyUpdater.h"
 #include "core/ResourceUpdatingWorkspace.h"
@@ -189,14 +183,6 @@ void assignKeyBy(
     }
 }
 
-void assignSRTKeyData(
-        Project& aProject, ObjectNode& aTarget, int aFrame,
-        const SRTKey::Data& aNewData)
-{
-    assignKeyData<SRTKey, TimeKeyType_SRT>(
-                aProject, aTarget, aFrame, aNewData, "assign srt key");
-}
-
 void assignMoveKeyData(
         Project& aProject, ObjectNode& aTarget, int aFrame,
         const MoveKey::Data& aNewData)
@@ -288,6 +274,7 @@ void assignImageKeyOffset(
     });
 }
 
+//---------------------------------------------------------------------------------------
 template<class tKey, TimeKeyType tType>
 void pushNewKey(
         Project& aProject, ObjectNode& aTarget, int aFrame,
@@ -315,13 +302,6 @@ void pushNewKey(
             stack.push(new cmnd::PushBackTree<TimeKey>(&aParentKey->children(), aKey));
         }
     }
-}
-
-void pushNewSRTKey(
-        Project& aProject, ObjectNode& aTarget, int aFrame, SRTKey* aKey)
-{
-    pushNewKey<SRTKey, TimeKeyType_SRT>(
-                aProject, aTarget, aFrame, aKey, "push new srt key");
 }
 
 void pushNewMoveKey(

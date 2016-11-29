@@ -5,7 +5,6 @@
 #include <QMatrix4x4>
 #include "util/Range.h"
 #include "util/FergusonCoonsSpline.h"
-#include "core/SRTKey.h"
 #include "core/Frame.h"
 
 namespace core
@@ -23,9 +22,6 @@ public:
     void setSplineCache(const util::Range& aFrame) { mSplineCache = aFrame; }
     void clearSplineCache() { mSplineCache = util::Range(-1, 0); }
     bool hasSplineCache(Frame aFrame) const;
-
-    void setData(const SRTKey::Data& aData);
-    SRTKey::Data data() const;
 
     void setPos(const QVector2D& aPos) { mPos = aPos; }
     QVector2D pos() const { return mPos; }

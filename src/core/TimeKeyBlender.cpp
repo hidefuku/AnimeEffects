@@ -129,7 +129,6 @@ QMatrix4x4 TimeKeyBlender::getRelativeMatrix(
     {
         ObjectTreeSeeker seeker(true);
         TimeKeyBlender blender(seeker, seeker.position(&aNode));
-        //blender.blendSRTKey(seeker.position(&aNode), aTime);
 
         auto pos = seeker.position(&aNode);
         auto seek = seeker.data(pos);
@@ -261,9 +260,6 @@ void TimeKeyBlender::updateCurrents(ObjectNode* aRootNode, const TimeInfo& aTime
             auto pos = itr.next();
             XC_ASSERT(pos);
             auto seek = mSeeker->data(pos);
-
-            // build srt
-            //blendSRTKey(pos, aTime);
 
             if (seek.objNode && seek.expans)
             {
@@ -412,95 +408,6 @@ typename tKey::Data getDefaultKeyData(const ObjectNode& aNode)
     return tKey::Data();
 }
 
-void TimeKeyBlender::blendSRTKey(PositionType aPos, const TimeInfo& aTime)
-{
-    auto seekData = mSeeker->data(aPos);
-    if (!seekData.objNode || !seekData.expans) return;
-    auto& node = *seekData.objNode;
-    auto& expans = *seekData.expans;
-
-    // set srt
-    getSRTData(expans, node, aTime);
-
-    // update matrix
-    expans.srt().setParentMatrix(QMatrix4x4());
-    {
-        auto pos = mSeeker->parent(aPos);
-        while (pos)
-        {
-            auto data = mSeeker->data(pos);
-            if (!data.expans)
-            {
-                pos = mSeeker->parent(pos);
-                continue;
-            }
-            if (!data.expans->hasKeyCache(TimeKeyType_SRT, aTime.frame))
-            {
-                blendSRTKey(pos, aTime);
-            }
-            expans.srt().setParentMatrix(data.expans->srt().worldMatrix());
-            break;
-        }
-    }
-}
-
-void TimeKeyBlender::getSRTData(
-        TimeKeyExpans& aCurrent, const ObjectNode& aNode, const TimeInfo& aTime)
-{
-    XC_PTR_ASSERT(aNode.timeLine());
-    TimeKeyGatherer blend(aNode.timeLine()->map(TimeKeyType_SRT), aTime);
-    auto& srt = aCurrent.srt();
-    aCurrent.setKeyCache(TimeKeyType_SRT, aTime.frame);
-
-    if (blend.isEmpty())
-    { // no key is exists
-        srt.setData(getDefaultKeyData<SRTKey, TimeKeyType_SRT>(aNode));
-    }
-    else if (blend.hasSameFrame())
-    { // a key is exists
-        srt.setData(((const SRTKey*)blend.point(0).key)->data());
-    }
-    else if (blend.isSingle())
-    { // perfect following
-        srt.setData(((const SRTKey*)blend.singlePoint().key)->data());
-    }
-    else
-    {
-        // blend keys
-        auto p0 = blend.point(0);
-        auto p1 = blend.point(1);
-        const SRTKey* k0 = (const SRTKey*)p0.key;
-        const SRTKey* k1 = (const SRTKey*)p1.key;
-        const float frame = p1.relativeFrame - p0.relativeFrame;
-        XC_ASSERT(frame != 0.0f);
-
-        auto easing = k0->data().easing;
-
-        // calculate easing
-        const float time = util::Easing::calculate(
-                    easing, -p0.relativeFrame, 0.0f, 1.0f, frame);
-
-        // use spline cache
-        if (srt.hasSplineCache(aTime.frame))
-        {
-            srt.setPos(srt.spline().getByLinear(time).toVector2D());
-            srt.setRotate(k0->rotate() * (1.0f - time) + k1->rotate() * time);
-            srt.setScale(k0->scale() * (1.0f - time) + k1->scale() * time);
-        }
-        else
-        {
-            // linear blending
-            const std::array<QVector3D, 2> vels = catmullRomVels(blend);
-            srt.spline().set(k0->pos(), k1->pos(), vels[0], vels[1]);
-            srt.setSplineCache(util::Range(p0.frame, p1.frame));
-
-            srt.setPos(srt.spline().getByLinear(time).toVector2D());
-            srt.setRotate(k0->rotate() * (1.0f - time) + k1->rotate() * time);
-            srt.setScale(k0->scale() * (1.0f - time) + k1->scale() * time);
-        }
-    }
-}
-
 void TimeKeyBlender::blendMoveKey(TimeKeyExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime)
 {
     if (!aNode.timeLine()) return;
@@ -545,7 +452,7 @@ void TimeKeyBlender::blendMoveKey(TimeKeyExpans& aExpans, const ObjectNode& aNod
         else
         {
             // linear blending
-            const std::array<QVector3D, 2> vels = catmullRomVelsForMove(blend);
+            const std::array<QVector3D, 2> vels = catmullRomVels(blend);
             srt.spline().set(k0->pos(), k1->pos(), vels[0], vels[1]);
             srt.setSplineCache(util::Range(p0.frame, p1.frame));
 
@@ -1149,7 +1056,7 @@ void TimeKeyBlender::setBindingMatrices(
         {
             if (aAffectedByBinding)
             {
-                aBindingMtx = aBindingMtx * expans.srt().data().localMatrix();
+                aBindingMtx = aBindingMtx * expans.srt().localMatrix();
                 expans.bone().setOuterMatrix(aBindingMtx);
                 QMatrix4x4 innerMtx;
                 expans.bone().setInnerMatrix(innerMtx);
@@ -1200,56 +1107,6 @@ void TimeKeyBlender::setBindingMatrices(
 }
 
 std::array<QVector3D, 2> TimeKeyBlender::catmullRomVels(const TimeKeyGatherer& aBlend)
-{
-    const SRTKey* k0 = (const SRTKey*)aBlend.point(-1).key;
-    const SRTKey* k1 = (const SRTKey*)aBlend.point( 0).key;
-    const SRTKey* k2 = (const SRTKey*)aBlend.point( 1).key;
-    const SRTKey* k3 = (const SRTKey*)aBlend.point( 2).key;
-    std::array<QVector3D, 2> result;
-
-    if (k1->data().spline == SRTKey::SplineType_Linear)
-    {
-        k0 = nullptr;
-    }
-    if (k2->data().spline == SRTKey::SplineType_Linear)
-    {
-        k3 = nullptr;
-    }
-
-    if (!k0)
-    {
-        const QVector3D linear = k2->pos() - k1->pos();
-
-        if (!k3)
-        {
-            result[1] = linear;
-            result[0]  = linear;
-        }
-        else
-        {
-            result[1] = 0.5f * (k3->pos() - k1->pos());
-            result[0]  = util::MathUtil::getAxisInversed(linear.normalized(), result[1]);
-        }
-    }
-    else
-    {
-        if (!k3)
-        {
-            const QVector3D linear = k2->pos() - k1->pos();
-
-            result[0]  = 0.5f * (k2->pos() - k0->pos());
-            result[1] = util::MathUtil::getAxisInversed(linear.normalized(), result[0]);
-        }
-        else
-        {
-            result[0]  = 0.5f * (k2->pos() - k0->pos());
-            result[1] = 0.5f * (k3->pos() - k1->pos());
-        }
-    }
-    return result;
-}
-
-std::array<QVector3D, 2> TimeKeyBlender::catmullRomVelsForMove(const TimeKeyGatherer& aBlend)
 {
     const MoveKey* k0 = (const MoveKey*)aBlend.point(-1).key;
     const MoveKey* k1 = (const MoveKey*)aBlend.point( 0).key;

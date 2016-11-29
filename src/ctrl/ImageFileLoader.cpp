@@ -61,7 +61,7 @@ FolderNode* createTopNode(const QString& aName, const QRect& aInitialRect)
     FolderNode* node = new FolderNode(aName);
     node->setInitialRect(aInitialRect);
     node->setDefaultOpacity(1.0f);
-    node->setDefaultPos(QVector2D());
+    node->setDefaultPosture(QVector2D());
     return node;
 }
 
@@ -170,7 +170,7 @@ bool ImageFileLoader::loadImage(
         layerNode->setInitialRect(resNode->data().rect());
         layerNode->setDefaultImage(resNode->handle());
         layerNode->setDefaultOpacity(1.0f);
-        layerNode->setDefaultPos(resNode->data().center());
+        layerNode->setDefaultPosture(resNode->data().center());
         topNode->children().pushBack(layerNode);
     }
 
@@ -338,7 +338,7 @@ bool ImageFileLoader::loadPsd(
     }
 
     // setup default positions
-    setDefaultPositionsFromInitialRects(*topNode);
+    setDefaultPosturesFromInitialRects(*topNode);
 
     XC_DEBUG_REPORT("------------------------------------------");
 
@@ -359,7 +359,7 @@ QRect ImageFileLoader::calculateBoundingRectFromChildren(const ObjectNode& aNode
     return rect;
 }
 
-void ImageFileLoader::setDefaultPositionsFromInitialRects(ObjectNode& aNode)
+void ImageFileLoader::setDefaultPosturesFromInitialRects(ObjectNode& aNode)
 {
     ObjectNode::Iterator itr(&aNode);
     while (itr.hasNext())
@@ -386,11 +386,11 @@ void ImageFileLoader::setDefaultPositionsFromInitialRects(ObjectNode& aNode)
         // set
         if (node->type() == ObjectType_Layer)
         {
-            ((LayerNode*)node)->setDefaultPos(pos - parentPos);
+            ((LayerNode*)node)->setDefaultPosture(pos - parentPos);
         }
         else if (node->type() == ObjectType_Folder)
         {
-            ((FolderNode*)node)->setDefaultPos(pos - parentPos);
+            ((FolderNode*)node)->setDefaultPosture(pos - parentPos);
         }
     }
 }

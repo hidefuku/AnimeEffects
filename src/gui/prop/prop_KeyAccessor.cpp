@@ -5,13 +5,6 @@
 namespace
 {
 
-const core::SRTKey::Data& getSRTKeyData(const core::ObjectNode& aTarget, int aFrame)
-{
-    auto key = aTarget.timeLine()->timeKey(core::TimeKeyType_SRT, aFrame);
-    XC_PTR_ASSERT(key);
-    return ((const core::SRTKey*)key)->data();
-}
-
 const core::MoveKey::Data& getMoveKeyData(const core::ObjectNode& aTarget, int aFrame)
 {
     auto key = aTarget.timeLine()->timeKey(core::TimeKeyType_Move, aFrame);
@@ -82,59 +75,6 @@ void KeyAccessor::setTarget(core::ObjectNode* aTarget)
     XC_ASSERT(isValid());                  \
     if (!isValid()) return;                \
 
-//-------------------------------------------------------------------------------------------------
-void KeyAccessor::assignSRTEasing(util::Easing::Param aNext)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET();
-    XC_ASSERT(aNext.isValidParam());
-    const int frame = getFrame();
-    auto newData = getSRTKeyData(*mTarget, frame);
-    newData.easing = aNext;
-
-    ctrl::TimeLineUtil::assignSRTKeyData(*mProject, *mTarget, frame, newData);
-}
-
-void KeyAccessor::assignSRTSpline(int aNext)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET();
-    XC_ASSERT(0 <= aNext && aNext < core::SRTKey::SplineType_TERM);
-    const int frame = getFrame();
-    auto newData = getSRTKeyData(*mTarget, frame);
-    newData.spline = (core::SRTKey::SplineType)aNext;
-
-    ctrl::TimeLineUtil::assignSRTKeyData(*mProject, *mTarget, frame, newData);
-}
-
-void KeyAccessor::assignSRTTrans(const QVector2D& aNewPos)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET();
-    const int frame = getFrame();
-    auto newData = getSRTKeyData(*mTarget, frame);
-    newData.pos.setX(aNewPos.x());
-    newData.pos.setY(aNewPos.y());
-
-    ctrl::TimeLineUtil::assignSRTKeyData(*mProject, *mTarget, frame, newData);
-}
-
-void KeyAccessor::assignSRTRotate(float aRotate)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET();
-    const int frame = getFrame();
-    auto newData = getSRTKeyData(*mTarget, frame);
-    newData.rotate = aRotate;
-
-    ctrl::TimeLineUtil::assignSRTKeyData(*mProject, *mTarget, frame, newData);
-}
-
-void KeyAccessor::assignSRTScale(const QVector2D& aNewScale)
-{
-    ASSERT_AND_RETURN_INVALID_TARGET();
-    const int frame = getFrame();
-    auto newData = getSRTKeyData(*mTarget, frame);
-    newData.scale = aNewScale;
-
-    ctrl::TimeLineUtil::assignSRTKeyData(*mProject, *mTarget, frame, newData);
-}
 
 //-------------------------------------------------------------------------------------------------
 void KeyAccessor::assignMoveEasing(util::Easing::Param aNext)
@@ -262,15 +202,6 @@ void KeyAccessor::assignImageOffset(const QVector2D& aNext)
 }
 
 //-------------------------------------------------------------------------------------------------
-void KeyAccessor::knockNewSRT()
-{
-    ASSERT_AND_RETURN_INVALID_TARGET();
-    auto newKey = new core::SRTKey();
-    newKey->data() = mTarget->timeLine()->current().srt().data();
-
-    ctrl::TimeLineUtil::pushNewSRTKey(*mProject, *mTarget, getFrame(), newKey);
-}
-
 void KeyAccessor::knockNewMove()
 {
     ASSERT_AND_RETURN_INVALID_TARGET();

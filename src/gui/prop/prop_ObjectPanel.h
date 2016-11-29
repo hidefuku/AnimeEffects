@@ -25,27 +25,6 @@ public:
     void updateFrame();
 
 private:
-    class SRTPanel
-    {
-    public:
-        SRTPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
-        void setEnabled(bool);
-        void setKeyExists(bool);
-        void setKeyValue(const core::TimeKey* aKey);
-        bool keyExists() const;
-
-    private:
-        KeyAccessor& mAccessor;
-        KeyKnocker* mKnocker;
-        KeyGroup* mGroup;
-        EasingItem* mEasing;
-        ComboItem* mSpline;
-        Vector2DItem* mTrans;
-        DecimalItem* mRotate;
-        Vector2DItem* mScale;
-        bool mKeyExists;
-    };
-
     class MovePanel
     {
     public:
@@ -193,7 +172,6 @@ private:
     ComboItem* mBlendMode;
     CheckItem* mClipped;
 
-    QScopedPointer<SRTPanel> mSRTPanel;
     QScopedPointer<MovePanel> mMovePanel;
     QScopedPointer<RotatePanel> mRotatePanel;
     QScopedPointer<ScalePanel> mScalePanel;

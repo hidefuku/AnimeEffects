@@ -57,15 +57,10 @@ public:
 
 private:
     static std::array<QVector3D, 2> catmullRomVels(const TimeKeyGatherer& aBlend);
-    static std::array<QVector3D, 2> catmullRomVelsForMove(const TimeKeyGatherer& aBlend);
-    static void getSRTData(
-            TimeKeyExpans& aCurrent, const ObjectNode& aNode, const TimeInfo& aTime);
     static std::pair<TimeKey*, LayerMesh*> getAreaMeshImpl(ObjectNode& aNode, const TimeInfo& aTime);
     static MeshKey* getMeshKey(const ObjectNode& aNode, const TimeInfo& aTime);
     static ImageKey* getImageKey(const ObjectNode& aNode, const TimeInfo& aTime);
 
-    //QMatrix4x4 getParentMatrix(PositionType aPos, const TimeInfo& aTime, int aCacheFrame);
-    void blendSRTKey(PositionType aPos, const TimeInfo& aTime);
     static void blendMoveKey(TimeKeyExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime);
     static void blendRotateKey(TimeKeyExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime);
     static void blendScaleKey(TimeKeyExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime);

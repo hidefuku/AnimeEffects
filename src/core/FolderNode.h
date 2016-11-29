@@ -18,8 +18,8 @@ public:
     FolderNode(const QString& aName);
     ~FolderNode();
 
-    // default position
-    void setDefaultPos(const QVector2D& aPos);
+    // default posture
+    void setDefaultPosture(const QVector2D& aPos);
     // default opacity
     void setDefaultOpacity(float aValue);
 

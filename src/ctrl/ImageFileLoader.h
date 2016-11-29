@@ -36,7 +36,7 @@ private:
                    util::IProgressReporter& aReporter);
 
     static QRect calculateBoundingRectFromChildren(const core::ObjectNode& aNode);
-    void setDefaultPositionsFromInitialRects(core::ObjectNode& aNode);
+    void setDefaultPosturesFromInitialRects(core::ObjectNode& aNode);
     bool checkTextureSizeError(uint32 aWidth, uint32 aHeight);
 
     QString mLog;

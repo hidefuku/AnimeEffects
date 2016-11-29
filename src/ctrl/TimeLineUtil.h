@@ -8,7 +8,6 @@
 #include "core/Project.h"
 #include "core/TimeLine.h"
 #include "core/TimeLineEvent.h"
-#include "core/SRTKey.h"
 #include "core/MoveKey.h"
 #include "core/RotateKey.h"
 #include "core/ScaleKey.h"
@@ -108,10 +107,6 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
-void assignSRTKeyData(
-        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
-        const core::SRTKey::Data& aNewData);
-
 void assignMoveKeyData(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
         const core::MoveKey::Data& aNewData);
@@ -144,10 +139,7 @@ void assignImageKeyOffset(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
         const QVector2D& aNewData);
 
-void pushNewSRTKey(
-        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
-        core::SRTKey* aKey);
-
+//-------------------------------------------------------------------------------------------------
 void pushNewMoveKey(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
         core::MoveKey* aKey);

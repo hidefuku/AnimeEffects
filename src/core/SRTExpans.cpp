@@ -27,22 +27,6 @@ bool SRTExpans::hasSplineCache(Frame aFrame) const
     }
 }
 
-SRTKey::Data SRTExpans::data() const
-{
-    SRTKey::Data data;
-    data.pos = mPos;
-    data.rotate = mRotate;
-    data.scale = mScale;
-    return data;
-}
-
-void SRTExpans::setData(const SRTKey::Data& aData)
-{
-    mPos = aData.pos.toVector2D();
-    mRotate = aData.rotate;
-    mScale = aData.scale;
-}
-
 QMatrix4x4 SRTExpans::localMatrix() const
 {
     QMatrix4x4 mtx;

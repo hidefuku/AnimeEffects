@@ -31,104 +31,6 @@ namespace gui {
 namespace prop {
 
 //-------------------------------------------------------------------------------------------------
-ObjectPanel::SRTPanel::SRTPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
-    : mAccessor(aAccessor)
-    , mKnocker()
-    , mGroup()
-    , mEasing()
-    , mSpline()
-    , mTrans()
-    , mRotate()
-    , mScale()
-    , mKeyExists(false)
-{
-    mKnocker = new KeyKnocker("SRT");
-    mKnocker->set([=](){ this->mAccessor.knockNewSRT(); });
-    aPanel.addGroup(mKnocker);
-
-    mGroup = new KeyGroup("SRT", aLabelWidth);
-    {
-        aPanel.addGroup(mGroup);
-
-        // easing
-        mEasing = new EasingItem(mGroup);
-        mGroup->addItem("easing :", mEasing);
-        mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
-        {
-            this->mAccessor.assignSRTEasing(aNext);
-        };
-
-        // spline
-        mSpline = new ComboItem(mGroup);
-        mSpline->box().addItems(QStringList() << "Linear" << "CatmullRom");
-        mSpline->setValue(core::SRTKey::kDefaultSplineType, false);
-        mSpline->onValueUpdated = [=](int, int aNext)
-        {
-            this->mAccessor.assignSRTSpline(aNext);
-        };
-        mGroup->addItem("spline :", mSpline);
-
-        // translate
-        mTrans = new Vector2DItem(mGroup);
-        mTrans->setRange(core::Constant::transMin(), core::Constant::transMax());
-        mTrans->onValueUpdated = [=](QVector2D, QVector2D aNext)
-        {
-            this->mAccessor.assignSRTTrans(aNext);
-        };
-        mGroup->addItem("translate :", mTrans);
-
-        // rotate
-        mRotate = new DecimalItem(mGroup);
-        mRotate->setRange(core::Constant::rotateMin(), core::Constant::rotateMax());
-        mRotate->onValueUpdated = [=](double, double aNext)
-        {
-            this->mAccessor.assignSRTRotate(aNext);
-        };
-        mGroup->addItem("rotate :", mRotate);
-
-        // scale
-        mScale = new Vector2DItem(mGroup);
-        mScale->setRange(core::Constant::scaleMin(), core::Constant::scaleMax());
-        mScale->onValueUpdated = [=](QVector2D, QVector2D aNext)
-        {
-            this->mAccessor.assignSRTScale(aNext);
-        };
-        mGroup->addItem("scale :", mScale);
-    }
-    setEnabled(false);
-    setKeyExists(false);
-}
-
-void ObjectPanel::SRTPanel::setEnabled(bool aEnabled)
-{
-    mKnocker->setEnabled(aEnabled);
-    mGroup->setEnabled(aEnabled);
-}
-
-void ObjectPanel::SRTPanel::setKeyExists(bool aIsExists)
-{
-    mKeyExists = aIsExists;
-    mKnocker->setVisible(!aIsExists);
-    mGroup->setVisible(aIsExists);
-}
-
-void ObjectPanel::SRTPanel::setKeyValue(const core::TimeKey* aKey)
-{
-    TIMEKEY_PTR_TYPE_ASSERT(aKey, SRT);
-    const core::SRTKey::Data data = ((const core::SRTKey*)aKey)->data();
-    mEasing->setValue(data.easing, false);
-    mSpline->setValue(data.spline, false);
-    mTrans->setValue(data.pos.toVector2D());
-    mRotate->setValue(data.rotate);
-    mScale->setValue(data.scale);
-}
-
-bool ObjectPanel::SRTPanel::keyExists() const
-{
-    return mKeyExists;
-}
-
-//-------------------------------------------------------------------------------------------------
 ObjectPanel::MovePanel::MovePanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
     : mAccessor(aAccessor)
     , mKnocker()
@@ -594,7 +496,6 @@ ObjectPanel::ObjectPanel(ViaPoint& aViaPoint, core::Project& aProject, const QSt
     , mDepth()
     , mBlendMode()
     , mClipped()
-    , mSRTPanel()
     , mMovePanel()
     , mRotatePanel()
     , mScalePanel()
@@ -694,7 +595,6 @@ void ObjectPanel::build()
         mAttributes->addItem("clipped :", mClipped);
     }
 
-    mSRTPanel.reset(new SRTPanel(*this, mKeyAccessor, mLabelWidth));
     mMovePanel.reset(new MovePanel(*this, mKeyAccessor, mLabelWidth));
     mRotatePanel.reset(new RotatePanel(*this, mKeyAccessor, mLabelWidth));
     mScalePanel.reset(new ScalePanel(*this, mKeyAccessor, mLabelWidth));
@@ -746,8 +646,6 @@ void ObjectPanel::updateKeyExists()
         const bool hasAnyMesh = mTarget->hasAnyMesh();
         const bool hasAnyImage = mTarget->hasAnyImage();
 
-        mSRTPanel->setEnabled(true);
-        mSRTPanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_SRT, frame));
         mMovePanel->setEnabled(true);
         mMovePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Move, frame));
         mRotatePanel->setEnabled(true);
@@ -765,7 +663,6 @@ void ObjectPanel::updateKeyExists()
     }
     else
     {
-        mSRTPanel->setEnabled(false);
         mMovePanel->setEnabled(false);
         mRotatePanel->setEnabled(false);
         mScalePanel->setEnabled(false);
@@ -782,10 +679,6 @@ void ObjectPanel::updateKeyValue()
     {
         const int frame = mProject.animator().currentFrame().get();
 
-        if (mSRTPanel->keyExists())
-        {
-            mSRTPanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_SRT, frame));
-        }
         if (mMovePanel->keyExists())
         {
             mMovePanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_Move, frame));

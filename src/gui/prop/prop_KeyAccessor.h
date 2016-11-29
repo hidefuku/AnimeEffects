@@ -16,13 +16,6 @@ public:
     void setProject(core::Project* aProject);
     void setTarget(core::ObjectNode* aTarget);
 
-    // srt
-    void assignSRTEasing(util::Easing::Param);
-    void assignSRTSpline(int);
-    void assignSRTTrans(const QVector2D&);
-    void assignSRTRotate(float);
-    void assignSRTScale(const QVector2D&);
-
     // move
     void assignMoveEasing(util::Easing::Param);
     void assignMoveSpline(int);
@@ -51,7 +44,6 @@ public:
     void assignImageOffset(const QVector2D&);
 
     // new keys
-    void knockNewSRT();
     void knockNewMove();
     void knockNewRotate();
     void knockNewScale();

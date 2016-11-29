@@ -10,7 +10,6 @@ namespace
 
 static const int kMaxLengthOfTimeKeyName = 8;
 static const std::array<const char*, core::TimeKeyType_TERM> kTimeKeyNames = {
-    "SRT",
     "Move",
     "Rotate",
     "Scale",
@@ -54,11 +53,10 @@ TimeKeyType TimeLine::getTimeKeyTypeInOrderOfOperations(int aIndex)
     case 2: return TimeKeyType_FFD;
     case 3: return TimeKeyType_Bone;
     case 4: return TimeKeyType_Pose;
-    case 5: return TimeKeyType_SRT;
-    case 6: return TimeKeyType_Move;
-    case 7: return TimeKeyType_Rotate;
-    case 8: return TimeKeyType_Scale;
-    case 9: return TimeKeyType_Opa;
+    case 5: return TimeKeyType_Move;
+    case 6: return TimeKeyType_Rotate;
+    case 7: return TimeKeyType_Scale;
+    case 8: return TimeKeyType_Opa;
     default: XC_ASSERT(0); return TimeKeyType_TERM;
     }
 }
@@ -431,11 +429,7 @@ bool TimeLine::deserialize(Deserializer& aIn)
 bool TimeLine::deserializeTimeKey(Deserializer& aIn, TimeKeyType aType, int aIndex)
 {
     TimeKey* key = nullptr;
-    if (aType == TimeKeyType_SRT)
-    {
-        key = new SRTKey();
-    }
-    else if (aType == TimeKeyType_Move)
+    if (aType == TimeKeyType_Move)
     {
         key = new MoveKey();
     }

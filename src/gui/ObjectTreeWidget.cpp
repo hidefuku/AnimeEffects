@@ -558,7 +558,7 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
             ptr->setDepth(depth);
             ptr->setVisibility(true);
             ptr->setDefaultImage(resNode->handle());
-            ptr->setDefaultPos(QVector2D());
+            ptr->setDefaultPosture(QVector2D());
             ptr->setDefaultOpacity(1.0f); // @todo support default opacity
 
 
@@ -637,7 +637,7 @@ void ObjectTreeWidget::onFolderActionTriggered(bool)
             // create node
             core::FolderNode* ptr = new core::FolderNode("folder0");
             ptr->setDepth(depth);
-            ptr->setDefaultPos(QVector2D());
+            ptr->setDefaultPosture(QVector2D());
             ptr->setDefaultOpacity(1.0f); // @todo support default opacity
 
             // notifier

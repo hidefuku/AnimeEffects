@@ -9,7 +9,7 @@ namespace core
 
 void BoneKeyUpdater::onTimeLineModified(TimeLineEvent& aEvent)
 {
-    // pass only srt and mesh key(which affect to influence map)
+    // pass only a key which affect to influence map
     QVector<ObjectNode*> targets;
     for (auto t : aEvent.targets())
     {
