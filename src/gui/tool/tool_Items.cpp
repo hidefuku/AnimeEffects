@@ -157,6 +157,37 @@ void SliderItem::updateText(int aValue)
     mLabel->setText(mText + ":  " + QString::number(aValue));
 }
 
+//-------------------------------------------------------------------------------------------------
+CheckBoxItem::CheckBoxItem(const QString& aLabel, QWidget* aParent)
+    : mCheckBox()
+{
+    XC_PTR_ASSERT(aParent);
+
+    mCheckBox = new QCheckBox(aLabel, aParent);
+    mCheckBox->setObjectName("checkItem");
+    mCheckBox->setFocusPolicy(Qt::NoFocus);
+}
+
+void CheckBoxItem::setToolTip(const QString& aTip)
+{
+    mCheckBox->setToolTip(aTip);
+}
+
+void CheckBoxItem::connect(const std::function<void(bool)>& aValueChanged)
+{
+    mCheckBox->connect(mCheckBox, &QCheckBox::clicked, aValueChanged);
+}
+
+int CheckBoxItem::updateGeometry(const QPoint& aPos, int aWidth)
+{
+    //qDebug() << mCheckBox->width() << mCheckBox->height() << mCheckBox->sizeHint();
+    //const int height = mCheckBox->height();
+    const int height = mCheckBox->sizeHint().height();
+    //const int height = 16;
+    mCheckBox->setGeometry(aPos.x(), aPos.y(), aWidth, height);
+    return height;
+}
+
 } // namespace tool
 } // namespace gui
 

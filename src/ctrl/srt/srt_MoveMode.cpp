@@ -14,6 +14,7 @@ MoveMode::MoveMode(Project& aProject, ObjectNode& aTarget, KeyOwner& aKeyOwner)
     : mProject(aProject)
     , mTarget(aTarget)
     , mKeyOwner(aKeyOwner)
+    , mSRTParam()
     , mSymbol()
     , mFocus(FocusType_TERM, QVector2D())
     , mAssignMoveRef()
@@ -24,6 +25,11 @@ MoveMode::MoveMode(Project& aProject, ObjectNode& aTarget, KeyOwner& aKeyOwner)
     , mBaseValue()
 {
     XC_PTR_ASSERT(mTarget.timeLine());
+}
+
+void MoveMode::updateParam(const SRTParam& aParam)
+{
+    mSRTParam = aParam;
 }
 
 bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCursor)
@@ -186,7 +192,11 @@ void MoveMode::assignMoveKey(MoveKey::Data& aNewData)
     TimeLine& timeLine = *mTarget.timeLine();
     cmnd::Stack& stack = mProject.commandStack();
 
-    if (mAssignMoveRef && mProject.commandStack().isModifiable(mAssignMoveRef))
+    const bool appendKeys =
+            (mSRTParam.necessarilyRotate && mKeyOwner.ownsRotateKey) ||
+            (mSRTParam.necessarilyScale && mKeyOwner.ownsScaleKey);
+
+    if (!appendKeys && mAssignMoveRef && mProject.commandStack().isModifiable(mAssignMoveRef))
     {
         // modify command
         XC_ASSERT(!mKeyOwner.ownsMoveKey);
@@ -199,6 +209,16 @@ void MoveMode::assignMoveKey(MoveKey::Data& aNewData)
         setAssignNotifier(macro, TimeKeyType_Move, mKeyOwner.ownsMoveKey);
         // push commands
         mKeyOwner.pushOwningMoveKey(stack, timeLine, frame);
+
+        if (mSRTParam.necessarilyRotate)
+        {
+            mKeyOwner.pushOwningRotateKey(stack, timeLine, frame);
+        }
+        if (mSRTParam.necessarilyScale)
+        {
+            mKeyOwner.pushOwningScaleKey(stack, timeLine, frame);
+        }
+
         mAssignMoveRef = new AssignMoveCommand(&(mKeyOwner.moveKey->data()), aNewData);
         stack.push(mAssignMoveRef);
     }
@@ -210,7 +230,11 @@ void MoveMode::assignRotateKey(RotateKey::Data& aNewData)
     TimeLine& timeLine = *mTarget.timeLine();
     cmnd::Stack& stack = mProject.commandStack();
 
-    if (mAssignRotateRef && mProject.commandStack().isModifiable(mAssignRotateRef))
+    const bool appendKeys =
+            (mSRTParam.necessarilyMove && mKeyOwner.ownsMoveKey) ||
+            (mSRTParam.necessarilyScale && mKeyOwner.ownsScaleKey);
+
+    if (!appendKeys && mAssignRotateRef && mProject.commandStack().isModifiable(mAssignRotateRef))
     {
         // modify command
         XC_ASSERT(!mKeyOwner.ownsRotateKey);
@@ -223,6 +247,16 @@ void MoveMode::assignRotateKey(RotateKey::Data& aNewData)
         setAssignNotifier(macro, TimeKeyType_Rotate, mKeyOwner.ownsRotateKey);
         // push commands
         mKeyOwner.pushOwningRotateKey(stack, timeLine, frame);
+
+        if (mSRTParam.necessarilyMove)
+        {
+            mKeyOwner.pushOwningMoveKey(stack, timeLine, frame);
+        }
+        if (mSRTParam.necessarilyScale)
+        {
+            mKeyOwner.pushOwningScaleKey(stack, timeLine, frame);
+        }
+
         mAssignRotateRef = new AssignRotateCommand(&(mKeyOwner.rotateKey->data()), aNewData);
         stack.push(mAssignRotateRef);
     }
@@ -234,7 +268,11 @@ void MoveMode::assignScaleKey(ScaleKey::Data& aNewData)
     TimeLine& timeLine = *mTarget.timeLine();
     cmnd::Stack& stack = mProject.commandStack();
 
-    if (mAssignScaleRef && mProject.commandStack().isModifiable(mAssignScaleRef))
+    const bool appendKeys =
+            (mSRTParam.necessarilyMove && mKeyOwner.ownsMoveKey) ||
+            (mSRTParam.necessarilyRotate && mKeyOwner.ownsRotateKey);
+
+    if (!appendKeys && mAssignScaleRef && mProject.commandStack().isModifiable(mAssignScaleRef))
     {
         // modify command
         XC_ASSERT(!mKeyOwner.ownsScaleKey);
@@ -247,6 +285,16 @@ void MoveMode::assignScaleKey(ScaleKey::Data& aNewData)
         setAssignNotifier(macro, TimeKeyType_Scale, mKeyOwner.ownsScaleKey);
         // push commands
         mKeyOwner.pushOwningScaleKey(stack, timeLine, frame);
+
+        if (mSRTParam.necessarilyMove)
+        {
+            mKeyOwner.pushOwningMoveKey(stack, timeLine, frame);
+        }
+        if (mSRTParam.necessarilyRotate)
+        {
+            mKeyOwner.pushOwningRotateKey(stack, timeLine, frame);
+        }
+
         mAssignScaleRef = new AssignScaleCommand(&(mKeyOwner.scaleKey->data()), aNewData);
         stack.push(mAssignScaleRef);
     }

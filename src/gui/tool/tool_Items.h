@@ -4,6 +4,7 @@
 #include <functional>
 #include <QButtonGroup>
 #include <QPushButton>
+#include <QCheckBox>
 #include <QSlider>
 #include <QLabel>
 #include "util/Range.h"
@@ -47,6 +48,21 @@ private:
     QLabel* mLabel;
     QSlider* mSlider;
     QString mText;
+};
+
+//-------------------------------------------------------------------------------------------------
+class CheckBoxItem
+{
+public:
+    CheckBoxItem(const QString& aLabel, QWidget* aParent);
+    void setToolTip(const QString& aTip);
+    void connect(const std::function<void(bool)>& aValueChanged);
+    int updateGeometry(const QPoint& aPos, int aWidth);
+    void show() { mCheckBox->show(); }
+    void hide() { mCheckBox->hide(); }
+
+private:
+    QCheckBox* mCheckBox;
 };
 
 } // namespace tool

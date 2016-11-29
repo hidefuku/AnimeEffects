@@ -220,3 +220,13 @@ QSlider::handle:horizontal {
     margin: -6px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
     border-radius: 2px;
 }
+
+QCheckBox#checkItem {
+}
+
+QCheckBox#checkItem::indicator {
+margin: 0px;
+padding: 4px;
+width: 16px;
+height: 16px;
+}

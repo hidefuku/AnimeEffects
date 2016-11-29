@@ -18,6 +18,7 @@ class MoveMode : public IMode
 {
 public:
     MoveMode(core::Project& aProject, core::ObjectNode& aTarget, KeyOwner& aKey);
+    virtual void updateParam(const SRTParam&);
     virtual bool updateCursor(const core::CameraInfo&, const core::AbstractCursor&);
     virtual void renderQt(const core::RenderInfo& aInfo, QPainter& aPainter);
 
@@ -38,6 +39,7 @@ private:
     core::Project& mProject;
     core::ObjectNode& mTarget;
     KeyOwner& mKeyOwner;
+    SRTParam mSRTParam;
 
     Symbol mSymbol;
     Symbol::FocusData mFocus;

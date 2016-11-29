@@ -15,6 +15,9 @@ SRTPanel::SRTPanel(QWidget* aParent, GUIResources& aResources)
     , mResources(aResources)
     , mParam()
     , mTypeGroup()
+    , mAddMove()
+    , mAddRotate()
+    , mAddScale()
 {
     this->setTitle("SRT Transform");
     createMode();
@@ -34,10 +37,44 @@ void SRTPanel::createMode()
         this->updateTypeParam(aIndex);
         this->onParamUpdated(true);
     });
+
+    mAddMove.reset(new CheckBoxItem("necessarily move", this));
+    mAddMove->setToolTip("Necessarily add a MoveKey if the posture is modified.");
+    mAddMove->connect([=](bool aChecked)
+    {
+        this->mParam.necessarilyMove = aChecked;
+        this->onParamUpdated(false);
+    });
+    mAddRotate.reset(new CheckBoxItem("necessarily rotate", this));
+    mAddRotate->setToolTip("Necessarily add a RotateKey if the posture is modified.");
+    mAddRotate->connect([=](bool aChecked)
+    {
+        this->mParam.necessarilyRotate = aChecked;
+        this->onParamUpdated(false);
+    });
+    mAddScale.reset(new CheckBoxItem("necessarily scale", this));
+    mAddScale->setToolTip("Necessarily add a ScaleKey if the posture is modified.");
+    mAddScale->connect([=](bool aChecked)
+    {
+        this->mParam.necessarilyScale = aChecked;
+        this->onParamUpdated(false);
+    });
 }
 
-void SRTPanel::updateTypeParam(int)
+void SRTPanel::updateTypeParam(int aType)
 {
+    if (aType == 0)
+    {
+        mAddMove->show();
+        mAddRotate->show();
+        mAddScale->show();
+    }
+    else
+    {
+        mAddMove->hide();
+        mAddRotate->hide();
+        mAddScale->hide();
+    }
 }
 
 int SRTPanel::updateGeometry(const QPoint& aPos, int aWidth)
@@ -50,6 +87,14 @@ int SRTPanel::updateGeometry(const QPoint& aPos, int aWidth)
 
     // type
     curPos.setY(mTypeGroup->updateGeometry(curPos, itemWidth) + curPos.y() + 5);
+
+    if (mParam.mode == 0)
+    {
+        curPos.setY(mAddMove->updateGeometry(curPos, itemWidth) + curPos.y());
+        curPos.setY(mAddRotate->updateGeometry(curPos, itemWidth) + curPos.y());
+        curPos.setY(mAddScale->updateGeometry(curPos, itemWidth) + curPos.y());
+        curPos.setY(curPos.y() + 5);
+    }
 
     // myself
     this->setGeometry(aPos.x(), aPos.y(), aWidth, curPos.y());
