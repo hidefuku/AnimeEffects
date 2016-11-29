@@ -26,15 +26,11 @@ public:
     typedef SeekerType::Position PositionType;
 
 
-    ///@todo don't use work caches
-    static QMatrix4x4 getLocalSRMatrix(ObjectNode& aNode, const TimeInfo& aTime);
+    static QMatrix4x4 getLocalSRMatrix(
+            const ObjectNode& aNode, const TimeInfo& aTime);
 
-
-
-    //static SRTExpans getSRTExpans(
-    //        ObjectNode& aNode, const TimeInfo& aTime);
-    //static QMatrix4x4 getWorldMatrix(
-    //        ObjectNode& aNode, const TimeInfo& aTime);
+    static QMatrix4x4 getWorldMatrix(
+            ObjectNode& aNode, const TimeInfo& aTime);
     static QMatrix4x4 getRelativeMatrix(
             ObjectNode& aNode, const TimeInfo& aTime,
             const ObjectNode* aParent);
@@ -60,10 +56,11 @@ private:
     static MeshKey* getMeshKey(const ObjectNode& aNode, const TimeInfo& aTime);
     static ImageKey* getImageKey(const ObjectNode& aNode, const TimeInfo& aTime);
 
-    static void blendMoveKey(TimeKeyExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime);
-    static void blendRotateKey(TimeKeyExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime);
-    static void blendScaleKey(TimeKeyExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime);
-    void mergeMoveRotateScale(PositionType aPos, const TimeInfo& aTime);
+    static void getMoveExpans(SRTExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime);
+    static void getRotateExpans(SRTExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime);
+    static void getScaleExpans(SRTExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime);
+
+    void blendSRTKeys(PositionType aPos, const TimeInfo& aTime);
     void blendOpaKey(PositionType aPos, const TimeInfo& aTime);
     void blendBoneKey(PositionType aPos, const TimeInfo& aTime);
     void blendPoseKey(PositionType aPos, const TimeInfo& aTime);
