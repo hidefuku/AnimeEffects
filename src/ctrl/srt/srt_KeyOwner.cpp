@@ -122,5 +122,15 @@ QMatrix4x4 KeyOwner::getLocalMatrixFromKeys() const
     return expans.localMatrix();
 }
 
+QMatrix4x4 KeyOwner::getLocalSRMatrixFromKeys() const
+{
+    if (!(bool)(*this)) return QMatrix4x4();
+
+    SRTExpans expans;
+    expans.setRotate(rotateKey->rotate());
+    expans.setScale(scaleKey->scale());
+    return expans.localSRMatrix();
+}
+
 } // namespace srt
 } // namespace ctrl

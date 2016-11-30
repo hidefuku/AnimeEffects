@@ -76,6 +76,7 @@ namespace core
 QMatrix4x4 TimeKeyBlender::getLocalSRMatrix(
         const ObjectNode& aNode, const TimeInfo& aTime)
 {
+    XC_ASSERT(aTime.frame.get() != TimeLine::kDefaultKeyIndex);
     if (aNode.timeLine())
     {
         SRTExpans expans;
@@ -90,6 +91,7 @@ QMatrix4x4 TimeKeyBlender::getLocalSRMatrix(
 QMatrix4x4 TimeKeyBlender::getWorldMatrix(
         ObjectNode& aNode, const TimeInfo& aTime)
 {
+    XC_ASSERT(aTime.frame.get() != TimeLine::kDefaultKeyIndex);
     if (aNode.timeLine())
     {
         ObjectTreeSeeker seeker(true);
@@ -103,6 +105,7 @@ QMatrix4x4 TimeKeyBlender::getWorldMatrix(
 QMatrix4x4 TimeKeyBlender::getRelativeMatrix(
         ObjectNode& aNode, const TimeInfo& aTime, const ObjectNode* aParent)
 {
+    XC_ASSERT(aTime.frame.get() != TimeLine::kDefaultKeyIndex);
     QMatrix4x4 result;
 
     if (aNode.timeLine())

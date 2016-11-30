@@ -66,6 +66,10 @@ CentroidMover::CentroidMover(core::Project& aProject,
 
 QMatrix4x4 CentroidMover::getLocalSRMatrix(const core::TimeKey& aKey)
 {
+    if (aKey.frame() == TimeLine::kDefaultKeyIndex)
+    {
+        return QMatrix4x4();
+    }
     auto time = mProject.currentTimeInfo();
     time.frame.set(aKey.frame());
     return core::TimeKeyBlender::getLocalSRMatrix(mTarget, time);

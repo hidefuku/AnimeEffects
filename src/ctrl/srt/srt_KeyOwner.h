@@ -27,6 +27,7 @@ struct KeyOwner
     bool updatePosture(const core::TimeKeyExpans& aExpans);
 
     QMatrix4x4 getLocalMatrixFromKeys() const;
+    QMatrix4x4 getLocalSRMatrixFromKeys() const;
 
     core::MoveKey* moveKey;
     core::RotateKey* rotateKey;
