@@ -21,7 +21,7 @@ KeyKnocker::KeyKnocker(const QString& aLabel)
 
 void KeyKnocker::set(const std::function<void()>& aKnocker)
 {
-    mButton->connect(mButton, &QPushButton::pressed, aKnocker);
+    mButton->connect(mButton, &QPushButton::clicked, aKnocker);
 }
 
 } // namespace prop
