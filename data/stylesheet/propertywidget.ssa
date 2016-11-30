@@ -110,11 +110,11 @@ QPushButton#keyKnocker {
 border: 1px solid #a0a0a0;
 border-radius: 2px;
 padding: 0px;
-width: 15px;
-height: 15px;
+width: 14px;
+height: 14px;
 }
 QPushButton#keyKnocker::enabled {
-image: url(data/icon/plus.png);
+image: url(data/icon/knockkey.png);
 }
 QPushButton#keyKnocker::disabled {
 image: url(data/icon/minus.png);
