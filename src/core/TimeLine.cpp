@@ -139,7 +139,7 @@ void TimeLine::grabDefaultKey(TimeKeyType aType, TimeKey* aKey)
 {
     if (aKey)
     {
-        aKey->setFrame(-1);
+        aKey->setFrame(kDefaultKeyIndex);
     }
     mDefaultKeys.at(aType).reset(aKey);
 }

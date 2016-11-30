@@ -3,9 +3,51 @@
 #include "core/TimeKeyBlender.h"
 #include "ctrl/srt/srt_CentroidMover.h"
 
+using namespace core;
+
 namespace ctrl {
 namespace srt {
 
+//-------------------------------------------------------------------------------------------------
+void CentroidMover::pushEventTargets(ObjectNode& aTarget, TimeLineEvent& aEvent)
+{
+    XC_PTR_ASSERT(aTarget.timeLine());
+    {
+        auto& map = aTarget.timeLine()->map(TimeKeyType_Move);
+        for (auto itr = map.begin(); itr != map.end(); ++itr)
+        {
+            aEvent.pushTarget(aTarget, TimeKeyType_Move, itr.key());
+        }
+    }
+
+    if (aTarget.timeLine()->defaultKey(TimeKeyType_Move))
+    {
+        aEvent.pushDefaultTarget(aTarget, TimeKeyType_Move);
+    }
+
+    if (aTarget.canHoldChild())
+    {
+        for (auto child : aTarget.children())
+        {
+            XC_PTR_ASSERT(child->timeLine());
+            auto& map = child->timeLine()->map(TimeKeyType_Move);
+            for (auto itr = map.begin(); itr != map.end(); ++itr)
+            {
+                aEvent.pushTarget(*child, TimeKeyType_Move, itr.key());
+            }
+        }
+    }
+    else
+    {
+        auto& map = aTarget.timeLine()->map(TimeKeyType_Image);
+        for (auto itr = map.begin(); itr != map.end(); ++itr)
+        {
+            aEvent.pushTarget(aTarget, TimeKeyType_Image, itr.key());
+        }
+    }
+}
+
+//-------------------------------------------------------------------------------------------------
 CentroidMover::CentroidMover(core::Project& aProject,
                              core::ObjectNode& aTarget,
                              const QVector2D& aPrev,

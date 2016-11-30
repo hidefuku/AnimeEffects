@@ -7,24 +7,38 @@
 namespace core
 {
 
+bool keyAffectsToInfluenceMap(TimeKeyType aKeyType)
+{
+    switch (aKeyType)
+    {
+    case TimeKeyType_Move:
+    case TimeKeyType_Rotate:
+    case TimeKeyType_Scale:
+    case TimeKeyType_Mesh:
+    case TimeKeyType_Image:
+        return true;
+    default:
+        return false;
+    }
+
+}
+
 void BoneKeyUpdater::onTimeLineModified(TimeLineEvent& aEvent)
 {
     // pass only a key which affect to influence map
     QVector<ObjectNode*> targets;
     for (auto t : aEvent.targets())
     {
-        auto type = t.pos.type();
-        switch (type)
+        if (keyAffectsToInfluenceMap(t.pos.type()))
         {
-        case TimeKeyType_Move:
-        case TimeKeyType_Rotate:
-        case TimeKeyType_Scale:
-        case TimeKeyType_Mesh:
-        case TimeKeyType_Image:
             targets.push_back(t.node);
-            break;
-        default:
-            break;
+        }
+    }
+    for (auto t : aEvent.defaultTargets())
+    {
+        if (keyAffectsToInfluenceMap(t.pos.type()))
+        {
+            targets.push_back(t.node);
         }
     }
     if (targets.empty()) return;

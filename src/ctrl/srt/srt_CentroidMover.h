@@ -29,6 +29,8 @@ class CentroidMover : public cmnd::Stable
     bool mExecuteOnce;
 
 public:
+    static void pushEventTargets(core::ObjectNode& aTarget, core::TimeLineEvent& aEvent);
+
     CentroidMover(core::Project& aProject,
                   core::ObjectNode& aTarget,
                   const QVector2D& aPrev,

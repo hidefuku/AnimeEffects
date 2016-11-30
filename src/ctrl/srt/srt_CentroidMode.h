@@ -19,7 +19,6 @@ public:
     virtual void renderQt(const core::RenderInfo& aInfo, QPainter& aPainter);
 
 private:
-    void pushEventTarget(core::ObjectNode& aTarget, core::TimeLineEvent& aEvent) const;
     void moveCentroid(const QVector2D& aNewCenter);
     QVector2D getWorldCentroidPos() const;
     core::Project& mProject;

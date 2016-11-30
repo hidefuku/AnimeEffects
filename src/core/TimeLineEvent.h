@@ -42,9 +42,14 @@ public:
     void pushTarget(ObjectNode& aNode, TimeKeyType aType, int aIndex);
     void pushTarget(ObjectNode& aNode, TimeKeyType aType, int aIndex, int aSubIndex);
 
+    void pushDefaultTarget(ObjectNode& aNode, TimeKeyType aType);
+
     Type type() const { return mType; }
     QVector<Target>& targets() { return mTargets; }
     const QVector<Target>& targets() const { return mTargets; }
+
+    QVector<Target>& defaultTargets() { return mDefaultTargets; }
+    const QVector<Target>& detaulTargets() const { return mDefaultTargets; }
 
     // set a project by a project
     void setProject(Project& aProject) { mProject = &aProject; }
@@ -54,6 +59,7 @@ private:
     Project* mProject;
     Type mType;
     QVector<Target> mTargets;
+    QVector<Target> mDefaultTargets;
 };
 
 } // namespace core

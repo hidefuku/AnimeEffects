@@ -20,6 +20,8 @@ namespace core
 class TimeLine
 {
 public:
+    enum { kDefaultKeyIndex = -1 };
+
     typedef QMap<int, TimeKey*> MapType;
 
     static QString getTimeKeyName(TimeKeyType aType);

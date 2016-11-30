@@ -114,7 +114,7 @@ void CentroidMode::moveCentroid(const QVector2D& aNewCenter)
         // singleshot notify
         TimeLineEvent event;
         event.setType(TimeLineEvent::Type_ChangeKeyValue);
-        pushEventTarget(mTarget, event);
+        CentroidMover::pushEventTargets(mTarget, event);
         mProject.onTimeLineModified(event, false);
         mProject.onNodeAttributeModified(mTarget, false); ///@todo Is there any means?
     }
@@ -126,7 +126,7 @@ void CentroidMode::moveCentroid(const QVector2D& aNewCenter)
         {
             auto tln = new TimeLineUtil::Notifier(mProject);
             tln->event().setType(TimeLineEvent::Type_ChangeKeyValue);
-            pushEventTarget(mTarget, tln->event());
+            CentroidMover::pushEventTargets(mTarget, tln->event());
             macro.grabListener(tln);
         }
         macro.grabListener(new ObjectNodeUtil::AttributeNotifier(mProject, mTarget));
@@ -136,39 +136,6 @@ void CentroidMode::moveCentroid(const QVector2D& aNewCenter)
 
         // push command
         stack.push(mCommandRef);
-    }
-}
-
-void CentroidMode::pushEventTarget(core::ObjectNode& aTarget, TimeLineEvent& aEvent) const
-{
-    XC_PTR_ASSERT(aTarget.timeLine());
-    {
-        auto& map = aTarget.timeLine()->map(TimeKeyType_Move);
-        for (auto itr = map.begin(); itr != map.end(); ++itr)
-        {
-            aEvent.pushTarget(aTarget, TimeKeyType_Move, itr.key());
-        }
-    }
-
-    if (aTarget.canHoldChild())
-    {
-        for (auto child : aTarget.children())
-        {
-            XC_PTR_ASSERT(child->timeLine());
-            auto& map = child->timeLine()->map(TimeKeyType_Move);
-            for (auto itr = map.begin(); itr != map.end(); ++itr)
-            {
-                aEvent.pushTarget(*child, TimeKeyType_Move, itr.key());
-            }
-        }
-    }
-    else
-    {
-        auto& map = aTarget.timeLine()->map(TimeKeyType_Image);
-        for (auto itr = map.begin(); itr != map.end(); ++itr)
-        {
-            aEvent.pushTarget(aTarget, TimeKeyType_Image, itr.key());
-        }
     }
 }
 
