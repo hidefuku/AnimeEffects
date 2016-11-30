@@ -17,6 +17,8 @@ AttrGroup::AttrGroup(const QString& aTitle, int aLabelWidth)
     //mLayout->setRowWrapPolicy(QFormLayout::WrapAllRows);
     mLayout->setLabelAlignment(Qt::AlignRight);
     this->setLayout(mLayout);
+    this->setCheckable(true);
+    this->connect(this, &QGroupBox::clicked, this, &AttrGroup::onClicked);
 }
 
 AttrGroup::~AttrGroup()
@@ -42,6 +44,18 @@ void AttrGroup::addItem(const QString& aLabel, ItemBase* aItem)
     else if (aItem->itemWidget())
     {
         mLayout->addRow(label, aItem->itemWidget());
+    }
+}
+
+void AttrGroup::onClicked(bool aChecked)
+{
+    if (aChecked)
+    {
+        this->setFixedHeight(QWIDGETSIZE_MAX);
+    }
+    else
+    {
+        this->setFixedHeight(22);
     }
 }
 

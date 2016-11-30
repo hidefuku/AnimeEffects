@@ -15,6 +15,9 @@ public:
     virtual ~AttrGroup();
     void addItem(const QString& aLabel, ItemBase* aItem);
 
+private slots:
+    void onClicked(bool aChecked);
+
 private:
     QFormLayout* mLayout;
     int mLabelWidth;

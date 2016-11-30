@@ -85,7 +85,7 @@ padding-top: 10px;
 QGroupBox#attrGroup::title {
 subcontrol-origin: margin;
 subcontrol-position:top left;
-padding-left: 10px;
+padding-left: 8px;
 padding-top: 2px;
 }
 
