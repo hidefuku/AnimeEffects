@@ -421,7 +421,8 @@ void MeshFace::rawInit(MeshEdge& aEp0, MeshEdge& aEp1, MeshEdge& aEp2)
 
 //-------------------------------------------------------------------------------------------------
 MeshKey::Data::Data()
-    : mVertices()
+    : mOriginOffset()
+    , mVertices()
     , mEdges()
     , mFaces()
     , mPositions()
@@ -515,8 +516,8 @@ MeshKey::MeshKey()
 
 bool MeshKey::serialize(Serializer& aOut) const
 {
-    // image size
-    //aOut.write(mData.mSize);
+    // origin offset
+    aOut.write(mData.mOriginOffset);
 
     // vertex count
     aOut.write((int)mData.mVertices.count());
@@ -557,8 +558,8 @@ bool MeshKey::deserialize(Deserializer& aIn)
 
     mData.destroy();
 
-    // image size
-    //aIn.read(mData.mSize);
+    // origin offset
+    aIn.read(mData.mOriginOffset);
 
     // vertex count
     int vtxCount = 0;

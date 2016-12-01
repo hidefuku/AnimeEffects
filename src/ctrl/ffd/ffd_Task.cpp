@@ -17,7 +17,9 @@ Task::Task(TaskResource& aResource, core::MeshTransformerResource& aMeshRes)
     : mResource(aResource)
     , mMeshTransformer(aMeshRes)
     , mMeshBuffer()
+    , mSrcMesh()
     , mSrcExpans()
+    , mSrcOriginOffset()
     , mArrayedConnectionList()
     , mSrcBlurPositions(gl::ComputeTexture1D::CompoType_F32, 2)
     , mWorkInMesh(GL_ARRAY_BUFFER)
@@ -65,6 +67,7 @@ void Task::writeSrc(
 
     mSrcExpans = &aSrcExpans;
     mSrcMesh = util::ArrayBlock<const gl::Vector3>(aSrcMesh, vtxCount);
+    mSrcOriginOffset = aOriginMesh.originOffset();
 
     mParam = aParam;
     mOriginMesh = aOriginMesh.positions();
@@ -105,7 +108,7 @@ void Task::onRequested()
     XC_ASSERT(mSrcMesh.count() <= mOutMesh.dataCount());
 
     mMeshBuffer.reserve(mSrcMesh.count());
-    mMeshTransformer.callGL(*mSrcExpans, mMeshBuffer, mSrcMesh);
+    mMeshTransformer.callGL(*mSrcExpans, mMeshBuffer, mSrcOriginOffset, mSrcMesh);
 
     gl::Global::Functions& ggl = gl::Global::functions();
     gl::EasyShaderProgram& program = mResource.program(mParam.type, mParam.hardness);

@@ -202,6 +202,7 @@ void LayerNode::renderClipper(
     if (!expans.areaTexture()) return;
     auto textureId = expans.areaTexture()->id();
     auto textureSize = expans.areaTexture()->size();
+    auto texCoordOffset = mCurrentMesh->originOffset() - expans.imageOffset();
 
     core::ClippingFrame& frame = *aInfo.clippingFrame;
     frame.updateRenderStamp();
@@ -230,6 +231,7 @@ void LayerNode::renderClipper(
         shader.setUniformValue("uViewMatrix", viewMatrix);
         shader.setUniformValue("uScreenSize", QSizeF(aInfo.camera.screenSize()));
         shader.setUniformValue("uImageSize", QSizeF(textureSize));
+        shader.setUniformValue("uTexCoordOffset", texCoordOffset);
         shader.setUniformValue("uColor", color);
         shader.setUniformValue("uClipperId", (int)aClipperId);
         shader.setUniformValue("uTexture", 0);
@@ -291,8 +293,8 @@ void LayerNode::transformShape(
 
     // transform
     mMeshTransformer.callGL(
-                expans, mesh->getMeshBuffer(), positions,
-                aInfo.nonPosed, useInfluence);
+                expans, mesh->getMeshBuffer(), mesh->originOffset(),
+                positions, aInfo.nonPosed, useInfluence);
 
     mCurrentMesh = mesh;
 }
@@ -310,6 +312,7 @@ void LayerNode::renderShape(
 
     auto textureId = expans.areaTexture()->id();
     auto textureSize = expans.areaTexture()->size();
+    auto texCoordOffset = mCurrentMesh->originOffset() - expans.imageOffset();
     auto blendMode = expans.blendMode();
     const QMatrix4x4 viewMatrix = aInfo.camera.viewMatrix();
 
@@ -363,6 +366,7 @@ void LayerNode::renderShape(
         shader.setUniformValue("uViewMatrix", viewMatrix);
         shader.setUniformValue("uScreenSize", QSizeF(aInfo.camera.screenSize()));
         shader.setUniformValue("uImageSize", QSizeF(textureSize));
+        shader.setUniformValue("uTexCoordOffset", texCoordOffset);
         shader.setUniformValue("uColor", color);
         shader.setUniformValue("uTexture", 0);
         shader.setUniformValue("uDestTexture", 1);

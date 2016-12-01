@@ -1,6 +1,9 @@
 #include "core/TimeKeyBlender.h"
 #include "core/Project.h"
 #include "core/TimeKeyBlender.h"
+#include "core/MoveKey.h"
+#include "core/ImageKey.h"
+#include "core/MeshKey.h"
 #include "ctrl/srt/srt_CentroidMover.h"
 
 using namespace core;
@@ -9,47 +12,41 @@ namespace ctrl {
 namespace srt {
 
 //-------------------------------------------------------------------------------------------------
-void CentroidMover::pushEventTargets(ObjectNode& aTarget, TimeLineEvent& aEvent)
+void addAllKeysToEvent(ObjectNode& aTarget, TimeKeyType aType, TimeLineEvent& aEvent, bool aContainDefault)
 {
     XC_PTR_ASSERT(aTarget.timeLine());
+    auto& line = *aTarget.timeLine();
     {
-        auto& map = aTarget.timeLine()->map(TimeKeyType_Move);
+        auto& map = line.map(aType);
         for (auto itr = map.begin(); itr != map.end(); ++itr)
         {
-            aEvent.pushTarget(aTarget, TimeKeyType_Move, itr.key());
+            aEvent.pushTarget(aTarget, aType, itr.key());
         }
     }
 
-    if (aTarget.timeLine()->defaultKey(TimeKeyType_Move))
+    if (aContainDefault && line.defaultKey(aType))
     {
-        aEvent.pushDefaultTarget(aTarget, TimeKeyType_Move);
+        aEvent.pushDefaultTarget(aTarget, aType);
     }
 
-    if (aTarget.canHoldChild())
+}
+
+//-------------------------------------------------------------------------------------------------
+void CentroidMover::pushEventTargets(ObjectNode& aTarget, TimeLineEvent& aEvent)
+{
+    addAllKeysToEvent(aTarget, TimeKeyType_Move, aEvent, true);
+    addAllKeysToEvent(aTarget, TimeKeyType_Mesh, aEvent, true);
+    addAllKeysToEvent(aTarget, TimeKeyType_Image, aEvent, true);
+
+    for (auto child : aTarget.children())
     {
-        for (auto child : aTarget.children())
-        {
-            XC_PTR_ASSERT(child->timeLine());
-            auto& map = child->timeLine()->map(TimeKeyType_Move);
-            for (auto itr = map.begin(); itr != map.end(); ++itr)
-            {
-                aEvent.pushTarget(*child, TimeKeyType_Move, itr.key());
-            }
-        }
-    }
-    else
-    {
-        auto& map = aTarget.timeLine()->map(TimeKeyType_Image);
-        for (auto itr = map.begin(); itr != map.end(); ++itr)
-        {
-            aEvent.pushTarget(aTarget, TimeKeyType_Image, itr.key());
-        }
+        addAllKeysToEvent(*child, TimeKeyType_Move, aEvent, true);
     }
 }
 
 //-------------------------------------------------------------------------------------------------
-CentroidMover::CentroidMover(core::Project& aProject,
-                             core::ObjectNode& aTarget,
+CentroidMover::CentroidMover(Project& aProject,
+                             ObjectNode& aTarget,
                              const QVector2D& aPrev,
                              const QVector2D& aNext)
     : mProject(aProject)
@@ -59,12 +56,13 @@ CentroidMover::CentroidMover(core::Project& aProject,
     , mKeys()
     , mChildKeys()
     , mImageKeys()
+    , mMeshKeys()
     , mDone()
     , mExecuteOnce()
 {
 }
 
-QMatrix4x4 CentroidMover::getLocalSRMatrix(const core::TimeKey& aKey)
+QMatrix4x4 CentroidMover::getLocalSRMatrix(const TimeKey& aKey)
 {
     if (aKey.frame() == TimeLine::kDefaultKeyIndex)
     {
@@ -72,7 +70,7 @@ QMatrix4x4 CentroidMover::getLocalSRMatrix(const core::TimeKey& aKey)
     }
     auto time = mProject.currentTimeInfo();
     time.frame.set(aKey.frame());
-    return core::TimeKeyBlender::getLocalSRMatrix(mTarget, time);
+    return TimeKeyBlender::getLocalSRMatrix(mTarget, time);
 }
 
 void CentroidMover::modifyValue(const QVector2D& aNext)
@@ -102,6 +100,12 @@ void CentroidMover::modifyValue(const QVector2D& aNext)
             key.next = key.prev - keyMove;
         }
 
+        // update meshKeys
+        for (auto& key : mMeshKeys)
+        {
+            key.next = key.prev - keyMove;
+        }
+
         if (mDone)
         {
             for (auto& key : mKeys)
@@ -116,6 +120,33 @@ void CentroidMover::modifyValue(const QVector2D& aNext)
             {
                 key.ptr->data().setImageOffset(key.next);
             }
+            for (auto& key : mMeshKeys)
+            {
+                key.ptr->data().setOriginOffset(key.next);
+            }
+        }
+    }
+}
+
+void CentroidMover::addAllTargets(
+        ObjectNode& aTarget, TimeKeyType aType, bool aContainDefault,
+        const std::function<void(TimeKey*)>& aPusher)
+{
+    XC_PTR_ASSERT(aTarget.timeLine());
+
+    auto& map = aTarget.timeLine()->map(aType);
+    for (auto itr = map.begin(); itr != map.end(); ++itr)
+    {
+        auto key = itr.value();
+        aPusher(key);
+    }
+
+    if (aContainDefault)
+    {
+        auto defaultKey = aTarget.timeLine()->defaultKey(aType);
+        if (defaultKey)
+        {
+            aPusher(defaultKey);
         }
     }
 }
@@ -126,87 +157,52 @@ void CentroidMover::exec()
     const QVector3D keyMove3D(keyMove);
 
     // translate moveKeys
+    addAllTargets(mTarget, TimeKeyType_Move, true, [=](TimeKey* aKey)
     {
-        auto& map = mTarget.timeLine()->map(core::TimeKeyType_Move);
+        TIMEKEY_PTR_TYPE_ASSERT(aKey, Move);
+        MoveKey* moveKey = (MoveKey*)aKey;
+        const QVector2D prev = moveKey->pos();
+        const QVector2D next = prev + (getLocalSRMatrix(*moveKey) * keyMove3D).toVector2D();
+        KeyData keyData = { moveKey, prev, next };
+        this->mKeys.push_back(keyData);
+    });
 
-        for (auto itr = map.begin(); itr != map.end(); ++itr)
-        {
-            auto key = itr.value();
-            TIMEKEY_PTR_TYPE_ASSERT(key, Move);
-            core::MoveKey* moveKey = (core::MoveKey*)key;
-            const QVector2D prev = moveKey->pos();
-            const QVector2D next = prev + (getLocalSRMatrix(*moveKey) * keyMove3D).toVector2D();
-            KeyData keyData = { moveKey, prev, next };
-            mKeys.push_back(keyData);
-        }
+    // translate imageKeys negatively
+    addAllTargets(mTarget, TimeKeyType_Image, true, [=](TimeKey* aKey)
+    {
+        TIMEKEY_PTR_TYPE_ASSERT(aKey, Image);
+        ImageKey* imageKey = (ImageKey*)aKey;
+        const QVector2D prev = imageKey->data().imageOffset();
+        const QVector2D next = prev - keyMove;
+        ImageKeyData keyData = { imageKey, prev, next };
+        this->mImageKeys.push_back(keyData);
+    });
 
-        auto defaultKey = mTarget.timeLine()->defaultKey(core::TimeKeyType_Move);
-        if (defaultKey)
-        {
-            TIMEKEY_PTR_TYPE_ASSERT(defaultKey, Move);
-            core::MoveKey* moveKey = (core::MoveKey*)defaultKey;
-            const QVector2D prev = moveKey->pos();
-            const QVector2D next = prev + (getLocalSRMatrix(*moveKey) * keyMove3D).toVector2D();
-            KeyData keyData = { moveKey, prev, next };
-            mKeys.push_back(keyData);
-        }
-    }
+    // translate meshKeys negatively
+    addAllTargets(mTarget, TimeKeyType_Mesh, true, [=](TimeKey* aKey)
+    {
+        TIMEKEY_PTR_TYPE_ASSERT(aKey, Mesh);
+        MeshKey* meshKey = (MeshKey*)aKey;
+        const QVector2D prev = meshKey->data().originOffset();
+        const QVector2D next = prev - keyMove;
+        MeshKeyData keyData = { meshKey, prev, next };
+        this->mMeshKeys.push_back(keyData);
+    });
 
     if (mTarget.canHoldChild())
     {
         // translate child moveKeys negatively
         for (auto child : mTarget.children())
         {
-            auto& map = child->timeLine()->map(core::TimeKeyType_Move);
-
-            for (auto itr = map.begin(); itr != map.end(); ++itr)
+            addAllTargets(*child, TimeKeyType_Move, true, [=](TimeKey* aKey)
             {
-                auto key = itr.value();
-                TIMEKEY_PTR_TYPE_ASSERT(key, Move);
-                core::MoveKey* moveKey = (core::MoveKey*)key;
+                TIMEKEY_PTR_TYPE_ASSERT(aKey, Move);
+                MoveKey* moveKey = (MoveKey*)aKey;
                 const QVector2D prev = moveKey->pos();
                 const QVector2D next = prev - keyMove;
                 ChildKeyData keyData = { moveKey, prev, next };
-                mChildKeys.push_back(keyData);
-            }
-
-            auto defaultKey = child->timeLine()->defaultKey(core::TimeKeyType_Move);
-            if (defaultKey)
-            {
-                TIMEKEY_PTR_TYPE_ASSERT(defaultKey, Move);
-                core::MoveKey* moveKey = (core::MoveKey*)defaultKey;
-                const QVector2D prev = moveKey->pos();
-                const QVector2D next = prev - keyMove;
-                ChildKeyData keyData = { moveKey, prev, next };
-                mChildKeys.push_back(keyData);
-            }
-        }
-    }
-    else
-    {
-        // translate imageKeys negatively
-        auto& map = mTarget.timeLine()->map(core::TimeKeyType_Image);
-
-        for (auto itr = map.begin(); itr != map.end(); ++itr)
-        {
-            auto key = itr.value();
-            TIMEKEY_PTR_TYPE_ASSERT(key, Image);
-            core::ImageKey* imageKey = (core::ImageKey*)key;
-            const QVector2D prev = imageKey->data().imageOffset();
-            const QVector2D next = prev - keyMove;
-            ImageKeyData keyData = { imageKey, prev, next };
-            mImageKeys.push_back(keyData);
-        }
-
-        auto defaultKey = mTarget.timeLine()->defaultKey(core::TimeKeyType_Image);
-        if (defaultKey)
-        {
-            TIMEKEY_PTR_TYPE_ASSERT(defaultKey, Image);
-            core::ImageKey* imageKey = (core::ImageKey*)defaultKey;
-            const QVector2D prev = imageKey->data().imageOffset();
-            const QVector2D next = prev - keyMove;
-            ImageKeyData keyData = { imageKey, prev, next };
-            mImageKeys.push_back(keyData);
+                this->mChildKeys.push_back(keyData);
+            });
         }
     }
 
@@ -229,6 +225,10 @@ void CentroidMover::undo()
     {
         key.ptr->data().setImageOffset(key.prev);
     }
+    for (auto& key : mMeshKeys)
+    {
+        key.ptr->data().setOriginOffset(key.prev);
+    }
     mDone = false;
 }
 
@@ -245,6 +245,10 @@ void CentroidMover::redo()
     for (auto& key : mImageKeys)
     {
         key.ptr->data().setImageOffset(key.next);
+    }
+    for (auto& key : mMeshKeys)
+    {
+        key.ptr->data().setOriginOffset(key.next);
     }
     mDone = true;
 }

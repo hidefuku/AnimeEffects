@@ -97,7 +97,7 @@ void MeshEditor::resetTarget(ObjectNode* aPrev, ObjectNode* aNext)
 
         bool success = false;
         mTarget.mtx = mTarget->timeLine()->current().srt().worldMatrix();
-        mTarget.mtx.translate(mTarget->timeLine()->current().imageOffset());
+        //mTarget.mtx.translate(mTarget->timeLine()->current().imageOffset());
 
         mTarget.invMtx = mTarget.mtx.inverted(&success);
         if (!success)
@@ -163,15 +163,6 @@ void MeshEditor::initializeKey(TimeLine& aLine)
         // create new key
         mKeyOwner.key = new MeshKey();
         mKeyOwner.ownsKey = true;
-
-#if 0
-        // initialize key data
-        if (mTarget.node)
-        {
-            !!!it_is_bug;
-            mKeyOwner.key->data().setImageSize(mTarget.node->initialRect().size());
-        }
-#endif
     }
 }
 

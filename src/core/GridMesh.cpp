@@ -12,6 +12,7 @@
 #include "img/Quad.h"
 #include "core/GridMesh.h"
 #include "core/HeightMap.h"
+#include "core/TimeLine.h"
 
 namespace core
 {
@@ -28,6 +29,7 @@ void GridMesh::QuadConnection::clear()
 //-------------------------------------------------------------------------------------------------
 GridMesh::GridMesh()
     : mSize()
+    , mOriginOffset()
     , mCellNumX(0)
     , mCellNumY(0)
     , mCellPx(0)
@@ -636,6 +638,11 @@ void GridMesh::resetArrayedConnection(
     }
 }
 
+Frame GridMesh::frameSign() const
+{
+    return Frame(TimeLine::kDefaultKeyIndex);
+}
+
 util::ArrayBlock<gl::Vector3> GridMesh::createFFD(
         util::ArrayBlock<const gl::Vector3> aPrevFFD,
         const Transitions& aTrans) const
@@ -826,6 +833,8 @@ bool GridMesh::serialize(Serializer& aOut) const
     aOut.write(0);
 
     // info
+    aOut.write(mSize);
+    aOut.write(mOriginOffset);
     aOut.write(mCellNumX);
     aOut.write(mCellNumY);
     aOut.write(mCellPx);
@@ -881,6 +890,8 @@ bool GridMesh::deserialize(Deserializer& aIn)
     if (type != 0) return false;
 
     // info
+    aIn.read(mSize);
+    aIn.read(mOriginOffset);
     aIn.read(mCellNumX);
     aIn.read(mCellNumY);
     aIn.read(mCellPx);

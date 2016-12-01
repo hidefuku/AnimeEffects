@@ -36,7 +36,9 @@ MeshTransformer::~MeshTransformer()
 }
 
 void MeshTransformer::callGL(
-        const TimeKeyExpans& aExpans, LayerMesh::MeshBuffer& aMeshBuffer,
+        const TimeKeyExpans& aExpans,
+        LayerMesh::MeshBuffer& aMeshBuffer,
+        const QVector2D& aOriginOffset,
         util::ArrayBlock<const gl::Vector3> aPositions,
         bool aNonPosed, bool aUseInfluence)
 {
@@ -71,12 +73,14 @@ void MeshTransformer::callGL(
     {
         worldMatrix = aExpans.bone().outerMatrix();
         innerMatrix = aExpans.bone().innerMatrix();
-        innerMatrix.translate(aExpans.imageOffset());
+        //innerMatrix.translate(aExpans.imageOffset());
+        innerMatrix.translate(aOriginOffset);
     }
     else
     {
         worldMatrix = aExpans.srt().worldMatrix();
-        worldMatrix.translate(aExpans.imageOffset());
+        //worldMatrix.translate(aExpans.imageOffset());
+        worldMatrix.translate(aOriginOffset);
     }
 
     gl::Global::Functions& ggl = gl::Global::functions();

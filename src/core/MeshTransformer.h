@@ -20,7 +20,9 @@ public:
     MeshTransformer(MeshTransformerResource& aResource);
     ~MeshTransformer();
 
-    void callGL(const TimeKeyExpans& aExpans, LayerMesh::MeshBuffer& aMeshBuffer,
+    void callGL(const TimeKeyExpans& aExpans,
+                LayerMesh::MeshBuffer& aMeshBuffer,
+                const QVector2D& aOriginOffset,
                 util::ArrayBlock<const gl::Vector3> aPositions,
                 bool aNonPosed = false, bool aUseInfluence = true);
 

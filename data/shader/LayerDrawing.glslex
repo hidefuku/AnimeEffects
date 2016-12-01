@@ -8,6 +8,7 @@ in vec2  inTexCoord;
 uniform mat4 uViewMatrix;
 uniform vec2 uScreenSize;
 uniform vec2 uImageSize;
+uniform vec2 uTexCoordOffset;
 
 out vec2 vTexCoord;
 out vec2 vDestCoord;
@@ -19,7 +20,9 @@ void main(void)
 
     gl_Position = pos;
     vDestCoord = vec2(uScreenSize.x * (screenPos.x + 1.0) * 0.5, uScreenSize.y * (screenPos.y + 1.0) * 0.5);
-    vTexCoord = vec2(inTexCoord.x / uImageSize.x, inTexCoord.y / uImageSize.y);
+
+    vec2 texCoord = inTexCoord + uTexCoordOffset;
+    vTexCoord = vec2(texCoord.x / uImageSize.x, texCoord.y / uImageSize.y);
 }
 
 

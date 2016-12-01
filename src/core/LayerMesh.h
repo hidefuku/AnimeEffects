@@ -88,6 +88,7 @@ public:
             ArrayedConnectionList& aDest,
             const gl::Vector3* aPositions) const = 0;
     virtual Frame frameSign() const = 0;
+    virtual QVector2D originOffset() const = 0;
 };
 
 } // namespace core

@@ -156,6 +156,8 @@ public:
         const EdgeList& edges() const { return mEdges; }
         const FaceList& faces() const { return mFaces; }
 
+        void setOriginOffset(const QVector2D& aOffset) { mOriginOffset = aOffset; }
+
         // from LayerMesh
         virtual GLenum primitiveMode() const { return GL_TRIANGLES; }
         virtual const gl::Vector3* positions() const { return mPositions.data(); }
@@ -168,12 +170,14 @@ public:
                 ArrayedConnectionList& aDest,
                 const gl::Vector3* aPositions) const;
         virtual Frame frameSign() const { return Frame(mOwner->frame()); }
+        virtual QVector2D originOffset() const { return mOriginOffset; }
 
         void destroy();
 
     private:
         friend class MeshKey;
 
+        QVector2D mOriginOffset;
         VtxList mVertices;
         EdgeList mEdges;
         FaceList mFaces;

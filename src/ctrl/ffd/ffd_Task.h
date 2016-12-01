@@ -50,6 +50,7 @@ private:
     core::LayerMesh::MeshBuffer mMeshBuffer;
     util::ArrayBlock<const gl::Vector3> mSrcMesh;
     const core::TimeKeyExpans* mSrcExpans;
+    QVector2D mSrcOriginOffset;
     core::LayerMesh::ArrayedConnectionList mArrayedConnectionList;
     gl::ComputeTexture1DList mSrcBlurPositions;
 

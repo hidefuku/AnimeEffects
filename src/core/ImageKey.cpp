@@ -22,6 +22,7 @@ void ImageKey::Data::setImageOffset(const QVector2D& aOffset)
                 xc_clamp(aOffset.x(), Constant::transMin(), Constant::transMax()),
                 xc_clamp(aOffset.y(), Constant::transMin(), Constant::transMax()));
     mImageOffset = offset;
+    mGridMesh.setOriginOffset(offset);
 }
 
 //-------------------------------------------------------------------------------------------------

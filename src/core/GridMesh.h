@@ -56,6 +56,7 @@ public:
     GridMesh();
     ~GridMesh();
 
+    void setOriginOffset(const QVector2D& aOffset) { mOriginOffset = aOffset; }
     void createFromImage(const void* aImagePtr, const QSize& aSize, int aCellPx);
     void writeHeightMap(const HeightMap& aMap, const QVector2D& aMinPos);
     util::ArrayBlock<gl::Vector3> createFFD(
@@ -73,7 +74,8 @@ public:
     virtual void resetArrayedConnection(
             ArrayedConnectionList& aDest,
             const gl::Vector3* aPositions) const;
-    virtual Frame frameSign() const { return Frame(-1); }
+    virtual Frame frameSign() const;
+    virtual QVector2D originOffset() const { return mOriginOffset; }
 
     const gl::Vector3* offsets() const { return mOffsets.data(); }
     const gl::Vector3* normals() const { return mNormals.data(); }
@@ -114,6 +116,7 @@ private:
     int connectionId(int aArrayIndex, int aIdIndex) const;
 
     QSize mSize;
+    QVector2D mOriginOffset;
     int mCellNumX;
     int mCellNumY;
     int mCellPx;
