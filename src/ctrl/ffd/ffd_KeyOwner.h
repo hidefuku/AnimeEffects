@@ -24,7 +24,6 @@ struct KeyOwner
             const core::LayerMesh& aAreaMesh,
             core::TimeKey* aAreaKey,
             int aFrame);
-    void setupMtx(const core::ObjectNode& aNode, const core::TimeLine& aLine);
 
     void pushOwnsKey(cmnd::Stack& aStack, core::TimeLine& aLine, int aFrame);
     void deleteOwnsKey();
@@ -33,10 +32,6 @@ struct KeyOwner
 
     core::FFDKey* key;
     bool ownsKey;
-
-    QMatrix4x4 worldMtx;
-    QMatrix4x4 invMtx;
-    bool hasInv;
 
     core::TimeKey* parentKey;
 };

@@ -164,11 +164,14 @@ void MeshEditor::initializeKey(TimeLine& aLine)
         mKeyOwner.key = new MeshKey();
         mKeyOwner.ownsKey = true;
 
+#if 0
         // initialize key data
         if (mTarget.node)
         {
+            !!!it_is_bug;
             mKeyOwner.key->data().setImageSize(mTarget.node->initialRect().size());
         }
+#endif
     }
 }
 

@@ -28,8 +28,6 @@ Task::Task(TaskResource& aResource, core::MeshTransformerResource& aMeshRes)
     , mDstMesh()
     , mVtxCount()
     , mDstBufferCount()
-    , mWorldMtx()
-    , mWorldInvMtx()
     , mParam()
     , mBrushCenter()
     , mBrushVel()
@@ -93,13 +91,9 @@ void Task::writeSrc(
 }
 
 void Task::setBrush(
-        const QMatrix4x4& aWorldMtx,
-        const QMatrix4x4& aWorldInvMtx,
         const QVector2D& aBrushCenter,
         const QVector2D& aBrushVel)
 {
-    mWorldMtx = aWorldMtx;
-    mWorldInvMtx = aWorldInvMtx;
     mBrushCenter = aBrushCenter;
     mBrushVel = aBrushVel;
 }

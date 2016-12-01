@@ -201,6 +201,7 @@ void LayerNode::renderClipper(
 
     if (!expans.areaTexture()) return;
     auto textureId = expans.areaTexture()->id();
+    auto textureSize = expans.areaTexture()->size();
 
     core::ClippingFrame& frame = *aInfo.clippingFrame;
     frame.updateRenderStamp();
@@ -228,6 +229,7 @@ void LayerNode::renderClipper(
 
         shader.setUniformValue("uViewMatrix", viewMatrix);
         shader.setUniformValue("uScreenSize", QSizeF(aInfo.camera.screenSize()));
+        shader.setUniformValue("uImageSize", QSizeF(textureSize));
         shader.setUniformValue("uColor", color);
         shader.setUniformValue("uClipperId", (int)aClipperId);
         shader.setUniformValue("uTexture", 0);
@@ -307,6 +309,7 @@ void LayerNode::renderShape(
     if (!expans.areaImageKey() || !expans.areaTexture()) return;
 
     auto textureId = expans.areaTexture()->id();
+    auto textureSize = expans.areaTexture()->size();
     auto blendMode = expans.blendMode();
     const QMatrix4x4 viewMatrix = aInfo.camera.viewMatrix();
 
@@ -359,6 +362,7 @@ void LayerNode::renderShape(
 
         shader.setUniformValue("uViewMatrix", viewMatrix);
         shader.setUniformValue("uScreenSize", QSizeF(aInfo.camera.screenSize()));
+        shader.setUniformValue("uImageSize", QSizeF(textureSize));
         shader.setUniformValue("uColor", color);
         shader.setUniformValue("uTexture", 0);
         shader.setUniformValue("uDestTexture", 1);

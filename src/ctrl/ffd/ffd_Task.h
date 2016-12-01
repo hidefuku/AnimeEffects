@@ -33,8 +33,6 @@ public:
             const FFDParam& aBrushParam);
 
     void setBrush(
-            const QMatrix4x4& aWorldMtx,
-            const QMatrix4x4& aWorldInvMtx,
             const QVector2D& aBrushCenter,
             const QVector2D& aBrushVel);
 
@@ -65,8 +63,6 @@ private:
     int mVtxCount;
     int mDstBufferCount;
 
-    QMatrix4x4 mWorldMtx;
-    QMatrix4x4 mWorldInvMtx;
     FFDParam mParam;
     QVector2D mBrushCenter;
     QVector2D mBrushVel;

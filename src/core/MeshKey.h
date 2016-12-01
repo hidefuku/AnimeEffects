@@ -152,9 +152,6 @@ public:
         Data();
         ~Data();
 
-        void setImageSize(const QSize& aSize) { mSize = aSize; }
-        QSize imageSize() const { return mSize; }
-
         const VtxList& vertices() const { return mVertices; }
         const EdgeList& edges() const { return mEdges; }
         const FaceList& faces() const { return mFaces; }
@@ -177,7 +174,6 @@ public:
     private:
         friend class MeshKey;
 
-        QSize mSize;
         VtxList mVertices;
         EdgeList mEdges;
         FaceList mFaces;

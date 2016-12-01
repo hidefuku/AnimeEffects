@@ -49,7 +49,7 @@ FFDEditor::Target::Target(core::ObjectNode* aNode)
 
 bool FFDEditor::Target::isValid() const
 {
-    return (bool)node && (bool)keyOwner && keyOwner.hasInv;
+    return (bool)node && (bool)keyOwner;
 }
 
 FFDEditor::Target::~Target()
@@ -367,8 +367,6 @@ void FFDEditor::updateTargetsKeys()
 
         // get key
         mTargets[i]->keyOwner.createKey(*line, *mesh, areaKey, frame);
-        // setup srt
-        mTargets[i]->keyOwner.setupMtx(*node, *line);
     }
 }
 
@@ -412,9 +410,7 @@ bool FFDEditor::executeDrawTask(const QVector2D& aCenter, const QVector2D& aMove
                     *mesh, mParam);
 
         // set brush
-        mTargets[i]->task->setBrush(
-                    owner.worldMtx, owner.invMtx,
-                    aCenter, aMove);
+        mTargets[i]->task->setBrush(aCenter, aMove);
 
         // execute
         mTargets[i]->task->request();

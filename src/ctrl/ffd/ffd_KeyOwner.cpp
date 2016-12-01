@@ -12,9 +12,6 @@ namespace ffd {
 KeyOwner::KeyOwner()
     : key()
     , ownsKey()
-    , worldMtx()
-    , invMtx()
-    , hasInv(false)
     , parentKey()
 {
 }
@@ -59,17 +56,6 @@ void KeyOwner::createKey(
         key->data().write(aLine.current().ffd().positions(), vtxCount);
         parentKey = aAreaKey;
     }
-}
-
-void KeyOwner::setupMtx(const core::ObjectNode& aNode, const core::TimeLine& aLine)
-{
-    const TimeKeyExpans& current = aLine.current();
-    const QSizeF size(aNode.initialRect().size());
-    const QVector3D center(size.width() * 0.5f, size.height() * 0.5f, 0.0f);
-
-    worldMtx = current.srt().worldMatrix();
-    worldMtx.translate(-center);
-    invMtx = worldMtx.inverted(&hasInv);
 }
 
 void KeyOwner::pushOwnsKey(cmnd::Stack& aStack, TimeLine& aLine, int aFrame)

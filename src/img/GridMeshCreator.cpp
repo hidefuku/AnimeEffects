@@ -382,8 +382,6 @@ void GridMeshCreator::writeVertices(GLfloat* aPosVec3, GLfloat* aTexVec2)
 {
     const int w = mVertices->width();
     const int h = mVertices->height();
-    const float iw = mImageSize.width();
-    const float ih = mImageSize.height();
     GLuint index = 0;
     for (int y = 0; y < h; ++y)
     {
@@ -399,8 +397,8 @@ void GridMeshCreator::writeVertices(GLfloat* aPosVec3, GLfloat* aTexVec2)
                 posPtr[2] = 0.0f;
 
                 auto texPtr = &(aTexVec2[index * 2]);
-                texPtr[0] = pos.x() / iw;
-                texPtr[1] = pos.y() / ih;
+                texPtr[0] = pos.x();
+                texPtr[1] = pos.y();
                 ++index;
             }
         }

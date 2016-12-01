@@ -421,8 +421,7 @@ void MeshFace::rawInit(MeshEdge& aEp0, MeshEdge& aEp1, MeshEdge& aEp2)
 
 //-------------------------------------------------------------------------------------------------
 MeshKey::Data::Data()
-    : mSize()
-    , mVertices()
+    : mVertices()
     , mEdges()
     , mFaces()
     , mPositions()
@@ -517,7 +516,7 @@ MeshKey::MeshKey()
 bool MeshKey::serialize(Serializer& aOut) const
 {
     // image size
-    aOut.write(mData.mSize);
+    //aOut.write(mData.mSize);
 
     // vertex count
     aOut.write((int)mData.mVertices.count());
@@ -559,7 +558,7 @@ bool MeshKey::deserialize(Deserializer& aIn)
     mData.destroy();
 
     // image size
-    aIn.read(mData.mSize);
+    //aIn.read(mData.mSize);
 
     // vertex count
     int vtxCount = 0;
@@ -1298,8 +1297,6 @@ void MeshKey::updateGLAttribute()
 {
     int vtxCount = mData.mVertices.count();
 
-    const int w = mData.mSize.width();
-    const int h = mData.mSize.height();
     mData.mPositions.resize(vtxCount);
     mData.mTexCoords.resize(vtxCount);
 
@@ -1310,7 +1307,7 @@ void MeshKey::updateGLAttribute()
             XC_PTR_ASSERT(vtx);
             auto vec = vtx->vec();
             mData.mPositions[i].set(vec.x(), vec.y(), 0.0f);
-            mData.mTexCoords[i].set(vec.x() / w, vec.y() / h);
+            mData.mTexCoords[i].set(vec.x(), vec.y());
             ++i;
         }
     }

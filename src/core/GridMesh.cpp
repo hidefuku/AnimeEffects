@@ -448,7 +448,7 @@ void GridMesh::createFromImageVer1(const void* aImagePtr, const QSize& aSize, in
                     {
                         PixelPos pixelPos = cell->quad.pos[i];
                         mPositions[pixelPos.id].set(pixelPos.x, pixelPos.y, 0.0f);
-                        mTexCoords[pixelPos.id].set((float)pixelPos.x / width, (float)pixelPos.y / height);
+                        mTexCoords[pixelPos.id].set((float)pixelPos.x, (float)pixelPos.y);
                     }
                     mIndices[index] = cell->quad.lt().id; ++index;
                     mIndices[index] = cell->quad.rt().id; ++index;
