@@ -235,20 +235,21 @@ void TimeKeyBlender::updateCurrents(ObjectNode* aRootNode, const TimeInfo& aTime
             // build opa
             blendOpaKey(pos, aTime);
 
+            // build mesh
+            blendMeshKey(pos, aTime);
+
+            // build image
+            blendImageKey(pos, aTime);
+
             // build bone
             blendBoneKey(pos, aTime);
 
             // build pose
             blendPoseKey(pos, aTime);
 
-            // build mesh
-            blendMeshKey(pos, aTime);
-
             // build ffd
             blendFFDKey(pos, aTime);
 
-            // build image
-            blendImageKey(pos, aTime);
         }
     }
 
@@ -609,7 +610,26 @@ void TimeKeyBlender::blendBoneKey(PositionType aPos, const TimeInfo& aTime)
     auto& expans = *seekData.expans;
     if (!node.timeLine()) return;
 
-    expans.bone().setAreaKey(getAreaBone(node, aTime));
+    expans.setKeyCache(TimeKeyType_Bone, aTime.frame);
+    auto areaBone = getAreaBone(node, aTime);
+
+    // check bone validity
+    if (areaBone)
+    {
+        XC_ASSERT(expans.hasKeyCache(TimeKeyType_Mesh, aTime.frame));
+        XC_ASSERT(expans.hasKeyCache(TimeKeyType_Image, aTime.frame));
+
+        auto boneFrame  = areaBone->frame();
+        auto meshFrame  = expans.areaMeshKey() ? expans.areaMeshKey()->frame() : -1;
+        auto imageFrame = expans.areaImageKey() ? expans.areaImageKey()->frame() : -1;
+
+        if (boneFrame < meshFrame || boneFrame < imageFrame)
+        {
+            areaBone = nullptr;
+        }
+    }
+
+    expans.bone().setAreaKey(areaBone);
 }
 
 void TimeKeyBlender::blendPoseKey(PositionType aPos, const TimeInfo& aTime)
@@ -621,6 +641,7 @@ void TimeKeyBlender::blendPoseKey(PositionType aPos, const TimeInfo& aTime)
     if (!node.timeLine()) return;
 
     // area bone
+    XC_ASSERT(expans.hasKeyCache(TimeKeyType_Bone, aTime.frame));
     auto areaBoneKey = expans.bone().areaKey();
     expans.setPoseParent(areaBoneKey);
 
@@ -710,6 +731,7 @@ void TimeKeyBlender::blendMeshKey(PositionType aPos, const TimeInfo& aTime)
     auto& expans = *seekData.expans;
     if (!node.timeLine()) return;
 
+    expans.setKeyCache(TimeKeyType_Mesh, aTime.frame);
     expans.setAreaMeshKey(getMeshKey(node, aTime));
 }
 
@@ -802,6 +824,8 @@ void TimeKeyBlender::blendImageKey(PositionType aPos, const TimeInfo& aTime)
     auto& expans = *seekData.expans;
     if (!node.timeLine()) return;
 
+    expans.setKeyCache(TimeKeyType_Image, aTime.frame);
+
     auto imageKey = getImageKey(node, aTime);
     expans.setAreaImageKey(imageKey);
     expans.setImageOffset(imageKey ? imageKey->data().imageOffset() : QVector2D());
@@ -864,14 +888,30 @@ void TimeKeyBlender::setBoneInfluenceMaps(
         XC_PTR_ASSERT(mSeeker->data(&aNode).expans);
         auto& expans = *(mSeeker->data(&aNode).expans);
 
-        auto parent = expans.bone().areaKey();
-        if (parent) key = parent;
+        auto areaBoneKey = expans.bone().areaKey();
+        if (areaBoneKey) key = areaBoneKey;
 
         const LayerMesh* mesh = nullptr;
         BoneInfluenceMap* influence = nullptr;
         QMatrix4x4 outerMtx;
         QMatrix4x4 innerMtx;
         QVector2D imageOffset = expans.imageOffset();
+
+        // check bone validity
+        if (key)
+        {
+            XC_ASSERT(expans.hasKeyCache(TimeKeyType_Mesh, aTime.frame));
+            XC_ASSERT(expans.hasKeyCache(TimeKeyType_Image, aTime.frame));
+
+            auto boneFrame  = key->frame();
+            auto meshFrame  = expans.areaMeshKey() ? expans.areaMeshKey()->frame() : -1;
+            auto imageFrame = expans.areaImageKey() ? expans.areaImageKey()->frame() : -1;
+
+            if (boneFrame < meshFrame || boneFrame < imageFrame)
+            {
+                key = nullptr;
+            }
+        }
 
         if (key)
         {
