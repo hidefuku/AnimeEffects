@@ -22,7 +22,7 @@ public:
     BoneEditor(core::Project& aProject, GraphicStyle& aStyle);
     ~BoneEditor();
 
-    virtual void setTarget(core::ObjectNode* aTarget);
+    virtual bool setTarget(core::ObjectNode* aTarget);
 
     void updateParam(const BoneParam& aParam);
     virtual bool updateCursor(

@@ -19,7 +19,7 @@ public:
     PoseEditor(core::Project& aProject);
     ~PoseEditor();
 
-    virtual void setTarget(core::ObjectNode* aTarget);
+    virtual bool setTarget(core::ObjectNode* aTarget);
 
     //void updateParam(const PoseParam& aParam);
     virtual bool updateCursor(

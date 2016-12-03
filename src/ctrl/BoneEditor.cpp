@@ -34,14 +34,16 @@ BoneEditor::~BoneEditor()
     finalize();
 }
 
-void BoneEditor::setTarget(core::ObjectNode* aTarget)
+bool BoneEditor::setTarget(core::ObjectNode* aTarget)
 {
     finalize();
 
-    if (!aTarget || !aTarget->timeLine()) return;
+    if (!aTarget || !aTarget->timeLine()) return false;
 
     mTarget.node = aTarget;
     resetCurrentTarget();
+
+    return mTarget && mKeyOwner;
 }
 
 void BoneEditor::updateParam(const BoneParam& aParam)

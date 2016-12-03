@@ -21,7 +21,7 @@ public:
     SRTEditor(core::Project& aProject);
     ~SRTEditor();
 
-    virtual void setTarget(core::ObjectNode* aTarget);
+    virtual bool setTarget(core::ObjectNode* aTarget);
 
     void updateParam(const SRTParam& aParam);
 

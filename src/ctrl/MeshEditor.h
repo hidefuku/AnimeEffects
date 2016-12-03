@@ -20,7 +20,7 @@ public:
     MeshEditor(core::Project& aProject);
     ~MeshEditor();
 
-    virtual void setTarget(core::ObjectNode* aTarget);
+    virtual bool setTarget(core::ObjectNode* aTarget);
 
     void updateParam(const MeshParam& aParam);
     virtual bool updateCursor(

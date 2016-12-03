@@ -25,6 +25,7 @@ Driver::Driver(core::Project& aProject, DriverResources& aResources, GraphicStyl
     , mEditor()
     , mCurrentNode()
     , mOnUpdating(0)
+    , mRejectedTarget()
 {
     // initialize blending
     mBlender.updateCurrents(
@@ -36,10 +37,11 @@ void Driver::setTarget(core::ObjectNode* aNode)
 {
     ScopeCounter counter(mOnUpdating);
     mCurrentNode = aNode;
+    mRejectedTarget = false;
 
     if (mEditor)
     {
-        mEditor->setTarget(mCurrentNode);
+        mRejectedTarget = !mEditor->setTarget(mCurrentNode);
     }
 }
 
@@ -223,6 +225,7 @@ void Driver::renderQt(const core::RenderInfo& aRenderInfo, QPainter& aPainter)
         info.nonPosed = true;
     }
 
+    // draw editor
     if (mEditor)
     {
         mEditor->renderQt(info, aPainter);
@@ -230,6 +233,12 @@ void Driver::renderQt(const core::RenderInfo& aRenderInfo, QPainter& aPainter)
 
     // draw outline
     drawOutline(info, aPainter);
+
+    // draw ban mark
+    if (mRejectedTarget)
+    {
+        drawBanMark(info, aPainter);
+    }
 }
 
 void Driver::drawOutline(const core::RenderInfo& aRenderInfo, QPainter& aPainter)
@@ -268,6 +277,38 @@ void Driver::drawOutline(const core::RenderInfo& aRenderInfo, QPainter& aPainter
             aPainter.drawLine(quad[i].toPointF(), quad[k].toPointF());
         }
     }
+#endif
+}
+
+void Driver::drawBanMark(const core::RenderInfo& aRenderInfo, QPainter& aPainter)
+{
+    aPainter.setRenderHint(QPainter::Antialiasing);
+#if 0
+    aPainter.setBrush(QBrush(QColor(0, 0, 0, 128)));
+    aPainter.setPen(Qt::NoPen);
+
+    const QPointF c = aRenderInfo.camera.screenCenter().toPointF();
+    const QSize scrSize = aRenderInfo.camera.screenSize();
+    const float r = std::min(scrSize.width(), scrSize.height());
+    const float r1 = r * 0.04f;
+    const float r2 = r * 0.20f;
+
+    const QPointF a[4] = { c + QPointF(0.0f, -r1), c + QPointF(r1, 0.0f), c + QPointF(0.0f, r1), c + QPointF(-r1, 0.0f) };
+    aPainter.drawConvexPolygon(a, 4);
+
+    const QPointF x[4] = { QPointF(r2, -r2), QPointF(r2, r2), QPointF(-r2, r2), QPointF(-r2, -r2) };
+
+    for (int i = 0; i < 4; ++i)
+    {
+        auto k = (i + 1) % 4;
+        const QPointF b[4] = { a[k], a[i], a[i] + x[i], a[k] + x[i] };
+        aPainter.drawConvexPolygon(b, 4);
+    }
+#elif 1
+    aPainter.setBrush(Qt::NoBrush);
+    aPainter.setPen(QPen(QColor(0, 0, 0, 128)));
+    auto quad = aRenderInfo.camera.screenImageQuadangle();
+    aPainter.drawLine(quad[1].toPointF(), quad[3].toPointF());
 #endif
 }
 

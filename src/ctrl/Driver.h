@@ -45,6 +45,7 @@ public:
 
 private:
     void drawOutline(const core::RenderInfo& aRenderInfo, QPainter& aPainter);
+    void drawBanMark(const core::RenderInfo& aRenderInfo, QPainter& aPainter);
 
     core::Project& mProject;
     DriverResources& mResources;
@@ -54,6 +55,7 @@ private:
     QScopedPointer<IEditor> mEditor;
     core::ObjectNode* mCurrentNode;
     int mOnUpdating;
+    bool mRejectedTarget;
 };
 
 } // namespace ctrl

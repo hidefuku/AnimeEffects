@@ -20,7 +20,7 @@ public:
 
     virtual ~IEditor() {}
 
-    virtual void setTarget(core::ObjectNode* aTarget) = 0;
+    virtual bool setTarget(core::ObjectNode* aTarget) = 0;
 
     virtual bool updateCursor(
             const core::CameraInfo& aCamera,

@@ -113,7 +113,7 @@ void SRTEditor::createMode()
     }
 }
 
-void SRTEditor::setTarget(ObjectNode* aTarget)
+bool SRTEditor::setTarget(ObjectNode* aTarget)
 {
     finalize();
 
@@ -131,6 +131,7 @@ void SRTEditor::setTarget(ObjectNode* aTarget)
             mTarget = nullptr;
         }
     }
+    return mTarget && mKeyOwner;
 }
 
 void SRTEditor::updateParam(const SRTParam& aParam)

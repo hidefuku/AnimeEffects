@@ -24,18 +24,20 @@ MeshEditor::~MeshEditor()
     finalize();
 }
 
-void MeshEditor::setTarget(core::ObjectNode* aTarget)
+bool MeshEditor::setTarget(core::ObjectNode* aTarget)
 {
     auto prev = mTarget.node;
 
     finalize();
 
-    if (!aTarget || !aTarget->timeLine()) return;
+    if (!aTarget || !aTarget->timeLine()) return false;
 
     // for layer only
-    if (aTarget->type() != ObjectType_Layer) return;
+    if (aTarget->type() != ObjectType_Layer) return false;
 
     resetTarget(prev, aTarget);
+
+    return mTarget && mKeyOwner;
 }
 
 void MeshEditor::updateParam(const MeshParam& aParam)

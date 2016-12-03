@@ -22,14 +22,16 @@ PoseEditor::~PoseEditor()
     finalize();
 }
 
-void PoseEditor::setTarget(core::ObjectNode* aTarget)
+bool PoseEditor::setTarget(core::ObjectNode* aTarget)
 {
     finalize();
 
-    if (!aTarget || !aTarget->timeLine()) return;
+    if (!aTarget || !aTarget->timeLine()) return false;
 
     mTarget.node = aTarget;
     resetCurrentTarget();
+
+    return mTarget && mKeyOwner;
 }
 
 #if 0

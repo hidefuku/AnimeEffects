@@ -25,7 +25,7 @@ public:
     FFDEditor(core::Project& aProject, DriverResources& aDriverResources);
     ~FFDEditor();
 
-    virtual void setTarget(core::ObjectNode* aTarget);
+    virtual bool setTarget(core::ObjectNode* aTarget);
 
     void updateParam(const FFDParam& aParam);
     virtual bool updateCursor(

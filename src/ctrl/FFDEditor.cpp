@@ -221,7 +221,7 @@ FFDEditor::~FFDEditor()
     mTargets.clear();
 }
 
-void FFDEditor::setTarget(ObjectNode* aTarget)
+bool FFDEditor::setTarget(ObjectNode* aTarget)
 {
     clearState();
     qDeleteAll(mTargets);
@@ -235,6 +235,7 @@ void FFDEditor::setTarget(ObjectNode* aTarget)
             mRootTarget = nullptr;
         }
     }
+    return mRootTarget;
 }
 
 void FFDEditor::updateParam(const FFDParam& aParam)
