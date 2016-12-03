@@ -11,6 +11,7 @@
 #include "core/LayerNode.h"
 #include "core/ObjectNodeUtil.h"
 #include "core/TimeKeyExpans.h"
+#include "core/DepthKey.h"
 #include "core/ResourceEvent.h"
 #include "core/ResourceUpdatingWorkspace.h"
 #include "core/FFDKeyUpdater.h"
@@ -23,14 +24,12 @@ namespace core
 
 LayerNode::LayerNode(const QString& aName, ShaderHolder& aShaderHolder)
     : mName(aName)
-    , mDepth()
     , mIsVisible(true)
     , mInitialRect()
     , mTimeLine()
     , mShaderHolder(aShaderHolder)
     , mIsClipped()
     , mMeshTransformer("./data/shader/MeshTransform.glslex")
-    , mRenderDepth(0.0f)
     , mCurrentMesh()
     , mClippees()
 {
@@ -86,6 +85,17 @@ void LayerNode::setDefaultPosture(const QVector2D& aPos)
     }
 }
 
+void LayerNode::setDefaultDepth(float aValue)
+{
+    auto key = (DepthKey*)mTimeLine.defaultKey(TimeKeyType_Depth);
+    if (!key)
+    {
+        key = new DepthKey();
+        mTimeLine.grabDefaultKey(TimeKeyType_Depth, key);
+    }
+    key->setDepth(aValue);
+}
+
 void LayerNode::setDefaultOpacity(float aValue)
 {
     auto key = (OpaKey*)mTimeLine.defaultKey(TimeKeyType_Opa);
@@ -95,6 +105,17 @@ void LayerNode::setDefaultOpacity(float aValue)
         mTimeLine.grabDefaultKey(TimeKeyType_Opa, key);
     }
     key->setOpacity(aValue);
+}
+
+float LayerNode::initialDepth() const
+{
+    auto key = (DepthKey*)mTimeLine.defaultKey(TimeKeyType_Depth);
+    return key ? key->depth() : 0.0f;
+}
+
+float LayerNode::renderDepth() const
+{
+    return mTimeLine.current().worldDepth();
 }
 
 void LayerNode::setClipped(bool aIsClipped)
@@ -430,8 +451,6 @@ bool LayerNode::serialize(Serializer& aOut) const
 
     // name
     aOut.write(mName);
-    // depth
-    aOut.write(mDepth);
     // visibility
     aOut.write(mIsVisible);
     // initial rect
@@ -458,8 +477,6 @@ bool LayerNode::deserialize(Deserializer& aIn)
 
     // name
     aIn.read(mName);
-    // depth
-    aIn.read(mDepth);
     // visibility
     aIn.read(mIsVisible);
     // initial rect

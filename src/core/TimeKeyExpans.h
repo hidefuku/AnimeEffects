@@ -43,6 +43,11 @@ public:
     void setWorldOpacity(float aValue) { mWorldOpacity = aValue; }
     float worldOpacity() const { return mWorldOpacity; }
 
+    void setDepth(float aValue) { mDepth = aValue; }
+    float depth() const { return mDepth; }
+    void setWorldDepth(float aValue) { mWorldDepth = aValue; }
+    float worldDepth() const { return mWorldDepth; }
+
     BoneExpans& bone() { return mBone; }
     const BoneExpans& bone() const { return mBone; }
 
@@ -79,6 +84,8 @@ private:
     SRTExpans mSRT;
     OpaKey::Data mOpa;
     float mWorldOpacity;
+    float mDepth;
+    float mWorldDepth;
     BoneExpans mBone;
     PoseKey::Data mPose;
     BoneKey* mPoseParent;

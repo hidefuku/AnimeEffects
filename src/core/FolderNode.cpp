@@ -4,6 +4,7 @@
 #include "core/ObjectTreeEvent.h"
 #include "core/ResourceEvent.h"
 #include "core/TimeKeyExpans.h"
+#include "core/DepthKey.h"
 #include "core/ClippingFrame.h"
 
 namespace core
@@ -11,13 +12,11 @@ namespace core
 
 FolderNode::FolderNode(const QString& aName)
     : mName(aName)
-    , mDepth()
     , mIsVisible(true)
     , mInitialRect()
     , mHeightMap()
     , mTimeLine()
     , mIsClipped()
-    , mRenderDepth()
     , mClippees()
 {
 }
@@ -54,6 +53,17 @@ void FolderNode::setDefaultPosture(const QVector2D& aPos)
             mTimeLine.grabDefaultKey(TimeKeyType_Scale, key);
         }
     }
+}
+
+void FolderNode::setDefaultDepth(float aValue)
+{
+    auto key = (DepthKey*)mTimeLine.defaultKey(TimeKeyType_Depth);
+    if (!key)
+    {
+        key = new DepthKey();
+        mTimeLine.grabDefaultKey(TimeKeyType_Depth, key);
+    }
+    key->setDepth(aValue);
 }
 
 void FolderNode::setDefaultOpacity(float aValue)
@@ -146,6 +156,17 @@ void FolderNode::renderClipper(
     }
 }
 
+float FolderNode::initialDepth() const
+{
+    auto key = (DepthKey*)mTimeLine.defaultKey(TimeKeyType_Depth);
+    return key ? key->depth() : 0.0f;
+}
+
+float FolderNode::renderDepth() const
+{
+    return mTimeLine.current().worldDepth();
+}
+
 void FolderNode::setClipped(bool aIsClipped)
 {
     mIsClipped = aIsClipped;
@@ -161,8 +182,6 @@ bool FolderNode::serialize(Serializer& aOut) const
 
     // name
     aOut.write(mName);
-    // depth
-    aOut.write(mDepth);
     // visibility
     aOut.write(mIsVisible);
     // initial rect
@@ -190,8 +209,6 @@ bool FolderNode::deserialize(Deserializer& aIn)
 
     // name
     aIn.read(mName);
-    // depth
-    aIn.read(mDepth);
     // visibility
     aIn.read(mIsVisible);
     // initial rect

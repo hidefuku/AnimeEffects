@@ -24,17 +24,13 @@ class SortAndRenderCall
         return a->renderDepth() < b->renderDepth();
     }
 
-    void pushNodeRecursive(ObjectNode* aNode, float aParentDepth, bool aPush)
+    void pushNodeRecursive(ObjectNode* aNode, bool aPush)
     {
         if (!aNode || !aNode->isVisible()) return;
 
-        const float depth = aParentDepth + aNode->depth();
         auto renderer = aNode->renderer();
-
         if (renderer)
         {
-            renderer->setRenderDepth(depth);
-
             if (aPush)
             {
                 if (!renderer->isClipped())
@@ -45,14 +41,13 @@ class SortAndRenderCall
                 {
                     aPush = false;
                 }
-
             }
         }
 
         auto& children = aNode->children();
         for (auto itr = children.rbegin(); itr != children.rend(); ++itr)
         {
-            pushNodeRecursive(*itr, depth, aPush);
+            pushNodeRecursive(*itr, aPush);
         }
     }
 
@@ -84,7 +79,7 @@ public:
 
         // sort
         mArray.clear();
-        pushNodeRecursive(aTopNode, 0.0f, true);
+        pushNodeRecursive(aTopNode, true);
         std::stable_sort(mArray.begin(), mArray.end(), compareDepth);
 
         // render

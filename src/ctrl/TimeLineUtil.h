@@ -11,6 +11,7 @@
 #include "core/MoveKey.h"
 #include "core/RotateKey.h"
 #include "core/ScaleKey.h"
+#include "core/DepthKey.h"
 #include "core/OpaKey.h"
 #include "core/BoneKey.h"
 #include "core/PoseKey.h"
@@ -107,6 +108,15 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
+void assignDefaultDepthKeyData(
+        core::Project& aProject, core::ObjectNode& aTarget,
+        const core::DepthKey::Data& aNewData);
+
+void assignDefaultOpaKeyData(
+        core::Project& aProject, core::ObjectNode& aTarget,
+        const core::OpaKey::Data& aNewData);
+
+//-------------------------------------------------------------------------------------------------
 void assignMoveKeyData(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
         const core::MoveKey::Data& aNewData);
@@ -118,6 +128,10 @@ void assignRotateKeyData(
 void assignScaleKeyData(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
         const core::ScaleKey::Data& aNewData);
+
+void assignDepthKeyData(
+        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
+        const core::DepthKey::Data& aNewData);
 
 void assignOpaKeyData(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
@@ -151,6 +165,10 @@ void pushNewRotateKey(
 void pushNewScaleKey(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
         core::ScaleKey* aKey);
+
+void pushNewDepthKey(
+        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
+        core::DepthKey* aKey);
 
 void pushNewOpaKey(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,

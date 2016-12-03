@@ -26,7 +26,6 @@ public:
                                const TimeCacheAccessor&,
                                uint8 aClipperId) = 0;
 
-    virtual void setRenderDepth(float aDepth) = 0;
     virtual float renderDepth() const = 0;
 
     virtual void setClipped(bool aIsClipped) = 0;

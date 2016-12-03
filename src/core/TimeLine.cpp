@@ -3,6 +3,7 @@
 #include "cmnd/Scalable.h"
 #include "core/TimeLine.h"
 #include "core/TimeKeyExpans.h"
+#include "core/DepthKey.h"
 #include "core/Project.h"
 
 namespace
@@ -13,6 +14,7 @@ static const std::array<const char*, core::TimeKeyType_TERM> kTimeKeyNames = {
     "Move",
     "Rotate",
     "Scale",
+    "Depth",
     "Opa",
     "Bone",
     "Pose",
@@ -56,7 +58,8 @@ TimeKeyType TimeLine::getTimeKeyTypeInOrderOfOperations(int aIndex)
     case 5: return TimeKeyType_Move;
     case 6: return TimeKeyType_Rotate;
     case 7: return TimeKeyType_Scale;
-    case 8: return TimeKeyType_Opa;
+    case 8: return TimeKeyType_Depth;
+    case 9: return TimeKeyType_Opa;
     default: XC_ASSERT(0); return TimeKeyType_TERM;
     }
 }
@@ -440,6 +443,10 @@ bool TimeLine::deserializeTimeKey(Deserializer& aIn, TimeKeyType aType, int aInd
     else if (aType == TimeKeyType_Scale)
     {
         key = new ScaleKey();
+    }
+    else if (aType == TimeKeyType_Depth)
+    {
+        key = new DepthKey();
     }
     else if (aType == TimeKeyType_Opa)
     {

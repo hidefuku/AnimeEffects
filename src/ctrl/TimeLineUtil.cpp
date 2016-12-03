@@ -118,6 +118,45 @@ void MoveFrameOfKey::redo()
 
 //---------------------------------------------------------------------------------------
 template<class tKey, TimeKeyType tType>
+void assignDefaultKeyData(
+        Project& aProject, ObjectNode& aTarget,
+        const typename tKey::Data& aNewData, const QString& aText)
+{
+    XC_ASSERT(aTarget.timeLine());
+    tKey* key = (tKey*)(aTarget.timeLine()->defaultKey(tType));
+    XC_PTR_ASSERT(key);
+
+    {
+        cmnd::ScopedMacro macro(aProject.commandStack(), aText);
+
+        auto notifier = new Notifier(aProject);
+        notifier->event().setType(TimeLineEvent::Type_ChangeKeyValue);
+        notifier->event().pushDefaultTarget(aTarget, tType);
+        macro.grabListener(notifier);
+
+        auto command = new cmnd::Assign<typename tKey::Data>(&(key->data()), aNewData);
+        aProject.commandStack().push(command);
+    }
+}
+
+void assignDefaultDepthKeyData(
+        core::Project& aProject, core::ObjectNode& aTarget,
+        const core::DepthKey::Data& aNewData)
+{
+    assignDefaultKeyData<DepthKey, TimeKeyType_Depth>(
+                aProject, aTarget, aNewData, "assign default depth");
+}
+
+void assignDefaultOpaKeyData(
+        core::Project& aProject, core::ObjectNode& aTarget,
+        const core::OpaKey::Data& aNewData)
+{
+    assignDefaultKeyData<OpaKey, TimeKeyType_Opa>(
+                aProject, aTarget, aNewData, "assign default opacity");
+}
+
+//---------------------------------------------------------------------------------------
+template<class tKey, TimeKeyType tType>
 void assignKeyData(
         Project& aProject, ObjectNode& aTarget, int aFrame,
         const typename tKey::Data& aNewData, const QString& aText)
@@ -205,6 +244,14 @@ void assignScaleKeyData(
 {
     assignKeyData<ScaleKey, TimeKeyType_Scale>(
                 aProject, aTarget, aFrame, aNewData, "assign scale key");
+}
+
+void assignDepthKeyData(
+        Project& aProject, ObjectNode& aTarget, int aFrame,
+        const DepthKey::Data& aNewData)
+{
+    assignKeyData<DepthKey, TimeKeyType_Depth>(
+                aProject, aTarget, aFrame, aNewData, "assign depth key");
 }
 
 void assignOpaKeyData(
@@ -322,6 +369,13 @@ void pushNewScaleKey(
 {
     pushNewKey<ScaleKey, TimeKeyType_Scale>(
                 aProject, aTarget, aFrame, aKey, "push new scale key");
+}
+
+void pushNewDepthKey(
+        Project& aProject, ObjectNode& aTarget, int aFrame, DepthKey* aKey)
+{
+    pushNewKey<DepthKey, TimeKeyType_Depth>(
+                aProject, aTarget, aFrame, aKey, "push new depth key");
 }
 
 void pushNewOpaKey(

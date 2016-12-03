@@ -46,8 +46,7 @@ public:
     virtual void setName(const QString& aName) = 0;
     virtual const QString& name() const = 0;
 
-    virtual void setDepth(float aDepth) = 0;
-    virtual float depth() const = 0;
+    virtual float initialDepth() const = 0;
 
     virtual void setVisibility(bool aIsVisible) = 0;
     virtual bool isVisible() const = 0;

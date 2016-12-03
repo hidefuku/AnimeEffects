@@ -272,7 +272,7 @@ bool ImageFileLoader::loadPsd(
         const QString name = textFilter.get(layer.name);
         QRect rect(layer.rect.left(), layer.rect.top(),
                    layer.rect.width(), layer.rect.height());
-        const float parentDepth = core::ObjectNodeUtil::getGlobalDepth(*current);
+        const float parentDepth = ObjectNodeUtil::getInitialWorldDepth(*current);
 
         XC_REPORT() << "name =" << name << "size =" << rect.width() << "," << rect.height();
 
@@ -290,11 +290,11 @@ bool ImageFileLoader::loadPsd(
 
             // create layer node
             LayerNode* layerNode = new LayerNode(name, aProject.objectTree().shaderHolder());
-            layerNode->setDepth(globalDepth - parentDepth);
             layerNode->setVisibility(layer.isVisible());
             layerNode->setClipped(layer.clipping != 0);
             layerNode->setInitialRect(rect);
             layerNode->setDefaultImage(resNode->handle());
+            layerNode->setDefaultDepth(globalDepth - parentDepth);
             layerNode->setDefaultOpacity(layer.opacity / 255.0f);
 
             current->children().pushBack(layerNode);
@@ -320,9 +320,9 @@ bool ImageFileLoader::loadPsd(
 
             // create folder node
             FolderNode* folderNode = new FolderNode(name);
-            folderNode->setDepth(globalDepth - parentDepth);
             folderNode->setVisibility(layer.isVisible());
             folderNode->setClipped(layer.clipping != 0);
+            folderNode->setDefaultDepth(globalDepth - parentDepth);
             folderNode->setDefaultOpacity(layer.opacity / 255.0f);
 
             // push tree

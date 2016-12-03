@@ -43,14 +43,14 @@ namespace ObjectNodeUtil
 {
 
 //-------------------------------------------------------------------------------------------------
-float getGlobalDepth(ObjectNode& aNode)
+float getInitialWorldDepth(ObjectNode& aNode)
 {
     ObjectNode* node = &aNode;
     float gdepth = 0.0f;
 
     while (node)
     {
-        gdepth += node->depth();
+        gdepth += node->initialDepth();
         node = node->parent();
     }
     return gdepth;

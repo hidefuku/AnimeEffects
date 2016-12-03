@@ -26,6 +26,13 @@ const core::ScaleKey::Data& getScaleKeyData(const core::ObjectNode& aTarget, int
     return ((const core::ScaleKey*)key)->data();
 }
 
+const core::DepthKey::Data& getDepthKeyData(const core::ObjectNode& aTarget, int aFrame)
+{
+    auto key = aTarget.timeLine()->timeKey(core::TimeKeyType_Depth, aFrame);
+    XC_PTR_ASSERT(key);
+    return ((const core::DepthKey*)key)->data();
+}
+
 const core::OpaKey::Data& getOpaKeyData(const core::ObjectNode& aTarget, int aFrame)
 {
     auto key = aTarget.timeLine()->timeKey(core::TimeKeyType_Opa, aFrame);
@@ -75,6 +82,25 @@ void KeyAccessor::setTarget(core::ObjectNode* aTarget)
     XC_ASSERT(isValid());                  \
     if (!isValid()) return;                \
 
+
+//-------------------------------------------------------------------------------------------------
+void KeyAccessor::assignDefaultDepth(float aNext)
+{
+    auto key = (const core::DepthKey*)mTarget->timeLine()->defaultKey(core::TimeKeyType_Depth);
+    XC_PTR_ASSERT(key);
+    core::DepthKey::Data newData = key->data();
+    newData.setDepth(aNext);
+    ctrl::TimeLineUtil::assignDefaultDepthKeyData(*mProject, *mTarget, newData);
+}
+
+void KeyAccessor::assignDefaultOpacity(float aNext)
+{
+    auto key = (const core::OpaKey*)mTarget->timeLine()->defaultKey(core::TimeKeyType_Opa);
+    XC_PTR_ASSERT(key);
+    core::OpaKey::Data newData = key->data();
+    newData.setOpacity(aNext);
+    ctrl::TimeLineUtil::assignDefaultOpaKeyData(*mProject, *mTarget, newData);
+}
 
 //-------------------------------------------------------------------------------------------------
 void KeyAccessor::assignMoveEasing(util::Easing::Param aNext)
@@ -154,6 +180,28 @@ void KeyAccessor::assignScaleRate(const QVector2D& aNewScale)
 }
 
 //-------------------------------------------------------------------------------------------------
+void KeyAccessor::assignDepthEasing(util::Easing::Param aNext)
+{
+    ASSERT_AND_RETURN_INVALID_TARGET();
+    XC_ASSERT(aNext.isValidParam());
+    const int frame = getFrame();
+    auto newData = getDepthKeyData(*mTarget, frame);
+    newData.easing() = aNext;
+
+    ctrl::TimeLineUtil::assignDepthKeyData(*mProject, *mTarget, frame, newData);
+}
+
+void KeyAccessor::assignDepthPosition(float aNext)
+{
+    ASSERT_AND_RETURN_INVALID_TARGET();
+    const int frame = getFrame();
+    auto newData = getDepthKeyData(*mTarget, frame);
+    newData.setDepth(aNext);
+
+    ctrl::TimeLineUtil::assignDepthKeyData(*mProject, *mTarget, frame, newData);
+}
+
+//-------------------------------------------------------------------------------------------------
 void KeyAccessor::assignOpacity(float aOpacity)
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
@@ -225,6 +273,15 @@ void KeyAccessor::knockNewScale()
     newKey->setScale(mTarget->timeLine()->current().srt().scale());
 
     ctrl::TimeLineUtil::pushNewScaleKey(*mProject, *mTarget, getFrame(), newKey);
+}
+
+void KeyAccessor::knockNewDepth()
+{
+    ASSERT_AND_RETURN_INVALID_TARGET();
+    auto newKey = new core::DepthKey();
+    newKey->setDepth(mTarget->timeLine()->current().depth());
+
+    ctrl::TimeLineUtil::pushNewDepthKey(*mProject, *mTarget, getFrame(), newKey);
 }
 
 void KeyAccessor::knockNewOpacity()

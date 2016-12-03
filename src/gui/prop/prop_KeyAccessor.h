@@ -16,6 +16,10 @@ public:
     void setProject(core::Project* aProject);
     void setTarget(core::ObjectNode* aTarget);
 
+    // default values
+    void assignDefaultDepth(float);
+    void assignDefaultOpacity(float);
+
     // move
     void assignMoveEasing(util::Easing::Param);
     void assignMoveSpline(int);
@@ -28,6 +32,10 @@ public:
     // scale
     void assignScaleEasing(util::Easing::Param);
     void assignScaleRate(const QVector2D&);
+
+    // depth
+    void assignDepthEasing(util::Easing::Param);
+    void assignDepthPosition(float);
 
     // opa
     void assignOpaEasing(util::Easing::Param);
@@ -47,6 +55,7 @@ public:
     void knockNewMove();
     void knockNewRotate();
     void knockNewScale();
+    void knockNewDepth();
     void knockNewOpacity();
     void knockNewPose();
     void knockNewFFD();

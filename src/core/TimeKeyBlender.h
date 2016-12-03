@@ -61,6 +61,7 @@ private:
     static void getScaleExpans(SRTExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime);
 
     void blendSRTKeys(PositionType aPos, const TimeInfo& aTime);
+    void blendDepthKey(PositionType aPos, const TimeInfo& aTime);
     void blendOpaKey(PositionType aPos, const TimeInfo& aTime);
     void blendBoneKey(PositionType aPos, const TimeInfo& aTime);
     void blendPoseKey(PositionType aPos, const TimeInfo& aTime);

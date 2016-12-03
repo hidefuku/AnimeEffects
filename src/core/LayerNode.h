@@ -33,6 +33,8 @@ public:
     void setDefaultImage(const img::ResourceHandle& aHandle, img::BlendMode aBlendMode);
     // default posture
     void setDefaultPosture(const QVector2D& aPos);
+    // default depth
+    void setDefaultDepth(float aValue);
     // default opacity
     void setDefaultOpacity(float aValue);
 
@@ -40,8 +42,7 @@ public:
     virtual ObjectType type() const { return ObjectType_Layer; }
     virtual void setName(const QString& aName) { mName = aName; }
     virtual const QString& name() const { return mName; }
-    virtual void setDepth(float aDepth) { mDepth = aDepth; }
-    virtual float depth() const { return mDepth; }
+    virtual float initialDepth() const;
     virtual void setVisibility(bool aIsVisible) { mIsVisible = aIsVisible; }
     virtual bool isVisible() const { return mIsVisible; }
     virtual bool canHoldChild() const { return false; }
@@ -64,8 +65,7 @@ public:
     virtual void render(const RenderInfo&, const TimeCacheAccessor&);
     virtual void renderClipper(
             const RenderInfo&, const TimeCacheAccessor&, uint8 aClipperId);
-    virtual void setRenderDepth(float aDepth) { mRenderDepth = aDepth; }
-    virtual float renderDepth() const { return mRenderDepth; }
+    virtual float renderDepth() const;
     virtual void setClipped(bool aIsClipped);
     virtual bool isClipped() const { return mIsClipped; }
     virtual bool hasBlendMode() const { return true; }
@@ -79,7 +79,6 @@ private:
     bool isClipper() const;
 
     QString mName;
-    float mDepth;
     bool mIsVisible;
     QRect mInitialRect;
     TimeLine mTimeLine;
@@ -87,7 +86,6 @@ private:
     bool mIsClipped;
 
     MeshTransformer mMeshTransformer;
-    float mRenderDepth;
     LayerMesh* mCurrentMesh;
     std::vector<Renderer*> mClippees; // a cache for performance
 };

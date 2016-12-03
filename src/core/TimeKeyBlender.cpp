@@ -5,6 +5,7 @@
 #include "core/TimeKeyBlender.h"
 #include "core/LayerMesh.h"
 #include "core/ObjectNodeUtil.h"
+#include "core/DepthKey.h"
 
 namespace core
 {
@@ -231,6 +232,9 @@ void TimeKeyBlender::updateCurrents(ObjectNode* aRootNode, const TimeInfo& aTime
 
             // build move, rotate and scale
             blendSRTKeys(pos, aTime);
+
+            // build depth
+            blendDepthKey(pos, aTime);
 
             // build opa
             blendOpaKey(pos, aTime);
@@ -533,6 +537,65 @@ void TimeKeyBlender::blendSRTKeys(PositionType aPos, const TimeInfo& aTime)
 
 }
 
+void TimeKeyBlender::blendDepthKey(PositionType aPos, const TimeInfo& aTime)
+{
+    auto seekData = mSeeker->data(aPos);
+    if (!seekData.objNode || !seekData.expans) return;
+    auto& node = *seekData.objNode;
+    auto& expans = *seekData.expans;
+    if (!node.timeLine()) return;
+
+    // set cache frame
+    expans.setKeyCache(TimeKeyType_Depth, aTime.frame);
+
+    // get blend info
+    TimeKeyGatherer blend(node.timeLine()->map(TimeKeyType_Depth), aTime);
+
+    // no key is exists
+    if (blend.isEmpty())
+    {
+        auto defaultKey = (DepthKey*)node.timeLine()->defaultKey(TimeKeyType_Depth);
+        expans.setDepth(defaultKey ? defaultKey->depth() : DepthKey::Data().depth());
+    }
+    else if (blend.hasSameFrame())
+    {
+        // a key is exists
+        expans.setDepth(((const DepthKey*)blend.point(0).key)->depth());
+    }
+    else if (blend.isSingle())
+    {
+        // perfect following
+        expans.setDepth(((const DepthKey*)blend.singlePoint().key)->depth());
+    }
+    else
+    {
+        const DepthKey* k0 = (const DepthKey*)blend.point(0).key;
+        const DepthKey* k1 = (const DepthKey*)blend.point(1).key;
+        // calculate easing
+        const float time = getEasingRateFromTwoKeys<DepthKey>(blend);
+        // blend
+        expans.setDepth(k0->depth() * (1.0f - time) + k1->depth() * time);
+    }
+
+    // sum depths of parents
+    {
+        expans.setWorldDepth(expans.depth());
+        for (auto ppos = mSeeker->parent(aPos); ppos; ppos = mSeeker->parent(ppos))
+        {
+            auto pdata = mSeeker->data(ppos);
+            if (!pdata.expans) continue;
+            // check cache
+            if (!pdata.expans->hasKeyCache(TimeKeyType_Depth, aTime.frame))
+            {
+                blendDepthKey(ppos, aTime);
+            }
+            // world depth
+            expans.setWorldDepth(pdata.expans->worldDepth() + expans.depth());
+            break;
+        }
+    }
+}
+
 void TimeKeyBlender::blendOpaKey(PositionType aPos, const TimeInfo& aTime)
 {
     auto seekData = mSeeker->data(aPos);
@@ -576,24 +639,16 @@ void TimeKeyBlender::blendOpaKey(PositionType aPos, const TimeInfo& aTime)
     // multiply opacity of parents
     {
         expans.setWorldOpacity(expans.opa().opacity());
-
-        auto ppos = mSeeker->parent(aPos);
-        while (ppos)
+        for (auto ppos = mSeeker->parent(aPos); ppos; ppos = mSeeker->parent(ppos))
         {
             // find a parent
             auto pdata = mSeeker->data(ppos);
-            if (!pdata.expans)
-            {
-                ppos = mSeeker->parent(ppos);
-                continue;
-            }
-
+            if (!pdata.expans) continue;
             // check cache
             if (!pdata.expans->hasKeyCache(TimeKeyType_Opa, aTime.frame))
             {
                 blendOpaKey(ppos, aTime);
             }
-
             // world opacity
             expans.setWorldOpacity(
                         pdata.expans->worldOpacity() * expans.opa().opacity());

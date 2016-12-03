@@ -93,7 +93,8 @@ SOURCES += \
     MoveKey.cpp \
     RotateKey.cpp \
     ScaleKey.cpp \
-    SRTExpans.cpp
+    SRTExpans.cpp \
+    DepthKey.cpp
 
 HEADERS += \
     AbstractCursor.h \
@@ -156,4 +157,5 @@ HEADERS += \
     DestinationTexturizer.h \
     MoveKey.h \
     RotateKey.h \
-    ScaleKey.h
+    ScaleKey.h \
+    DepthKey.h

@@ -25,6 +25,20 @@ public:
     void updateFrame();
 
 private:
+    class DefaultPanel
+    {
+    public:
+        DefaultPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+        void setEnabled(bool);
+        void setKeyValue(const core::TimeLine& aLine);
+
+    private:
+        KeyAccessor& mAccessor;
+        KeyGroup* mGroup;
+        DecimalItem* mDepth;
+        DecimalItem* mOpacity;
+    };
+
     class MovePanel
     {
     public:
@@ -77,6 +91,24 @@ private:
         KeyGroup* mGroup;
         EasingItem* mEasing;
         Vector2DItem* mScale;
+        bool mKeyExists;
+    };
+
+    class DepthPanel
+    {
+    public:
+        DepthPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+        void setEnabled(bool);
+        void setKeyExists(bool);
+        void setKeyValue(const core::TimeKey* aKey);
+        bool keyExists() const;
+
+    private:
+        KeyAccessor& mAccessor;
+        KeyKnocker* mKnocker;
+        KeyGroup* mGroup;
+        EasingItem* mEasing;
+        DecimalItem* mDepth;
         bool mKeyExists;
     };
 
@@ -157,7 +189,6 @@ private:
     void updateKeyExists();
     void updateKeyValue();
 
-    static void assignDepth(core::Project&, core::ObjectNode*, float);
     static void assignBlendMode(core::Project&, core::ObjectNode*, img::BlendMode);
     static void assignClipped(core::Project&, core::ObjectNode*, bool);
 
@@ -168,13 +199,15 @@ private:
     int mLabelWidth;
 
     AttrGroup* mAttributes;
-    DecimalItem* mDepth;
     ComboItem* mBlendMode;
     CheckItem* mClipped;
+
+    QScopedPointer<DefaultPanel> mDefaultPanel;
 
     QScopedPointer<MovePanel> mMovePanel;
     QScopedPointer<RotatePanel> mRotatePanel;
     QScopedPointer<ScalePanel> mScalePanel;
+    QScopedPointer<DepthPanel> mDepthPanel;
     QScopedPointer<OpaPanel> mOpaPanel;
     QScopedPointer<PosePanel> mPosePanel;
     QScopedPointer<FFDPanel> mFFDPanel;

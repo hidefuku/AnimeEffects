@@ -513,7 +513,7 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
             if (index > 0)
             {
                 auto prevNode = parent->children().back();
-                depth = prevNode->depth() - 1.0f;
+                depth = prevNode->initialDepth() - 1.0f;
             }
             parentItem = mActionItem;
             itemIndex = parentItem->childCount();
@@ -521,7 +521,7 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
         else // sub node
         {
             auto prevNode = &(objItem->node());
-            depth = prevNode->depth() + 1.0f;
+            depth = prevNode->initialDepth() + 1.0f;
 
             parent = prevNode->parent();
             if (!parent) return;
@@ -555,10 +555,10 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
             core::LayerNode* ptr = new core::LayerNode(
                         resNode->data().identifier(),
                         mProject->objectTree().shaderHolder());
-            ptr->setDepth(depth);
             ptr->setVisibility(true);
             ptr->setDefaultImage(resNode->handle());
             ptr->setDefaultPosture(QVector2D());
+            ptr->setDefaultDepth(depth);
             ptr->setDefaultOpacity(1.0f); // @todo support default opacity
 
 
@@ -607,7 +607,7 @@ void ObjectTreeWidget::onFolderActionTriggered(bool)
             if (index > 0)
             {
                 auto prevNode = parent->children().back();
-                depth = prevNode->depth() - 1.0f;
+                depth = prevNode->initialDepth() - 1.0f;
             }
             parentItem = mActionItem;
             itemIndex = parentItem->childCount();
@@ -615,7 +615,7 @@ void ObjectTreeWidget::onFolderActionTriggered(bool)
         else // sub node
         {
             auto prevNode = &(objItem->node());
-            depth = prevNode->depth() + 1.0f;
+            depth = prevNode->initialDepth() + 1.0f;
 
             parent = prevNode->parent();
             if (!parent) return;
@@ -636,8 +636,8 @@ void ObjectTreeWidget::onFolderActionTriggered(bool)
 
             // create node
             core::FolderNode* ptr = new core::FolderNode("folder0");
-            ptr->setDepth(depth);
             ptr->setDefaultPosture(QVector2D());
+            ptr->setDefaultDepth(depth);
             ptr->setDefaultOpacity(1.0f); // @todo support default opacity
 
             // notifier

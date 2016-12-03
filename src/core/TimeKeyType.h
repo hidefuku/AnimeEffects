@@ -9,6 +9,7 @@ enum TimeKeyType
     TimeKeyType_Move,
     TimeKeyType_Rotate,
     TimeKeyType_Scale,
+    TimeKeyType_Depth,
     TimeKeyType_Opa,
     TimeKeyType_Bone,
     TimeKeyType_Pose,

@@ -2,6 +2,7 @@
 #include "cmnd/BasicCommands.h"
 #include "core/Constant.h"
 #include "core/TimeKeyExpans.h"
+#include "core/DepthKey.h"
 #include "ctrl/TimeLineUtil.h"
 #include "gui/ResourceDialog.h"
 #include "gui/prop/prop_ObjectPanel.h"
@@ -29,6 +30,67 @@ private:
 
 namespace gui {
 namespace prop {
+//-------------------------------------------------------------------------------------------------
+ObjectPanel::DefaultPanel::DefaultPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
+    : mAccessor(aAccessor)
+    , mGroup()
+    , mDepth()
+    , mOpacity()
+{
+    mGroup = new KeyGroup("Default", aLabelWidth);
+    {
+        aPanel.addGroup(mGroup);
+
+        // depth
+        mDepth = new DecimalItem(mGroup);
+        mDepth->setRange(core::Constant::transMin(), core::Constant::transMax());
+        mDepth->onValueUpdated = [=](double, double aNext)
+        {
+            this->mAccessor.assignDefaultDepth(aNext);
+        };
+        mGroup->addItem("depth :", mDepth);
+
+        // opacity
+        mOpacity = new DecimalItem(mGroup);
+        mOpacity->setRange(0.0f, 1.0f);
+        mOpacity->onValueUpdated = [=](double, double aNext)
+        {
+            this->mAccessor.assignDefaultOpacity(aNext);
+        };
+        mGroup->addItem("opacity :", mOpacity);
+    }
+    mGroup->setEnabled(false);
+}
+
+void ObjectPanel::DefaultPanel::setEnabled(bool aEnabled)
+{
+    mGroup->setEnabled(aEnabled);
+}
+
+void ObjectPanel::DefaultPanel::setKeyValue(const core::TimeLine& aLine)
+{
+    auto depthKey = (core::DepthKey*)aLine.defaultKey(core::TimeKeyType_Depth);
+    if (depthKey)
+    {
+        mDepth->setItemEnabled(true);
+        mDepth->setValue(depthKey->depth());
+    }
+    else
+    {
+        mDepth->setItemEnabled(false);
+    }
+
+    auto opaKey = (core::OpaKey*)aLine.defaultKey(core::TimeKeyType_Opa);
+    if (opaKey)
+    {
+        mOpacity->setItemEnabled(true);
+        mOpacity->setValue(opaKey->opacity());
+    }
+    else
+    {
+        mOpacity->setItemEnabled(false);
+    }
+}
 
 //-------------------------------------------------------------------------------------------------
 ObjectPanel::MovePanel::MovePanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
@@ -230,6 +292,70 @@ void ObjectPanel::ScalePanel::setKeyValue(const core::TimeKey* aKey)
 }
 
 bool ObjectPanel::ScalePanel::keyExists() const
+{
+    return mKeyExists;
+}
+
+//-------------------------------------------------------------------------------------------------
+ObjectPanel::DepthPanel::DepthPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
+    : mAccessor(aAccessor)
+    , mKnocker()
+    , mGroup()
+    , mEasing()
+    , mDepth()
+    , mKeyExists(false)
+{
+    mKnocker = new KeyKnocker("Depth");
+    mKnocker->set([=](){ this->mAccessor.knockNewDepth(); });
+    aPanel.addGroup(mKnocker);
+
+    mGroup = new KeyGroup("Depth", aLabelWidth);
+    {
+        aPanel.addGroup(mGroup);
+
+        // easing
+        mEasing = new EasingItem(mGroup);
+        mGroup->addItem("easing :", mEasing);
+        mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
+        {
+            this->mAccessor.assignDepthEasing(aNext);
+        };
+
+        // depth
+        mDepth = new DecimalItem(mGroup);
+        mDepth->setRange(core::Constant::transMin(), core::Constant::transMax());
+        mDepth->onValueUpdated = [=](double, double aNext)
+        {
+            this->mAccessor.assignDepthPosition(aNext);
+        };
+        mGroup->addItem("position :", mDepth);
+    }
+    setEnabled(false);
+    setKeyExists(false);
+}
+
+void ObjectPanel::DepthPanel::setEnabled(bool aEnabled)
+{
+    mKnocker->setEnabled(aEnabled);
+    mGroup->setEnabled(aEnabled);
+}
+
+void ObjectPanel::DepthPanel::setKeyExists(bool aIsExists)
+{
+    mKeyExists = aIsExists;
+    mKnocker->setVisible(!aIsExists);
+    mGroup->setVisible(aIsExists);
+}
+
+void ObjectPanel::DepthPanel::setKeyValue(const core::TimeKey* aKey)
+{
+    TIMEKEY_PTR_TYPE_ASSERT(aKey, Depth);
+    const core::DepthKey::Data& data = ((const core::DepthKey*)aKey)->data();
+    mEasing->setValue(data.easing(), false);
+    mDepth->setValue(data.depth());
+}
+
+bool ObjectPanel::DepthPanel::keyExists() const
 {
     return mKeyExists;
 }
@@ -493,12 +619,13 @@ ObjectPanel::ObjectPanel(ViaPoint& aViaPoint, core::Project& aProject, const QSt
     , mKeyAccessor()
     , mLabelWidth()
     , mAttributes()
-    , mDepth()
     , mBlendMode()
     , mClipped()
+    , mDefaultPanel()
     , mMovePanel()
     , mRotatePanel()
     , mScalePanel()
+    , mDepthPanel()
     , mOpaPanel()
     , mPosePanel()
     , mFFDPanel()
@@ -564,15 +691,6 @@ void ObjectPanel::build()
     {
         this->addGroup(mAttributes);
 
-        // depth
-        mDepth = new DecimalItem(mAttributes);
-        mDepth->setRange(Constant::transMin(), Constant::transMax());
-        mDepth->onValueUpdated = [=](double, double aNext)
-        {
-            assignDepth(this->mProject, this->mTarget, aNext);
-        };
-        mAttributes->addItem("depth :", mDepth);
-
         // blend mode
         mBlendMode = new ComboItem(mAttributes);
         for (int i = 0; i < img::BlendMode_TERM; ++i)
@@ -595,9 +713,11 @@ void ObjectPanel::build()
         mAttributes->addItem("clipped :", mClipped);
     }
 
+    mDefaultPanel.reset(new DefaultPanel(*this, mKeyAccessor, mLabelWidth));
     mMovePanel.reset(new MovePanel(*this, mKeyAccessor, mLabelWidth));
     mRotatePanel.reset(new RotatePanel(*this, mKeyAccessor, mLabelWidth));
     mScalePanel.reset(new ScalePanel(*this, mKeyAccessor, mLabelWidth));
+    mDepthPanel.reset(new DepthPanel(*this, mKeyAccessor, mLabelWidth));
     mOpaPanel.reset(new OpaPanel(*this, mKeyAccessor, mLabelWidth));
     mPosePanel.reset(new PosePanel(*this, mKeyAccessor, mLabelWidth));
     mFFDPanel.reset(new FFDPanel(*this, mKeyAccessor, mLabelWidth));
@@ -610,8 +730,6 @@ void ObjectPanel::updateAttribute()
 {
     if (mTarget)
     {
-        mDepth->setValue(mTarget->depth());
-
         if (mTarget->renderer())
         {
             auto& renderer = *(mTarget->renderer());
@@ -646,12 +764,15 @@ void ObjectPanel::updateKeyExists()
         const bool hasAnyMesh = mTarget->hasAnyMesh();
         const bool hasAnyImage = mTarget->hasAnyImage();
 
+        mDefaultPanel->setEnabled(true);
         mMovePanel->setEnabled(true);
         mMovePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Move, frame));
         mRotatePanel->setEnabled(true);
         mRotatePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Rotate, frame));
         mScalePanel->setEnabled(true);
         mScalePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Scale, frame));
+        mDepthPanel->setEnabled(true);
+        mDepthPanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Depth, frame));
         mOpaPanel->setEnabled(true);
         mOpaPanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Opa, frame));
         mPosePanel->setEnabled(true);
@@ -663,9 +784,11 @@ void ObjectPanel::updateKeyExists()
     }
     else
     {
+        mDefaultPanel->setEnabled(false);
         mMovePanel->setEnabled(false);
         mRotatePanel->setEnabled(false);
         mScalePanel->setEnabled(false);
+        mDepthPanel->setEnabled(false);
         mOpaPanel->setEnabled(false);
         mPosePanel->setEnabled(false);
         mFFDPanel->setEnabled(false);
@@ -677,51 +800,44 @@ void ObjectPanel::updateKeyValue()
 {
     if (mTarget && mTarget->timeLine())
     {
+        auto& timeLine = *mTarget->timeLine();
         const int frame = mProject.animator().currentFrame().get();
+
+        mDefaultPanel->setKeyValue(timeLine);
 
         if (mMovePanel->keyExists())
         {
-            mMovePanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_Move, frame));
+            mMovePanel->setKeyValue(timeLine.timeKey(core::TimeKeyType_Move, frame));
         }
         if (mRotatePanel->keyExists())
         {
-            mRotatePanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_Rotate, frame));
+            mRotatePanel->setKeyValue(timeLine.timeKey(core::TimeKeyType_Rotate, frame));
         }
         if (mScalePanel->keyExists())
         {
-            mScalePanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_Scale, frame));
+            mScalePanel->setKeyValue(timeLine.timeKey(core::TimeKeyType_Scale, frame));
+        }
+        if (mDepthPanel->keyExists())
+        {
+            mDepthPanel->setKeyValue(timeLine.timeKey(core::TimeKeyType_Depth, frame));
         }
         if (mOpaPanel->keyExists())
         {
-            mOpaPanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_Opa, frame));
+            mOpaPanel->setKeyValue(timeLine.timeKey(core::TimeKeyType_Opa, frame));
         }
         if (mPosePanel->keyExists())
         {
-            mPosePanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_Pose, frame));
+            mPosePanel->setKeyValue(timeLine.timeKey(core::TimeKeyType_Pose, frame));
         }
         if (mFFDPanel->keyExists())
         {
-            mFFDPanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_FFD, frame));
+            mFFDPanel->setKeyValue(timeLine.timeKey(core::TimeKeyType_FFD, frame));
         }
         if (mImagePanel->keyExists())
         {
-            mImagePanel->setKeyValue(mTarget->timeLine()->timeKey(core::TimeKeyType_Image, frame));
+            mImagePanel->setKeyValue(timeLine.timeKey(core::TimeKeyType_Image, frame));
         }
     }
-}
-
-void ObjectPanel::assignDepth(core::Project& aProject, core::ObjectNode* aTarget, float aValue)
-{
-    XC_ASSERT(aTarget);
-    if (!aTarget) return; // fail safe code
-
-    const float prev = aTarget->depth();
-    cmnd::ScopedMacro macro(aProject.commandStack(), "assign node depth");
-    macro.grabListener(new ObjectNodeAttrNotifier(aProject, *aTarget));
-
-    auto exec = [=](){ aTarget->setDepth(aValue); };
-    auto undo = [=](){ aTarget->setDepth(prev); };
-    aProject.commandStack().push(new cmnd::Delegatable(exec, undo));
 }
 
 void ObjectPanel::assignBlendMode(core::Project& aProject, core::ObjectNode* aTarget, img::BlendMode aValue)

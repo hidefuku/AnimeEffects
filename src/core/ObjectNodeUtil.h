@@ -14,7 +14,7 @@ namespace core
 
 namespace ObjectNodeUtil
 {
-float getGlobalDepth(ObjectNode& aNode);
+float getInitialWorldDepth(ObjectNode& aNode);
 
 bool thereAreSomeKeysExceedingFrame(const ObjectNode* aRootNode, int aMaxFrame);
 
