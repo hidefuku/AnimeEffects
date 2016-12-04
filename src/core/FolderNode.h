@@ -35,6 +35,8 @@ public:
     virtual float initialDepth() const;
     virtual void setVisibility(bool aIsVisible) { mIsVisible = aIsVisible; }
     virtual bool isVisible() const { return mIsVisible; }
+    virtual void setSlimDown(bool aIsSlimmed) { mIsSlimmedDown = aIsSlimmed; }
+    virtual bool isSlimmedDown() const { return mIsSlimmedDown; }
     virtual bool canHoldChild() const { return true; }
     virtual void setInitialRect(const QRect& aRect) { mInitialRect = aRect; }
     virtual QRect initialRect() const { return mInitialRect; }
@@ -61,6 +63,7 @@ private:
 
     QString mName;
     bool mIsVisible;
+    bool mIsSlimmedDown;
     QRect mInitialRect;
     QScopedPointer<HeightMap> mHeightMap;
     TimeLine mTimeLine;

@@ -85,6 +85,7 @@ private:
     void onItemExpanded(QTreeWidgetItem* aItem);
     void onItemSelectionChanged();
     void onContextMenuRequested(const QPoint& aPos);
+    void onSlimActionTriggered(bool aIsTriggered);
     void onNameActionTriggered(bool aIsTriggered);
     void onObjectActionTriggered(bool aIsTriggered);
     void onFolderActionTriggered(bool aIsTriggered);
@@ -103,6 +104,7 @@ private:
     QAbstractItemView::DropIndicatorPosition mDropIndicatorPos;
 
     QTreeWidgetItem* mActionItem;
+    QAction* mSlimAction;
     QAction* mNameAction;
     QAction* mObjectAction;
     QAction* mFolderAction;

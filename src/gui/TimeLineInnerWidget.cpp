@@ -189,7 +189,9 @@ void TimeLineInnerWidget::updateWheel(QWheelEvent* aEvent)
 
 void TimeLineInnerWidget::updateSize()
 {
-    QSize size = mEditor->modelSpaceSize();
+    // get inner size
+    // add enough margin to coordinate height with ObjectTreeWidget.
+    QSize size = mEditor->modelSpaceSize() + QSize(0, 128);
 
     if (mCamera)
     {

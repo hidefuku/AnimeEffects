@@ -51,6 +51,9 @@ public:
     virtual void setVisibility(bool aIsVisible) = 0;
     virtual bool isVisible() const = 0;
 
+    virtual void setSlimDown(bool aIsSlimmed) = 0;
+    virtual bool isSlimmedDown() const = 0;
+
     virtual bool canHoldChild() const = 0;
 
     virtual void setInitialRect(const QRect&) = 0;

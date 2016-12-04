@@ -23,14 +23,29 @@ TimeLineRow::TimeLineRow(
 
 float TimeLineRow::keyHeight(int aIndex, int aValidCount) const
 {
-    return aValidCount <= 1 ?
-               rect.top() + (aIndex + 1) * (0.5f * rect.height()) :
-               rect.top() + 0.5f * kIncrease + aIndex * (float)rect.height() / aValidCount;
+    if (aValidCount <= 1 || (node && node->isSlimmedDown()))
+    {
+        return rect.top() + 0.5f * rect.height();
+    }
+    else
+    {
+        return rect.top() + 0.5f * kIncrease + aIndex * (float)rect.height() / aValidCount;
+    }
 }
 
-int TimeLineRow::calculateHeight(int aValidCount)
+int TimeLineRow::calculateHeight(const core::ObjectNode& aNode)
 {
-    return aValidCount <= 1 ? kHeight : kIncrease * aValidCount;
+    if (!aNode.timeLine()) return kHeight;
+
+    auto validCount = aNode.timeLine()->validTypeCount();
+    if (validCount <= 1 || aNode.isSlimmedDown())
+    {
+        return kHeight;
+    }
+    else
+    {
+        return kIncrease * validCount;
+    }
 }
 
 } // namespace ctrl

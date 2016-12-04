@@ -39,12 +39,13 @@ void Renderer::renderLines(const QVector<TimeLineRow>& aRows, const QRect& aCame
         mPainter.setBrush(row.selecting ? kBrushBodySelect : kBrushBody);
         mPainter.drawRect(rect);
 
-        if (row.node && row.node->timeLine())
+        if (!row.node || !row.node->timeLine()) continue;
+
+        if (!row.node->isSlimmedDown())
         {
+            // draw separators
             mPainter.setPen(QPen(kBrushSepa, 1, Qt::DotLine));
-
             const int sepa = row.node->timeLine()->validTypeCount();
-
             for (int i = 1; i < sepa; ++i)
             {
                 const float h = (float)rect.height() / sepa;
@@ -55,6 +56,7 @@ void Renderer::renderLines(const QVector<TimeLineRow>& aRows, const QRect& aCame
 
             }
 
+            // draw type labels
             mPainter.setPen(QPen(kBrushText, 1));
             int i = 0;
             for (int typei = 0; typei < TimeKeyType_TERM; ++typei)
@@ -165,12 +167,15 @@ void Renderer::drawKeys(const ObjectNode* aNode, const TimeLineRow& aRow)
     const QBrush kBrushKeyBody1(QColor(145, 145, 145, 255));
     const QBrush kBrushKeyBody2(QColor(240, 240, 240, 255));
     const QBrush kBrushKeyEdge(QColor(90, 90, 100, 255));
+    QPointF holder[4] = { QPointF(0.0f, -4.2f), QPointF( 4.2f, 0.0f),
+                          QPointF(0.0f,  4.2f), QPointF(-4.2f, 0.0f) };
 
     if (aNode && aNode->timeLine())
     {
         const TimeLine& timeLine = *(aNode->timeLine());
         const int validNum = timeLine.validTypeCount();
         const int left = aRow.rect.left();
+        const bool isSlimmed = aNode->isSlimmedDown();
         int validIndex = 0;
 
         for (int i = 0; i < TimeKeyType_TERM; ++i)
@@ -192,14 +197,28 @@ void Renderer::drawKeys(const ObjectNode* aNode, const TimeLineRow& aRow)
                 auto attr = mScale->attribute(itr.key());
                 QPointF pos(left + attr.grid.x() + 0.5f, height + 0.5f);
 
-                if (itr.value()->canHoldChild())
+                if (isSlimmed)
                 {
-                    QPointF offsx(4.2f, 0.0f);
-                    QPointF offsy(0.0f, 4.2f);
-                    QPointF poly[4] = {
-                        pos - offsy, pos + offsx,
-                        pos + offsy, pos - offsx
-                    };
+                    /*
+                    const QPointF poly[3] = {
+                        pos + QPointF(0.0f, -2.5f),
+                        pos + QPointF(-3.0f, 2.5f),
+                        pos + QPointF(3.0f, 2.5f) };
+                    mPainter.drawConvexPolygon(poly, 3);
+                    */
+                    //mPainter.drawEllipse(pos, 3.0f, 1.5f);
+                    const QPointF poly[] = {
+                        pos + QPointF(-3.0f, -2.0f),
+                        pos + QPointF( 3.0f, -2.0f),
+                        pos + QPointF( 3.0f,  2.0f),
+                        pos + QPointF(-3.0f,  2.0f) };
+                    mPainter.drawConvexPolygon(poly, 4);
+                }
+                else if (itr.value()->canHoldChild())
+                {
+                    const QPointF poly[4] = {
+                        pos + holder[0], pos + holder[1],
+                        pos + holder[2], pos + holder[3] };
                     mPainter.drawConvexPolygon(poly, 4);
                 }
                 else

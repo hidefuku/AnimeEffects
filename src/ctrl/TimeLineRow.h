@@ -22,7 +22,7 @@ public:
                 bool aClosedFolder, bool aSelecting);
 
     float keyHeight(int aIndex, int aValidCount) const;
-    static int calculateHeight(int aValidCount);
+    static int calculateHeight(const core::ObjectNode& aNode);
 };
 
 } // namespace ctrl

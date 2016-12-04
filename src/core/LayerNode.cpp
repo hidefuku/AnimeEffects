@@ -25,6 +25,7 @@ namespace core
 LayerNode::LayerNode(const QString& aName, ShaderHolder& aShaderHolder)
     : mName(aName)
     , mIsVisible(true)
+    , mIsSlimmedDown()
     , mInitialRect()
     , mTimeLine()
     , mShaderHolder(aShaderHolder)
@@ -453,6 +454,8 @@ bool LayerNode::serialize(Serializer& aOut) const
     aOut.write(mName);
     // visibility
     aOut.write(mIsVisible);
+    // slim-down
+    aOut.write(mIsSlimmedDown);
     // initial rect
     aOut.write(mInitialRect);
     // clipping
@@ -479,6 +482,8 @@ bool LayerNode::deserialize(Deserializer& aIn)
     aIn.read(mName);
     // visibility
     aIn.read(mIsVisible);
+    // slim-down
+    aIn.read(mIsSlimmedDown);
     // initial rect
     aIn.read(mInitialRect);
     // clipping

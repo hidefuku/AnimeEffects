@@ -45,6 +45,7 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
     , mDragIndex()
     , mDropIndicatorPos()
     , mActionItem()
+    , mSlimAction()
     , mNameAction()
     , mObjectAction()
     , mFolderAction()
@@ -87,6 +88,9 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
     this->connect(this, &QTreeWidget::itemSelectionChanged, this, &ObjectTreeWidget::onItemSelectionChanged);
 
     {
+        mSlimAction = new QAction("slim down object", this);
+        mSlimAction->connect(mSlimAction, &QAction::triggered, this, &ObjectTreeWidget::onSlimActionTriggered);
+
         mNameAction = new QAction("change object name", this);
         mNameAction->connect(mNameAction, &QAction::triggered, this, &ObjectTreeWidget::onNameActionTriggered);
 
@@ -207,10 +211,7 @@ void ObjectTreeWidget::addItemRecursive(QTreeWidgetItem* aItem, core::ObjectNode
 
 int ObjectTreeWidget::itemHeight(const core::ObjectNode& aNode) const
 {
-    return aNode.timeLine() ?
-                ctrl::TimeLineRow::calculateHeight(
-                    aNode.timeLine()->validTypeCount()) :
-                kItemSize;
+    return ctrl::TimeLineRow::calculateHeight(aNode);
 }
 
 obj::Item* ObjectTreeWidget::createFolderItem(core::ObjectNode& aNode)
@@ -461,15 +462,23 @@ void ObjectTreeWidget::onContextMenuRequested(const QPoint& aPos)
     mActionItem = this->itemAt(aPos);
     if (mActionItem)
     {
+        obj::Item* objItem = obj::Item::cast(mActionItem);
         QMenu menu(this);
 
+        if (objItem)
+        {
+            mSlimAction->setText(
+                        objItem->node().isSlimmedDown() ?
+                            "fatten object" : "slim down object");
+            menu.addAction(mSlimAction);
+            menu.addSeparator();
+        }
         menu.addAction(mNameAction);
         menu.addSeparator();
         menu.addAction(mObjectAction);
         menu.addAction(mFolderAction);
 
         {
-            obj::Item* objItem = obj::Item::cast(mActionItem);
             if (objItem && objItem->node().parent())
             {
                 menu.addSeparator();
@@ -478,6 +487,23 @@ void ObjectTreeWidget::onContextMenuRequested(const QPoint& aPos)
         }
 
         menu.exec(this->mapToGlobal(aPos));
+    }
+}
+
+void ObjectTreeWidget::onSlimActionTriggered(bool)
+{
+    if (mActionItem)
+    {
+        obj::Item* objItem = obj::Item::cast(mActionItem);
+        if (objItem)
+        {
+            objItem->node().setSlimDown(!objItem->node().isSlimmedDown());
+
+            if (updateItemHeights(this->topLevelItem(0)))
+            {
+                notifyViewUpdated();
+            }
+        }
     }
 }
 

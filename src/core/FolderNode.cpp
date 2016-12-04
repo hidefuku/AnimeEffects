@@ -13,6 +13,7 @@ namespace core
 FolderNode::FolderNode(const QString& aName)
     : mName(aName)
     , mIsVisible(true)
+    , mIsSlimmedDown()
     , mInitialRect()
     , mHeightMap()
     , mTimeLine()
@@ -184,6 +185,8 @@ bool FolderNode::serialize(Serializer& aOut) const
     aOut.write(mName);
     // visibility
     aOut.write(mIsVisible);
+    // slim-down
+    aOut.write(mIsSlimmedDown);
     // initial rect
     aOut.write(mInitialRect);
     // clipping
@@ -211,6 +214,8 @@ bool FolderNode::deserialize(Deserializer& aIn)
     aIn.read(mName);
     // visibility
     aIn.read(mIsVisible);
+    // slim-down
+    aIn.read(mIsSlimmedDown);
     // initial rect
     aIn.read(mInitialRect);
     // clipping

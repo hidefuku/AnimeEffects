@@ -378,7 +378,7 @@ core::Frame TimeLineEditor::currentFrame() const
 
 QSize TimeLineEditor::modelSpaceSize() const
 {
-    int height = kHeaderHeight + 1 + 64; // with margin
+    int height = kHeaderHeight;
 
     if (!mRows.empty())
     {
