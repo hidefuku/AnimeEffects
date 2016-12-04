@@ -1,13 +1,13 @@
-#ifndef CTRL_TIMELINESCALE_H
-#define CTRL_TIMELINESCALE_H
+#ifndef CTRL_TIME_SCALER_H
+#define CTRL_TIME_SCALER_H
 
 #include <array>
 #include <QPoint>
 
-namespace ctrl
-{
+namespace ctrl {
+namespace time {
 
-class TimeLineScale
+class Scaler
 {
 public:
     struct Attribute
@@ -16,7 +16,7 @@ public:
         QPoint grid;
     };
 
-    TimeLineScale();
+    Scaler();
 
     void setMaxFrame(int aMaxFrame);
     void setFrameList(const std::array<int, 3>& aFrameList);
@@ -33,6 +33,7 @@ private:
     std::array<int, 3> mFrameList;
 };
 
+} // namespace time
 } // namespace ctrl
 
-#endif // CTRL_TIMELINESCALE_H
+#endif // CTRL_TIME_SCALER_H

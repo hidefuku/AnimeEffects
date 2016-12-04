@@ -1,4 +1,4 @@
-#include "ctrl/TimeLineScale.h"
+#include "ctrl/time/time_Scaler.h"
 
 namespace
 {
@@ -7,11 +7,11 @@ static const int kMinScaleRaw =  1 * kWheelValue;
 static const int kMaxScaleRaw = 15 * kWheelValue;
 }
 
-namespace ctrl
-{
+namespace ctrl {
+namespace time {
 
 //-------------------------------------------------------------------------------------------------
-TimeLineScale::TimeLineScale()
+Scaler::Scaler()
     : mMaxFrame()
     , mWheel(kWheelValue)
     , mIndex(1)
@@ -19,40 +19,40 @@ TimeLineScale::TimeLineScale()
 {
 }
 
-void TimeLineScale::setMaxFrame(int aMaxFrame)
+void Scaler::setMaxFrame(int aMaxFrame)
 {
     mMaxFrame = aMaxFrame;
 }
 
-void TimeLineScale::setFrameList(const std::array<int, 3>& aFrameList)
+void Scaler::setFrameList(const std::array<int, 3>& aFrameList)
 {
     mFrameList = aFrameList;
 }
 
-void TimeLineScale::update(int aWheelDelta)
+void Scaler::update(int aWheelDelta)
 {
     mWheel = std::max(kMinScaleRaw, std::min(kMaxScaleRaw, mWheel - aWheelDelta));
     mIndex = mWheel / kWheelValue;
 }
 
-int TimeLineScale::pixelWidth(int aFrame) const
+int Scaler::pixelWidth(int aFrame) const
 {
     const int frame = std::max(0, std::min(mMaxFrame, aFrame));
     return (mIndex + 1) * frame;
 }
 
-int TimeLineScale::maxPixelWidth() const
+int Scaler::maxPixelWidth() const
 {
     return pixelWidth(mMaxFrame);
 }
 
-int TimeLineScale::frame(int aPixelWidth) const
+int Scaler::frame(int aPixelWidth) const
 {
     const int frame = (aPixelWidth + ((mIndex + 1) >> 1)) / (mIndex + 1);
     return std::max(0, std::min(mMaxFrame, frame));
 }
 
-TimeLineScale::Attribute TimeLineScale::attribute(int aFrame) const
+Scaler::Attribute Scaler::attribute(int aFrame) const
 {
     Attribute attr;
     attr.grid.setX((mIndex + 1) * aFrame);
@@ -80,4 +80,5 @@ TimeLineScale::Attribute TimeLineScale::attribute(int aFrame) const
     return attr;
 }
 
+} // namespace time
 } // namespace ctrl

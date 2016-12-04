@@ -1,5 +1,5 @@
-#ifndef CTRL_TIMELINEFOCUS_H
-#define CTRL_TIMELINEFOCUS_H
+#ifndef CTRL_TIME_FOCUSER_H
+#define CTRL_TIME_FOCUSER_H
 
 #include <QVector>
 #include "util/PlacePointer.h"
@@ -7,12 +7,12 @@
 #include "core/TimeKeyPos.h"
 #include "core/TimeLineEvent.h"
 #include "ctrl/TimeLineRow.h"
-#include "ctrl/TimeLineScale.h"
+#include "ctrl/time/time_Scaler.h"
 
-namespace ctrl
-{
+namespace ctrl {
+namespace time {
 
-class TimeLineFocus
+class Focuser
 {
 public:
     struct SingleFocus
@@ -23,9 +23,9 @@ public:
         core::TimeKeyPos pos;
     };
 
-    TimeLineFocus(
+    Focuser(
             const QVector<TimeLineRow>& aRows,
-            const TimeLineScale& aScale,
+            const Scaler& aScale,
             int aMargin);
 
     SingleFocus reset(const QPoint& aPoint);
@@ -43,7 +43,7 @@ private:
     QRect boundingRect() const;
 
     const QVector<TimeLineRow>& mRows;
-    const TimeLineScale& mScale;
+    const Scaler& mScale;
     util::PlacePointer<util::LifeLink> mFocusLink;
     QPoint mPoint;
     QRect mRange;
@@ -53,6 +53,7 @@ private:
     int mRadius;
 };
 
+} // namespace time
 } // namespace ctrl
 
-#endif // CTRL_TIMELINEFOCUS_H
+#endif // CTRL_TIME_FOCUSER_H

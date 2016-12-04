@@ -1,25 +1,26 @@
-#include "ctrl/TimeLineFocus.h"
+#include "ctrl/time/time_Focuser.h"
 
 using namespace core;
 
-namespace ctrl
-{
+namespace ctrl {
+namespace time {
+
 //-------------------------------------------------------------------------------------------------
-TimeLineFocus::SingleFocus::SingleFocus()
+Focuser::SingleFocus::SingleFocus()
     : node()
     , pos()
 {
 }
 
-bool TimeLineFocus::SingleFocus::isValid() const
+bool Focuser::SingleFocus::isValid() const
 {
     return node && !pos.isNull();
 }
 
 //-------------------------------------------------------------------------------------------------
-TimeLineFocus::TimeLineFocus(
+Focuser::Focuser(
         const QVector<TimeLineRow>& aRows,
-        const TimeLineScale& aScale,
+        const Scaler& aScale,
         int aMargin)
     : mRows(aRows)
     , mScale(aScale)
@@ -33,7 +34,7 @@ TimeLineFocus::TimeLineFocus(
 {
 }
 
-TimeLineFocus::SingleFocus TimeLineFocus::reset(const QPoint& aPoint)
+Focuser::SingleFocus Focuser::reset(const QPoint& aPoint)
 {
     mPoint = aPoint;
     const int beginFrame = mScale.frame((aPoint.x() - 2) - mMargin);
@@ -51,7 +52,7 @@ TimeLineFocus::SingleFocus TimeLineFocus::reset(const QPoint& aPoint)
     return single;
 }
 
-bool TimeLineFocus::update(const QPoint& aPoint)
+bool Focuser::update(const QPoint& aPoint)
 {
     const int frame0 = mScale.frame(mPoint.x() - mMargin);
     const int frame1 = mScale.frame(aPoint.x() - mMargin);
@@ -86,7 +87,7 @@ bool TimeLineFocus::update(const QPoint& aPoint)
     return foundFocus;
 }
 
-QRect TimeLineFocus::visualRect() const
+QRect Focuser::visualRect() const
 {
     QRect box = mRange;
     box.setLeft(mScale.pixelWidth(box.left()) + mMargin);
@@ -94,7 +95,7 @@ QRect TimeLineFocus::visualRect() const
     return box;
 }
 
-QRect TimeLineFocus::boundingRect() const
+QRect Focuser::boundingRect() const
 {
     QRect box = mRange;
     box.setLeft(mScale.pixelWidth(box.left()) + mMargin);
@@ -104,13 +105,13 @@ QRect TimeLineFocus::boundingRect() const
     return box;
 }
 
-void TimeLineFocus::moveBoundingRect(int aAddFrame)
+void Focuser::moveBoundingRect(int aAddFrame)
 {
     mRange.setLeft(mRange.left() + aAddFrame);
     mRange.setRight(mRange.right() + aAddFrame);
 }
 
-bool TimeLineFocus::select(TimeLineEvent& aEvent)
+bool Focuser::select(TimeLineEvent& aEvent)
 {
     const QRect box = boundingRect();
     bool found = false;
@@ -157,7 +158,7 @@ bool TimeLineFocus::select(TimeLineEvent& aEvent)
     return found;
 }
 
-TimeLineFocus::SingleFocus TimeLineFocus::updateImpl(bool aForceSingle)
+Focuser::SingleFocus Focuser::updateImpl(bool aForceSingle)
 {
     SingleFocus single;
 
@@ -214,7 +215,7 @@ TimeLineFocus::SingleFocus TimeLineFocus::updateImpl(bool aForceSingle)
     return single;
 }
 
-bool TimeLineFocus::isInRange(const QPoint& aPoint) const
+bool Focuser::isInRange(const QPoint& aPoint) const
 {
     QRect boundingBox = mRange;
     boundingBox.setLeft(mScale.pixelWidth(boundingBox.left()) + mMargin);
@@ -222,12 +223,12 @@ bool TimeLineFocus::isInRange(const QPoint& aPoint) const
     return boundingBox.contains(aPoint);
 }
 
-bool TimeLineFocus::hasRange() const
+bool Focuser::hasRange() const
 {
     return mRange.left() < mRange.right() && mRange.top() < mRange.bottom();
 }
 
-void TimeLineFocus::clear()
+void Focuser::clear()
 {
     mPoint = QPoint();
     mRange = QRect();
@@ -236,9 +237,10 @@ void TimeLineFocus::clear()
     mViewIsChanged = true;
 }
 
-bool TimeLineFocus::viewIsChanged() const
+bool Focuser::viewIsChanged() const
 {
     return mViewIsChanged;
 }
 
+} // namespace time
 } // namespace ctrl

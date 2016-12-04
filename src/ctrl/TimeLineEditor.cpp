@@ -2,7 +2,7 @@
 #include "util/TreeIterator.h"
 #include "cmnd/ScopedMacro.h"
 #include "ctrl/TimeLineEditor.h"
-#include "ctrl/TimeLineRenderer.h"
+#include "ctrl/time/time_Renderer.h"
 
 using namespace core;
 
@@ -22,47 +22,13 @@ namespace ctrl
 {
 
 //-------------------------------------------------------------------------------------------------
-TimeLineEditor::TimeCurrent::TimeCurrent()
-    : mMaxFrame(0)
-    , mFrame(0)
-    , mPos()
-{
-    mPos.setY(11);
-}
-
-void TimeLineEditor::TimeCurrent::setMaxFrame(int aMaxFrame)
-{
-    mMaxFrame = aMaxFrame;
-}
-
-void TimeLineEditor::TimeCurrent::setFrame(const TimeLineScale& aScale, core::Frame aFrame)
-{
-    mFrame = aFrame;
-    mFrame.clamp(0, mMaxFrame);
-    mPos.setX(kTimeLineMargin + aScale.pixelWidth(mFrame.get()));
-}
-
-void TimeLineEditor::TimeCurrent::setHandlePos(const TimeLineScale& aScale, const QPoint& aPos)
-{
-    mFrame.set(aScale.frame(aPos.x() - kTimeLineMargin));
-    mFrame.clamp(0, mMaxFrame);
-    mPos.setX(kTimeLineMargin + aScale.pixelWidth(mFrame.get()));
-}
-
-void TimeLineEditor::TimeCurrent::update(const TimeLineScale& aScale)
-{
-    mPos.setX(kTimeLineMargin + aScale.pixelWidth(mFrame.get()));
-}
-
-
-//-------------------------------------------------------------------------------------------------
 TimeLineEditor::TimeLineEditor()
     : mProject()
     , mRows()
     , mSelectingRow()
     , mTimeMax()
     , mState(State_Standby)
-    , mTimeCurrent()
+    , mTimeCurrent(kTimeLineMargin)
     , mTimeScale()
     , mFocus(mRows, mTimeScale, kTimeLineMargin)
     , mMoveRef()
@@ -128,8 +94,7 @@ void TimeLineEditor::pushRow(ObjectNode* aNode, util::Range aWorldTB, bool aClos
     const int left = kTimeLineMargin;
     const int right = left + mTimeScale.maxPixelWidth();
     const QRect rect(QPoint(left, aWorldTB.min()), QPoint(right, aWorldTB.max()));
-    TimeLineRow row = { aNode, rect, aClosedFolder, aNode == mSelectingRow };
-    mRows.push_back(row);
+    mRows.push_back(TimeLineRow(aNode, rect, aClosedFolder, aNode == mSelectingRow));
 }
 
 void TimeLineEditor::updateRowSelection(const core::ObjectNode* aRepresent)
@@ -281,7 +246,7 @@ TimeLineEditor::UpdateFlags TimeLineEditor::updateCursor(const AbstractCursor& a
     return flags;
 }
 
-void TimeLineEditor::beginMoveKey(const TimeLineFocus::SingleFocus& aTarget)
+void TimeLineEditor::beginMoveKey(const time::Focuser::SingleFocus& aTarget)
 {
     XC_ASSERT(aTarget.isValid());
 
@@ -441,7 +406,7 @@ void TimeLineEditor::render(QPainter& aPainter, const CameraInfo& aCamera, const
     const int bgn = mTimeScale.frame(cullRect.left() - margin - 5);
     const int end = mTimeScale.frame(cullRect.right() - margin + 5);
 
-    TimeLineRenderer renderer(aPainter, aCamera);
+    time::Renderer renderer(aPainter, aCamera);
     renderer.setMargin(margin);
     renderer.setRange(util::Range(bgn, end));
     renderer.setTimeScale(mTimeScale);

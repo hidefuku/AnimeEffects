@@ -1,5 +1,5 @@
-#ifndef CTRL_TIMELINEROW
-#define CTRL_TIMELINEROW
+#ifndef CTRL_TIMELINEROW_H
+#define CTRL_TIMELINEROW_H
 
 #include <QRect>
 #include "core/ObjectNode.h"
@@ -7,8 +7,9 @@
 namespace ctrl
 {
 
-struct TimeLineRow
+class TimeLineRow
 {
+public:
     enum { kHeight = 22, kIncrease = 18 };
 
     core::ObjectNode* node;
@@ -16,21 +17,14 @@ struct TimeLineRow
     bool closedFolder;
     bool selecting;
 
-    float keyHeight(int aIndex, int aValidCount) const
-    {
-        if (aValidCount <= 1)
-            return rect.top() + (aIndex + 1) * (0.5f * rect.height());
-        else
-            return rect.top() + 0.5f * kIncrease + aIndex * (float)rect.height() / aValidCount;
-    }
+    TimeLineRow();
+    TimeLineRow(core::ObjectNode* aNode, const QRect& aRect,
+                bool aClosedFolder, bool aSelecting);
 
-    static int calculateHeight(int aValidCount)
-    {
-        return aValidCount <= 1 ? kHeight : kIncrease * aValidCount;
-    }
+    float keyHeight(int aIndex, int aValidCount) const;
+    static int calculateHeight(int aValidCount);
 };
 
 } // namespace ctrl
 
-#endif // CTRL_TIMELINEROW
-
+#endif // CTRL_TIMELINEROW_H

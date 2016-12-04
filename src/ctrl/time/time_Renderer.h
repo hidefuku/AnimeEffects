@@ -1,5 +1,5 @@
-#ifndef CTRL_TIMELINERENDERER_H
-#define CTRL_TIMELINERENDERER_H
+#ifndef CTRL_TIME_RENDERER_H
+#define CTRL_TIME_RENDERER_H
 
 #include <QVector>
 #include <QPainter>
@@ -7,19 +7,19 @@
 #include "core/CameraInfo.h"
 #include "core/ObjectNode.h"
 #include "ctrl/TimeLineRow.h"
-#include "ctrl/TimeLineScale.h"
+#include "ctrl/time/time_Scaler.h"
 
-namespace ctrl
-{
+namespace ctrl {
+namespace time {
 
-class TimeLineRenderer
+class Renderer
 {
 public:
-    TimeLineRenderer(QPainter& aPainter, const core::CameraInfo& aCamera);
+    Renderer(QPainter& aPainter, const core::CameraInfo& aCamera);
 
     void setMargin(int aMargin) { mMargin = aMargin; }
     void setRange(const util::Range& aRange) { mRange = aRange; }
-    void setTimeScale(const TimeLineScale& aScale) { mScale = &aScale; }
+    void setTimeScale(const Scaler& aScale) { mScale = &aScale; }
 
     void renderLines(const QVector<TimeLineRow>& aRows, const QRect& aCameraRect, const QRect& aCullRect);
     void renderHeader(int aHeight, int aFps);
@@ -35,9 +35,10 @@ private:
     const core::CameraInfo& mCamera;
     int mMargin;
     util::Range mRange;
-    const TimeLineScale* mScale;
+    const Scaler* mScale;
 };
 
+} // namespace time
 } // namespace ctrl
 
-#endif // CTRL_TIMELINERENDERER_H
+#endif // CTRL_TIME_RENDERER_H

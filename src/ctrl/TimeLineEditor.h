@@ -12,10 +12,11 @@
 #include "core/ObjectNode.h"
 #include "core/CameraInfo.h"
 #include "core/TimeKeyPos.h"
-#include "ctrl/TimeLineScale.h"
 #include "ctrl/TimeLineRow.h"
-#include "ctrl/TimeLineFocus.h"
 #include "ctrl/TimeLineUtil.h"
+#include "ctrl/time/time_Current.h"
+#include "ctrl/time/time_Scaler.h"
+#include "ctrl/time/time_Focuser.h"
 
 namespace ctrl
 {
@@ -45,7 +46,8 @@ public:
     void clearRows();
     void pushRow(core::ObjectNode* aNode, util::Range aWorldTB, bool aClosedFolder);
     void updateRowSelection(const core::ObjectNode* aRepresent);
-    void render(QPainter& aPainter, const core::CameraInfo& aCamera, const QRect& aCullRect);
+    void render(QPainter& aPainter, const core::CameraInfo& aCamera,
+                const QRect& aCullRect);
 
     core::Frame currentFrame() const;
     int maxFrame() const { return mTimeMax; }
@@ -55,24 +57,6 @@ public:
     void deleteCheckedKeys(core::TimeLineEvent& aEvent);
 
 private:
-
-    class TimeCurrent
-    {
-    public:
-        TimeCurrent();
-        void setMaxFrame(int aMaxFrame);
-        void setFrame(const TimeLineScale& aScale, core::Frame aFrame);
-        void setHandlePos(const TimeLineScale& aScale, const QPoint& aPos);
-        void update(const TimeLineScale& aScale);
-        core::Frame frame() const { return mFrame; }
-        const QPoint& handlePos() const { return mPos; }
-        int handleRange() const { return 5; }
-    private:
-        int mMaxFrame;
-        core::Frame mFrame;
-        QPoint mPos;
-    };
-
     enum State
     {
         State_Standby,
@@ -84,7 +68,7 @@ private:
 
     void setMaxFrame(int aValue);
     void clearState();
-    void beginMoveKey(const TimeLineFocus::SingleFocus& aTarget);
+    void beginMoveKey(const time::Focuser::SingleFocus& aTarget);
     bool beginMoveKeys(const QPoint& aWorldPos);
     bool modifyMoveKeys(const QPoint& aWorldPos);
 
@@ -93,9 +77,9 @@ private:
     const core::ObjectNode* mSelectingRow;
     int mTimeMax;
     State mState;
-    TimeCurrent mTimeCurrent;
-    TimeLineScale mTimeScale;
-    TimeLineFocus mFocus;
+    time::Current mTimeCurrent;
+    time::Scaler mTimeScale;
+    time::Focuser mFocus;
 
     TimeLineUtil::MoveFrameOfKey* mMoveRef;
     int mMoveFrame;

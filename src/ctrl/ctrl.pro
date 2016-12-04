@@ -57,9 +57,6 @@ SOURCES += \
     ProjectLoader.cpp \
     ProjectSaver.cpp \
     System.cpp \
-    TimeLineScale.cpp \
-    TimeLineFocus.cpp \
-    TimeLineRenderer.cpp \
     BoneEditor.cpp \
     PoseEditor.cpp \
     bone/bone_CreateMode.cpp \
@@ -99,7 +96,12 @@ SOURCES += \
     ffd/ffd_TaskResource.cpp \
     DriverResources.cpp \
     Painter.cpp \
-    KeyBinding.cpp
+    KeyBinding.cpp \
+    time/time_Focuser.cpp \
+    time/time_Renderer.cpp \
+    time/time_Scaler.cpp \
+    TimeLineRow.cpp \
+    time/time_Current.cpp
 
 HEADERS += \
     Driver.h \
@@ -114,10 +116,7 @@ HEADERS += \
     ProjectLoader.h \
     ProjectSaver.h \
     System.h \
-    TimeLineScale.h \
     TimeLineRow.h \
-    TimeLineFocus.h \
-    TimeLineRenderer.h \
     BoneEditor.h \
     PoseEditor.h \
     bone/bone_IMode.h \
@@ -176,4 +175,8 @@ HEADERS += \
     ffd/ffd_TaskResource.h \
     DriverResources.h \
     Painter.h \
-    KeyBinding.h
+    KeyBinding.h \
+    time/time_Focuser.h \
+    time/time_Renderer.h \
+    time/time_Scaler.h \
+    time/time_Current.h

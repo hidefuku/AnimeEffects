@@ -1,11 +1,11 @@
-#include "ctrl/TimeLineRenderer.h"
+#include "ctrl/time/time_Renderer.h"
 
 using namespace core;
 
-namespace ctrl
-{
+namespace ctrl {
+namespace time {
 
-TimeLineRenderer::TimeLineRenderer(QPainter& aPainter, const core::CameraInfo& aCamera)
+Renderer::Renderer(QPainter& aPainter, const CameraInfo& aCamera)
     : mPainter(aPainter)
     , mCamera(aCamera)
     , mMargin()
@@ -14,7 +14,7 @@ TimeLineRenderer::TimeLineRenderer(QPainter& aPainter, const core::CameraInfo& a
 {
 }
 
-void TimeLineRenderer::renderLines(const QVector<TimeLineRow>& aRows, const QRect& aCameraRect, const QRect& aCullRect)
+void Renderer::renderLines(const QVector<TimeLineRow>& aRows, const QRect& aCameraRect, const QRect& aCullRect)
 {
     // draw each line
     mPainter.setRenderHint(QPainter::Antialiasing);
@@ -57,9 +57,9 @@ void TimeLineRenderer::renderLines(const QVector<TimeLineRow>& aRows, const QRec
 
             mPainter.setPen(QPen(kBrushText, 1));
             int i = 0;
-            for (int typei = 0; typei < core::TimeKeyType_TERM; ++typei)
+            for (int typei = 0; typei < TimeKeyType_TERM; ++typei)
             {
-                auto type = (core::TimeKeyType)typei;
+                auto type = (TimeKeyType)typei;
                 if (row.node->timeLine()->isEmpty(type))
                 {
                     continue;
@@ -68,7 +68,7 @@ void TimeLineRenderer::renderLines(const QVector<TimeLineRow>& aRows, const QRec
                 const float h = (float)rect.height() / sepa;
                 mPainter.drawText(
                             QRect(textLeft, rect.top() + (int)i * h, textWidth, (int)h),
-                            core::TimeLine::getTimeKeyName(type),
+                            TimeLine::getTimeKeyName(type),
                             QTextOption(Qt::AlignCenter));
                 ++i;
             }
@@ -84,7 +84,7 @@ void TimeLineRenderer::renderLines(const QVector<TimeLineRow>& aRows, const QRec
     }
 }
 
-void TimeLineRenderer::renderHeader(int aHeight, int aFps)
+void Renderer::renderHeader(int aHeight, int aFps)
 {
     const QRect cameraRect(-mCamera.leftTopPos().toPoint(), mCamera.screenSize());
 
@@ -131,7 +131,7 @@ void TimeLineRenderer::renderHeader(int aHeight, int aFps)
     }
 }
 
-void TimeLineRenderer::renderHandle(const QPoint& aPoint, int aRange)
+void Renderer::renderHandle(const QPoint& aPoint, int aRange)
 {
     const QPoint pos = aPoint + QPoint(0, -(int)mCamera.leftTopPos().y());
     const int range = aRange;
@@ -147,7 +147,7 @@ void TimeLineRenderer::renderHandle(const QPoint& aPoint, int aRange)
     mPainter.drawEllipse(pos, range, range);
 }
 
-void TimeLineRenderer::renderSelectionRange(const QRect& aRect)
+void Renderer::renderSelectionRange(const QRect& aRect)
 {
     if (aRect.width() >= 2 && aRect.height() >= 2)
     {
@@ -160,7 +160,7 @@ void TimeLineRenderer::renderSelectionRange(const QRect& aRect)
     }
 }
 
-void TimeLineRenderer::drawKeys(const ObjectNode* aNode, const TimeLineRow& aRow)
+void Renderer::drawKeys(const ObjectNode* aNode, const TimeLineRow& aRow)
 {
     const QBrush kBrushKeyBody1(QColor(145, 145, 145, 255));
     const QBrush kBrushKeyBody2(QColor(240, 240, 240, 255));
@@ -213,7 +213,7 @@ void TimeLineRenderer::drawKeys(const ObjectNode* aNode, const TimeLineRow& aRow
     }
 }
 
-void TimeLineRenderer::drawChildKeys(const ObjectNode* aNode, const QPoint& aPos)
+void Renderer::drawChildKeys(const ObjectNode* aNode, const QPoint& aPos)
 {
     const QBrush kBrushKey(QColor(170, 170, 170, 255));
 
@@ -249,4 +249,5 @@ void TimeLineRenderer::drawChildKeys(const ObjectNode* aNode, const QPoint& aPos
     }
 }
 
+} // namespace time
 } // namespace ctrl
