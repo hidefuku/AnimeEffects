@@ -25,6 +25,8 @@ bool keyAffectsToInfluenceMap(TimeKeyType aKeyType)
 
 void BoneKeyUpdater::onTimeLineModified(TimeLineEvent& aEvent)
 {
+    bool resetCacheList = false;
+
     // pass only a key which affect to influence map
     QVector<ObjectNode*> targets;
     for (auto t : aEvent.targets())
@@ -48,6 +50,7 @@ void BoneKeyUpdater::onTimeLineModified(TimeLineEvent& aEvent)
             if (t.pos.type() == TimeKeyType_Bone)
             {
                 targets.push_back(t.node);
+                resetCacheList = true;
             }
         }
     }
@@ -60,14 +63,15 @@ void BoneKeyUpdater::onTimeLineModified(TimeLineEvent& aEvent)
     {
         for (auto p = root; p; p = p->parent())
         {
-            BoneKeyUpdater::onTimeLineModified(aEvent.project(), *p, uniqueRoots);
+            BoneKeyUpdater::onTimeLineModified(aEvent.project(), *p, uniqueRoots, resetCacheList);
         }
     }
 }
 
 void BoneKeyUpdater::onTimeLineModified(
         Project& aProject, ObjectNode& aNode,
-        const QVector<ObjectNode*>& aUniqueRoots)
+        const QVector<ObjectNode*>& aUniqueRoots,
+        bool aResetCacheList)
 {
     if (!aNode.timeLine()) return;
     auto& map = aNode.timeLine()->map(TimeKeyType_Bone);
@@ -75,7 +79,14 @@ void BoneKeyUpdater::onTimeLineModified(
     {
         TimeKey* key = itr.value();
         TIMEKEY_PTR_TYPE_ASSERT(key, Bone);
-        ((BoneKey*)key)->updateCaches(aProject, aNode, aUniqueRoots);
+        if (aResetCacheList)
+        {
+            ((BoneKey*)key)->resetCaches(aProject, aNode);
+        }
+        else
+        {
+            ((BoneKey*)key)->updateCaches(aProject, aNode, aUniqueRoots);
+        }
     }
 }
 
