@@ -18,22 +18,12 @@ namespace core
 {
 
 //-------------------------------------------------------------------------------------------------
-void GridMesh::QuadConnection::clear()
-{
-    for (int i = 0; i < util::Dir4_TERM; ++i)
-    {
-        id[i] = -1;
-    }
-}
-
-//-------------------------------------------------------------------------------------------------
 GridMesh::GridMesh()
     : mSize()
     , mOriginOffset()
     , mCellNumX(0)
     , mCellNumY(0)
     , mCellPx(0)
-    , mPrimitiveType(GL_TRIANGLES)
     , mIndexCount(0)
     , mVertexCount(0)
     , mVertexRect()
@@ -42,7 +32,6 @@ GridMesh::GridMesh()
     , mOffsets()
     , mTexCoords()
     , mNormals()
-    , mQuadConnections()
     , mHexaConnections()
     , mMeshBuffer()
 {
@@ -56,7 +45,6 @@ GridMesh::GridMesh(const GridMesh& aRhs)
     , mCellNumX(aRhs.mCellNumX)
     , mCellNumY(aRhs.mCellNumY)
     , mCellPx(aRhs.mCellPx)
-    , mPrimitiveType(aRhs.mPrimitiveType)
     , mIndexCount(aRhs.mIndexCount)
     , mVertexCount(aRhs.mVertexCount)
     , mVertexRect(aRhs.mVertexRect)
@@ -65,7 +53,6 @@ GridMesh::GridMesh(const GridMesh& aRhs)
     , mOffsets(aRhs.mOffsets)
     , mTexCoords(aRhs.mTexCoords)
     , mNormals(aRhs.mNormals)
-    , mQuadConnections(aRhs.mQuadConnections)
     , mHexaConnections(aRhs.mHexaConnections)
     , mMeshBuffer()
 {
@@ -82,7 +69,6 @@ GridMesh& GridMesh::operator=(const GridMesh& aRhs)
     mCellNumX = aRhs.mCellNumX;
     mCellNumY = aRhs.mCellNumY;
     mCellPx = aRhs.mCellPx;
-    mPrimitiveType = aRhs.mPrimitiveType;
     mIndexCount = aRhs.mIndexCount;
     mVertexCount = aRhs.mVertexCount;
     mVertexRect = aRhs.mVertexRect;
@@ -91,7 +77,6 @@ GridMesh& GridMesh::operator=(const GridMesh& aRhs)
     mOffsets = aRhs.mOffsets;
     mTexCoords = aRhs.mTexCoords;
     mNormals = aRhs.mNormals;
-    mQuadConnections = aRhs.mQuadConnections;
     mHexaConnections = aRhs.mHexaConnections;
 
     // initialize mesh buffer
@@ -112,7 +97,6 @@ void GridMesh::freeBuffers()
     mTexCoords.reset();
     mNormals.reset();
     mHexaConnections.reset();
-    mQuadConnections.reset();
     mIndices.reset();
 }
 
@@ -122,15 +106,7 @@ void GridMesh::allocVertexBuffers(int aVertexCount)
     mOffsets.construct(aVertexCount);
     mTexCoords.construct(aVertexCount);
     mNormals.construct(aVertexCount);
-
-    if (mPrimitiveType == GL_TRIANGLES)
-    {
-        mHexaConnections.construct(aVertexCount);
-    }
-    else
-    {
-        mQuadConnections.construct(aVertexCount);
-    }
+    mHexaConnections.construct(aVertexCount);
 }
 
 void GridMesh::allocIndexBuffer(int aIndexCount)
@@ -151,12 +127,6 @@ void GridMesh::initializeVertexBuffers(int aVertexCount)
 
 void GridMesh::createFromImage(const void* aImagePtr, const QSize& aSize, int aCellPx)
 {
-    //createFromImageVer1(aImagePtr, aSize, aCellPx);
-    createFromImageVer2(aImagePtr, aSize, aCellPx);
-}
-
-void GridMesh::createFromImageVer2(const void* aImagePtr, const QSize& aSize, int aCellPx)
-{
     XC_PTR_ASSERT(aImagePtr);
     XC_ASSERT(aSize.width() > 0 && aSize.height() > 0);
     XC_ASSERT(aCellPx > 0);
@@ -166,7 +136,6 @@ void GridMesh::createFromImageVer2(const void* aImagePtr, const QSize& aSize, in
 
     mSize = aSize;
     mCellPx = aCellPx;
-    mPrimitiveType = GL_TRIANGLES;
 
     img::GridMeshCreator creator((const uint8*)aImagePtr, aSize, aCellPx);
 
@@ -189,412 +158,6 @@ void GridMesh::createFromImageVer2(const void* aImagePtr, const QSize& aSize, in
     // setup connections
     creator.writeConnections(mHexaConnections.data());
 }
-
-#if 1
-void GridMesh::createFromImageVer1(const void* aImagePtr, const QSize& aSize, int aCellPx)
-{
-    using img::PixelPos;
-    using img::Quad;
-
-    struct Cell
-    {
-        bool isExist;
-        bool hasXlu;
-        Quad quad;
-
-        inline void reset()
-        {
-            isExist = false;
-            hasXlu = false;
-            quad.reset();
-        }
-    };
-
-    class CellSet
-    {
-    public:
-        CellSet(int aCellNumX, int aCellNumY, int aPixel)
-            : mCells()
-            , mPixel(aPixel)
-            , mNumX(aCellNumX)
-            , mNumY(aCellNumY)
-        {
-            // allocate cells
-            mCells.reset(new Cell[mNumX * mNumY]);
-            XC_PTR_ASSERT(mCells.data());
-
-            // initialize cell exist flags
-            for (int y = 0; y < mNumY; ++y)
-            {
-                int indexY = y * mNumX;
-                for (int x = 0; x < mNumX; ++x)
-                {
-                    mCells[indexY + x].reset();
-                }
-            }
-        }
-
-        // calculate cells from a image
-        void readImage(const void* aImagePtr, int aImageWidth, int aImageHeight)
-        {
-            static const uint8 kAlphaThreshold = 3;
-            const uint8* alphaPtr = ((const uint8*)aImagePtr) + 3;
-
-            for (int pixelY = 0; pixelY < aImageHeight; ++pixelY)
-            {
-                const int cellY = std::min(pixelY / mPixel, mNumY - 1) * mNumX;
-                for (int pixelX = 0; pixelX < aImageWidth; ++pixelX)
-                {
-                    const int cellX = std::min(pixelX / mPixel, mNumX - 1);
-                    auto& cell = mCells[cellY + cellX];
-
-                    if (*alphaPtr >= kAlphaThreshold)
-                    {
-                        cell.isExist = true;
-                        cell.quad.extend(pixelX, pixelY);
-                    }
-                    else
-                    {
-                        cell.hasXlu = true;
-                    }
-                    alphaPtr += 4;
-                }
-            }
-
-            connectQuads();
-
-            makeSureConvexQuads();
-        }
-
-        int makeVertexIds()
-        {
-            int count = 0;
-            for (int y = 0; y < mNumY; ++y)
-            {
-                for (int x = 0; x < mNumX; ++x)
-                {
-                    Cell* self = existCellPtr(x, y);
-                    if (self)
-                    {
-                        Cell* lu = existCellPtr(x - 1, y - 1);
-                        Cell* up = existCellPtr(x, y - 1);
-                        Cell* ru = existCellPtr(x + 1, y - 1);
-                        Cell* ll = existCellPtr(x - 1, y);
-
-                        // left top vertex
-                        if ((!lu || !self->quad.lt().tryMergeId(lu->quad.rb())) &&
-                            (!up || !self->quad.lt().tryMergeId(up->quad.lb())) &&
-                            (!ll || !self->quad.lt().tryMergeId(ll->quad.rt())))
-                        {
-                            self->quad.lt().id = count;
-                            ++count;
-                        }
-
-                        // right top vertex
-                        if ((!up || !self->quad.rt().tryMergeId(up->quad.rb())) &&
-                            (!ru || !self->quad.rt().tryMergeId(ru->quad.lb())))
-                        {
-                            self->quad.rt().id = count;
-                            ++count;
-                        }
-
-                        // left bottom vertex
-                        if ((!ll || !self->quad.lb().tryMergeId(ll->quad.rb())))
-                        {
-                            self->quad.lb().id = count;
-                            ++count;
-                        }
-
-                        // right bottom vertex
-                        self->quad.rb().id = count;
-                        ++count;
-                    }
-                }
-            }
-            return count;
-        }
-
-        GLsizei calculateIndexCount() const
-        {
-            GLsizei count = 0;
-            for (int y = 0; y < mNumY; ++y)
-            {
-                for (int x = 0; x < mNumX; ++x)
-                {
-                    if (cell(x, y).isExist) count += 4;
-                }
-            }
-            return count;
-        }
-
-        inline bool isIn(int aX, int aY) const
-        {
-            return (0 <= aX && aX < mNumX) && (0 <= aY && aY < mNumY);
-        }
-
-        inline Cell* cellPtr(int aX, int aY)
-        {
-            if (!isIn(aX, aY)) return NULL;
-            return &(mCells[mNumX * aY + aX]);
-        }
-
-        inline Cell* existCellPtr(int aX, int aY)
-        {
-            Cell* p = cellPtr(aX, aY);
-            return (p && !p->isExist) ? NULL : p;
-        }
-
-        inline Cell& cell(int aX, int aY)
-        {
-            return mCells[mNumX * aY + aX];
-        }
-
-        inline const Cell& cell(int aX, int aY) const
-        {
-            return mCells[mNumX * aY + aX];
-        }
-
-        inline int numX() const { return mNumX; }
-
-        inline int numY() const { return mNumY; }
-
-        inline int pixel() const { return mPixel; }
-
-    private:
-        void connectQuads()
-        {
-            for (int y = 0; y < mNumY; ++y)
-            {
-                for (int x = 0; x < mNumX; ++x)
-                {
-                    Cell* self = existCellPtr(x, y);
-                    if (self)
-                    {
-                        Cell* right = existCellPtr(x + 1, y);
-                        if (right) tryConnectLeftRight(self, right);
-
-                        Cell* down = existCellPtr(x, y + 1);
-                        if (down) tryConnectUpDown(self, down);
-                    }
-                }
-            }
-        }
-
-        void tryConnectLeftRight(Cell* aLeft, Cell* aRight)
-        {
-            if (aLeft->quad.rt().x == aRight->quad.lt().x &&
-                aLeft->quad.rb().x == aRight->quad.lb().x)
-            {
-                if (aLeft->quad.rt().y > aRight->quad.lt().y)
-                {
-                    aLeft->quad.rt().y = aRight->quad.lt().y;
-                }
-                else
-                {
-                    aRight->quad.lt().y = aLeft->quad.rt().y;
-                }
-                if (aLeft->quad.rb().y < aRight->quad.lb().y)
-                {
-                    aLeft->quad.rb().y = aRight->quad.lb().y;
-                }
-                else
-                {
-                    aRight->quad.lb().y = aLeft->quad.rb().y;
-                }
-            }
-        }
-
-        void tryConnectUpDown(Cell* aUp, Cell* aDown)
-        {
-            if (aUp->quad.lb().y == aDown->quad.lt().y &&
-                aUp->quad.rb().y == aDown->quad.rt().y)
-            {
-                if (aUp->quad.lb().x > aDown->quad.lt().x)
-                {
-                    aUp->quad.lb().x = aDown->quad.lt().x;
-                }
-                else
-                {
-                    aDown->quad.lt().x = aUp->quad.lb().x;
-                }
-                if (aUp->quad.rb().x < aDown->quad.rt().x)
-                {
-                    aUp->quad.rb().x = aDown->quad.rt().x;
-                }
-                else
-                {
-                    aDown->quad.rt().x = aUp->quad.rb().x;
-                }
-            }
-        }
-
-        void makeSureConvexQuads()
-        {
-            for (int y = 0; y < mNumY; ++y)
-            {
-                for (int x = 0; x < mNumX; ++x)
-                {
-                    if (cell(x, y).isExist) cell(x, y).quad.makeSureConvex();
-                }
-            }
-        }
-
-        QScopedArrayPointer<Cell> mCells;
-        int mPixel;
-        int mNumX;
-        int mNumY;
-    };
-
-    XC_PTR_ASSERT(aImagePtr);
-    XC_ASSERT(aSize.width() > 0 && aSize.height() > 0);
-    XC_ASSERT(aCellPx > 0);
-    const int width = aSize.width();
-    const int height = aSize.height();
-
-    // free old buffers
-    freeBuffers();
-
-    mSize = aSize;
-    mPrimitiveType = GL_QUADS;
-    mVertexRect = QRect(QPoint(0, 0), aSize);
-
-    // calculate cell information
-    {
-        mCellPx = aCellPx;
-        mCellNumX = (width / mCellPx) + 1;
-        mCellNumY = (height / mCellPx) + 1;
-    }
-
-    // initialize cell set
-    CellSet cellSet(mCellNumX, mCellNumY, mCellPx);
-
-    // read a image
-    cellSet.readImage(aImagePtr, width, height);
-
-    // make the vertex structure
-    mVertexCount = cellSet.makeVertexIds();
-    mIndexCount = (int)cellSet.calculateIndexCount();
-
-    // return if any vertices does not exist
-    if (mVertexCount <= 0 || mIndexCount <= 0) return;
-
-    // allocate attribute buffers
-    {
-        allocIndexBuffer(mIndexCount);
-        allocVertexBuffers(mVertexCount);
-        initializeVertexBuffers(mVertexCount);
-    }
-
-    // setup attributes
-    {
-        GLsizei index = 0;
-        for (int y = 0; y < cellSet.numY(); ++y)
-        {
-            for (int x = 0; x < cellSet.numX(); ++x)
-            {
-                Cell* cell = cellSet.existCellPtr(x, y);
-                if (cell)
-                {
-                    for (int i = 0; i < 4; ++i)
-                    {
-                        PixelPos pixelPos = cell->quad.pos[i];
-                        mPositions[pixelPos.id].set(pixelPos.x, pixelPos.y, 0.0f);
-                        mTexCoords[pixelPos.id].set((float)pixelPos.x, (float)pixelPos.y);
-                    }
-                    mIndices[index] = cell->quad.lt().id; ++index;
-                    mIndices[index] = cell->quad.rt().id; ++index;
-                    mIndices[index] = cell->quad.rb().id; ++index;
-                    mIndices[index] = cell->quad.lb().id; ++index;
-                }
-            }
-        }
-    }
-
-    // setup connections
-    {
-        for (int i = 0; i < mVertexCount; ++i)
-        {
-            mQuadConnections[i].clear();
-        }
-
-        for (int y = 0; y < cellSet.numY(); ++y)
-        {
-            for (int x = 0; x < cellSet.numX(); ++x)
-            {
-                Cell* cell = cellSet.existCellPtr(x, y);
-
-                if (cell)
-                {
-                    auto lt = cell->quad.lt();
-                    auto rt = cell->quad.rt();
-                    auto rb = cell->quad.rb();
-                    auto lb = cell->quad.lb();
-                    Cell* u = cellSet.existCellPtr(x, y - 1);
-                    Cell* l = cellSet.existCellPtr(x - 1, y);
-                    Cell* d = cellSet.existCellPtr(x, y + 1);
-                    Cell* r = cellSet.existCellPtr(x + 1, y);
-
-                    // lt
-                    {
-                        auto id = lt.id;
-                        auto& connect = mQuadConnections[id];
-                        if (id != lb.id) connect.setDown(lb.id);
-                        if (id != rt.id) connect.setRight(rt.id);
-
-                        if (u && id == u->quad.lb().id && u->quad.hasLRange())
-                            connect.setUp(u->quad.lt().id);
-
-                        if (l && id == l->quad.rt().id && l->quad.hasTRange())
-                            connect.setLeft(l->quad.lt().id);
-                    }
-                    // rt
-                    {
-                        auto id = rt.id;
-                        auto& connect = mQuadConnections[id];
-                        if (id != rb.id) connect.setDown(rb.id);
-                        if (id != lt.id) connect.setLeft(lt.id);
-
-                        if (u && id == u->quad.rb().id && u->quad.hasRRange())
-                            connect.setUp(u->quad.rt().id);
-
-                        if (r && id == r->quad.lt().id && r->quad.hasTRange())
-                            connect.setRight(r->quad.rt().id);
-                    }
-                    // lb
-                    {
-                        auto id = lb.id;
-                        auto& connect = mQuadConnections[id];
-                        if (id != lt.id) connect.setUp(lt.id);
-                        if (id != rb.id) connect.setRight(rb.id);
-
-                        if (d && id == d->quad.lt().id && d->quad.hasLRange())
-                            connect.setDown(d->quad.lb().id);
-
-                        if (l && id == l->quad.rb().id && l->quad.hasBRange())
-                            connect.setLeft(l->quad.lb().id);
-                    }
-                    // rb
-                    {
-                        auto id = rb.id;
-                        auto& connect = mQuadConnections[id];
-                        if (id != rt.id) connect.setUp(rt.id);
-                        if (id != lb.id) connect.setLeft(lb.id);
-
-                        if (d && id == d->quad.rt().id && d->quad.hasRRange())
-                            connect.setDown(d->quad.rb().id);
-
-                        if (r && id == r->quad.lb().id && r->quad.hasBRange())
-                            connect.setRight(r->quad.rb().id);
-                    }
-                }
-            }
-        }
-
-    }
-
-    //qDebug() << "test end";
-}
-#endif
 
 void GridMesh::writeHeightMap(const HeightMap& aMap, const QVector2D& aMinPos)
 {
@@ -646,42 +209,19 @@ LayerMesh::MeshBuffer& GridMesh::getMeshBuffer()
 void GridMesh::resetArrayedConnection(
         ArrayedConnectionList& aDest, const gl::Vector3* aPositions) const
 {
-    if (mPrimitiveType == GL_TRIANGLES)
+    ArrayedConnectionWriter writer(aDest, mVertexCount);
+
+    for (int i = 0; i < mVertexCount; ++i)
     {
-        ArrayedConnectionWriter writer(aDest, mVertexCount);
+        writer.beginOneVertex(6);
 
-        for (int i = 0; i < mVertexCount; ++i)
+        for (int dir = 0; dir < 6; ++dir)
         {
-            writer.beginOneVertex(6);
-
-            for (int dir = 0; dir < 6; ++dir)
+            if (mHexaConnections[i].has(dir))
             {
-                if (mHexaConnections[i].has(dir))
-                {
-                    const int connectIndex = mHexaConnections[i].id[dir];
-                    auto offset = aPositions[connectIndex] - mPositions[connectIndex];
-                    writer.pushPosition(offset.vec2());
-                }
-            }
-        }
-    }
-    else
-    {
-        ArrayedConnectionWriter writer(aDest, mVertexCount);
-
-        for (int i = 0; i < mVertexCount; ++i)
-        {
-            writer.beginOneVertex(4);
-
-            for (int di = 0; di < util::Dir4_TERM; ++di)
-            {
-                auto dir = (util::Dir4)di;
-                if (mQuadConnections[i].has(dir))
-                {
-                    const int connectIndex = mQuadConnections[i].id[dir];
-                    auto offset = aPositions[connectIndex] - mPositions[connectIndex];
-                    writer.pushPosition(offset.vec2());
-                }
+                const int connectIndex = mHexaConnections[i].id[dir];
+                auto offset = aPositions[connectIndex] - mPositions[connectIndex];
+                writer.pushPosition(offset.vec2());
             }
         }
     }
@@ -776,25 +316,19 @@ util::ArrayBlock<gl::Vector3> GridMesh::createFFD(
 
 bool GridMesh::hasConnection(int aArrayIndex, int aIdIndex) const
 {
-    return (mPrimitiveType == GL_TRIANGLES) ?
-                mHexaConnections[aArrayIndex].has(aIdIndex) :
-                mQuadConnections[aArrayIndex].has(aIdIndex);
+    return mHexaConnections[aArrayIndex].has(aIdIndex);
 }
 
 int GridMesh::connectionId(int aArrayIndex, int aIdIndex) const
 {
-    return (mPrimitiveType == GL_TRIANGLES) ?
-                mHexaConnections[aArrayIndex].id[aIdIndex] :
-                mQuadConnections[aArrayIndex].id[aIdIndex];
+    return mHexaConnections[aArrayIndex].id[aIdIndex];
 }
 
 
 std::pair<bool, gl::Vector3> GridMesh::gatherValidPositions(
         int aIndex, const gl::Vector3* aPositions, const bool* aValidity) const
 {
-    const int connectionCount =
-            (mPrimitiveType == GL_TRIANGLES) ?
-                kHexaConnectionCount : kQuadConnectionCount;
+    const int connectionCount = kHexaConnectionCount;
 
     std::array<QVector2D, kMaxConnectionCount> result;
     int count = 0;
@@ -887,7 +421,7 @@ bool GridMesh::serialize(Serializer& aOut) const
     aOut.write(mCellNumX);
     aOut.write(mCellNumY);
     aOut.write(mCellPx);
-    aOut.write((mPrimitiveType == GL_TRIANGLES) ? 0 : 1);
+    aOut.write(0); // primitive type
 
     // indices
     aOut.write(mIndexCount);
@@ -905,16 +439,8 @@ bool GridMesh::serialize(Serializer& aOut) const
         aOut.writeGL(mTexCoords.data(), mVertexCount);
         aOut.writeGL(mNormals.data(),   mVertexCount);
 
-        if (mPrimitiveType == GL_TRIANGLES)
-        {
-            const size_t connectSize = mVertexCount * sizeof(HexaConnection);
-            aOut.write(XCMemBlock((uint8*)mHexaConnections.data(), connectSize));
-        }
-        else
-        {
-            const size_t connectSize = mVertexCount * sizeof(QuadConnection);
-            aOut.write(XCMemBlock((uint8*)mQuadConnections.data(), connectSize));
-        }
+        const size_t connectSize = mVertexCount * sizeof(HexaConnection);
+        aOut.write(XCMemBlock((uint8*)mHexaConnections.data(), connectSize));
     }
 
     aOut.endBlock(pos);
@@ -936,7 +462,7 @@ bool GridMesh::deserialize(Deserializer& aIn)
     // type
     int type = 0;
     aIn.read(type);
-    if (type != 0) return false;
+    if (type != 0) return aIn.errored("invalid type");
 
     // info
     aIn.read(mSize);
@@ -946,14 +472,14 @@ bool GridMesh::deserialize(Deserializer& aIn)
     aIn.read(mCellPx);
     // primitive
     {
-        int prim = 0;
-        aIn.read(prim);
-        mPrimitiveType = (prim == 0) ? GL_TRIANGLES : GL_QUADS;
+        int primType = 0;
+        aIn.read(primType);
+        if (primType != 0) return aIn.errored("invalid primitive type");
     }
 
     // index count
     aIn.read(mIndexCount);
-    if (mIndexCount < 0) return false;
+    if (mIndexCount < 0) return aIn.errored("invalid index count");
 
     // indices
     if (mIndexCount > 0)
@@ -964,7 +490,7 @@ bool GridMesh::deserialize(Deserializer& aIn)
 
     // vertex count
     aIn.read(mVertexCount);
-    if (mVertexCount < 0) return false;
+    if (mVertexCount < 0) return aIn.errored("invalid vertex count");
 
     // vertices
     if (mVertexCount > 0)
@@ -975,21 +501,10 @@ bool GridMesh::deserialize(Deserializer& aIn)
         aIn.readGL(mTexCoords.data(), mVertexCount);
         aIn.readGL(mNormals.data(),   mVertexCount);
 
-        if (mPrimitiveType == GL_TRIANGLES)
+        const size_t connectSize = mVertexCount * sizeof(HexaConnection);
+        if (!aIn.read(XCMemBlock((uint8*)mHexaConnections.data(), connectSize)))
         {
-            const size_t connectSize = mVertexCount * sizeof(HexaConnection);
-            if (!aIn.read(XCMemBlock((uint8*)mHexaConnections.data(), connectSize)))
-            {
-                return aIn.errored("failed to read connections");
-            }
-        }
-        else
-        {
-            const size_t connectSize = mVertexCount * sizeof(QuadConnection);
-            if (!aIn.read(XCMemBlock((uint8*)mQuadConnections.data(), connectSize)))
-            {
-                return aIn.errored("failed to read connections");
-            }
+            return aIn.errored("failed to read connections");
         }
     }
 
@@ -1010,10 +525,8 @@ GridMesh::TransitionCreater::TransitionCreater(const GridMesh& aPrev, const QPoi
     , mIndices()
     , mPositions()
     , mTopLeft(aTopLeft)
-    , mQuad(aPrev.primitiveMode() == GL_QUADS)
 {
-    XC_ASSERT(aPrev.primitiveMode() == GL_TRIANGLES ||
-              aPrev.primitiveMode() == GL_QUADS);
+    XC_ASSERT(aPrev.primitiveMode() == GL_TRIANGLES);
     const int vertexCount = aPrev.vertexCount();
     mIndices.reset(new GLuint[mIndexCount]);
     mPositions.reset(new gl::Vector3[vertexCount]);
@@ -1029,52 +542,20 @@ GridMesh::Transitions GridMesh::TransitionCreater::create(
     const QRectF space(mRect);
     util::BinarySpacePartition2D<TriId> bsp(space);
 
-    if (mQuad)
+    for (int i = 0; i < mIndexCount; i += 3)
     {
-        for (int i = 0; i < mIndexCount; i += 4)
-        {
-            TriId a = { mIndices[i], mIndices[i + 1], mIndices[i + 2] };
-            TriId b = { mIndices[i], mIndices[i + 2], mIndices[i + 3] };
-            util::Triangle2D ta(
+        TriId a = { mIndices[i], mIndices[i + 1], mIndices[i + 2] };
+        util::Triangle2D ta(
                     mPositions[a[0]].pos2D(),
-                    mPositions[a[1]].pos2D(),
-                    mPositions[a[2]].pos2D());
-            util::Triangle2D tb(
-                    mPositions[b[0]].pos2D(),
-                    mPositions[b[1]].pos2D(),
-                    mPositions[b[2]].pos2D());
+                mPositions[a[1]].pos2D(),
+                mPositions[a[2]].pos2D());
 
-            bool result = false;
+        bool result = false;
 
-            if (ta.hasFace(FLT_MIN))
-            {
-                result = bsp.push(a, ta);
-                XC_ASSERT(result);
-            }
-            if (tb.hasFace(FLT_MIN))
-            {
-                result = bsp.push(b, tb);
-                XC_ASSERT(result);
-            }
-        }
-    }
-    else
-    {
-        for (int i = 0; i < mIndexCount; i += 3)
+        if (ta.hasFace(FLT_MIN))
         {
-            TriId a = { mIndices[i], mIndices[i + 1], mIndices[i + 2] };
-            util::Triangle2D ta(
-                    mPositions[a[0]].pos2D(),
-                    mPositions[a[1]].pos2D(),
-                    mPositions[a[2]].pos2D());
-
-            bool result = false;
-
-            if (ta.hasFace(FLT_MIN))
-            {
-                result = bsp.push(a, ta);
-                XC_ASSERT(result);
-            }
+            result = bsp.push(a, ta);
+            XC_ASSERT(result);
         }
     }
 

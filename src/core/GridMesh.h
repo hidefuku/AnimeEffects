@@ -45,10 +45,11 @@ public:
         QScopedArrayPointer<GLuint> mIndices;
         QScopedArrayPointer<gl::Vector3> mPositions;
         QPoint mTopLeft;
-        bool mQuad;
 
     public:
-        TransitionCreater(const GridMesh& aPrev, const QPoint& aTopLeft);
+        TransitionCreater(
+                const GridMesh& aPrev,
+                const QPoint& aTopLeft);
         Transitions create(
                 const gl::Vector3* aNext, int aCount,
                 const QPoint& aTopLeft);
@@ -67,7 +68,7 @@ public:
             const Transitions& aTrans) const;
 
     // from LayerMesh
-    virtual GLenum primitiveMode() const { return mPrimitiveType; }
+    virtual GLenum primitiveMode() const { return GL_TRIANGLES; }
     virtual const gl::Vector3* positions() const { return mPositions.data(); }
     virtual const gl::Vector2* texCoords() const { return mTexCoords.data(); }
     virtual int vertexCount() const { return mVertexCount; }
@@ -91,22 +92,8 @@ public:
     bool deserialize(Deserializer& aIn);
 
 private:
-    struct QuadConnection
-    {
-        int id[util::Dir4_TERM];
-        bool has(int aIndex) const { return id[aIndex] != -1; }
-        void setUp(int aId) { id[util::Dir4_Up] = aId; }
-        void setDown(int aId) { id[util::Dir4_Down] = aId; }
-        void setLeft(int aId) { id[util::Dir4_Left] = aId; }
-        void setRight(int aId) { id[util::Dir4_Right] = aId; }
-        void clear();
-    };
     typedef img::GridMeshCreator::HexaConnection HexaConnection;
-
-    enum { kMaxConnectionCount = 6, kHexaConnectionCount = 6, kQuadConnectionCount = 4 };
-
-    void createFromImageVer1(const void* aImagePtr, const QSize& aSize, int aCellPx);
-    void createFromImageVer2(const void* aImagePtr, const QSize& aSize, int aCellPx);
+    enum { kMaxConnectionCount = 6, kHexaConnectionCount = 6 };
 
     void allocIndexBuffer(int aIndexCount);
     void allocVertexBuffers(int aVertexCount);
@@ -123,7 +110,6 @@ private:
     int mCellNumX;
     int mCellNumY;
     int mCellPx;
-    GLenum mPrimitiveType;
     int mIndexCount;
     int mVertexCount;
     QRect mVertexRect;
@@ -132,7 +118,6 @@ private:
     util::ArrayBuffer<gl::Vector3> mOffsets;
     util::ArrayBuffer<gl::Vector2> mTexCoords;
     util::ArrayBuffer<gl::Vector3> mNormals;
-    util::ArrayBuffer<QuadConnection> mQuadConnections;
     util::ArrayBuffer<HexaConnection> mHexaConnections;
     QScopedPointer<MeshBuffer> mMeshBuffer;
 };
