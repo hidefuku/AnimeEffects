@@ -30,10 +30,13 @@ public:
         : mObjects()
         , mCount(aRhs.mCount)
     {
-        mObjects = new tObjects[mCount];
-        for (int i = 0; i < mCount; ++i)
+        if (mCount > 0)
         {
-            mObjects[i] = aRhs.mObjects[i];
+            mObjects = new tObject[mCount];
+            for (int i = 0; i < mCount; ++i)
+            {
+                mObjects[i] = aRhs.mObjects[i];
+            }
         }
     }
 
@@ -41,11 +44,15 @@ public:
     {
         reset();
         mCount = aRhs.mCount;
-        mObjects = new tObjects[mCount];
-        for (int i = 0; i < mCount; ++i)
+        if (mCount > 0)
         {
-            mObjects[i] = aRhs.mObjects[i];
+            mObjects = new tObject[mCount];
+            for (int i = 0; i < mCount; ++i)
+            {
+                mObjects[i] = aRhs.mObjects[i];
+            }
         }
+        return *this;
     }
 
     virtual ~ArrayBuffer()
@@ -58,6 +65,8 @@ public:
         if (mObjects)
         {
             delete [] mObjects;
+            mObjects = nullptr;
+            mCount = 0;
         }
     }
 
@@ -67,6 +76,15 @@ public:
         reset();
         mObjects = aObjects;
         mCount = aCount;
+    }
+
+    void construct(int aCount)
+    {
+        reset();
+        if (aCount > 0)
+        {
+            reset(new tObject[aCount], aCount);
+        }
     }
 
     explicit operator bool() const

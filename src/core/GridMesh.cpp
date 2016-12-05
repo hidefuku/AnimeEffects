@@ -60,19 +60,17 @@ GridMesh::GridMesh(const GridMesh& aRhs)
     , mIndexCount(aRhs.mIndexCount)
     , mVertexCount(aRhs.mVertexCount)
     , mVertexRect(aRhs.mVertexRect)
-    , mIndices()
-    , mPositions()
-    , mOffsets()
-    , mTexCoords()
-    , mNormals()
-    , mQuadConnections()
-    , mHexaConnections()
+    , mIndices(aRhs.mIndices)
+    , mPositions(aRhs.mPositions)
+    , mOffsets(aRhs.mOffsets)
+    , mTexCoords(aRhs.mTexCoords)
+    , mNormals(aRhs.mNormals)
+    , mQuadConnections(aRhs.mQuadConnections)
+    , mHexaConnections(aRhs.mHexaConnections)
     , mMeshBuffer()
 {
     // initialize mesh buffer
     getMeshBuffer();
-    // copy index buffer and vertex buffers
-    copyIndexAndVertexBuffers(aRhs);
 }
 
 GridMesh& GridMesh::operator=(const GridMesh& aRhs)
@@ -88,32 +86,18 @@ GridMesh& GridMesh::operator=(const GridMesh& aRhs)
     mIndexCount = aRhs.mIndexCount;
     mVertexCount = aRhs.mVertexCount;
     mVertexRect = aRhs.mVertexRect;
+    mIndices = aRhs.mIndices;
+    mPositions = aRhs.mPositions;
+    mOffsets = aRhs.mOffsets;
+    mTexCoords = aRhs.mTexCoords;
+    mNormals = aRhs.mNormals;
+    mQuadConnections = aRhs.mQuadConnections;
+    mHexaConnections = aRhs.mHexaConnections;
+
     // initialize mesh buffer
     getMeshBuffer();
-    // copy index buffer and vertex buffers
-    copyIndexAndVertexBuffers(aRhs);
 
     return *this;
-}
-
-void GridMesh::copyIndexAndVertexBuffers(const GridMesh& aRhs)
-{
-    allocIndexBuffer(mIndexCount);
-    allocVertexBuffers(mVertexCount);
-    memcpy(mIndices.data(), aRhs.mIndices.data(), sizeof(GLuint) * mIndexCount);
-    memcpy(mPositions.data(), aRhs.mPositions.data(), sizeof(gl::Vector3) * mVertexCount);
-    memcpy(mOffsets.data(), aRhs.mOffsets.data(), sizeof(gl::Vector3) * mVertexCount);
-    memcpy(mTexCoords.data(), aRhs.mTexCoords.data(), sizeof(gl::Vector2) * mVertexCount);
-    memcpy(mNormals.data(), aRhs.mNormals.data(), sizeof(gl::Vector3) * mVertexCount);
-
-    if (mPrimitiveType == GL_TRIANGLES)
-    {
-        memcpy(mHexaConnections.data(), aRhs.mHexaConnections.data(), sizeof(HexaConnection) * mVertexCount);
-    }
-    else
-    {
-        memcpy(mQuadConnections.data(), aRhs.mQuadConnections.data(), sizeof(QuadConnection) * mVertexCount);
-    }
 }
 
 GridMesh::~GridMesh()
@@ -134,25 +118,24 @@ void GridMesh::freeBuffers()
 
 void GridMesh::allocVertexBuffers(int aVertexCount)
 {
-    mPositions.reset(new gl::Vector3[aVertexCount]);
-    mOffsets.reset(new gl::Vector3[aVertexCount]);
-    mTexCoords.reset(new gl::Vector2[aVertexCount]);
-    mNormals.reset(new gl::Vector3[aVertexCount]);
+    mPositions.construct(aVertexCount);
+    mOffsets.construct(aVertexCount);
+    mTexCoords.construct(aVertexCount);
+    mNormals.construct(aVertexCount);
 
     if (mPrimitiveType == GL_TRIANGLES)
     {
-        mHexaConnections.reset(new HexaConnection[aVertexCount]);
+        mHexaConnections.construct(aVertexCount);
     }
     else
     {
-        mQuadConnections.reset(new QuadConnection[aVertexCount]);
+        mQuadConnections.construct(aVertexCount);
     }
 }
 
 void GridMesh::allocIndexBuffer(int aIndexCount)
 {
-    mIndices.reset();
-    mIndices.reset(new GLuint[aIndexCount]);
+    mIndices.construct(aIndexCount);
 }
 
 void GridMesh::initializeVertexBuffers(int aVertexCount)

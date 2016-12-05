@@ -8,6 +8,7 @@
 #include "util/Dir4.h"
 #include "util/Triangle2DPos.h"
 #include "util/ArrayBlock.h"
+#include "util/ArrayBuffer.h"
 #include "gl/Vector2.h"
 #include "gl/Vector3.h"
 #include "img/GridMeshCreator.h"
@@ -110,7 +111,6 @@ private:
     void allocIndexBuffer(int aIndexCount);
     void allocVertexBuffers(int aVertexCount);
     void initializeVertexBuffers(int aVertexCount);
-    void copyIndexAndVertexBuffers(const GridMesh& aRhs);
     void freeBuffers();
     std::pair<bool, gl::Vector3> gatherValidPositions(
             int aIndex, const gl::Vector3* aPositions,
@@ -127,13 +127,13 @@ private:
     int mIndexCount;
     int mVertexCount;
     QRect mVertexRect;
-    QScopedArrayPointer<GLuint> mIndices;
-    QScopedArrayPointer<gl::Vector3> mPositions;
-    QScopedArrayPointer<gl::Vector3> mOffsets;
-    QScopedArrayPointer<gl::Vector2> mTexCoords;
-    QScopedArrayPointer<gl::Vector3> mNormals;
-    QScopedArrayPointer<QuadConnection> mQuadConnections;
-    QScopedArrayPointer<HexaConnection> mHexaConnections;
+    util::ArrayBuffer<GLuint> mIndices;
+    util::ArrayBuffer<gl::Vector3> mPositions;
+    util::ArrayBuffer<gl::Vector3> mOffsets;
+    util::ArrayBuffer<gl::Vector2> mTexCoords;
+    util::ArrayBuffer<gl::Vector3> mNormals;
+    util::ArrayBuffer<QuadConnection> mQuadConnections;
+    util::ArrayBuffer<HexaConnection> mHexaConnections;
     QScopedPointer<MeshBuffer> mMeshBuffer;
 };
 
