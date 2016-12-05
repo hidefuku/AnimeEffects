@@ -36,6 +36,7 @@ public:
     const float& opacity() const { return mData.opacity(); }
 
     virtual TimeKeyType type() const { return TimeKeyType_Opa; }
+    virtual TimeKey* createClone();
     virtual bool serialize(Serializer& aOut) const;
     virtual bool deserialize(Deserializer& aIn);
 

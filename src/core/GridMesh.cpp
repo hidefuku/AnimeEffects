@@ -50,6 +50,72 @@ GridMesh::GridMesh()
     getMeshBuffer();
 }
 
+GridMesh::GridMesh(const GridMesh& aRhs)
+    : mSize(aRhs.mSize)
+    , mOriginOffset(aRhs.mOriginOffset)
+    , mCellNumX(aRhs.mCellNumX)
+    , mCellNumY(aRhs.mCellNumY)
+    , mCellPx(aRhs.mCellPx)
+    , mPrimitiveType(aRhs.mPrimitiveType)
+    , mIndexCount(aRhs.mIndexCount)
+    , mVertexCount(aRhs.mVertexCount)
+    , mVertexRect(aRhs.mVertexRect)
+    , mIndices()
+    , mPositions()
+    , mOffsets()
+    , mTexCoords()
+    , mNormals()
+    , mQuadConnections()
+    , mHexaConnections()
+    , mMeshBuffer()
+{
+    // initialize mesh buffer
+    getMeshBuffer();
+    // copy index buffer and vertex buffers
+    copyIndexAndVertexBuffers(aRhs);
+}
+
+GridMesh& GridMesh::operator=(const GridMesh& aRhs)
+{
+    freeBuffers();
+
+    mSize = aRhs.mSize;
+    mOriginOffset = aRhs.mOriginOffset;
+    mCellNumX = aRhs.mCellNumX;
+    mCellNumY = aRhs.mCellNumY;
+    mCellPx = aRhs.mCellPx;
+    mPrimitiveType = aRhs.mPrimitiveType;
+    mIndexCount = aRhs.mIndexCount;
+    mVertexCount = aRhs.mVertexCount;
+    mVertexRect = aRhs.mVertexRect;
+    // initialize mesh buffer
+    getMeshBuffer();
+    // copy index buffer and vertex buffers
+    copyIndexAndVertexBuffers(aRhs);
+
+    return *this;
+}
+
+void GridMesh::copyIndexAndVertexBuffers(const GridMesh& aRhs)
+{
+    allocIndexBuffer(mIndexCount);
+    allocVertexBuffers(mVertexCount);
+    memcpy(mIndices.data(), aRhs.mIndices.data(), sizeof(GLuint) * mIndexCount);
+    memcpy(mPositions.data(), aRhs.mPositions.data(), sizeof(gl::Vector3) * mVertexCount);
+    memcpy(mOffsets.data(), aRhs.mOffsets.data(), sizeof(gl::Vector3) * mVertexCount);
+    memcpy(mTexCoords.data(), aRhs.mTexCoords.data(), sizeof(gl::Vector2) * mVertexCount);
+    memcpy(mNormals.data(), aRhs.mNormals.data(), sizeof(gl::Vector3) * mVertexCount);
+
+    if (mPrimitiveType == GL_TRIANGLES)
+    {
+        memcpy(mHexaConnections.data(), aRhs.mHexaConnections.data(), sizeof(HexaConnection) * mVertexCount);
+    }
+    else
+    {
+        memcpy(mQuadConnections.data(), aRhs.mQuadConnections.data(), sizeof(QuadConnection) * mVertexCount);
+    }
+}
+
 GridMesh::~GridMesh()
 {
     freeBuffers();

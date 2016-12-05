@@ -42,6 +42,7 @@ public:
     bool belongsToDefaultParent() const { return !parent(); }
 
     virtual TimeKeyType type() const { return TimeKeyType_FFD; }
+    virtual TimeKey* createClone();
     virtual bool serialize(Serializer& aOut) const;
     virtual bool deserialize(Deserializer& aIn);
 

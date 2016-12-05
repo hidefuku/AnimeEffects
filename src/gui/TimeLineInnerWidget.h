@@ -42,17 +42,27 @@ private:
     void updateLinesRecursive(QTreeWidgetItem* aItem);
     virtual void paintEvent(QPaintEvent* aEvent);
     void onTimeLineModified(core::TimeLineEvent& aEvent, bool aUndo);
+    void onTreeRestructured(core::ObjectTreeEvent& aEvent, bool aUndo);
+    void onProjectAttributeModified(core::ProjectEvent& aEvent, bool aUndo);
     void onContextMenuRequested(const QPoint& aPos);
+    void onCopyKeyTriggered(bool);
+    void onPasteKeyTriggered(bool);
     void onDeleteKeyTriggered(bool);
 
     util::LinkPointer<core::Project> mProject;
     util::SlotId mTimeLineSlot;
+    util::SlotId mTreeRestructSlot;
+    util::SlotId mProjectAttrSlot;
     QScopedPointer<ctrl::TimeLineEditor> mEditor;
     const core::CameraInfo* mCamera;
     TimeCursor mTimeCursor;
 
+    QAction* mCopyKey;
+    QAction* mPasteKey;
     QAction* mDeleteKey;
     core::TimeLineEvent mTargets;
+    core::TimeLineEvent mCopyTargets;
+    QPoint mPastePos;
 };
 
 } // namespace gui

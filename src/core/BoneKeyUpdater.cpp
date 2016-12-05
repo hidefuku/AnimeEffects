@@ -41,6 +41,16 @@ void BoneKeyUpdater::onTimeLineModified(TimeLineEvent& aEvent)
             targets.push_back(t.node);
         }
     }
+    if (aEvent.type() == TimeLineEvent::Type_CopyKey)
+    {
+        for (auto t : aEvent.targets())
+        {
+            if (t.pos.type() == TimeKeyType_Bone)
+            {
+                targets.push_back(t.node);
+            }
+        }
+    }
     if (targets.empty()) return;
 
     // remove redundant nodes

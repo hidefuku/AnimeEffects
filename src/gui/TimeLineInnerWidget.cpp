@@ -1,4 +1,5 @@
 #include <QMenu>
+#include <QMessageBox>
 #include "gui/TimeLineInnerWidget.h"
 #include "gui/obj/obj_Item.h"
 
@@ -45,11 +46,17 @@ TimeLineInnerWidget::TimeLineInnerWidget(QWidget* aParent)
     : QWidget(aParent)
     , mProject()
     , mTimeLineSlot()
+    , mTreeRestructSlot()
+    , mProjectAttrSlot()
     , mEditor()
     , mCamera()
     , mTimeCursor(this)
+    , mCopyKey()
+    , mPasteKey()
     , mDeleteKey()
     , mTargets()
+    , mCopyTargets()
+    , mPastePos()
 {
     mTimeCursor.show();
 
@@ -62,6 +69,12 @@ TimeLineInnerWidget::TimeLineInnerWidget(QWidget* aParent)
                 this, &TimeLineInnerWidget::onContextMenuRequested);
 
     {
+        mCopyKey = new QAction("copy key", this);
+        mCopyKey->connect(mCopyKey, &QAction::triggered, this, &TimeLineInnerWidget::onCopyKeyTriggered);
+
+        mPasteKey = new QAction("paste key", this);
+        mPasteKey->connect(mPasteKey, &QAction::triggered, this, &TimeLineInnerWidget::onPasteKeyTriggered);
+
         mDeleteKey = new QAction("delete key", this);
         mDeleteKey->connect(mDeleteKey, &QAction::triggered, this, &TimeLineInnerWidget::onDeleteKeyTriggered);
     }
@@ -72,6 +85,8 @@ void TimeLineInnerWidget::setProject(core::Project* aProject)
     if (mProject)
     {
         mProject->onTimeLineModified.disconnect(mTimeLineSlot);
+        mProject->onTreeRestructured.disconnect(mTreeRestructSlot);
+        mProject->onProjectAttributeModified.disconnect(mProjectAttrSlot);
     }
 
     if (aProject)
@@ -79,6 +94,12 @@ void TimeLineInnerWidget::setProject(core::Project* aProject)
         mProject = aProject->pointee();
         mTimeLineSlot = aProject->onTimeLineModified.connect(
                     this, &TimeLineInnerWidget::onTimeLineModified);
+
+        mTreeRestructSlot = aProject->onTreeRestructured.connect(
+                    this, &TimeLineInnerWidget::onTreeRestructured);
+
+        mProjectAttrSlot = aProject->onProjectAttributeModified.connect(
+                    this, &TimeLineInnerWidget::onProjectAttributeModified);
     }
     else
     {
@@ -223,22 +244,53 @@ void TimeLineInnerWidget::paintEvent(QPaintEvent* aEvent)
 
 void TimeLineInnerWidget::onTimeLineModified(core::TimeLineEvent&, bool)
 {
+    mCopyTargets = core::TimeLineEvent();
     mEditor->updateKey();
     this->update();
 }
 
+void TimeLineInnerWidget::onTreeRestructured(core::ObjectTreeEvent&, bool)
+{
+    mCopyTargets = core::TimeLineEvent();
+}
+
+void TimeLineInnerWidget::onProjectAttributeModified(core::ProjectEvent&, bool)
+{
+    mCopyTargets = core::TimeLineEvent();
+}
+
 void TimeLineInnerWidget::onContextMenuRequested(const QPoint& aPos)
 {
-    mTargets = core::TimeLineEvent();
+    QMenu menu(this);
 
-    if (mEditor->checkDeletableKeys(mTargets, aPos))
-    {
-        QMenu menu(this);
-        menu.addAction(mDeleteKey);
-        menu.exec(this->mapToGlobal(aPos));
-        this->update();
-    }
     mTargets = core::TimeLineEvent();
+    if (mEditor->checkContactWithKeyFocus(mTargets, aPos))
+    {
+        menu.addAction(mCopyKey);
+        menu.addSeparator();
+        menu.addAction(mDeleteKey);
+    }
+    else
+    {
+        mPastePos = aPos;
+        mPasteKey->setEnabled(mCopyTargets.hasAnyTargets());
+        menu.addAction(mPasteKey);
+    }
+    menu.exec(this->mapToGlobal(aPos));
+    this->update();
+}
+
+void TimeLineInnerWidget::onCopyKeyTriggered(bool)
+{
+    mCopyTargets = mTargets;
+}
+
+void TimeLineInnerWidget::onPasteKeyTriggered(bool)
+{
+    if (!mEditor->pasteCopiedKeys(mCopyTargets, mPastePos))
+    {
+        QMessageBox::warning(nullptr, "operation error", "Failed to paste keys.");
+    }
 }
 
 void TimeLineInnerWidget::onDeleteKeyTriggered(bool)

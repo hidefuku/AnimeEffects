@@ -44,6 +44,8 @@ public:
     bool isSelected() const { return mSelect.isLinking(); }
     void setSelect(util::LifeLink& aLink) { mSelect = aLink; }
 
+    virtual TimeKey* createClone() = 0;
+
     virtual bool serialize(Serializer& aOut) const = 0;
     virtual bool deserialize(Deserializer& aIn) = 0;
 

@@ -70,6 +70,13 @@ PoseKey::PoseKey()
 {
 }
 
+TimeKey* PoseKey::createClone()
+{
+    auto newKey = new PoseKey();
+    newKey->mData = this->mData;
+    return newKey;
+}
+
 bool PoseKey::serialize(Serializer& aOut) const
 {
     // easing

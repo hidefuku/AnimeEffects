@@ -433,9 +433,79 @@ MeshKey::Data::Data()
 {
 }
 
+MeshKey::Data::Data(const Data& aRhs)
+    : mOriginOffset(aRhs.mOriginOffset)
+    , mVertices()
+    , mEdges()
+    , mFaces()
+    , mPositions(aRhs.mPositions)
+    , mTexCoords(aRhs.mTexCoords)
+    , mIndices(aRhs.mIndices)
+    , mMeshBuffer()
+    , mOwner(aRhs.mOwner)
+{
+    // copy geo
+    copyVerticesEdgesAndFaces(aRhs);
+    // initialize mesh buffer
+    getMeshBuffer();
+}
+
+MeshKey::Data& MeshKey::Data::operator=(const Data& aRhs)
+{
+    destroy();
+
+    mOriginOffset = aRhs.mOriginOffset;
+    mPositions = aRhs.mPositions;
+    mTexCoords = aRhs.mTexCoords;
+    mIndices = aRhs.mIndices;
+    mOwner = aRhs.mOwner;
+    // copy geo
+    copyVerticesEdgesAndFaces(aRhs);
+    // initialize mesh buffer
+    getMeshBuffer();
+
+    return *this;
+}
+
 MeshKey::Data::~Data()
 {
     destroy();
+}
+
+void MeshKey::Data::copyVerticesEdgesAndFaces(const Data& aRhs)
+{
+    // vertices
+    QMap<MeshVtx*, MeshVtx*> vtxMap;
+    {
+        int i = 0;
+        for (auto prevVtx : aRhs.mVertices)
+        {
+            auto nextVtx = new MeshVtx(prevVtx->vec());
+            nextVtx->setIndex(i);
+            mVertices.push_back(nextVtx);
+            vtxMap[prevVtx] = nextVtx;
+            ++i;
+        }
+    }
+    // edges
+    QMap<MeshEdge*, MeshEdge*> edgeMap;
+    for (auto prevEdge : aRhs.mEdges)
+    {
+        auto nextEdge = new MeshEdge();
+        nextEdge->rawInit(*vtxMap[prevEdge->vtx(0)], *vtxMap[prevEdge->vtx(1)]);
+        mEdges.push_back(nextEdge);
+        edgeMap[prevEdge] = nextEdge;
+    }
+    // faces
+    for (auto prevFace : aRhs.mFaces)
+    {
+        auto nextFace = new MeshFace();
+        nextFace->rawInit(
+                *edgeMap[prevFace->edge(0)],
+                *edgeMap[prevFace->edge(1)],
+                *edgeMap[prevFace->edge(2)]);
+        mFaces.push_back(nextFace);
+    }
 }
 
 void MeshKey::Data::destroy()
@@ -507,11 +577,55 @@ void MeshKey::Data::resetArrayedConnection(
     aDest.destroyUnuseBlocks();
 }
 
+void MeshKey::Data::updateGLAttribute()
+{
+    int vtxCount = mVertices.count();
+
+    // vertices
+    mPositions.resize(vtxCount);
+    mTexCoords.resize(vtxCount);
+    {
+        int i = 0;
+        for (auto vtx : mVertices)
+        {
+            XC_PTR_ASSERT(vtx);
+            auto vec = vtx->vec();
+            mPositions[i].set(vec.x(), vec.y(), 0.0f);
+            mTexCoords[i].set(vec.x(), vec.y());
+            ++i;
+        }
+    }
+
+    // indices
+    const int idxCount = mFaces.count() * 3;
+    mIndices.resize(idxCount);
+    {
+        int i = 0;
+        for (auto face : mFaces)
+        {
+            XC_PTR_ASSERT(face);
+            auto vtx = face->vertices();
+            mIndices[i    ] = vtx[0]->index();
+            mIndices[i + 1] = vtx[1]->index();
+            mIndices[i + 2] = vtx[2]->index();
+            i += 3;
+        }
+    }
+}
+
 //-------------------------------------------------------------------------------------------------
 MeshKey::MeshKey()
     : mData()
 {
     mData.mOwner = this;
+}
+
+TimeKey* MeshKey::createClone()
+{
+    auto newKey = new MeshKey();
+    newKey->mData = this->mData;
+    newKey->mData.mOwner = newKey;
+    return newKey;
 }
 
 bool MeshKey::serialize(Serializer& aOut) const
@@ -1296,38 +1410,7 @@ void MeshKey::updateVtxIndices()
 
 void MeshKey::updateGLAttribute()
 {
-    int vtxCount = mData.mVertices.count();
-
-    mData.mPositions.resize(vtxCount);
-    mData.mTexCoords.resize(vtxCount);
-
-    {
-        int i = 0;
-        for (auto vtx : mData.mVertices)
-        {
-            XC_PTR_ASSERT(vtx);
-            auto vec = vtx->vec();
-            mData.mPositions[i].set(vec.x(), vec.y(), 0.0f);
-            mData.mTexCoords[i].set(vec.x(), vec.y());
-            ++i;
-        }
-    }
-
-    const int idxCount = mData.mFaces.count() * 3;
-    mData.mIndices.resize(idxCount);
-
-    {
-        int i = 0;
-        for (auto face : mData.mFaces)
-        {
-            XC_PTR_ASSERT(face);
-            auto vtx = face->vertices();
-            mData.mIndices[i    ] = vtx[0]->index();
-            mData.mIndices[i + 1] = vtx[1]->index();
-            mData.mIndices[i + 2] = vtx[2]->index();
-            i += 3;
-        }
-    }
+    mData.updateGLAttribute();
 }
 
 } // namespace core

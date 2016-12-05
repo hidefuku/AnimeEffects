@@ -101,6 +101,13 @@ FFDKey::FFDKey()
 {
 }
 
+TimeKey* FFDKey::createClone()
+{
+    auto newKey = new FFDKey();
+    newKey->mData = this->mData;
+    return newKey;
+}
+
 bool FFDKey::serialize(Serializer& aOut) const
 {
     XC_PTR_ASSERT(mData.positions());

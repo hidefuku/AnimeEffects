@@ -22,6 +22,13 @@ ScaleKey::ScaleKey()
 {
 }
 
+TimeKey* ScaleKey::createClone()
+{
+    auto newKey = new ScaleKey();
+    newKey->mData = this->mData;
+    return newKey;
+}
+
 bool ScaleKey::serialize(Serializer& aOut) const
 {
     aOut.write(mData.easing());

@@ -23,6 +23,8 @@ public:
         GridMesh mGridMesh;
     public:
         Data();
+        Data(const Data& aRhs);
+        Data& operator=(const Data& aRhs);
         util::Easing::Param& easing() { return mEasing; }
         const util::Easing::Param& easing() const { return mEasing; }
         img::ResourceHandle& resource() { return mResHandle; }
@@ -57,6 +59,7 @@ public:
     bool hasImage() const { return mData.resource() && mData.resource()->hasImage(); }
 
     virtual TimeKeyType type() const { return TimeKeyType_Image; }
+    virtual TimeKey* createClone();
     virtual bool serialize(Serializer& aOut) const;
     virtual bool deserialize(Deserializer& aIn);
 

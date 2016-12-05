@@ -16,6 +16,26 @@ ImageKey::Data::Data()
 {
 }
 
+ImageKey::Data::Data(const Data& aRhs)
+    : mEasing(aRhs.mEasing)
+    , mResHandle(aRhs.mResHandle)
+    , mBlendMode(aRhs.mBlendMode)
+    , mImageOffset()
+{
+    setImageOffset(aRhs.mImageOffset);
+    mGridMesh = aRhs.mGridMesh;
+}
+
+ImageKey::Data& ImageKey::Data::operator=(const Data& aRhs)
+{
+    mEasing = aRhs.mEasing;
+    mResHandle = aRhs.mResHandle;
+    mBlendMode = aRhs.mBlendMode;
+    setImageOffset(aRhs.mImageOffset);
+    mGridMesh = aRhs.mGridMesh;
+    return *this;
+}
+
 void ImageKey::Data::setImageOffset(const QVector2D& aOffset)
 {
     const QVector2D offset(
@@ -38,6 +58,14 @@ ImageKey::ImageKey()
     , mSleepCount(0)
 {
     mData.resource().setOriginKeeping(true);
+}
+
+TimeKey* ImageKey::createClone()
+{
+    auto newKey = new ImageKey();
+    newKey->mData = this->mData;
+    newKey->resetTextureCache();
+    return newKey;
 }
 
 void ImageKey::setImage(const img::ResourceHandle& aResource, img::BlendMode aMode)

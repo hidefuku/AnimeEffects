@@ -20,14 +20,14 @@ SOURCES += \
     TextUtil.cpp \
     TreePos.cpp \
     PackBits.cpp \
-    Buffer.cpp \
     TreeUtil.cpp \
     Triangle2D.cpp \
     IndexTable.cpp \
     Triangle2DPos.cpp \
     Dir4.cpp \
     Easing.cpp \
-    TriangleRasterizer.cpp
+    TriangleRasterizer.cpp \
+    ByteBuffer.cpp
 
 HEADERS += \
     Signaler.h \
@@ -48,7 +48,6 @@ HEADERS += \
     FergusonCoonsSpline.h \
     SlotId.h \
     StreamReader.h \
-    Buffer.h \
     StreamWriter.h \
     PackBits.h \
     Range.h \
@@ -68,4 +67,6 @@ HEADERS += \
     IProgressReporter.h \
     Finally.h \
     TriangleRasterizer.h \
-    DealtList.h
+    DealtList.h \
+    ByteBuffer.h \
+    ArrayBuffer.h

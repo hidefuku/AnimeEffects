@@ -21,6 +21,13 @@ RotateKey::RotateKey()
 {
 }
 
+TimeKey* RotateKey::createClone()
+{
+    auto newKey = new RotateKey();
+    newKey->mData = this->mData;
+    return newKey;
+}
+
 bool RotateKey::serialize(Serializer& aOut) const
 {
     aOut.write(mData.easing());

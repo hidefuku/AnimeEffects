@@ -54,6 +54,8 @@ public:
     };
 
     GridMesh();
+    GridMesh(const GridMesh& aRhs);
+    GridMesh& operator=(const GridMesh& aRhs);
     ~GridMesh();
 
     void setOriginOffset(const QVector2D& aOffset) { mOriginOffset = aOffset; }
@@ -108,6 +110,7 @@ private:
     void allocIndexBuffer(int aIndexCount);
     void allocVertexBuffers(int aVertexCount);
     void initializeVertexBuffers(int aVertexCount);
+    void copyIndexAndVertexBuffers(const GridMesh& aRhs);
     void freeBuffers();
     std::pair<bool, gl::Vector3> gatherValidPositions(
             int aIndex, const gl::Vector3* aPositions,

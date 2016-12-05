@@ -24,6 +24,13 @@ OpaKey::OpaKey()
 {
 }
 
+TimeKey* OpaKey::createClone()
+{
+    auto newKey = new OpaKey();
+    newKey->mData = this->mData;
+    return newKey;
+}
+
 bool OpaKey::serialize(Serializer& aOut) const
 {
     aOut.write(mData.easing());

@@ -78,6 +78,13 @@ MoveKey::MoveKey()
 {
 }
 
+TimeKey* MoveKey::createClone()
+{
+    auto newKey = new MoveKey();
+    newKey->mData = this->mData;
+    return newKey;
+}
+
 bool MoveKey::serialize(Serializer& aOut) const
 {
     aOut.write(mData.easing());

@@ -21,6 +21,13 @@ DepthKey::DepthKey()
 {
 }
 
+TimeKey* DepthKey::createClone()
+{
+    auto newKey = new DepthKey();
+    newKey->mData = this->mData;
+    return newKey;
+}
+
 bool DepthKey::serialize(Serializer& aOut) const
 {
     aOut.write(mData.easing());

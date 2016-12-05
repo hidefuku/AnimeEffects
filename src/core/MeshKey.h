@@ -150,6 +150,8 @@ public:
         typedef QList<MeshEdge*> EdgeList;
         typedef QList<MeshFace*> FaceList;
         Data();
+        Data(const Data& aRhs);
+        Data& operator=(const Data& aRhs);
         ~Data();
 
         const VtxList& vertices() const { return mVertices; }
@@ -176,6 +178,9 @@ public:
 
     private:
         friend class MeshKey;
+
+        void copyVerticesEdgesAndFaces(const Data& aRhs);
+        void updateGLAttribute();
 
         QVector2D mOriginOffset;
         VtxList mVertices;
@@ -211,6 +216,7 @@ public:
 
     virtual TimeKeyType type() const { return TimeKeyType_Mesh; }
     virtual bool canHoldChild() const { return true; }
+    virtual TimeKey* createClone();
     virtual bool serialize(Serializer& aOut) const;
     virtual bool deserialize(Deserializer& aIn);
 

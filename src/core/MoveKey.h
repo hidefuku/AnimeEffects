@@ -52,6 +52,7 @@ public:
     const Data& data() const { return mData; }
 
     virtual TimeKeyType type() const { return TimeKeyType_Move; }
+    virtual TimeKey* createClone();
     virtual bool serialize(Serializer& aOut) const;
     virtual bool deserialize(Deserializer& aIn);
 

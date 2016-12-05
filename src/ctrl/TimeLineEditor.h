@@ -53,7 +53,8 @@ public:
     int maxFrame() const { return mTimeMax; }
     QSize modelSpaceSize() const;
     QPoint currentTimeCursorPos() const;
-    bool checkDeletableKeys(core::TimeLineEvent& aEvent, const QPoint& aPos);
+    bool checkContactWithKeyFocus(core::TimeLineEvent& aEvent, const QPoint& aPos);
+    bool pasteCopiedKeys(core::TimeLineEvent& aEvent, const QPoint& aWorldPos);
     void deleteCheckedKeys(core::TimeLineEvent& aEvent);
 
 private:

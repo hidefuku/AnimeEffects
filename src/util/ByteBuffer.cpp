@@ -1,14 +1,14 @@
-#include "util/Buffer.h"
+#include "util/ByteBuffer.h"
 
 namespace util
 {
 
-Buffer::Buffer()
+ByteBuffer::ByteBuffer()
     : mBlock()
 {
 }
 
-Buffer::Buffer(const Buffer& aRhs)
+ByteBuffer::ByteBuffer(const ByteBuffer& aRhs)
     : mBlock()
 {
     if (aRhs.size())
@@ -18,7 +18,7 @@ Buffer::Buffer(const Buffer& aRhs)
     }
 }
 
-Buffer& Buffer::operator=(const Buffer& aRhs)
+ByteBuffer& ByteBuffer::operator=(const ByteBuffer& aRhs)
 {
     free();
     if (aRhs.size())
@@ -29,18 +29,24 @@ Buffer& Buffer::operator=(const Buffer& aRhs)
     return *this;
 }
 
-Buffer::~Buffer()
+ByteBuffer::~ByteBuffer()
 {
     free();
 }
 
-void Buffer::grab(const XCMemBlock& aBlock)
+void ByteBuffer::grab(const XCMemBlock& aBlock)
 {
     free();
     mBlock = aBlock;
 }
 
-void Buffer::alloc(size_t aSize)
+void ByteBuffer::grab(uint8* aPtr, size_t aSize)
+{
+    free();
+    mBlock = XCMemBlock(aPtr, aSize);
+}
+
+void ByteBuffer::alloc(size_t aSize)
 {
     XC_ASSERT(aSize > 0);
     if (mBlock.size != aSize)
@@ -51,7 +57,7 @@ void Buffer::alloc(size_t aSize)
     }
 }
 
-void Buffer::free()
+void ByteBuffer::free()
 {
     if (mBlock.data)
     {

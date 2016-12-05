@@ -357,6 +357,13 @@ void BoneKey::destroyCaches()
     mCacheOwner.reset();
 }
 
+TimeKey* BoneKey::createClone()
+{
+    auto newKey = new BoneKey();
+    newKey->mData = this->mData;
+    return newKey;
+}
+
 bool BoneKey::serialize(Serializer& aOut) const
 {
     // top bone count

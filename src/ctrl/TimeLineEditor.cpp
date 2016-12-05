@@ -1,6 +1,7 @@
 #include <QPainter>
 #include "util/TreeIterator.h"
 #include "cmnd/ScopedMacro.h"
+#include "cmnd/BasicCommands.h"
 #include "ctrl/TimeLineEditor.h"
 #include "ctrl/time/time_Renderer.h"
 
@@ -314,14 +315,94 @@ bool TimeLineEditor::modifyMoveKeys(const QPoint& aWorldPos)
     return false;
 }
 
-bool TimeLineEditor::checkDeletableKeys(core::TimeLineEvent& aEvent, const QPoint& aPos)
+bool TimeLineEditor::checkContactWithKeyFocus(core::TimeLineEvent& aEvent, const QPoint& aPos)
 {
     if (mFocus.hasRange() && !mFocus.isInRange(aPos))
     {
         return false;
     }
-
     return mFocus.select(aEvent);
+}
+
+bool TimeLineEditor::pasteCopiedKeys(core::TimeLineEvent& aEvent, const QPoint& aWorldPos)
+{
+    XC_ASSERT(!aEvent.targets().isEmpty());
+
+    // a minimum frame for key pasting
+    auto pasteFrame = mTimeScale.frame(aWorldPos.x() - kTimeLineMargin);
+
+    // a minimum frame in copied keys
+    int copiedFrame = mTimeMax;
+    for (auto target : aEvent.targets())
+    {
+        copiedFrame = std::min(copiedFrame, target.pos.index());
+    }
+
+    const int frameOffset = pasteFrame - copiedFrame;
+
+    // check validity
+    for (auto target : aEvent.targets())
+    {
+        auto newFrame = target.pos.index() + frameOffset;
+
+        // invalid frame
+        if (newFrame < 0 || mTimeMax < newFrame)
+        {
+            return false;
+        }
+
+        // a key already exists.
+        auto type = target.pos.type();
+        if (target.pos.line()->hasTimeKey(type, newFrame))
+        {
+            return false;
+        }
+    }
+
+    mOnUpdatingKey = true;
+    {
+        cmnd::Stack& stack = mProject->commandStack();
+
+        // create notifier
+        auto notifier = new TimeLineUtil::Notifier(*mProject);
+        notifier->event() = aEvent;
+        notifier->event().setType(core::TimeLineEvent::Type_CopyKey);
+
+        // push delete keys command
+        cmnd::ScopedMacro macro(stack, "paste keys");
+        macro.grabListener(notifier);
+
+        ///@todo reset BoneKey cache, imprement MeshKeyData copying,
+
+        for (auto target : aEvent.targets())
+        {
+            auto type = target.pos.type();
+            auto line = target.pos.line();
+            XC_PTR_ASSERT(line);
+
+            auto copiedKey = target.pos.key();
+            XC_PTR_ASSERT(copiedKey);
+            auto parentKey = copiedKey->parent();
+
+            core::TimeKey* newKey = copiedKey->createClone();
+
+            auto newFrame = copiedKey->frame() + frameOffset;
+            newKey->setFrame(newFrame);
+
+            stack.push(new cmnd::GrabNewObject<TimeKey>(newKey));
+            stack.push(line->createPusher(type, newFrame, newKey));
+
+            if (parentKey)
+            {
+                stack.push(new cmnd::PushBackTree<TimeKey>(
+                               &parentKey->children(), newKey));
+            }
+        }
+    }
+    mOnUpdatingKey = false;
+
+    clearState();
+    return true;
 }
 
 void TimeLineEditor::deleteCheckedKeys(core::TimeLineEvent& aEvent)
@@ -338,7 +419,7 @@ void TimeLineEditor::deleteCheckedKeys(core::TimeLineEvent& aEvent)
         notifier->event().setType(core::TimeLineEvent::Type_RemoveKey);
 
         // push delete keys command
-        cmnd::ScopedMacro macro(stack, "remove time keys");
+        cmnd::ScopedMacro macro(stack, "remove keys");
         macro.grabListener(notifier);
 
         for (auto target : aEvent.targets())

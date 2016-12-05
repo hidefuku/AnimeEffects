@@ -17,6 +17,7 @@ public:
         Type_PushKey,
         Type_RemoveKey,
         Type_MoveKey,
+        Type_CopyKey,
         Type_ChangeKeyValue,
         Type_TERM
     };
@@ -50,6 +51,8 @@ public:
 
     QVector<Target>& defaultTargets() { return mDefaultTargets; }
     const QVector<Target>& detaulTargets() const { return mDefaultTargets; }
+
+    bool hasAnyTargets() const { return !mTargets.empty() || !mDefaultTargets.empty(); }
 
     // set a project by a project
     void setProject(Project& aProject) { mProject = &aProject; }

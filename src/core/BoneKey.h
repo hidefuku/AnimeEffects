@@ -85,6 +85,7 @@ public:
 
     virtual TimeKeyType type() const { return TimeKeyType_Bone; }
     virtual bool canHoldChild() const { return true; }
+    virtual TimeKey* createClone(); ///@note a new key have to reset caches.
     virtual bool serialize(Serializer& aOut) const;
     virtual bool deserialize(Deserializer& aIn);
 
