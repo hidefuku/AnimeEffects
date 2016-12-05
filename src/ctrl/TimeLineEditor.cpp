@@ -366,13 +366,15 @@ bool TimeLineEditor::pasteCopiedKeys(core::TimeLineEvent& aEvent, const QPoint& 
         // create notifier
         auto notifier = new TimeLineUtil::Notifier(*mProject);
         notifier->event() = aEvent;
-        notifier->event().setType(core::TimeLineEvent::Type_CopyKey);
+        notifier->event().setType(TimeLineEvent::Type_CopyKey);
 
         // push delete keys command
         cmnd::ScopedMacro macro(stack, "paste keys");
         macro.grabListener(notifier);
 
-        ///@todo reset BoneKey cache, imprement MeshKeyData copying,
+        QMap<const TimeKey*, TimeKey*> parentMap;
+        struct ChildInfo { TimeKey* key; TimeKey* parent; };
+        QList<ChildInfo> childList;
 
         for (auto target : aEvent.targets())
         {
@@ -384,7 +386,7 @@ bool TimeLineEditor::pasteCopiedKeys(core::TimeLineEvent& aEvent, const QPoint& 
             XC_PTR_ASSERT(copiedKey);
             auto parentKey = copiedKey->parent();
 
-            core::TimeKey* newKey = copiedKey->createClone();
+            TimeKey* newKey = copiedKey->createClone();
 
             auto newFrame = copiedKey->frame() + frameOffset;
             newKey->setFrame(newFrame);
@@ -392,11 +394,24 @@ bool TimeLineEditor::pasteCopiedKeys(core::TimeLineEvent& aEvent, const QPoint& 
             stack.push(new cmnd::GrabNewObject<TimeKey>(newKey));
             stack.push(line->createPusher(type, newFrame, newKey));
 
+            if (newKey->canHoldChild())
+            {
+                parentMap[copiedKey] = newKey;
+            }
             if (parentKey)
             {
-                stack.push(new cmnd::PushBackTree<TimeKey>(
-                               &parentKey->children(), newKey));
+                ChildInfo info = { newKey, parentKey };
+                childList.push_back(info);
             }
+        }
+        // connect to parents
+        for (auto child : childList)
+        {
+            auto parent = child.parent;
+            // if the parent was also copied, connect to a new parent key.
+            auto it = parentMap.find(parent);
+            if (it != parentMap.end()) parent = it.value();
+            stack.push(new cmnd::PushBackTree<TimeKey>(&parent->children(), child.key));
         }
     }
     mOnUpdatingKey = false;
