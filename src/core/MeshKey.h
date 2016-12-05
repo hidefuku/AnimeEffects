@@ -180,7 +180,10 @@ public:
         friend class MeshKey;
 
         void copyVerticesEdgesAndFaces(const Data& aRhs);
+        void updateVtxIndices();
         void updateGLAttribute();
+        bool serialize(Serializer& aOut) const;
+        bool deserialize(Deserializer& aIn);
 
         QVector2D mOriginOffset;
         VtxList mVertices;

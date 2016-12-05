@@ -73,6 +73,9 @@ public:
     bool readImage(XCMemBlock& aEmptyValue);
     void readFixedString(QString& aValue, int aSize);
 
+    template<typename tValue>
+    tValue getRead() { tValue value = tValue(); read(value); return value; }
+
     bool beginBlock(const std::string& aSignature);
     bool endBlock();
 

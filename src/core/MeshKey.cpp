@@ -577,6 +577,16 @@ void MeshKey::Data::resetArrayedConnection(
     aDest.destroyUnuseBlocks();
 }
 
+void MeshKey::Data::updateVtxIndices()
+{
+    int vtxCount = 0;
+    for (auto vtx : mVertices)
+    {
+        vtx->setIndex(vtxCount);
+        ++vtxCount;
+    }
+}
+
 void MeshKey::Data::updateGLAttribute()
 {
     int vtxCount = mVertices.count();
@@ -613,6 +623,137 @@ void MeshKey::Data::updateGLAttribute()
     }
 }
 
+bool MeshKey::Data::serialize(Serializer& aOut) const
+{
+    // origin offset
+    aOut.write(mOriginOffset);
+
+    // vertex count
+    aOut.write((int)mVertices.count());
+
+    // vertices
+    for (auto vtx : mVertices)
+    {
+        aOut.write(vtx->vec());
+    }
+
+    // edge count
+    aOut.write((int)mEdges.count());
+
+    // edges
+    QMap<MeshEdge*, int> edgeMap;
+    int edgeIndex = 0;
+    for (auto edge : mEdges)
+    {
+        aOut.write((int)edge->vtx(0)->index());
+        aOut.write((int)edge->vtx(1)->index());
+        edgeMap[edge] = edgeIndex;
+        ++edgeIndex;
+    }
+
+    // face count
+    aOut.write((int)mFaces.count());
+
+    // faces
+    for (auto face : mFaces)
+    {
+        aOut.write(edgeMap[face->edge(0)]);
+        aOut.write(edgeMap[face->edge(1)]);
+        aOut.write(edgeMap[face->edge(2)]);
+    }
+
+    return aOut.checkStream();
+}
+
+bool MeshKey::Data::deserialize(Deserializer& aIn)
+{
+    destroy();
+
+    // origin offset
+    aIn.read(mOriginOffset);
+
+    // vertex count
+    auto vtxCount = aIn.getRead<int>();
+    if (vtxCount < 0)
+        return aIn.errored("invalid vertex count");
+
+    // vertices
+    QMap<int, MeshVtx*> vtxMap;
+    for (int i = 0; i < vtxCount; ++i)
+    {
+        auto vec = aIn.getRead<QVector2D>();
+        auto vtx = new MeshVtx(vec);
+        vtx->setIndex(i);
+        mVertices.push_back(vtx);
+        vtxMap[i] = vtx;
+    }
+    // check failure
+    if (aIn.failure())
+        return aIn.errored("stream error");
+
+    // edge count
+    auto edgeCount = aIn.getRead<int>();
+    if (edgeCount < 0)
+        return aIn.errored("invalid edge count");
+
+    // edges
+    QMap<int, MeshEdge*> edgeMap;
+    for (int i = 0; i < edgeCount; ++i)
+    {
+        auto v0 = aIn.getRead<int>();
+        auto v1 = aIn.getRead<int>();
+
+        if (!xc_contains(v0, 0, vtxCount - 1) ||
+            !xc_contains(v1, 0, vtxCount - 1))
+        {
+            return aIn.errored("invalid edge reference");
+        }
+
+        auto edge = new MeshEdge();
+        edge->rawInit(*vtxMap[v0], *vtxMap[v1]);
+        mEdges.push_back(edge);
+        edgeMap[i] = edge;
+    }
+    // check failure
+    if (aIn.failure())
+        return aIn.errored("stream error");
+
+    // face count
+    int faceCount = 0;
+    aIn.read(faceCount);
+    if (faceCount < 0)
+        return aIn.errored("invalid face count");
+
+    for (int i = 0; i < faceCount; ++i)
+    {
+        auto e0 = aIn.getRead<int>();
+        auto e1 = aIn.getRead<int>();
+        auto e2 = aIn.getRead<int>();
+
+        if (!xc_contains(e0, 0, edgeCount - 1) ||
+            !xc_contains(e1, 0, edgeCount - 1) ||
+            !xc_contains(e2, 0, edgeCount - 1))
+        {
+            return aIn.errored("invalid face reference");
+        }
+
+        auto face = new MeshFace();
+        face->rawInit(*edgeMap[e0], *edgeMap[e1], *edgeMap[e2]);
+        mFaces.push_back(face);
+    }
+    // check failure
+    if (aIn.failure())
+        return aIn.errored("stream error");
+
+    // update gl attribute
+    updateGLAttribute();
+
+    // gl initialize
+    getMeshBuffer();
+
+    return aIn.checkStream();
+}
+
 //-------------------------------------------------------------------------------------------------
 MeshKey::MeshKey()
     : mData()
@@ -630,134 +771,14 @@ TimeKey* MeshKey::createClone()
 
 bool MeshKey::serialize(Serializer& aOut) const
 {
-    // origin offset
-    aOut.write(mData.mOriginOffset);
-
-    // vertex count
-    aOut.write((int)mData.mVertices.count());
-
-    // vertices
-    for (auto vtx : mData.mVertices)
-    {
-        aOut.write(vtx->vec());
-    }
-
-    // edge count
-    aOut.write((int)mData.mEdges.count());
-
-    // edges
-    for (auto edge : mData.mEdges)
-    {
-        aOut.write((int)edge->vtx(0)->index());
-        aOut.write((int)edge->vtx(1)->index());
-    }
-
-    // face count
-    aOut.write((int)mData.mFaces.count());
-
-    // faces
-    for (auto face : mData.mFaces)
-    {
-        aOut.write((int)mData.mEdges.indexOf(face->edge(0)));
-        aOut.write((int)mData.mEdges.indexOf(face->edge(1)));
-        aOut.write((int)mData.mEdges.indexOf(face->edge(2)));
-    }
-
-    return aOut.checkStream();
+    return mData.serialize(aOut);
 }
 
 bool MeshKey::deserialize(Deserializer& aIn)
 {
     aIn.pushLogScope("MeshKey");
 
-    mData.destroy();
-
-    // origin offset
-    aIn.read(mData.mOriginOffset);
-
-    // vertex count
-    int vtxCount = 0;
-    aIn.read(vtxCount);
-    if (vtxCount < 0)
-        return aIn.errored("invalid vertex count");
-
-    // vertices
-    for (int i = 0; i < vtxCount; ++i)
-    {
-        QVector2D vec;
-        aIn.read(vec);
-        auto vtx = new MeshVtx(vec);
-        vtx->setIndex(i);
-        mData.mVertices.push_back(vtx);
-    }
-    // check failure
-    if (aIn.failure())
-        return aIn.errored("stream error");
-
-    // edge count
-    int edgeCount = 0;
-    aIn.read(edgeCount);
-    if (edgeCount < 0)
-        return aIn.errored("invalid edge count");
-
-    // edges
-    for (int i = 0; i < edgeCount; ++i)
-    {
-        int vtxIdx[2] = {};
-        aIn.read(vtxIdx[0]);
-        aIn.read(vtxIdx[1]);
-
-        if (!xc_contains(vtxIdx[0], 0, vtxCount - 1) ||
-            !xc_contains(vtxIdx[1], 0, vtxCount - 1))
-        {
-            return aIn.errored("invalid edge reference");
-        }
-
-        auto edge = new MeshEdge();
-        edge->rawInit(
-                *mData.mVertices.at(vtxIdx[0]),
-                *mData.mVertices.at(vtxIdx[1]));
-        mData.mEdges.push_back(edge);
-    }
-    // check failure
-    if (aIn.failure())
-        return aIn.errored("stream error");
-
-    // face count
-    int faceCount = 0;
-    aIn.read(faceCount);
-    if (faceCount < 0)
-        return aIn.errored("invalid face count");
-
-    for (int i = 0; i < faceCount; ++i)
-    {
-        int edgeIdx[3] = {};
-        aIn.read(edgeIdx[0]);
-        aIn.read(edgeIdx[1]);
-        aIn.read(edgeIdx[2]);
-
-        if (!xc_contains(edgeIdx[0], 0, edgeCount - 1) ||
-            !xc_contains(edgeIdx[1], 0, edgeCount - 1) ||
-            !xc_contains(edgeIdx[2], 0, edgeCount - 1))
-        {
-            return aIn.errored("invalid face reference");
-        }
-        auto face = new MeshFace();
-        face->rawInit(
-                *mData.mEdges.at(edgeIdx[0]),
-                *mData.mEdges.at(edgeIdx[1]),
-                *mData.mEdges.at(edgeIdx[2]));
-        mData.mFaces.push_back(face);
-    }
-    // check failure
-    if (aIn.failure())
-        return aIn.errored("stream error");
-
-    // update gl attribute
-    updateGLAttribute();
-
-    // gl initialize
-    mData.getMeshBuffer();
+    if (!mData.deserialize(aIn)) return false;
 
     aIn.popLogScope();
     return aIn.checkStream();
@@ -1393,19 +1414,14 @@ MeshVtx* MeshKey::splitTriangle(
 void MeshKey::moveVtx(MeshVtx& aVtx, const QVector2D& aPos)
 {
     aVtx.set(aPos);
-    const int index = mData.mVertices.indexOf(&aVtx);
+    auto index = aVtx.index();
     XC_ASSERT(index >= 0);
     mData.mPositions[index].set(aPos.toVector3D());
 }
 
 void MeshKey::updateVtxIndices()
 {
-    int vtxCount = 0;
-    for (auto vtx : mData.mVertices)
-    {
-        vtx->setIndex(vtxCount);
-        ++vtxCount;
-    }
+    mData.updateVtxIndices();
 }
 
 void MeshKey::updateGLAttribute()
