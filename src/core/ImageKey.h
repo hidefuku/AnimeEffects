@@ -59,6 +59,7 @@ public:
     bool hasImage() const { return mData.resource() && mData.resource()->hasImage(); }
 
     virtual TimeKeyType type() const { return TimeKeyType_Image; }
+    virtual bool canHoldChild() const { return true; }
     virtual TimeKey* createClone();
     virtual bool serialize(Serializer& aOut) const;
     virtual bool deserialize(Deserializer& aIn);
