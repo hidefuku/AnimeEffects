@@ -13,10 +13,6 @@ Backboard::Backboard(ViaPoint& aViaPoint, QWidget* aParent)
 {
     mLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     this->setLayout(mLayout);
-
-    //static const int kDefaultWidth = 360;
-    //static const int kDefaultHeight = 32;
-    //this->resize(kDefaultWidth, kDefaultHeight);
 }
 
 void Backboard::setProject(core::Project* aProject)
@@ -24,13 +20,23 @@ void Backboard::setProject(core::Project* aProject)
     mProjectPanel.reset();
     mObjectPanel.reset();
 
+    // reset layout
+    {
+        delete mLayout;
+        mLayout = new QVBoxLayout();
+        mLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+        this->setLayout(mLayout);
+    }
+
     mProject = aProject;
 
     if (mProject)
     {
         mObjectPanel.reset(new ObjectPanel(mViaPoint, *mProject, "Null", this));
         mLayout->addWidget(mObjectPanel.data());
+        mLayout->setAlignment(mObjectPanel.data(), Qt::AlignTop);
     }
+    mLayout->addStretch();
 }
 
 void Backboard::setTarget(core::ObjectNode* aNode)

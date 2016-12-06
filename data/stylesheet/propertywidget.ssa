@@ -65,7 +65,7 @@ font-size: 9pt;
 
 QGroupBox#keyGroup {
 background-color: #f8f8f8;
-border:1px solid transparent;
+border:0px solid transparent;
 border-radius:4px;
 margin-top: 0ex;
 padding-top: 10px;
@@ -80,7 +80,7 @@ padding-top: 2px;
 
 QGroupBox#attrGroup {
 background-color: #f8f8f8;
-border:1px solid transparent;
+border:0px solid transparent;
 border-radius:4px;
 margin-top: 0ex;
 padding-top: 10px;
@@ -95,7 +95,7 @@ padding-top: 2px;
 
 QGroupBox#keyKnocker {
 background-color: #f8f8f8;
-border:1px solid transparent;
+border:0px solid transparent;
 border-radius:4px;
 margin: 0ex;
 padding-left: 6px;
@@ -141,7 +141,7 @@ image: url(data/icon/file.png);
 QGroupBox#propertyPanel {
 font-size: 10pt;
 background-color: #c8c8c8;
-border:1px solid transparent;
+border:0px solid transparent;
 border-radius:8px;
 margin-top: 0ex;
 padding-top: 10px;
