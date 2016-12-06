@@ -61,7 +61,6 @@ SOURCES += \
     TimeLineWidget.cpp \
     ToolWidget.cpp \
     TargetWidget.cpp \
-    prop/prop_ObjectPanel.cpp \
     prop/prop_Panel.cpp \
     prop/prop_KeyGroup.cpp \
     prop/prop_Items.cpp \
@@ -104,7 +103,10 @@ SOURCES += \
     KeyBindingDialog.cpp \
     KeyCommandMap.cpp \
     KeyCommandInvoker.cpp \
-    CanvasMover.cpp
+    CanvasMover.cpp \
+    prop/prop_ConstantPanel.cpp \
+    prop/prop_DefaultKeyPanel.cpp \
+    prop/prop_CurrentKeyPanel.cpp
 
 HEADERS += \
     MainDisplayMode.h \
@@ -116,7 +118,6 @@ HEADERS += \
     TimeLineWidget.h \
     ToolWidget.h \
     TargetWidget.h \
-    prop/prop_ObjectPanel.h \
     prop/prop_Panel.h \
     prop/prop_KeyGroup.h \
     prop/prop_Items.h \
@@ -163,7 +164,10 @@ HEADERS += \
     KeyBindingDialog.h \
     KeyCommandMap.h \
     KeyCommandInvoker.h \
-    CanvasMover.h
+    CanvasMover.h \
+    prop/prop_ConstantPanel.h \
+    prop/prop_DefaultKeyPanel.h \
+    prop/prop_CurrentKeyPanel.h
 
 FORMS +=
 

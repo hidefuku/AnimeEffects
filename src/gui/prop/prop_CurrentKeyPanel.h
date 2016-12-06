@@ -1,11 +1,10 @@
-#ifndef GUI_PROP_OBJECTPANEL_H
-#define GUI_PROP_OBJECTPANEL_H
+#ifndef GUI_PROP_CURRENTKEYPANEL_H
+#define GUI_PROP_CURRENTKEYPANEL_H
 
 #include "core/Project.h"
 #include "core/ObjectNode.h"
 #include "gui/ViaPoint.h"
 #include "gui/prop/prop_Panel.h"
-#include "gui/prop/prop_AttrGroup.h"
 #include "gui/prop/prop_KeyGroup.h"
 #include "gui/prop/prop_KeyKnocker.h"
 #include "gui/prop/prop_Items.h"
@@ -14,31 +13,16 @@
 namespace gui {
 namespace prop {
 
-class ObjectPanel : public Panel
+class CurrentKeyPanel : public Panel
 {
 public:
-    ObjectPanel(ViaPoint& aViaPoint, core::Project& aProject, const QString& aTitle, QWidget* aParent);
+    CurrentKeyPanel(ViaPoint& aViaPoint, core::Project& aProject, const QString& aTitle, QWidget* aParent);
     void setTarget(core::ObjectNode* aTarget);
     void setPlayBackActivity(bool aIsActive);
-    void updateAttribute();
     void updateKey();
     void updateFrame();
 
 private:
-    class DefaultPanel
-    {
-    public:
-        DefaultPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
-        void setEnabled(bool);
-        void setKeyValue(const core::TimeLine& aLine);
-
-    private:
-        KeyAccessor& mAccessor;
-        KeyGroup* mGroup;
-        DecimalItem* mDepth;
-        DecimalItem* mOpacity;
-    };
-
     class MovePanel
     {
     public:
@@ -189,20 +173,11 @@ private:
     void updateKeyExists();
     void updateKeyValue();
 
-    static void assignBlendMode(core::Project&, core::ObjectNode*, img::BlendMode);
-    static void assignClipped(core::Project&, core::ObjectNode*, bool);
-
     ViaPoint& mViaPoint;
     core::Project& mProject;
     core::ObjectNode* mTarget;
     KeyAccessor mKeyAccessor;
     int mLabelWidth;
-
-    AttrGroup* mAttributes;
-    ComboItem* mBlendMode;
-    CheckItem* mClipped;
-
-    QScopedPointer<DefaultPanel> mDefaultPanel;
 
     QScopedPointer<MovePanel> mMovePanel;
     QScopedPointer<RotatePanel> mRotatePanel;
@@ -217,4 +192,4 @@ private:
 } // namespace prop
 } // namespace gui
 
-#endif // GUI_PROP_OBJECTPANEL_H
+#endif // GUI_PROP_CURRENTKEYPANEL_H

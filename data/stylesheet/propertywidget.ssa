@@ -68,7 +68,7 @@ background-color: #f8f8f8;
 border:0px solid transparent;
 border-radius:4px;
 margin-top: 0ex;
-padding-top: 10px;
+padding-top: 13px;
 }
 
 QGroupBox#keyGroup::title {
@@ -83,7 +83,7 @@ background-color: #f8f8f8;
 border:0px solid transparent;
 border-radius:4px;
 margin-top: 0ex;
-padding-top: 10px;
+padding-top: 13px;
 }
 
 QGroupBox#attrGroup::title {

@@ -8,8 +8,9 @@ Backboard::Backboard(ViaPoint& aViaPoint, QWidget* aParent)
     , mViaPoint(aViaPoint)
     , mProject()
     , mLayout(new QVBoxLayout())
-    , mProjectPanel()
-    , mObjectPanel()
+    , mConstantPanel()
+    , mDefaultKeyPanel()
+    , mCurrentKeyPanel()
 {
     mLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     this->setLayout(mLayout);
@@ -17,8 +18,9 @@ Backboard::Backboard(ViaPoint& aViaPoint, QWidget* aParent)
 
 void Backboard::setProject(core::Project* aProject)
 {
-    mProjectPanel.reset();
-    mObjectPanel.reset();
+    mConstantPanel.reset();
+    mDefaultKeyPanel.reset();
+    mCurrentKeyPanel.reset();
 
     // reset layout
     {
@@ -32,18 +34,34 @@ void Backboard::setProject(core::Project* aProject)
 
     if (mProject)
     {
-        mObjectPanel.reset(new ObjectPanel(mViaPoint, *mProject, "Null", this));
-        mLayout->addWidget(mObjectPanel.data());
-        mLayout->setAlignment(mObjectPanel.data(), Qt::AlignTop);
+        mConstantPanel.reset(new ConstantPanel(mViaPoint, *mProject, "Null", this));
+        mLayout->addWidget(mConstantPanel.data());
+        mLayout->setAlignment(mConstantPanel.data(), Qt::AlignTop);
+
+        mDefaultKeyPanel.reset(new DefaultKeyPanel(mViaPoint, *mProject, "Null", this));
+        mLayout->addWidget(mDefaultKeyPanel.data());
+        mLayout->setAlignment(mDefaultKeyPanel.data(), Qt::AlignTop);
+
+        mCurrentKeyPanel.reset(new CurrentKeyPanel(mViaPoint, *mProject, "Null", this));
+        mLayout->addWidget(mCurrentKeyPanel.data());
+        mLayout->setAlignment(mCurrentKeyPanel.data(), Qt::AlignTop);
     }
     mLayout->addStretch();
 }
 
 void Backboard::setTarget(core::ObjectNode* aNode)
 {
-    if (mObjectPanel)
+    if (mConstantPanel)
     {
-        mObjectPanel->setTarget(aNode);
+        mConstantPanel->setTarget(aNode);
+    }
+    if (mDefaultKeyPanel)
+    {
+        mDefaultKeyPanel->setTarget(aNode);
+    }
+    if (mCurrentKeyPanel)
+    {
+        mCurrentKeyPanel->setTarget(aNode);
     }
 }
 
@@ -51,33 +69,45 @@ void Backboard::setPlayBackActivity(bool aIsActive)
 {
     this->setEnabled(!aIsActive);
 
-    if (mObjectPanel)
+    if (mConstantPanel)
     {
-        mObjectPanel->setPlayBackActivity(aIsActive);
+        mConstantPanel->setPlayBackActivity(aIsActive);
+    }
+    if (mDefaultKeyPanel)
+    {
+        mDefaultKeyPanel->setPlayBackActivity(aIsActive);
+    }
+    if (mCurrentKeyPanel)
+    {
+        mCurrentKeyPanel->setPlayBackActivity(aIsActive);
     }
 }
 
 void Backboard::updateAttribute()
 {
-    if (mObjectPanel)
+    if (mConstantPanel)
     {
-        mObjectPanel->updateAttribute();
+        mConstantPanel->updateAttribute();
     }
 }
 
 void Backboard::updateKey()
 {
-    if (mObjectPanel)
+    if (mDefaultKeyPanel)
     {
-        mObjectPanel->updateKey();
+        mDefaultKeyPanel->updateKey();
+    }
+    if (mCurrentKeyPanel)
+    {
+        mCurrentKeyPanel->updateKey();
     }
 }
 
 void Backboard::updateFrame()
 {
-    if (mObjectPanel)
+    if (mCurrentKeyPanel)
     {
-        mObjectPanel->updateFrame();
+        mCurrentKeyPanel->updateFrame();
     }
 }
 

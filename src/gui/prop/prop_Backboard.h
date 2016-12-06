@@ -6,8 +6,9 @@
 #include "core/Project.h"
 #include "core/ObjectNode.h"
 #include "gui/ViaPoint.h"
-#include "gui/prop/prop_ProjectPanel.h"
-#include "gui/prop/prop_ObjectPanel.h"
+#include "gui/prop/prop_ConstantPanel.h"
+#include "gui/prop/prop_DefaultKeyPanel.h"
+#include "gui/prop/prop_CurrentKeyPanel.h"
 
 namespace gui {
 namespace prop {
@@ -28,8 +29,9 @@ private:
     ViaPoint& mViaPoint;
     core::Project* mProject;
     QVBoxLayout* mLayout;
-    QScopedPointer<ProjectPanel> mProjectPanel;
-    QScopedPointer<ObjectPanel> mObjectPanel;
+    QScopedPointer<ConstantPanel> mConstantPanel;
+    QScopedPointer<DefaultKeyPanel> mDefaultKeyPanel;
+    QScopedPointer<CurrentKeyPanel> mCurrentKeyPanel;
 };
 
 } // namespace prop
