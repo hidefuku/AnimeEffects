@@ -51,6 +51,7 @@ void LayerNode::setDefaultImage(const img::ResourceHandle& aHandle, img::BlendMo
     auto key = new ImageKey();
     mTimeLine.grabDefaultKey(TimeKeyType_Image, key);
     key->setImage(aHandle, aBlendMode);
+    key->setImageOffsetByCenter();
 
     mShaderHolder.reserveShaders(aBlendMode);
     mShaderHolder.reserveGridShader();

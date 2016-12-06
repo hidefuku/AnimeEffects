@@ -77,14 +77,22 @@ void ImageKey::setImage(const img::ResourceHandle& aResource, img::BlendMode aMo
 void ImageKey::setImage(const img::ResourceHandle& aResource)
 {
     mData.resource() = aResource;
-    mData.setImageOffset(QVector2D());
+    resetGridMesh();
+    resetTextureCache();
+}
+
+void ImageKey::setImageOffset(const QVector2D& aOffset)
+{
+    mData.setImageOffset(aOffset);
+}
+
+void ImageKey::setImageOffsetByCenter()
+{
     if (hasImage())
     {
         auto size = mData.resource()->image().pixelSize();
         mData.setImageOffset(QVector2D(-size.width() * 0.5f, -size.height() * 0.5f));
     }
-    resetGridMesh();
-    resetTextureCache();
 }
 
 void ImageKey::resetGridMesh()

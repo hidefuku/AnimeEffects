@@ -30,7 +30,12 @@ public:
                         key->data().resource()->pos());
 
             // update image
-            target.key->setImage(target.nextImage);
+            key->setImage(target.nextImage);
+            // update image offset
+            const QVector2D move(target.nextImage->pos() - target.prevImage->pos());
+            target.prevOffset = key->data().imageOffset();
+            target.nextOffset = target.prevOffset + move;
+            key->data().setImageOffset(target.nextOffset);
 
             // create transition data
             if (mCreateTransitions)
@@ -50,6 +55,7 @@ public:
         for (auto& target : mTargets)
         {
             target.key->setImage(target.nextImage);
+            target.key->data().setImageOffset(target.nextOffset);
         }
     }
 
@@ -58,6 +64,7 @@ public:
         for (auto& target : mTargets)
         {
             target.key->setImage(target.prevImage);
+            target.key->data().setImageOffset(target.prevOffset);
         }
     }
 
@@ -68,11 +75,15 @@ protected:
             : key(aKey)
             , prevImage()
             , nextImage()
+            , prevOffset()
+            , nextOffset()
         {
         }
         ImageKey* key;
         img::ResourceHandle prevImage;
         img::ResourceHandle nextImage;
+        QVector2D prevOffset;
+        QVector2D nextOffset;
     };
 
     QList<Target>& targets() { return mTargets; }

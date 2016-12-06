@@ -320,6 +320,7 @@ void KeyAccessor::knockNewImage(const img::ResourceHandle& aHandle)
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::ImageKey();
     newKey->setImage(aHandle);
+    newKey->setImageOffsetByCenter();
 
     ctrl::TimeLineUtil::pushNewImageKey(*mProject, *mTarget, getFrame(), newKey);
 }

@@ -56,6 +56,8 @@ public:
 
     void setImage(const img::ResourceHandle& aResource, img::BlendMode aMode);
     void setImage(const img::ResourceHandle& aResource);
+    void setImageOffset(const QVector2D& aOffset);
+    void setImageOffsetByCenter();
     bool hasImage() const { return mData.resource() && mData.resource()->hasImage(); }
 
     virtual TimeKeyType type() const { return TimeKeyType_Image; }
