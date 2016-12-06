@@ -132,7 +132,8 @@ bool Focuser::select(TimeLineEvent& aEvent)
 
             for (int i = 0; i < TimeKeyType_TERM; ++i)
             {
-                const TimeLine::MapType& map = timeLine.map((TimeKeyType)i);
+                auto type = TimeLine::getTimeKeyTypeInOrderOfOperations(i);
+                const TimeLine::MapType& map = timeLine.map(type);
                 if (map.isEmpty()) continue;
 
                 const float height = line.keyHeight(validIndex, validNum);
@@ -146,7 +147,7 @@ bool Focuser::select(TimeLineEvent& aEvent)
                     if (key)
                     {
                         const int frame = itr.key();
-                        aEvent.pushTarget(*node, (TimeKeyType)i, frame);
+                        aEvent.pushTarget(*node, type, frame);
                         found = true;
                     }
                     ++itr;
@@ -181,7 +182,8 @@ Focuser::SingleFocus Focuser::updateImpl(bool aForceSingle)
 
             for (int i = 0; i < TimeKeyType_TERM; ++i)
             {
-                const TimeLine::MapType& map = timeLine.map((TimeKeyType)i);
+                auto type = TimeLine::getTimeKeyTypeInOrderOfOperations(i);
+                const TimeLine::MapType& map = timeLine.map(type);
                 if (map.isEmpty()) continue;
 
                 const float height = line.keyHeight(validIndex, validNum);
@@ -198,7 +200,7 @@ Focuser::SingleFocus Focuser::updateImpl(bool aForceSingle)
 
                         single.node = node;
                         single.pos.setLine(&timeLine);
-                        single.pos.setType((TimeKeyType)i);
+                        single.pos.setType(type);
                         single.pos.setIndex(itr.key());
 
                         if (aForceSingle)

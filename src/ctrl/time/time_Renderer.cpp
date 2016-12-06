@@ -61,7 +61,7 @@ void Renderer::renderLines(const QVector<TimeLineRow>& aRows, const QRect& aCame
             int i = 0;
             for (int typei = 0; typei < TimeKeyType_TERM; ++typei)
             {
-                auto type = (TimeKeyType)typei;
+                auto type = TimeLine::getTimeKeyTypeInOrderOfOperations(typei);
                 if (row.node->timeLine()->isEmpty(type))
                 {
                     continue;
@@ -180,7 +180,8 @@ void Renderer::drawKeys(const ObjectNode* aNode, const TimeLineRow& aRow)
 
         for (int i = 0; i < TimeKeyType_TERM; ++i)
         {
-            const TimeLine::MapType& map = timeLine.map((TimeKeyType)i);
+            auto type = TimeLine::getTimeKeyTypeInOrderOfOperations(i);
+            const TimeLine::MapType& map = timeLine.map(type);
             if (map.isEmpty()) continue;
 
             const float height = aRow.keyHeight(validIndex, validNum);
@@ -250,7 +251,8 @@ void Renderer::drawChildKeys(const ObjectNode* aNode, const QPoint& aPos)
 
             for (int i = 0; i < TimeKeyType_TERM; ++i)
             {
-                const TimeLine::MapType& map = timeLine.map((TimeKeyType)i);
+                auto type = TimeLine::getTimeKeyTypeInOrderOfOperations(i);
+                const TimeLine::MapType& map = timeLine.map(type);
 
                 auto itr = map.lowerBound(mRange.min());
                 while (itr != map.end() && itr.key() <= mRange.max())

@@ -23,6 +23,19 @@ static const std::array<const char*, core::TimeKeyType_TERM> kTimeKeyNames = {
     "Image"
 };
 
+static const std::array<core::TimeKeyType, core::TimeKeyType_TERM> kTimeKeyTypeInOrderOfOperations = {
+    core::TimeKeyType_Image,
+    core::TimeKeyType_Mesh,
+    core::TimeKeyType_FFD,
+    core::TimeKeyType_Bone,
+    core::TimeKeyType_Pose,
+    core::TimeKeyType_Move,
+    core::TimeKeyType_Rotate,
+    core::TimeKeyType_Scale,
+    core::TimeKeyType_Depth,
+    core::TimeKeyType_Opa
+};
+
 }
 
 namespace core
@@ -48,20 +61,7 @@ TimeKeyType TimeLine::getTimeKeyType(const QString& aName)
 
 TimeKeyType TimeLine::getTimeKeyTypeInOrderOfOperations(int aIndex)
 {
-    switch (aIndex)
-    {
-    case 0: return TimeKeyType_Image;
-    case 1: return TimeKeyType_Mesh;
-    case 2: return TimeKeyType_FFD;
-    case 3: return TimeKeyType_Bone;
-    case 4: return TimeKeyType_Pose;
-    case 5: return TimeKeyType_Move;
-    case 6: return TimeKeyType_Rotate;
-    case 7: return TimeKeyType_Scale;
-    case 8: return TimeKeyType_Depth;
-    case 9: return TimeKeyType_Opa;
-    default: XC_ASSERT(0); return TimeKeyType_TERM;
-    }
+    return kTimeKeyTypeInOrderOfOperations.at(aIndex);
 }
 
 TimeLine::TimeLine()
