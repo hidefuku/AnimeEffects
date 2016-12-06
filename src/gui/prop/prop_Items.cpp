@@ -350,7 +350,8 @@ BrowseItem::BrowseItem(QWidget* aParent)
     //mLayout->setSpacing(2);
 
     mLine = new QLineEdit(aParent);
-    mLine->setEnabled(false);
+    //mLine->setEnabled(false);
+    mLine->setReadOnly(true);
     mLine->setFocusPolicy(Qt::NoFocus);
     mLayout->addWidget(mLine);
     mButton = new QPushButton(aParent);

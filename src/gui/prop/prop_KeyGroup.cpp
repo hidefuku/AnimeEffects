@@ -57,7 +57,7 @@ void KeyGroup::onClicked(bool aChecked)
     }
     else
     {
-        this->setFixedHeight(22);
+        this->setFixedHeight(20);
     }
 }
 

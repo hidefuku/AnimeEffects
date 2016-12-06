@@ -1,3 +1,7 @@
+QSplitter#propertysplitter {
+width: 380px;
+}
+
 QFrame#holder {
 background-color: #fafafa;
 border-radius:2px;
@@ -136,7 +140,7 @@ image: url(data/icon/file.png);
 
 QGroupBox#propertyPanel {
 font-size: 10pt;
-background-color: #d0d0d0;
+background-color: #c8c8c8;
 border:1px solid transparent;
 border-radius:8px;
 margin-top: 0ex;
@@ -156,4 +160,3 @@ image: url(data/icon/branchclose.png);
 QGroupBox#propertyPanel::indicator:checked {
 image: url(data/icon/branchopen.png);
 }
-

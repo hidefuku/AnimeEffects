@@ -55,7 +55,7 @@ void AttrGroup::onClicked(bool aChecked)
     }
     else
     {
-        this->setFixedHeight(22);
+        this->setFixedHeight(20);
     }
 }
 

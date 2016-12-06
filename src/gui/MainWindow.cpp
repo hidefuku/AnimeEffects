@@ -160,6 +160,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const QS
         dockWidget->setWidget(mProperty);
 #else
         auto splitter = new QSplitter(Qt::Vertical, dockWidget);
+        splitter->setObjectName("propertysplitter");
         dockWidget->setWidget(splitter);
 
         mProperty = new PropertyWidget(mViaPoint, splitter);

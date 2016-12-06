@@ -4,7 +4,7 @@
 
 namespace
 {
-static const int kCollapsedPanelHeight = 24;
+static const int kCollapsedPanelHeight = 20;
 }
 
 namespace gui {

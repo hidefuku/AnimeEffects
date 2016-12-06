@@ -1,11 +1,5 @@
 #include "gui/prop/prop_Backboard.h"
 
-namespace
-{
-static const int kDefaultWidth = 360;
-static const int kDefaultHeight = 32;
-}
-
 namespace gui {
 namespace prop {
 
@@ -19,7 +13,10 @@ Backboard::Backboard(ViaPoint& aViaPoint, QWidget* aParent)
 {
     mLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     this->setLayout(mLayout);
-    this->resize(kDefaultWidth, kDefaultHeight);
+
+    //static const int kDefaultWidth = 360;
+    //static const int kDefaultHeight = 32;
+    //this->resize(kDefaultWidth, kDefaultHeight);
 }
 
 void Backboard::setProject(core::Project* aProject)
