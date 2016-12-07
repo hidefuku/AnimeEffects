@@ -77,7 +77,6 @@ void ImageKey::setImage(const img::ResourceHandle& aResource, img::BlendMode aMo
 void ImageKey::setImage(const img::ResourceHandle& aResource)
 {
     mData.resource() = aResource;
-    resetGridMesh();
     resetTextureCache();
 }
 
@@ -95,16 +94,21 @@ void ImageKey::setImageOffsetByCenter()
     }
 }
 
-void ImageKey::resetGridMesh()
+void ImageKey::resetGridMesh(int aCellSize)
 {
     if (mData.resource()->hasImage())
     {
-        auto imageData = mData.resource()->image().data();
-        auto pixelSize = mData.resource()->image().pixelSize();
+        auto data = mData.resource()->image().data();
+        auto size = mData.resource()->image().pixelSize();
 
-        // grid mesh
-        const int cellPx = std::max(std::min(8, pixelSize.width() / 4), 2);
-        mData.gridMesh().createFromImage(imageData, pixelSize, cellPx);
+        //const int cellPx = std::max(std::min(8, pixelSize.width() / 4), 2);
+        auto cell = std::max(aCellSize, Constant::imageCellSizeMin());
+        while (img::GridMeshCreator::getCellTableCount(size, cell) > Constant::imageCellCountMax())
+        {
+            ++cell;
+        }
+        cell = std::min(cell, Constant::imageCellSizeMax());
+        mData.gridMesh().createFromImage(data, size, cell);
     }
 }
 

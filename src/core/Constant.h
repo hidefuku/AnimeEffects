@@ -18,6 +18,14 @@ public:
 
     static float normalizable() { return 0.01f; }
     static float dividable() { return 0.001f; }
+
+    static int imageSizeMax() { return 30000; }
+    static int imageSizeMin() { return 1; }
+
+    static int imageCellSizeMax() { return 30000; }
+    static int imageCellSizeMin() { return 2; }
+
+    static int imageCellCountMax() { return 1000000; }
 };
 
 } // namespace core
