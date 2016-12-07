@@ -165,6 +165,7 @@ private:
         KeyGroup* mGroup;
         BrowseItem* mBrowse;
         Vector2DItem* mOffset;
+        IntegerItem* mCellSize;
         bool mKeyExists;
         ViaPoint& mViaPoint;
     };

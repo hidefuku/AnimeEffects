@@ -34,10 +34,14 @@ private:
     virtual void resizeEvent(QResizeEvent* aEvent);
 
     void unlinkProject();
+    void updateAllProperties();
 
     util::LinkPointer<core::Project> mProject;
     util::SlotId mTimeLineSlot;
     util::SlotId mNodeAttrSlot;
+    util::SlotId mResModifiedSlot;
+    util::SlotId mTreeRestructSlot;
+    util::SlotId mProjAttrSlot;
     prop::Backboard* mBoard;
 };
 

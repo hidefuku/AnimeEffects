@@ -274,6 +274,12 @@ void KeyAccessor::assignImageOffset(const QVector2D& aNext)
     ctrl::TimeLineUtil::assignImageKeyOffset(*mProject, *mTarget, getFrame(), aNext);
 }
 
+void KeyAccessor::assignImageCellSize(int aNext)
+{
+    ASSERT_AND_RETURN_INVALID_TARGET();
+    ctrl::TimeLineUtil::assignImageKeyCellSize(*mProject, *mTarget, getFrame(), aNext);
+}
+
 //-------------------------------------------------------------------------------------------------
 void KeyAccessor::knockNewMove()
 {

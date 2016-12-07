@@ -129,7 +129,7 @@ DefaultKeyPanel::ImagePanel::ImagePanel(
         {
             this->mAccessor.assignDefaultImageCellSize(aNext);
         };
-        mGroup->addItem("mesh cell size :", mCellSize);
+        mGroup->addItem("mesh cell :", mCellSize);
     }
     setEnabled(false);
 }

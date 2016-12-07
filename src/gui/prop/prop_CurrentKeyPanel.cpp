@@ -458,6 +458,7 @@ CurrentKeyPanel::ImagePanel::ImagePanel(Panel& aPanel, KeyAccessor& aAccessor,
     , mGroup()
     , mBrowse()
     , mOffset()
+    , mCellSize()
     , mKeyExists(false)
     , mViaPoint(aViaPoint)
 {
@@ -489,6 +490,16 @@ CurrentKeyPanel::ImagePanel::ImagePanel(Panel& aPanel, KeyAccessor& aAccessor,
             this->mAccessor.assignImageOffset(-aNext);
         };
         mGroup->addItem("center :", mOffset);
+
+        // cell size
+        mCellSize = new IntegerItem(mGroup);
+        mCellSize->setRange(core::Constant::imageCellSizeMin(),
+                            core::Constant::imageCellSizeMax());
+        mCellSize->onValueUpdated = [=](int, int aNext)
+        {
+            this->mAccessor.assignImageCellSize(aNext);
+        };
+        mGroup->addItem("mesh cell :", mCellSize);
     }
     setEnabled(false);
     setKeyExists(false, false);
@@ -522,6 +533,7 @@ void CurrentKeyPanel::ImagePanel::setKeyValue(const core::TimeKey* aKey)
     const core::ImageKey::Data& data = ((const core::ImageKey*)aKey)->data();
     mBrowse->setValue(data.resource()->identifier());
     mOffset->setValue(-data.imageOffset());
+    mCellSize->setValue(data.gridMesh().cellSize());
 }
 
 bool CurrentKeyPanel::ImagePanel::keyExists() const

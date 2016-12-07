@@ -11,6 +11,9 @@ PropertyWidget::PropertyWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mProject()
     , mTimeLineSlot()
     , mNodeAttrSlot()
+    , mResModifiedSlot()
+    , mTreeRestructSlot()
+    , mProjAttrSlot()
     , mBoard()
 {
     this->setFocusPolicy(Qt::NoFocus);
@@ -38,6 +41,9 @@ void PropertyWidget::unlinkProject()
     {
         mProject->onTimeLineModified.disconnect(mTimeLineSlot);
         mProject->onNodeAttributeModified.disconnect(mNodeAttrSlot);
+        mProject->onResourceModified.disconnect(mResModifiedSlot);
+        mProject->onTreeRestructured.disconnect(mTreeRestructSlot);
+        mProject->onProjectAttributeModified.disconnect(mProjAttrSlot);
         mProject.reset();
     }
 }
@@ -55,9 +61,24 @@ void PropertyWidget::setProject(core::Project* aProject)
 
         mNodeAttrSlot = aProject->onNodeAttributeModified.connect(
                     this, &PropertyWidget::onAttributeUpdated);
+
+        mResModifiedSlot = aProject->onResourceModified.connect(
+                    [=](core::ResourceEvent&, bool) { updateAllProperties(); });
+
+        mTreeRestructSlot = aProject->onTreeRestructured.connect(
+                    [=](core::ObjectTreeEvent&, bool) { updateAllProperties(); });
+
+        mProjAttrSlot = aProject->onResourceModified.connect(
+                    [=](core::ResourceEvent&, bool) { updateAllProperties(); });
     }
 
     mBoard->setProject(aProject);
+}
+
+void PropertyWidget::updateAllProperties()
+{
+    mBoard->updateAttribute();
+    mBoard->updateKey(true, true);
 }
 
 void PropertyWidget::onSelectionChanged(core::ObjectNode* aRepresentNode)

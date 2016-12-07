@@ -53,6 +53,7 @@ public:
     // image
     void assignImageResource(img::ResourceNode&);
     void assignImageOffset(const QVector2D&);
+    void assignImageCellSize(int);
 
     // new keys
     void knockNewMove();
