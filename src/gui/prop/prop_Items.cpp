@@ -231,6 +231,47 @@ void EasingItem::setValue(util::Easing::Param aValue, bool aSignal)
 }
 
 //-------------------------------------------------------------------------------------------------
+IntegerItem::IntegerItem(QWidget* aParent)
+    : mBox()
+    , mStamp()
+    , mSignal(true)
+{
+    mBox = new QSpinBox(aParent);
+
+    mStamp = mBox->value();
+
+    mBox->connect(mBox, &QAbstractSpinBox::editingFinished, [=]()
+    {
+        this->onEditingFinished();
+        mBox->clearFocus();
+    });
+}
+
+void IntegerItem::setRange(int aMin, int aMax)
+{
+    mBox->setRange(aMin, aMax);
+}
+
+void IntegerItem::onEditingFinished()
+{
+    if (mStamp != value())
+    {
+        if (onValueUpdated && mSignal)
+        {
+            onValueUpdated(mStamp, value());
+        }
+        mStamp = value();
+    }
+}
+
+void IntegerItem::setItemEnabled(bool aEnable)
+{
+    mSignal = false;
+    mBox->setEnabled(aEnable);
+    mSignal = true;
+}
+
+//-------------------------------------------------------------------------------------------------
 DecimalItem::DecimalItem(QWidget* aParent)
     : mBox()
     , mStamp()
@@ -368,6 +409,7 @@ void BrowseItem::setValue(const QString& aValue)
 
 void BrowseItem::setItemEnabled(bool aEnable)
 {
+    mLine->setEnabled(aEnable);
     mButton->setEnabled(aEnable);
 }
 

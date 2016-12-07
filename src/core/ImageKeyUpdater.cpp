@@ -29,11 +29,23 @@ public:
                         key->data().gridMesh(),
                         key->data().resource()->pos());
 
+            auto cellSize = target.nextCellSize > 0 ?
+                        target.nextCellSize : key->data().gridMesh().cellSize();
+            auto imageOffset = key->data().imageOffset();
+
+            // swap grid mesh
+            target.anotherMesh = std::make_shared<GridMesh>();
+            target.anotherMesh->swap(key->data().gridMesh());
+
             // update image
             key->setImage(target.nextImage);
+
+            // reset grid mesh
+            key->resetGridMesh(cellSize);
+
             // update image offset
             const QVector2D move(target.nextImage->pos() - target.prevImage->pos());
-            target.prevOffset = key->data().imageOffset();
+            target.prevOffset = imageOffset;
             target.nextOffset = target.prevOffset + move;
             key->data().setImageOffset(target.nextOffset);
 
@@ -55,6 +67,7 @@ public:
         for (auto& target : mTargets)
         {
             target.key->setImage(target.nextImage);
+            target.key->data().gridMesh().swap(*target.anotherMesh);
             target.key->data().setImageOffset(target.nextOffset);
         }
     }
@@ -64,6 +77,7 @@ public:
         for (auto& target : mTargets)
         {
             target.key->setImage(target.prevImage);
+            target.key->data().gridMesh().swap(*target.anotherMesh);
             target.key->data().setImageOffset(target.prevOffset);
         }
     }
@@ -77,6 +91,8 @@ protected:
             , nextImage()
             , prevOffset()
             , nextOffset()
+            , anotherMesh()
+            , nextCellSize(0)
         {
         }
         ImageKey* key;
@@ -84,6 +100,8 @@ protected:
         img::ResourceHandle nextImage;
         QVector2D prevOffset;
         QVector2D nextOffset;
+        std::shared_ptr<GridMesh> anotherMesh;
+        int nextCellSize;
     };
 
     QList<Target>& targets() { return mTargets; }
@@ -159,6 +177,22 @@ public:
 };
 
 //-------------------------------------------------------------------------------------------------
+class GridMeshUpdater : public ImageResourceUpdaterBase
+{
+public:
+    GridMeshUpdater(ImageKey& aKey, int aNewCellSize,
+                    const ResourceUpdatingWorkspacePtr& aWorkspace,
+                    bool aCreateTransitions)
+        : ImageResourceUpdaterBase(aWorkspace, aCreateTransitions)
+    {
+        this->targets().push_back(Target(&aKey));
+        this->targets().back().prevImage = aKey.data().resource();
+        this->targets().back().nextImage = aKey.data().resource();
+        this->targets().back().nextCellSize = aNewCellSize;
+    }
+};
+
+//-------------------------------------------------------------------------------------------------
 cmnd::Stable* ImageKeyUpdater::createResourceUpdater(
         ObjectNode& aNode, const ResourceEvent& aEvent,
         const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions)
@@ -172,6 +206,13 @@ cmnd::Stable* ImageKeyUpdater::createResourceUpdater(
         const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions)
 {
     return new ImageChanger(aKey, aNewResource, aWorkspace, aCreateTransitions);
+}
+
+cmnd::Stable* ImageKeyUpdater::createGridMeshUpdater(
+        ImageKey& aKey, int aNewCellSize,
+        const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions)
+{
+    return new GridMeshUpdater(aKey, aNewCellSize, aWorkspace, aCreateTransitions);
 }
 
 //-------------------------------------------------------------------------------------------------

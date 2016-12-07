@@ -1,6 +1,8 @@
 #include "util/MathUtil.h"
 #include "util/TriangleRasterizer.h"
 #include "img/GridMeshCreator.h"
+#include "img/Util.h"
+#include "img/ColorRGBA.h"
 
 namespace img
 {
@@ -16,11 +18,17 @@ void GridMeshCreator::HexaConnection::clear()
 
 //-------------------------------------------------------------------------------------------------
 GridMeshCreator::Image::Image(const uint8* aPtr, const QSize& aSize)
-    : mData(aPtr)
+    : mBuffer()
+    , mData()
     , mSize(aSize)
 {
     XC_PTR_ASSERT(aPtr);
     XC_ASSERT(!aSize.isEmpty());
+
+    mBuffer.alloc(Format_RGBA8, mSize);
+    memcpy(mBuffer.data(), aPtr, mBuffer.size());
+    img::Util::expandAlpha1Pixel(mBuffer.data(), mSize);
+    mData = mBuffer.data();
 }
 
 bool GridMeshCreator::Image::hasSomeAlphaIn3x3(int aX, int aY) const
@@ -225,9 +233,23 @@ void GridMeshCreator::VertexTable::shortenReducingVectorsOnePixel()
 }
 
 //-------------------------------------------------------------------------------------------------
-GridMeshCreator::CellTable::CellTable(int aCellPx)
+QSizeF GridMeshCreator::CellTable::calculateCellSize(int aCellWidth)
+{
+    return QSizeF(aCellWidth, (float)(aCellWidth * std::sqrt(3.0) * 0.5));
+}
+
+QSize GridMeshCreator::CellTable::calculateCellTableSize(
+        const QSize& aImageSize, const QSizeF& aCellSize)
+{
+    const float halfCellWidth = aCellSize.width() * 0.5f;
+    auto width = (int)((float)aImageSize.width() / halfCellWidth + 2);
+    auto height = (int)((float)aImageSize.height() / aCellSize.height() + 1);
+    return QSize(width, height);
+}
+
+GridMeshCreator::CellTable::CellTable(int aCellWidth)
     : mCells()
-    , mCellSize(aCellPx, (float)(aCellPx * std::sqrt(3.0) * 0.5))
+    , mCellSize(calculateCellSize(aCellWidth))
     , mWidth()
     , mHeight()
 {
@@ -240,8 +262,9 @@ int GridMeshCreator::CellTable::initCells(const Image &aImage)
     const float cellWidth = mCellSize.width();
     const float cellHeight = mCellSize.height();
     const float halfCellWidth = cellWidth * 0.5f;
-    mWidth = (int)((float)aImage.size().width() / halfCellWidth + 2);
-    mHeight = (int)((float)aImage.size().height() / cellHeight + 1);
+    auto tableSize = calculateCellTableSize(aImage.size(), mCellSize);
+    mWidth = tableSize.width();
+    mHeight = tableSize.height();
     mCells.reset(new Cell[mWidth * mHeight]);
 
     // initialize each cells
@@ -356,6 +379,14 @@ GridMeshCreator::Cell* GridMeshCreator::CellTable::findExistingCell(int aX, int 
     Cell* cell = &(mCells[aX + mWidth * aY]);
     if (!cell->isExist) return nullptr;
     return cell;
+}
+
+//-------------------------------------------------------------------------------------------------
+int GridMeshCreator::getCellTableCount(const QSize& aImageSize, int aCellWidth)
+{
+    auto cellSize = CellTable::calculateCellSize(aCellWidth);
+    auto tableSize = CellTable::calculateCellTableSize(aImageSize, cellSize);
+    return tableSize.width() * tableSize.height();
 }
 
 //-------------------------------------------------------------------------------------------------

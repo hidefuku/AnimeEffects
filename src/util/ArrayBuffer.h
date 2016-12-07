@@ -1,6 +1,7 @@
 #ifndef UTIL_ARRAYBUFFER_H
 #define UTIL_ARRAYBUFFER_H
 
+#include <utility>
 #include "XC.h"
 
 namespace util
@@ -85,6 +86,12 @@ public:
         {
             reset(new tObject[aCount], aCount);
         }
+    }
+
+    void swap(ArrayBuffer<tObject>& aRhs)
+    {
+        std::swap(mObjects, aRhs.mObjects);
+        std::swap(mCount, aRhs.mCount);
     }
 
     explicit operator bool() const

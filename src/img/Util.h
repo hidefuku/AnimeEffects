@@ -28,6 +28,8 @@ public:
         bool mIsShiftJis;
     };
 
+    static void expandAlpha1Pixel(uint8* aImage, const QSize& aSize);
+
     /// @note each width and height increase 2 pixel
     static XCMemBlock recreateForBiLinearSampling(XCMemBlock& aGrabbedImage, const QSize& aSize);
 

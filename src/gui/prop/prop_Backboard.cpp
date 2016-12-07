@@ -91,13 +91,13 @@ void Backboard::updateAttribute()
     }
 }
 
-void Backboard::updateKey()
+void Backboard::updateKey(bool aUpdateKey, bool aUpdateDefaultKey)
 {
-    if (mDefaultKeyPanel)
+    if (aUpdateDefaultKey && mDefaultKeyPanel)
     {
         mDefaultKeyPanel->updateKey();
     }
-    if (mCurrentKeyPanel)
+    if (aUpdateKey && mCurrentKeyPanel)
     {
         mCurrentKeyPanel->updateKey();
     }

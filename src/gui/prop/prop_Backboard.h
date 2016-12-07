@@ -22,7 +22,7 @@ public:
     void setPlayBackActivity(bool aIsActive);
 
     void updateAttribute();
-    void updateKey();
+    void updateKey(bool aUpdateKey, bool aUppdateDefaultKey);
     void updateFrame();
 
 private:

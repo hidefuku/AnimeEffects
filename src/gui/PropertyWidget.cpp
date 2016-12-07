@@ -71,9 +71,9 @@ void PropertyWidget::onAttributeUpdated(core::ObjectNode&, bool)
     onVisualUpdated();
 }
 
-void PropertyWidget::onKeyUpdated(core::TimeLineEvent&, bool)
+void PropertyWidget::onKeyUpdated(core::TimeLineEvent& aEvent, bool)
 {
-    mBoard->updateKey();
+    mBoard->updateKey(!aEvent.targets().empty(), !aEvent.defaultTargets().empty());
 }
 
 void PropertyWidget::onFrameUpdated()

@@ -60,6 +60,7 @@ public:
     GridMesh& operator=(const GridMesh& aRhs);
     ~GridMesh();
 
+    void swap(GridMesh& aRhs);
     void setOriginOffset(const QVector2D& aOffset) { mOriginOffset = aOffset; }
     void createFromImage(const void* aImagePtr, const QSize& aSize, int aCellPx);
     void writeHeightMap(const HeightMap& aMap, const QVector2D& aMinPos);
@@ -107,8 +108,6 @@ private:
 
     QSize mSize;
     QVector2D mOriginOffset;
-    int mCellNumX;
-    int mCellNumY;
     int mCellPx;
     int mIndexCount;
     int mVertexCount;

@@ -86,20 +86,45 @@ void KeyAccessor::setTarget(core::ObjectNode* aTarget)
 //-------------------------------------------------------------------------------------------------
 void KeyAccessor::assignDefaultDepth(float aNext)
 {
-    auto key = (const core::DepthKey*)mTarget->timeLine()->defaultKey(core::TimeKeyType_Depth);
+    ASSERT_AND_RETURN_INVALID_TARGET();
+    auto key = (const core::DepthKey*)currline().defaultKey(core::TimeKeyType_Depth);
     XC_PTR_ASSERT(key);
     core::DepthKey::Data newData = key->data();
     newData.setDepth(aNext);
-    ctrl::TimeLineUtil::assignDefaultDepthKeyData(*mProject, *mTarget, newData);
+    ctrl::TimeLineUtil::assignDepthKeyData(
+                *mProject, *mTarget, core::TimeLine::kDefaultKeyIndex, newData);
 }
 
 void KeyAccessor::assignDefaultOpacity(float aNext)
 {
-    auto key = (const core::OpaKey*)mTarget->timeLine()->defaultKey(core::TimeKeyType_Opa);
+    ASSERT_AND_RETURN_INVALID_TARGET();
+    auto key = (const core::OpaKey*)currline().defaultKey(core::TimeKeyType_Opa);
     XC_PTR_ASSERT(key);
     core::OpaKey::Data newData = key->data();
     newData.setOpacity(aNext);
-    ctrl::TimeLineUtil::assignDefaultOpaKeyData(*mProject, *mTarget, newData);
+    ctrl::TimeLineUtil::assignOpaKeyData(
+                *mProject, *mTarget, core::TimeLine::kDefaultKeyIndex, newData);
+}
+
+void KeyAccessor::assignDefaultImageResource(img::ResourceNode& aNext)
+{
+    ASSERT_AND_RETURN_INVALID_TARGET();
+    ctrl::TimeLineUtil::assignImageKeyResource(
+                *mProject, *mTarget, core::TimeLine::kDefaultKeyIndex, aNext);
+}
+
+void KeyAccessor::assignDefaultImageOffset(const QVector2D& aNext)
+{
+    ASSERT_AND_RETURN_INVALID_TARGET();
+    ctrl::TimeLineUtil::assignImageKeyOffset(
+                *mProject, *mTarget, core::TimeLine::kDefaultKeyIndex, aNext);
+}
+
+void KeyAccessor::assignDefaultImageCellSize(int aNext)
+{
+    ASSERT_AND_RETURN_INVALID_TARGET();
+    ctrl::TimeLineUtil::assignImageKeyCellSize(
+                *mProject, *mTarget, core::TimeLine::kDefaultKeyIndex, aNext);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -254,7 +279,7 @@ void KeyAccessor::knockNewMove()
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::MoveKey();
-    newKey->setPos(mTarget->timeLine()->current().srt().pos());
+    newKey->setPos(currline().current().srt().pos());
 
     ctrl::TimeLineUtil::pushNewMoveKey(*mProject, *mTarget, getFrame(), newKey);
 }
@@ -262,7 +287,7 @@ void KeyAccessor::knockNewRotate()
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::RotateKey();
-    newKey->setRotate(mTarget->timeLine()->current().srt().rotate());
+    newKey->setRotate(currline().current().srt().rotate());
 
     ctrl::TimeLineUtil::pushNewRotateKey(*mProject, *mTarget, getFrame(), newKey);
 }
@@ -270,7 +295,7 @@ void KeyAccessor::knockNewScale()
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::ScaleKey();
-    newKey->setScale(mTarget->timeLine()->current().srt().scale());
+    newKey->setScale(currline().current().srt().scale());
 
     ctrl::TimeLineUtil::pushNewScaleKey(*mProject, *mTarget, getFrame(), newKey);
 }
@@ -279,7 +304,7 @@ void KeyAccessor::knockNewDepth()
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::DepthKey();
-    newKey->setDepth(mTarget->timeLine()->current().depth());
+    newKey->setDepth(currline().current().depth());
 
     ctrl::TimeLineUtil::pushNewDepthKey(*mProject, *mTarget, getFrame(), newKey);
 }
@@ -288,7 +313,7 @@ void KeyAccessor::knockNewOpacity()
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::OpaKey();
-    newKey->data() = mTarget->timeLine()->current().opa();
+    newKey->data() = currline().current().opa();
 
     ctrl::TimeLineUtil::pushNewOpaKey(*mProject, *mTarget, getFrame(), newKey);
 }
@@ -297,8 +322,8 @@ void KeyAccessor::knockNewPose()
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::PoseKey();
-    newKey->data() = mTarget->timeLine()->current().pose();
-    core::BoneKey* parentKey = mTarget->timeLine()->current().bone().areaKey();
+    newKey->data() = currline().current().pose();
+    core::BoneKey* parentKey = currline().current().bone().areaKey();
     XC_PTR_ASSERT(parentKey);
     newKey->data().createBonesBy(*parentKey);
 
@@ -309,8 +334,8 @@ void KeyAccessor::knockNewFFD()
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::FFDKey();
-    newKey->data() = mTarget->timeLine()->current().ffd();
-    core::TimeKey* parentKey = mTarget->timeLine()->current().ffdMeshParent();
+    newKey->data() = currline().current().ffd();
+    core::TimeKey* parentKey = currline().current().ffdMeshParent();
 
     ctrl::TimeLineUtil::pushNewFFDKey(*mProject, *mTarget, getFrame(), newKey, parentKey);
 }
@@ -320,6 +345,7 @@ void KeyAccessor::knockNewImage(const img::ResourceHandle& aHandle)
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::ImageKey();
     newKey->setImage(aHandle);
+    newKey->resetGridMesh();
     newKey->setImageOffsetByCenter();
 
     ctrl::TimeLineUtil::pushNewImageKey(*mProject, *mTarget, getFrame(), newKey);

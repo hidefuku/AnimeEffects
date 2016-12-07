@@ -108,15 +108,8 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
-void assignDefaultDepthKeyData(
-        core::Project& aProject, core::ObjectNode& aTarget,
-        const core::DepthKey::Data& aNewData);
-
-void assignDefaultOpaKeyData(
-        core::Project& aProject, core::ObjectNode& aTarget,
-        const core::OpaKey::Data& aNewData);
-
-//-------------------------------------------------------------------------------------------------
+/// @note you can also set a data to default keys in following assignment functions.
+///@{
 void assignMoveKeyData(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
         const core::MoveKey::Data& aNewData);
@@ -152,6 +145,11 @@ void assignImageKeyResource(
 void assignImageKeyOffset(
         core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
         const QVector2D& aNewData);
+
+void assignImageKeyCellSize(
+        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
+        int aNewData);
+///@}
 
 //-------------------------------------------------------------------------------------------------
 void pushNewMoveKey(

@@ -118,51 +118,14 @@ void MoveFrameOfKey::redo()
 
 //---------------------------------------------------------------------------------------
 template<class tKey, TimeKeyType tType>
-void assignDefaultKeyData(
-        Project& aProject, ObjectNode& aTarget,
-        const typename tKey::Data& aNewData, const QString& aText)
-{
-    XC_ASSERT(aTarget.timeLine());
-    tKey* key = (tKey*)(aTarget.timeLine()->defaultKey(tType));
-    XC_PTR_ASSERT(key);
-
-    {
-        cmnd::ScopedMacro macro(aProject.commandStack(), aText);
-
-        auto notifier = new Notifier(aProject);
-        notifier->event().setType(TimeLineEvent::Type_ChangeKeyValue);
-        notifier->event().pushDefaultTarget(aTarget, tType);
-        macro.grabListener(notifier);
-
-        auto command = new cmnd::Assign<typename tKey::Data>(&(key->data()), aNewData);
-        aProject.commandStack().push(command);
-    }
-}
-
-void assignDefaultDepthKeyData(
-        core::Project& aProject, core::ObjectNode& aTarget,
-        const core::DepthKey::Data& aNewData)
-{
-    assignDefaultKeyData<DepthKey, TimeKeyType_Depth>(
-                aProject, aTarget, aNewData, "assign default depth");
-}
-
-void assignDefaultOpaKeyData(
-        core::Project& aProject, core::ObjectNode& aTarget,
-        const core::OpaKey::Data& aNewData)
-{
-    assignDefaultKeyData<OpaKey, TimeKeyType_Opa>(
-                aProject, aTarget, aNewData, "assign default opacity");
-}
-
-//---------------------------------------------------------------------------------------
-template<class tKey, TimeKeyType tType>
 void assignKeyData(
         Project& aProject, ObjectNode& aTarget, int aFrame,
         const typename tKey::Data& aNewData, const QString& aText)
 {
     XC_ASSERT(aTarget.timeLine());
-    tKey* key = (tKey*)(aTarget.timeLine()->timeKey(tType, aFrame));
+    tKey* key = (tKey*)(aFrame == TimeLine::kDefaultKeyIndex ?
+                            aTarget.timeLine()->defaultKey(tType) :
+                            aTarget.timeLine()->timeKey(tType, aFrame));
     XC_PTR_ASSERT(key);
 
     {
@@ -170,7 +133,14 @@ void assignKeyData(
 
         auto notifier = new Notifier(aProject);
         notifier->event().setType(TimeLineEvent::Type_ChangeKeyValue);
-        notifier->event().pushTarget(aTarget, tType, aFrame);
+        if (aFrame == TimeLine::kDefaultKeyIndex)
+        {
+            notifier->event().pushDefaultTarget(aTarget, tType);
+        }
+        else
+        {
+            notifier->event().pushTarget(aTarget, tType, aFrame);
+        }
         macro.grabListener(notifier);
 
         auto command = new cmnd::Assign<typename tKey::Data>(&(key->data()), aNewData);
@@ -178,13 +148,16 @@ void assignKeyData(
     }
 }
 
+//---------------------------------------------------------------------------------------
 template<class tKey, TimeKeyType tType>
 void assignKeyEasing(
         Project& aProject, ObjectNode& aTarget, int aFrame,
         const util::Easing::Param& aNewData, const QString& aText)
 {
     XC_ASSERT(aTarget.timeLine());
-    tKey* key = (tKey*)(aTarget.timeLine()->timeKey(tType, aFrame));
+    tKey* key = (tKey*)(aFrame == TimeLine::kDefaultKeyIndex ?
+                            aTarget.timeLine()->defaultKey(tType) :
+                            aTarget.timeLine()->timeKey(tType, aFrame));
     XC_PTR_ASSERT(key);
 
     {
@@ -192,7 +165,14 @@ void assignKeyEasing(
 
         auto notifier = new Notifier(aProject);
         notifier->event().setType(TimeLineEvent::Type_ChangeKeyValue);
-        notifier->event().pushTarget(aTarget, tType, aFrame);
+        if (aFrame == TimeLine::kDefaultKeyIndex)
+        {
+            notifier->event().pushDefaultTarget(aTarget, tType);
+        }
+        else
+        {
+            notifier->event().pushTarget(aTarget, tType, aFrame);
+        }
         macro.grabListener(notifier);
 
         auto command = new cmnd::Assign<util::Easing::Param>(&(key->data().easing()), aNewData);
@@ -207,7 +187,9 @@ void assignKeyBy(
         const std::function<void(tKey*)>& aFunc)
 {
     XC_ASSERT(aTarget.timeLine());
-    tKey* key = (tKey*)(aTarget.timeLine()->timeKey(tType, aFrame));
+    tKey* key = (tKey*)(aFrame == TimeLine::kDefaultKeyIndex ?
+                            aTarget.timeLine()->defaultKey(tType) :
+                            aTarget.timeLine()->timeKey(tType, aFrame));
     XC_PTR_ASSERT(key);
 
     {
@@ -215,19 +197,29 @@ void assignKeyBy(
 
         auto notifier = new Notifier(aProject);
         notifier->event().setType(TimeLineEvent::Type_ChangeKeyValue);
-        notifier->event().pushTarget(aTarget, tType, aFrame);
+        if (aFrame == TimeLine::kDefaultKeyIndex)
+        {
+            notifier->event().pushDefaultTarget(aTarget, tType);
+        }
+        else
+        {
+            notifier->event().pushTarget(aTarget, tType, aFrame);
+        }
         macro.grabListener(notifier);
 
         aFunc(key);
     }
 }
 
+//---------------------------------------------------------------------------------------
 void assignMoveKeyData(
         Project& aProject, ObjectNode& aTarget, int aFrame,
         const MoveKey::Data& aNewData)
 {
     assignKeyData<MoveKey, TimeKeyType_Move>(
-                aProject, aTarget, aFrame, aNewData, "assign move key");
+                aProject, aTarget, aFrame, aNewData,
+                aFrame == TimeLine::kDefaultKeyIndex ?
+                    "assign default move" : "assign move key");
 }
 
 void assignRotateKeyData(
@@ -235,7 +227,9 @@ void assignRotateKeyData(
         const RotateKey::Data& aNewData)
 {
     assignKeyData<RotateKey, TimeKeyType_Rotate>(
-                aProject, aTarget, aFrame, aNewData, "assign rotate key");
+                aProject, aTarget, aFrame, aNewData,
+                aFrame == TimeLine::kDefaultKeyIndex ?
+                    "assign default rotate" : "assign rotate key");
 }
 
 void assignScaleKeyData(
@@ -243,7 +237,9 @@ void assignScaleKeyData(
         const ScaleKey::Data& aNewData)
 {
     assignKeyData<ScaleKey, TimeKeyType_Scale>(
-                aProject, aTarget, aFrame, aNewData, "assign scale key");
+                aProject, aTarget, aFrame, aNewData,
+                aFrame == TimeLine::kDefaultKeyIndex ?
+                "assign default scale" : "assign scale key");
 }
 
 void assignDepthKeyData(
@@ -251,7 +247,9 @@ void assignDepthKeyData(
         const DepthKey::Data& aNewData)
 {
     assignKeyData<DepthKey, TimeKeyType_Depth>(
-                aProject, aTarget, aFrame, aNewData, "assign depth key");
+                aProject, aTarget, aFrame, aNewData,
+                aFrame == TimeLine::kDefaultKeyIndex ?
+                "assign default depth" : "assign depth key");
 }
 
 void assignOpaKeyData(
@@ -259,7 +257,9 @@ void assignOpaKeyData(
         const OpaKey::Data& aNewData)
 {
     assignKeyData<OpaKey, TimeKeyType_Opa>(
-                aProject, aTarget, aFrame, aNewData, "assign opacity key");
+                aProject, aTarget, aFrame, aNewData,
+                aFrame == TimeLine::kDefaultKeyIndex ?
+                "assign default opacity" : "assign opacity key");
 }
 
 void assignPoseKeyEasing(
@@ -267,7 +267,9 @@ void assignPoseKeyEasing(
         const util::Easing::Param& aNewData)
 {
     assignKeyEasing<PoseKey, TimeKeyType_Pose>(
-                aProject, aTarget, aFrame, aNewData, "assign pose key");
+                aProject, aTarget, aFrame, aNewData,
+                aFrame == TimeLine::kDefaultKeyIndex ?
+                "assign default pose" : "assign pose key");
 }
 
 void assignFFDKeyEasing(
@@ -275,7 +277,9 @@ void assignFFDKeyEasing(
         const util::Easing::Param& aNewData)
 {
     assignKeyEasing<FFDKey, TimeKeyType_FFD>(
-                aProject, aTarget, aFrame, aNewData, "assign ffd key");
+                aProject, aTarget, aFrame, aNewData,
+                aFrame == TimeLine::kDefaultKeyIndex ?
+                "assign default ffd" : "assign ffd key");
 }
 
 void assignImageKeyResource(
@@ -286,7 +290,10 @@ void assignImageKeyResource(
     const bool createTransitions = !aTarget.timeLine()->isEmpty(TimeKeyType_FFD);
 
     assignKeyBy<ImageKey, TimeKeyType_Image>(
-                aProject, aTarget, aFrame, "assign image key resource", [&](ImageKey* aKey)
+                aProject, aTarget, aFrame,
+                aFrame == TimeLine::kDefaultKeyIndex ?
+                "assign default image resource" : "assign image key resource",
+                [&](ImageKey* aKey)
     {
         // image key
         aProject.commandStack().push(
@@ -296,7 +303,8 @@ void assignImageKeyResource(
         // ffd key should be called finally
         if (createTransitions)
         {
-            aProject.commandStack().push(FFDKeyUpdater::createResourceUpdater(aTarget, workspace));
+            aProject.commandStack().push(
+                        FFDKeyUpdater::createResourceUpdater(aTarget, workspace));
         }
     });
 }
@@ -306,7 +314,10 @@ void assignImageKeyOffset(
         const QVector2D& aNewData)
 {
     assignKeyBy<ImageKey, TimeKeyType_Image>(
-                aProject, aTarget, aFrame, "assign image key center", [&](ImageKey* aKey)
+                aProject, aTarget, aFrame,
+                aFrame == TimeLine::kDefaultKeyIndex ?
+                "assign default image center" : "assign image key center",
+                [&](ImageKey* aKey)
     {
         auto prevOffset = aKey->data().imageOffset();
 
@@ -318,6 +329,33 @@ void assignImageKeyOffset(
         {
             aKey->data().setImageOffset(prevOffset);
         }));
+    });
+}
+
+void assignImageKeyCellSize(
+        core::Project& aProject, core::ObjectNode& aTarget, int aFrame,
+        int aNewData)
+{
+    ResourceUpdatingWorkspacePtr workspace = std::make_shared<ResourceUpdatingWorkspace>();
+    const bool createTransitions = !aTarget.timeLine()->isEmpty(TimeKeyType_FFD);
+
+    assignKeyBy<ImageKey, TimeKeyType_Image>(
+                aProject, aTarget, aFrame,
+                aFrame == TimeLine::kDefaultKeyIndex ?
+                "assign default image cell size" : "assign image key cell size",
+                [&](ImageKey* aKey)
+    {
+        // image key
+        aProject.commandStack().push(
+                    ImageKeyUpdater::createGridMeshUpdater(
+                        *aKey, aNewData, workspace, createTransitions));
+
+        // ffd key should be called finally
+        if (createTransitions)
+        {
+            aProject.commandStack().push(
+                        FFDKeyUpdater::createResourceUpdater(aTarget, workspace));
+        }
     });
 }
 

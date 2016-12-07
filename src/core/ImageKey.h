@@ -46,6 +46,8 @@ public:
         const gl::Texture& texture() const { return mTexture; }
     };
 
+    enum { kDefaultMeshCellSize = 16 };
+
     ImageKey();
 
     Data& data() { return mData; }
@@ -59,6 +61,7 @@ public:
     void setImageOffset(const QVector2D& aOffset);
     void setImageOffsetByCenter();
     bool hasImage() const { return mData.resource() && mData.resource()->hasImage(); }
+    void resetGridMesh(int CellSize = kDefaultMeshCellSize);
 
     virtual TimeKeyType type() const { return TimeKeyType_Image; }
     virtual bool canHoldChild() const { return true; }
@@ -70,7 +73,6 @@ public:
     virtual void awake();
 
 private:
-    void resetGridMesh();
     void resetTextureCache();
 
     Data mData;

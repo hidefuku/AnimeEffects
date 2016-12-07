@@ -6,6 +6,7 @@
 #include <QRect>
 #include <QGL>
 #include "XC.h"
+#include "img/Buffer.h"
 
 namespace img
 {
@@ -19,6 +20,8 @@ public:
         bool has(int aIndex) const { return id[aIndex] != -1; }
         void clear();
     };
+
+    static int getCellTableCount(const QSize& aImageSize, int aCellWidth);
 
     GridMeshCreator(const uint8* aPtr, const QSize& aSize, int aCellPx);
 
@@ -62,6 +65,7 @@ private:
 
     class Image
     {
+        img::Buffer mBuffer;
         const uint8* mData;
         QSize mSize;
 
@@ -133,7 +137,11 @@ private:
         int mHeight;
 
     public:
-        CellTable(int aCellPx);
+        static QSizeF calculateCellSize(int aCellWidth);
+        static QSize calculateCellTableSize(
+                const QSize& aImageSize, const QSizeF& aCellSize);
+
+        CellTable(int aCellWidth);
         int initCells(const Image& aImage);
         void connectCellsToVertices(VertexTable& aTable);
         Cell& cell(int aX, int aY);

@@ -5,6 +5,7 @@
 #include <array>
 #include <QPushButton>
 #include <QComboBox>
+#include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QVector2D>
 #include <QHBoxLayout>
@@ -130,6 +131,35 @@ private:
     std::array<QComboBox*, 2> mBox;
     QDoubleSpinBox* mDBox;
     util::Easing::Param mStamp;
+    bool mSignal;
+};
+
+//-------------------------------------------------------------------------------------------------
+class IntegerItem
+        : public ItemBase
+{
+public:
+    typedef std::function<void(int, int)> UpdateType;
+
+    IntegerItem(QWidget* aParent);
+
+    QSpinBox& box() { return *mBox; }
+    const QSpinBox& box() const { return *mBox; }
+
+    int value() const { return mBox->value(); }
+    void setValue(int aValue) { mBox->setValue(aValue); mStamp = aValue; }
+    void setRange(int aMin, int aMax);
+
+    virtual QWidget* itemWidget() { return mBox; }
+    virtual void setItemEnabled(bool aEnable);
+
+    UpdateType onValueUpdated;
+
+private:
+    void onEditingFinished();
+
+    QSpinBox* mBox;
+    int mStamp;
     bool mSignal;
 };
 

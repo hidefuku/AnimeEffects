@@ -22,10 +22,10 @@ public:
     void updateKey();
 
 private:
-    class DefaultPanel
+    class DepthPanel
     {
     public:
-        DefaultPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+        DepthPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
         void setEnabled(bool);
         void setKeyValue(const core::TimeLine& aLine);
 
@@ -33,7 +33,36 @@ private:
         KeyAccessor& mAccessor;
         KeyGroup* mGroup;
         DecimalItem* mDepth;
+    };
+
+    class OpaPanel
+    {
+    public:
+        OpaPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+        void setEnabled(bool);
+        void setKeyValue(const core::TimeLine& aLine);
+
+    private:
+        KeyAccessor& mAccessor;
+        KeyGroup* mGroup;
         DecimalItem* mOpacity;
+    };
+
+    class ImagePanel
+    {
+    public:
+        ImagePanel(Panel& aPanel, KeyAccessor& aAccessor,
+                   int aLabelWidth, ViaPoint& aViaPoint);
+        void setEnabled(bool);
+        void setKeyValue(const core::TimeLine& aLine);
+
+    private:
+        KeyAccessor& mAccessor;
+        KeyGroup* mGroup;
+        BrowseItem* mBrowse;
+        Vector2DItem* mOffset;
+        IntegerItem* mCellSize;
+        ViaPoint& mViaPoint;
     };
 
     void build();
@@ -46,7 +75,9 @@ private:
     KeyAccessor mKeyAccessor;
     int mLabelWidth;
 
-    QScopedPointer<DefaultPanel> mDefaultPanel;
+    QScopedPointer<DepthPanel> mDepthPanel;
+    QScopedPointer<OpaPanel> mOpaPanel;
+    QScopedPointer<ImagePanel> mImagePanel;
 };
 
 } // namespace prop

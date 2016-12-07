@@ -21,8 +21,6 @@ namespace core
 GridMesh::GridMesh()
     : mSize()
     , mOriginOffset()
-    , mCellNumX(0)
-    , mCellNumY(0)
     , mCellPx(0)
     , mIndexCount(0)
     , mVertexCount(0)
@@ -42,8 +40,6 @@ GridMesh::GridMesh()
 GridMesh::GridMesh(const GridMesh& aRhs)
     : mSize(aRhs.mSize)
     , mOriginOffset(aRhs.mOriginOffset)
-    , mCellNumX(aRhs.mCellNumX)
-    , mCellNumY(aRhs.mCellNumY)
     , mCellPx(aRhs.mCellPx)
     , mIndexCount(aRhs.mIndexCount)
     , mVertexCount(aRhs.mVertexCount)
@@ -66,8 +62,6 @@ GridMesh& GridMesh::operator=(const GridMesh& aRhs)
 
     mSize = aRhs.mSize;
     mOriginOffset = aRhs.mOriginOffset;
-    mCellNumX = aRhs.mCellNumX;
-    mCellNumY = aRhs.mCellNumY;
     mCellPx = aRhs.mCellPx;
     mIndexCount = aRhs.mIndexCount;
     mVertexCount = aRhs.mVertexCount;
@@ -88,6 +82,23 @@ GridMesh& GridMesh::operator=(const GridMesh& aRhs)
 GridMesh::~GridMesh()
 {
     freeBuffers();
+}
+
+void GridMesh::swap(GridMesh& aRhs)
+{
+    std::swap(mSize, aRhs.mSize);
+    std::swap(mOriginOffset, aRhs.mOriginOffset);
+    std::swap(mCellPx, aRhs.mCellPx);
+    std::swap(mIndexCount, aRhs.mIndexCount);
+    std::swap(mVertexCount, aRhs.mVertexCount);
+    std::swap(mVertexRect, aRhs.mVertexRect);
+    mIndices.swap(aRhs.mIndices);
+    mPositions.swap(aRhs.mPositions);
+    mOffsets.swap(aRhs.mOffsets);
+    mTexCoords.swap(aRhs.mTexCoords);
+    mNormals.swap(aRhs.mNormals);
+    mHexaConnections.swap(aRhs.mHexaConnections);
+    mMeshBuffer.swap(aRhs.mMeshBuffer);
 }
 
 void GridMesh::freeBuffers()
@@ -418,8 +429,6 @@ bool GridMesh::serialize(Serializer& aOut) const
     // info
     aOut.write(mSize);
     aOut.write(mOriginOffset);
-    aOut.write(mCellNumX);
-    aOut.write(mCellNumY);
     aOut.write(mCellPx);
     aOut.write(0); // primitive type
 
@@ -467,8 +476,6 @@ bool GridMesh::deserialize(Deserializer& aIn)
     // info
     aIn.read(mSize);
     aIn.read(mOriginOffset);
-    aIn.read(mCellNumX);
-    aIn.read(mCellNumY);
     aIn.read(mCellPx);
     // primitive
     {

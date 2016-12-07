@@ -21,6 +21,10 @@ public:
             ImageKey& aKey, img::ResourceNode& aNewResource,
             const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions);
 
+    static cmnd::Stable* createGridMeshUpdater(
+            ImageKey& aKey, int aNewCellSize,
+            const ResourceUpdatingWorkspacePtr& aWorkspace, bool aCreateTransitions);
+
     static cmnd::Base* createResourceSleeperForDelete(ObjectNode& aNode);
 };
 

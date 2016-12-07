@@ -19,6 +19,9 @@ public:
     // default values
     void assignDefaultDepth(float);
     void assignDefaultOpacity(float);
+    void assignDefaultImageResource(img::ResourceNode&);
+    void assignDefaultImageOffset(const QVector2D&);
+    void assignDefaultImageCellSize(int);
 
     // move
     void assignMoveEasing(util::Easing::Param);
@@ -64,6 +67,7 @@ public:
 private:
     bool isValid() const { return mProject && mTarget && mTarget->timeLine(); }
     int getFrame() const { return mProject->animator().currentFrame().get(); }
+    core::TimeLine& currline() { return *mTarget->timeLine(); }
 
     core::Project* mProject;
     core::ObjectNode* mTarget;

@@ -58,6 +58,61 @@ void Util::copyImage(
     }
 }
 
+void Util::expandAlpha1Pixel(uint8* aImage, const QSize& aSize)
+{
+    auto w = aSize.width();
+    auto h = aSize.height();
+
+    // horizontal
+    for (int y = 0; y < h; ++y)
+    {
+        auto row = &((ColorRGBA*)aImage)[w * y];
+        auto prev = &row[0];
+        auto prevA = prev->a();
+
+        for (int x = 1; x < w; ++x)
+        {
+            auto curr = &row[x];
+            auto currA = curr->a();
+
+            if (prevA == 0)
+            {
+                if (currA > 0) prev->a() = currA;
+            }
+            else
+            {
+                if (currA == 0) curr->a() = prevA;
+            }
+            prev = curr;
+            prevA = currA;
+        }
+    }
+    // vertical
+    for (int x = 0; x < w; ++x)
+    {
+        auto column = &((ColorRGBA*)aImage)[x];
+        auto prev = &column[0];
+        auto prevA = prev->a();
+
+        for (int y = 1; y < h; ++y)
+        {
+            auto curr = &column[w * y];
+            auto currA = curr->a();
+
+            if (prevA == 0)
+            {
+                if (currA > 0) prev->a() = currA;
+            }
+            else
+            {
+                if (currA == 0) curr->a() = prevA;
+            }
+            prev = curr;
+            prevA = currA;
+        }
+    }
+}
+
 XCMemBlock Util::recreateForBiLinearSampling(XCMemBlock& aGrabbedImage, const QSize& aSize)
 {
     XC_PTR_ASSERT(aGrabbedImage.data);

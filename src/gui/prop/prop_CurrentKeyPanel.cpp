@@ -312,7 +312,7 @@ CurrentKeyPanel::OpaPanel::OpaPanel(Panel& aPanel, KeyAccessor& aAccessor, int a
         {
             this->mAccessor.assignOpacity(aNext);
         };
-        mGroup->addItem("opacity :", mOpacity);
+        mGroup->addItem("rate :", mOpacity);
     }
     setEnabled(false);
     setKeyExists(false);

@@ -88,16 +88,16 @@ color: #101010;
 border: 1px inset #8C8C8C;
 }
 
-QLineEdit::disabled {
-color: #808080;
-background-color: #ececec;
-border: 1px inset #8C8C8C;
-}
-
 QLineEdit::read-only {
 color: #303030;
 border: 1px solid #a0a0a0;
 border-radius: 1px;
+}
+
+QLineEdit::disabled {
+color: #808080;
+background-color: #ececec;
+border: 1px inset #8C8C8C;
 }
 
 QLabel {
