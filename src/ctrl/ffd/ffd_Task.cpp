@@ -52,6 +52,11 @@ void Task::resetDst(int aVtxCount)
         mOutMesh.resetData<gl::Vector3>(mVtxCount, GL_STREAM_COPY);
         mOutWeight.resetData<GLfloat>(mVtxCount, GL_STREAM_COPY);
     }
+    else
+    {
+        mOutMesh.fastResize(mVtxCount);
+        mOutWeight.fastResize(mVtxCount);
+    }
 }
 
 void Task::writeSrc(

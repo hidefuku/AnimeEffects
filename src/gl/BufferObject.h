@@ -22,10 +22,12 @@ public:
     void resetRawData(GLsizeiptr aTypeSize, const GLvoid* aData,
                       int aDataCount, GLenum aUsage);
 
+    void fastResize(int aDataCount);
+
     void copyFrom(const BufferObject& aFrom);
 
     explicit operator bool() const { return mId != 0; }
-    int dataCount() const { return mDataCount; }
+    int dataCount() const { return mUsingDataCount; }
     GLenum type() const { return mType; }
     GLuint id() const { return mId; }
     GLsizeiptr typeSize() const { return mTypeSize; }
@@ -37,7 +39,8 @@ private:
     GLenum mType;
     GLuint mId;
     GLsizeiptr mTypeSize;
-    int mDataCount;
+    int mUsingDataCount;
+    int mBufferCount;
     GLenum mUsage;
 };
 

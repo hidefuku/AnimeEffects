@@ -9,7 +9,8 @@ BufferObject::BufferObject(GLenum aType)
     : mType(aType)
     , mId(0)
     , mTypeSize(0)
-    , mDataCount(0)
+    , mUsingDataCount(0)
+    , mBufferCount(0)
     , mUsage()
 {
     Global::functions().glGenBuffers(1, &mId);
@@ -27,8 +28,9 @@ void BufferObject::resetRawData(GLsizeiptr aTypeSize, const GLvoid* aData,
                                 int aDataCount, GLenum aUsage)
 {
     Global::Functions& ggl = Global::functions();
-    if (mTypeSize == aTypeSize && mDataCount == aDataCount && mUsage == aUsage)
+    if (mTypeSize == aTypeSize && mBufferCount == aDataCount && mUsage == aUsage)
     {
+        mUsingDataCount = aDataCount;
         if (aData)
         {
             ggl.glBindBuffer(mType, mId);
@@ -40,7 +42,8 @@ void BufferObject::resetRawData(GLsizeiptr aTypeSize, const GLvoid* aData,
     else
     {
         mTypeSize = aTypeSize;
-        mDataCount = aDataCount;
+        mUsingDataCount = aDataCount;
+        mBufferCount = aDataCount;
         mUsage = aUsage;
 
         ggl.glBindBuffer(mType, mId);
@@ -50,9 +53,23 @@ void BufferObject::resetRawData(GLsizeiptr aTypeSize, const GLvoid* aData,
     }
 }
 
+void BufferObject::fastResize(int aDataCount)
+{
+    XC_ASSERT((bool)*this);
+    if (mBufferCount < aDataCount)
+    {
+        resetRawData(mTypeSize, nullptr, aDataCount, mUsage);
+    }
+    else
+    {
+        mUsingDataCount = aDataCount;
+    }
+}
+
 void BufferObject::copyFrom(const BufferObject& aFrom)
 {
-    XC_ASSERT(mDataCount == aFrom.dataCount());
+    XC_MSG_ASSERT(mUsingDataCount == aFrom.dataCount(),
+                  "data count: %d, %d", mUsingDataCount, aFrom.dataCount());
     XC_ASSERT(mTypeSize == aFrom.typeSize());
     XC_ASSERT(mId != 0 && aFrom.id() != 0);
 
@@ -60,7 +77,7 @@ void BufferObject::copyFrom(const BufferObject& aFrom)
 
     ggl.glBindBuffer(mType, mId);
     ggl.glBindBuffer(aFrom.type(), aFrom.id());
-    ggl.glCopyBufferSubData(aFrom.type(), mType, 0, 0, mTypeSize * mDataCount);
+    ggl.glCopyBufferSubData(aFrom.type(), mType, 0, 0, mTypeSize * mUsingDataCount);
     ggl.glBindBuffer(mType, 0);
     ggl.glBindBuffer(aFrom.type(), 0);
 }
