@@ -96,6 +96,9 @@ private:
     typedef img::GridMeshCreator::HexaConnection HexaConnection;
     enum { kMaxConnectionCount = 6, kHexaConnectionCount = 6 };
 
+    void createGridMesh(const void* aImagePtr);
+    void createQuadMesh();
+
     void allocIndexBuffer(int aIndexCount);
     void allocVertexBuffers(int aVertexCount);
     void initializeVertexBuffers(int aVertexCount);

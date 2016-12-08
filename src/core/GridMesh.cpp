@@ -148,7 +148,19 @@ void GridMesh::createFromImage(const void* aImagePtr, const QSize& aSize, int aC
     mSize = aSize;
     mCellPx = aCellPx;
 
-    img::GridMeshCreator creator((const uint8*)aImagePtr, aSize, aCellPx);
+    if (aCellPx < aSize.width() - 2 || aCellPx < aSize.height() - 2)
+    {
+        createGridMesh(aImagePtr);
+    }
+    else
+    {
+        createQuadMesh(); // create bounding quadangle
+    }
+}
+
+void GridMesh::createGridMesh(const void* aImagePtr)
+{
+    img::GridMeshCreator creator((const uint8*)aImagePtr, mSize, mCellPx);
 
     mVertexRect = creator.vertexRect();
     mVertexCount = creator.vertexCount();
@@ -168,6 +180,38 @@ void GridMesh::createFromImage(const void* aImagePtr, const QSize& aSize, int aC
 
     // setup connections
     creator.writeConnections(mHexaConnections.data());
+}
+
+void GridMesh::createQuadMesh()
+{
+    mVertexRect = QRect(QPoint(), mSize);
+    mVertexCount = 4;
+    mIndexCount = 6;
+
+    // allocate attribute buffers
+    allocIndexBuffer(mIndexCount);
+    allocVertexBuffers(mVertexCount);
+    initializeVertexBuffers(mVertexCount);
+
+    // indices
+    mIndices[0] = 0; mIndices[1] = 1; mIndices[2] = 2;
+    mIndices[3] = 1; mIndices[4] = 3; mIndices[5] = 2;
+
+    // vertices
+    mPositions[0].set(0.0f, 0.0f, 0.0f);
+    mPositions[1].set(mSize.width(), 0.0f, 0.0f);
+    mPositions[2].set(0.0f, mSize.height(), 0.0f);
+    mPositions[3].set(mSize.width(), mSize.height(), 0.0f);
+    for (int i = 0; i < 4; ++i) mTexCoords[i] = mPositions[i].vec2();
+
+    // connections
+    auto connects = mHexaConnections.data();
+    for (int i = 0; i < 4; ++i) connects[i].clear();
+
+    connects[0].id[0] = 1; connects[0].id[1] = 2;
+    connects[1].id[0] = 0; connects[1].id[1] = 2; connects[1].id[2] = 3;
+    connects[2].id[0] = 0; connects[2].id[1] = 1; connects[2].id[2] = 3;
+    connects[3].id[0] = 1; connects[3].id[1] = 2;
 }
 
 void GridMesh::writeHeightMap(const HeightMap& aMap, const QVector2D& aMinPos)
