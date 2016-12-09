@@ -101,7 +101,9 @@ SOURCES += \
     time/time_Renderer.cpp \
     time/time_Scaler.cpp \
     TimeLineRow.cpp \
-    time/time_Current.cpp
+    time/time_Current.cpp \
+    ffd/ffd_Target.cpp \
+    ffd/ffd_DrawMode.cpp
 
 HEADERS += \
     Driver.h \
@@ -179,4 +181,7 @@ HEADERS += \
     time/time_Focuser.h \
     time/time_Renderer.h \
     time/time_Scaler.h \
-    time/time_Current.h
+    time/time_Current.h \
+    ffd/ffd_Target.h \
+    ffd/ffd_IMode.h \
+    ffd/ffd_DrawMode.h

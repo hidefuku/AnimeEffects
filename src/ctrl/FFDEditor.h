@@ -1,7 +1,7 @@
 #ifndef CTRL_FFDEDITOR_H
 #define CTRL_FFDEDITOR_H
 
-#include "util/PlacePointer.h"
+#include <QScopedPointer>
 #include "util/Circle.h"
 #include "core/Project.h"
 #include "core/ObjectNode.h"
@@ -12,9 +12,8 @@
 #include "ctrl/IEditor.h"
 #include "ctrl/DriverResources.h"
 #include "ctrl/FFDParam.h"
-#include "ctrl/ffd/ffd_KeyOwner.h"
-#include "ctrl/ffd/ffd_MoveVertices.h"
-#include "ctrl/ffd/ffd_Task.h"
+#include "ctrl/ffd/ffd_Target.h"
+#include "ctrl/ffd/ffd_IMode.h"
 
 namespace ctrl
 {
@@ -36,51 +35,20 @@ public:
     virtual void renderQt(const core::RenderInfo& aInfo, QPainter& aPainter);
 
 private:
-    enum State
-    {
-        State_Idle,
-        State_Draw,
-    };
-
-    struct Status
-    {
-        Status();
-        void clear();
-        bool hasValidBrush() const;
-        bool isDrawing() const { return state == State_Draw; }
-        State state;
-        util::Circle brush;
-        ffd::MoveVertices* commandRef;
-    };
-
-    struct Target
-    {
-        Target();
-        Target(core::ObjectNode* aNode);
-        ~Target();
-        bool isValid() const;
-        core::ObjectNode* node;
-        ffd::KeyOwner keyOwner;
-        QScopedPointer<ffd::Task> task;
-    };
-
     core::LayerMesh* getCurrentAreaMesh(core::ObjectNode& aNode) const;
     bool resetCurrentTarget();
     void updateTargetsKeys();
-    bool hasValidTarget() const;
-    void clearState();
-    bool executeDrawTask(const QVector2D& aCenter, const QVector2D& aMove);
+    void createMode();
+    void finalize();
 
     core::Project& mProject;
     DriverResources& mDriverResources;
     FFDParam mParam;
+    QScopedPointer<ffd::IMode> mCurrent;
 
     // target info
     core::ObjectNode* mRootTarget;
-    QVector<Target*> mTargets;
-
-    // drawing state
-    Status mStatus;
+    ffd::Targets mTargets;
 };
 
 } // namespace ctrl

@@ -1,9 +1,7 @@
-#include "cmnd/ScopedMacro.h"
-#include "cmnd/BasicCommands.h"
 #include "gl/Global.h"
 #include "core/MeshTransformerResource.h"
 #include "ctrl/FFDEditor.h"
-#include "ctrl/TimeLineUtil.h"
+#include "ctrl/ffd/ffd_DrawMode.h"
 
 #include "gl/Util.h"
 #include "gl/ComputeTexture1D.h"
@@ -14,63 +12,14 @@ namespace ctrl
 {
 
 //-------------------------------------------------------------------------------------------------
-FFDEditor::Status::Status()
-    : state(State_Idle)
-    , brush(QVector2D(), 1.0f)
-    , commandRef()
-{
-}
-
-void FFDEditor::Status::clear()
-{
-    state = State_Idle;
-    commandRef = nullptr;
-}
-
-bool FFDEditor::Status::hasValidBrush() const
-{
-    return brush.radius() > 0.0f;
-}
-
-//-------------------------------------------------------------------------------------------------
-FFDEditor::Target::Target()
-    : node()
-    , keyOwner()
-    , task()
-{
-}
-
-FFDEditor::Target::Target(core::ObjectNode* aNode)
-    : node(aNode)
-    , keyOwner()
-    , task()
-{
-}
-
-bool FFDEditor::Target::isValid() const
-{
-    return (bool)node && (bool)keyOwner;
-}
-
-FFDEditor::Target::~Target()
-{
-    keyOwner.deleteOwnsKey();
-
-    gl::Global::makeCurrent();
-    task.reset();
-}
-
-//-------------------------------------------------------------------------------------------------
 FFDEditor::FFDEditor(Project& aProject, DriverResources& aDriverResources)
     : mProject(aProject)
     , mDriverResources(aDriverResources)
     , mParam()
+    , mCurrent()
     , mRootTarget()
     , mTargets()
-    , mStatus()
 {
-    mStatus.brush.setRadius(mParam.radius);
-
     // setup shader
     if (!mDriverResources.meshTransformerResource())
     {
@@ -216,18 +165,22 @@ FFDEditor::FFDEditor(Project& aProject, DriverResources& aDriverResources)
 
 FFDEditor::~FFDEditor()
 {
-    clearState();
+    finalize();
+}
+
+void FFDEditor::finalize()
+{
+    mCurrent.reset();
     qDeleteAll(mTargets);
     mTargets.clear();
+    mRootTarget = nullptr;
 }
 
 bool FFDEditor::setTarget(ObjectNode* aTarget)
 {
-    clearState();
-    qDeleteAll(mTargets);
-    mTargets.clear();
-    mRootTarget = aTarget;
+    finalize();
 
+    mRootTarget = aTarget;
     if (mRootTarget)
     {
         if (!resetCurrentTarget())
@@ -240,56 +193,27 @@ bool FFDEditor::setTarget(ObjectNode* aTarget)
 
 void FFDEditor::updateParam(const FFDParam& aParam)
 {
-    if (aParam.type == 0)
+    if (mParam.type != aParam.type)
     {
-        mStatus.brush.setRadius(aParam.radius);
+        resetCurrentTarget();
     }
-    else
+    if (mCurrent)
     {
-        mStatus.brush.setRadius(aParam.eraseRadius);
+        mCurrent->updateParam(aParam);
     }
-
     mParam = aParam;
 }
 
-bool FFDEditor::updateCursor(const CameraInfo&, const AbstractCursor& aCursor)
+bool FFDEditor::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCursor)
 {
     if (!mRootTarget) return false;
 
-    if (mStatus.state == State_Idle)
+    if (mCurrent)
     {
-        mStatus.brush.setCenter(aCursor.worldPos());
-
-        if (aCursor.emitsLeftPressedEvent())
-        {
-            mStatus.commandRef = nullptr;
-            if (mStatus.hasValidBrush() && hasValidTarget())
-            {
-                mStatus.state = State_Draw;
-            }
-        }
+        return mCurrent->updateCursor(aCamera, aCursor);
     }
-    else if (mStatus.state == State_Draw)
-    {
-        const QVector2D prevCenter = mStatus.brush.center();
-        mStatus.brush.setCenter(aCursor.worldPos());
+    return false;
 
-        // deform
-        if (aCursor.emitsLeftDraggedEvent())
-        {
-            // execute task
-            if (!executeDrawTask(prevCenter, aCursor.worldVel()))
-            {
-                clearState();
-            }
-        }
-        else if (aCursor.emitsLeftReleasedEvent())
-        {
-            clearState();
-        }
-    }
-
-    return true;
 }
 
 void FFDEditor::updateEvent(EventType)
@@ -305,8 +229,8 @@ core::LayerMesh* FFDEditor::getCurrentAreaMesh(core::ObjectNode& aNode) const
 
 bool FFDEditor::resetCurrentTarget()
 {
-    clearState();
-    QVector<Target*> prevTargets = mTargets;
+    mCurrent.reset();
+    QVector<ffd::Target*> prevTargets = mTargets;
     mTargets.clear();
 
     gl::Global::makeCurrent();
@@ -334,7 +258,7 @@ bool FFDEditor::resetCurrentTarget()
             if (!found)
             {
                 // push target
-                mTargets.push_back(new Target(node));
+                mTargets.push_back(new ffd::Target(node));
                 // create task
                 mTargets.back()->task.reset(
                             new ffd::Task(
@@ -346,8 +270,13 @@ bool FFDEditor::resetCurrentTarget()
     }
 
     updateTargetsKeys();
-
     qDeleteAll(prevTargets);
+
+    if (mTargets.hasValidTarget())
+    {
+        createMode();
+    }
+
     return !mTargets.isEmpty();
 }
 
@@ -371,165 +300,33 @@ void FFDEditor::updateTargetsKeys()
     }
 }
 
-bool FFDEditor::hasValidTarget() const
+void FFDEditor::createMode()
 {
-    for (int i = 0; i < mTargets.size(); ++i)
+    mCurrent.reset();
+
+    if (!mTargets.hasValidTarget()) return;
+
+    switch (mParam.type)
     {
-        if (mTargets[i]->isValid()) return true;
-    }
-    return false;
-}
-
-void FFDEditor::clearState()
-{
-    mStatus.clear();
-}
-
-bool FFDEditor::executeDrawTask(const QVector2D& aCenter, const QVector2D& aMove)
-{
-    static const size_t kCopySize = 1024;
-
-    // setup input buffers
-    gl::Global::makeCurrent();
-
-    // request gl task
-    for (int i = 0; i < mTargets.size(); ++i)
-    {
-        ObjectNode* node = mTargets[i]->node;
-        LayerMesh* mesh = mTargets[i]->keyOwner.getParentMesh(node);
-        ffd::KeyOwner& owner = mTargets[i]->keyOwner;
-        FFDKey* key = owner.key;
-        XC_PTR_ASSERT(node);
-        XC_PTR_ASSERT(mesh);
-        XC_PTR_ASSERT(key);
-        XC_ASSERT(mesh->vertexCount() == key->data().count());
-
-        // write vertex positions
-        mTargets[i]->task->writeSrc(
-                    node->timeLine()->current(),
-                    key->data().positions(),
-                    *mesh, mParam);
-
-        // set brush
-        mTargets[i]->task->setBrush(aCenter, aMove);
-
-        // execute
-        mTargets[i]->task->request();
+    case 0:
+    case 1:
+        mCurrent.reset(new ffd::DrawMode(mProject, mTargets));
+        break;
+    default:
+        break;
     }
 
-    // make commands
+    if (mCurrent)
     {
-        XC_PTR_ASSERT(mRootTarget);
-        cmnd::Stack& stack = mProject.commandStack();
-        const int frame = mProject.animator().currentFrame().get();
-
-        if (!mStatus.commandRef)
-        {
-            cmnd::ScopedMacro macro(stack, "update ffd");
-
-            // set notifier
-            auto notifier = new TimeLineUtil::Notifier(mProject);
-            macro.grabListener(notifier);
-            notifier->event().setType(TimeLineEvent::Type_PushKey);
-            for (int i = 0; i < mTargets.size(); ++i)
-            {
-                XC_PTR_ASSERT(mTargets[i]->node->timeLine());
-                notifier->event().pushTarget(
-                            *mTargets[i]->node, TimeKeyType_FFD, frame);
-            }
-
-            // push owns keys
-            for (int i = 0; i < mTargets.size(); ++i)
-            {
-                XC_PTR_ASSERT(mTargets[i]->keyOwner.key);
-
-                if (mTargets[i]->keyOwner.owns())
-                {
-                    mTargets[i]->keyOwner.pushOwnsKey(
-                                stack, *mTargets[i]->node->timeLine(), frame);
-                }
-            }
-
-            // create deform command
-            mStatus.commandRef = new ffd::MoveVertices();
-
-            // push memory assign commands
-            for (int i = 0; i < mTargets.size(); ++i)
-            {
-                FFDKey* key = mTargets[i]->keyOwner.key;
-                ffd::Task* task = mTargets[i]->task.data();
-                XC_PTR_ASSERT(key->data().positions());
-                XC_PTR_ASSERT(task->dstMesh());
-
-                // wait end of task
-                task->finish();
-
-                mStatus.commandRef->push(
-                            new cmnd::AssignMemory(
-                                key->data().positions(),
-                                task->dstMesh(), task->dstSize(), kCopySize));
-            }
-
-            // push deform command
-            stack.push(mStatus.commandRef);
-        }
-        else
-        {
-            const bool modifiable = stack.isModifiable(mStatus.commandRef);
-            TimeLineEvent event;
-            event.setType(TimeLineEvent::Type_ChangeKeyValue);
-
-            for (int i = 0; i < mTargets.size(); ++i)
-            {
-                FFDKey* key = mTargets[i]->keyOwner.key; (void)key;
-                ffd::Task* task = mTargets[i]->task.data();
-                ObjectNode& node = *mTargets[i]->node;
-
-                // wait end of task
-                task->finish();
-
-                if (modifiable)
-                {
-                    // modify value
-                    auto assign = mStatus.commandRef->assign(i);
-                    XC_ASSERT(assign->size() == task->dstSize());
-                    XC_ASSERT(assign->target() == key->data().positions());
-                    assign->modifyValue(task->dstMesh());
-
-                    // push event target
-                    event.pushTarget(node, TimeKeyType_FFD, frame);
-                }
-            }
-
-            // notify
-            if (event.targets().size())
-            {
-                mProject.onTimeLineModified(event, false);
-            }
-
-            return modifiable;
-        }
+        mCurrent->updateParam(mParam);
     }
-    return true;
 }
 
 void FFDEditor::renderQt(const RenderInfo& aInfo, QPainter& aPainter)
 {
-    if (!mRootTarget) return;
-
-    // draw brush
+    if (mCurrent)
     {
-        const QColor idleColor(100, 100, 255, 128);
-        const QColor focusColor(255, 255, 255, 255);
-
-        const QBrush centerBrush(mStatus.isDrawing() ? focusColor : idleColor);
-        Qt::PenStyle style = mParam.type == 0 ? Qt::SolidLine : Qt::DotLine;
-        aPainter.setPen(QPen(centerBrush, 1.2f, style));
-        aPainter.setBrush(Qt::NoBrush);
-
-        const QVector2D center = aInfo.camera.toScreenPos(mStatus.brush.center());
-        const float radius = aInfo.camera.toScreenLength(mStatus.brush.radius());
-        aPainter.drawEllipse(center.toPointF(), radius, radius);
+        mCurrent->renderQt(aInfo, aPainter);
     }
 }
 
