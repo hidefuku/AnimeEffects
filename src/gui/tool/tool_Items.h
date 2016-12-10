@@ -23,6 +23,7 @@ public:
     void setIcons(const QVector<QIcon>& aIcons);
     void connect(const std::function<void(int)>& aPressed);
     int updateGeometry(const QPoint& aPos, int aWidth);
+    void setVisible(bool aIs) { for (auto b : mButtons) b->setVisible(aIs); }
 
 private:
     QButtonGroup* mGroup;

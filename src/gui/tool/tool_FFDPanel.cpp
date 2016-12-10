@@ -19,6 +19,7 @@ FFDPanel::FFDPanel(QWidget* aParent, GUIResources& aResources)
     , mRadius()
     , mPressure()
     , mBlur()
+    , mEraseHardnessGroup()
     , mEraseRadius()
     , mErasePressure()
 {
@@ -34,9 +35,9 @@ void FFDPanel::createBrush()
     mTypeGroup->setChoice(mParam.type);
     mTypeGroup->setToolTips(QStringList() << "Deform Mesh" << "Erase Deforming" << "Drag Vertex");
     mTypeGroup->setIcons(QVector<QIcon>() <<
+                         mResources.icon("move") <<
                          mResources.icon("pencil") <<
-                         mResources.icon("eraser") <<
-                         mResources.icon("move"));
+                         mResources.icon("eraser"));
     mTypeGroup->connect([=](int aIndex)
     {
         this->mParam.type = (ctrl::FFDParam::Type)aIndex;
@@ -87,6 +88,20 @@ void FFDPanel::createBrush()
         this->onParamUpdated(false);
     });
 
+    // erase hardness
+    mEraseHardnessGroup.reset(new SingleOutItem(3, QSize(kButtonSpace, kButtonSpace), this));
+    mEraseHardnessGroup->setChoice(mParam.eraseHardness);
+    mEraseHardnessGroup->setToolTips(QStringList() << "Quadratic" << "Quartic" << "Octic");
+    mEraseHardnessGroup->setIcons(QVector<QIcon>() <<
+                             mResources.icon("hardness1") <<
+                             mResources.icon("hardness2") <<
+                             mResources.icon("hardness3"));
+    mEraseHardnessGroup->connect([=](int aIndex)
+    {
+        this->mParam.eraseHardness = aIndex;
+        this->onParamUpdated(false);
+    });
+
     // erase radius
     mEraseRadius.reset(new SliderItem("radius", this->palette(), this));
     mEraseRadius->setAttribute(util::Range(5, 1000), mParam.eraseRadius, 50);
@@ -111,10 +126,12 @@ void FFDPanel::updateTypeParam(ctrl::FFDParam::Type aType)
     const bool showPencil = (aType == ctrl::FFDParam::Type_Pencil);
     const bool showEraser = (aType == ctrl::FFDParam::Type_Eraser);
 
+    mHardnessGroup->setVisible(showPencil);
     mRadius->setVisible(showPencil);
     mPressure->setVisible(showPencil);
     mBlur->setVisible(showPencil);
 
+    mEraseHardnessGroup->setVisible(showEraser);
     mEraseRadius->setVisible(showEraser);
     mErasePressure->setVisible(showEraser);
 }
@@ -133,12 +150,10 @@ int FFDPanel::updateGeometry(const QPoint& aPos, int aWidth)
     // type
     curPos.setY(mTypeGroup->updateGeometry(curPos, itemWidth) + curPos.y() + 5);
 
-    // hardness
-    curPos.setY(mHardnessGroup->updateGeometry(curPos, itemWidth) + curPos.y() + 5);
-
-
     if (mParam.type == ctrl::FFDParam::Type_Pencil)
     {
+        // hardness
+        curPos.setY(mHardnessGroup->updateGeometry(curPos, itemWidth) + curPos.y() + 5);
         // radius
         curPos.setY(mRadius->updateGeometry(curPos, itemWidth) + curPos.y() + 5);
         // pressure
@@ -148,6 +163,8 @@ int FFDPanel::updateGeometry(const QPoint& aPos, int aWidth)
     }
     else if (mParam.type == ctrl::FFDParam::Type_Eraser)
     {
+        // erase hardness
+        curPos.setY(mEraseHardnessGroup->updateGeometry(curPos, itemWidth) + curPos.y() + 5);
         // eraseRadius
         curPos.setY(mEraseRadius->updateGeometry(curPos, itemWidth) + curPos.y() + 5);
         // erasePressure

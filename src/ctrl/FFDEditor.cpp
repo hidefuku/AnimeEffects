@@ -312,12 +312,13 @@ void FFDEditor::createMode()
 
     switch (mParam.type)
     {
+    case FFDParam::Type_Drag:
+        mCurrent.reset(new ffd::DragMode(mProject, mTargets));
+        break;
     case FFDParam::Type_Pencil:
     case FFDParam::Type_Eraser:
         mCurrent.reset(new ffd::BrushMode(mProject, mTargets));
         break;
-    case FFDParam::Type_Drag:
-        mCurrent.reset(new ffd::DragMode(mProject, mTargets));
     default:
         break;
     }

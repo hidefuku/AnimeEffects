@@ -57,7 +57,7 @@ private:
     virtual void onRequested();
     virtual void onFinished();
     void requestBlur();
-    int shaderType() const;
+    gl::EasyShaderProgram& selectShaderProgram() const;
 
     TaskResource& mResource;
 

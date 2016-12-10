@@ -38,6 +38,7 @@ private:
     QScopedPointer<SliderItem> mRadius;
     QScopedPointer<SliderItem> mPressure;
     QScopedPointer<SliderItem> mBlur;
+    QScopedPointer<SingleOutItem> mEraseHardnessGroup;
     QScopedPointer<SliderItem> mEraseRadius;
     QScopedPointer<SliderItem> mErasePressure;
 };

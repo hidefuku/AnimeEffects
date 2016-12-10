@@ -121,14 +121,19 @@ void Task::setBrush(
     mBrushVel = aBrushVel;
 }
 
-int Task::shaderType() const
+gl::EasyShaderProgram& Task::selectShaderProgram() const
 {
     switch (mType)
     {
-    case Type_Deformer: return TaskResource::kTypeDeformer;
-    case Type_Eraser: return TaskResource::kTypeEraser;
-    case Type_Focuser: return TaskResource::kTypeFocuser;
-    default: XC_ASSERT(0); return 0;
+    case Type_Deformer:
+        return mResource.program(TaskResource::kTypeDeformer, mParam.hardness);
+    case Type_Eraser:
+        return mResource.program(TaskResource::kTypeEraser, mParam.eraseHardness);
+    case Type_Focuser:
+        return mResource.program(TaskResource::kTypeFocuser, 0);
+    default:
+        XC_ASSERT(0);
+        return mResource.program(0, 0);
     }
 }
 
@@ -147,8 +152,8 @@ void Task::onRequested()
     if (mType != Type_Dragger)
     {
         gl::Global::Functions& ggl = gl::Global::functions();
-        gl::EasyShaderProgram& program = mResource.program(shaderType(), mParam.hardness);
         const int srcVtxCount = mSrcMesh.count();
+        gl::EasyShaderProgram& program = selectShaderProgram();
 
         gl::Util::resetRenderState();
         ggl.glEnable(GL_RASTERIZER_DISCARD);
