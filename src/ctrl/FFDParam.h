@@ -7,8 +7,16 @@ namespace ctrl
 class FFDParam
 {
 public:
+    enum Type
+    {
+        Type_Pencil,
+        Type_Eraser,
+        Type_Drag,
+        Type_TERM
+    };
+
     FFDParam()
-        : type(0)
+        : type(Type_Pencil)
         , hardness(1)
         , radius(100)
         , pressure(0.5f)
@@ -16,7 +24,7 @@ public:
         , eraseRadius(100)
         , erasePressure(0.1f)
     {}
-    int type; // (0 = deformer), (1 = eraser)
+    Type type;
     int hardness; // 0, 1, 2
 
     // deformer

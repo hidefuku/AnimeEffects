@@ -2,7 +2,7 @@
 #include "cmnd/BasicCommands.h"
 #include "gl/Global.h"
 #include "ctrl/TimeLineUtil.h"
-#include "ctrl/ffd/ffd_DrawMode.h"
+#include "ctrl/ffd/ffd_BrushMode.h"
 
 using namespace core;
 
@@ -10,26 +10,31 @@ namespace ctrl {
 namespace ffd {
 
 //-------------------------------------------------------------------------------------------------
-DrawMode::Status::Status()
+BrushMode::Status::Status()
     : state(State_Idle)
     , brush(QVector2D(), 1.0f)
     , commandRef()
 {
 }
 
-void DrawMode::Status::clear()
+void BrushMode::Status::clear()
 {
     state = State_Idle;
     commandRef = nullptr;
 }
 
-bool DrawMode::Status::hasValidBrush() const
+bool BrushMode::Status::hasValidBrush() const
 {
     return brush.radius() > 0.0f;
 }
 
+bool BrushMode::Status::isDrawing() const
+{
+    return state == State_Draw;
+}
+
 //-------------------------------------------------------------------------------------------------
-DrawMode::DrawMode(core::Project& aProject, Targets& aTargets)
+BrushMode::BrushMode(core::Project& aProject, Targets& aTargets)
     : mProject(aProject)
     , mTargets(aTargets)
     , mParam()
@@ -37,14 +42,15 @@ DrawMode::DrawMode(core::Project& aProject, Targets& aTargets)
 {
 }
 
-void DrawMode::updateParam(const FFDParam& aParam)
+void BrushMode::updateParam(const FFDParam& aParam)
 {
     mStatus.brush.setRadius(
-                aParam.type == 0 ? aParam.radius : aParam.eraseRadius);
+                aParam.type == FFDParam::Type_Pencil ?
+                    aParam.radius : aParam.eraseRadius);
     mParam = aParam;
 }
 
-bool DrawMode::updateCursor(const core::CameraInfo& aCamera, const core::AbstractCursor& aCursor)
+bool BrushMode::updateCursor(const core::CameraInfo&, const core::AbstractCursor& aCursor)
 {
     if (mStatus.state == State_Idle)
     {
@@ -82,7 +88,7 @@ bool DrawMode::updateCursor(const core::CameraInfo& aCamera, const core::Abstrac
     return true;
 }
 
-void DrawMode::renderQt(const core::RenderInfo& aInfo, QPainter& aPainter)
+void BrushMode::renderQt(const core::RenderInfo& aInfo, QPainter& aPainter)
 {
     // draw brush
     {
@@ -90,7 +96,8 @@ void DrawMode::renderQt(const core::RenderInfo& aInfo, QPainter& aPainter)
         const QColor focusColor(255, 255, 255, 255);
 
         const QBrush centerBrush(mStatus.isDrawing() ? focusColor : idleColor);
-        Qt::PenStyle style = mParam.type == 0 ? Qt::SolidLine : Qt::DotLine;
+        const Qt::PenStyle style =
+                mParam.type == FFDParam::Type_Pencil ? Qt::SolidLine : Qt::DotLine;
         aPainter.setPen(QPen(centerBrush, 1.2f, style));
         aPainter.setBrush(Qt::NoBrush);
 
@@ -100,7 +107,7 @@ void DrawMode::renderQt(const core::RenderInfo& aInfo, QPainter& aPainter)
     }
 }
 
-bool DrawMode::executeDrawTask(const QVector2D& aCenter, const QVector2D& aMove)
+bool BrushMode::executeDrawTask(const QVector2D& aCenter, const QVector2D& aMove)
 {
     static const size_t kCopySize = 1024;
 
@@ -110,6 +117,7 @@ bool DrawMode::executeDrawTask(const QVector2D& aCenter, const QVector2D& aMove)
     // request gl task
     for (int i = 0; i < mTargets.size(); ++i)
     {
+        auto task = mTargets[i]->task.data();
         ObjectNode* node = mTargets[i]->node;
         LayerMesh* mesh = mTargets[i]->keyOwner.getParentMesh(node);
         ffd::KeyOwner& owner = mTargets[i]->keyOwner;
@@ -119,17 +127,22 @@ bool DrawMode::executeDrawTask(const QVector2D& aCenter, const QVector2D& aMove)
         XC_PTR_ASSERT(key);
         XC_ASSERT(mesh->vertexCount() == key->data().count());
 
+        // set task type
+        task->setType(
+                    mParam.type == FFDParam::Type_Pencil ?
+                        Task::Type_Deformer : Task::Type_Eraser);
+
         // write vertex positions
-        mTargets[i]->task->writeSrc(
+        task->writeSrc(
                     node->timeLine()->current(),
                     key->data().positions(),
                     *mesh, mParam);
 
         // set brush
-        mTargets[i]->task->setBrush(aCenter, aMove);
+        task->setBrush(aCenter, aMove);
 
         // execute
-        mTargets[i]->task->request();
+        task->request();
     }
 
     // make commands
@@ -139,7 +152,7 @@ bool DrawMode::executeDrawTask(const QVector2D& aCenter, const QVector2D& aMove)
 
         if (!mStatus.commandRef)
         {
-            cmnd::ScopedMacro macro(stack, "update ffd");
+            cmnd::ScopedMacro macro(stack, "update FFD");
 
             // set notifier
             auto notifier = new TimeLineUtil::Notifier(mProject);

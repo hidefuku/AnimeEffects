@@ -1,7 +1,8 @@
 #include "gl/Global.h"
 #include "core/MeshTransformerResource.h"
 #include "ctrl/FFDEditor.h"
-#include "ctrl/ffd/ffd_DrawMode.h"
+#include "ctrl/ffd/ffd_BrushMode.h"
+#include "ctrl/ffd/ffd_DragMode.h"
 
 #include "gl/Util.h"
 #include "gl/ComputeTexture1D.h"
@@ -34,6 +35,7 @@ FFDEditor::FFDEditor(Project& aProject, DriverResources& aDriverResources)
         mDriverResources.ffdTaskResource()->setup(
                     "./data/shader/FreeFormDeform.glslex",
                     "./data/shader/FFDErase.glslex",
+                    "./data/shader/FFDFocusVertex.glslex",
                     "./data/shader/FFDBlur.glslex");
     }
 
@@ -193,7 +195,10 @@ bool FFDEditor::setTarget(ObjectNode* aTarget)
 
 void FFDEditor::updateParam(const FFDParam& aParam)
 {
-    if (mParam.type != aParam.type)
+    auto prevType = mParam.type;
+    mParam = aParam;
+
+    if (prevType != mParam.type)
     {
         resetCurrentTarget();
     }
@@ -201,7 +206,6 @@ void FFDEditor::updateParam(const FFDParam& aParam)
     {
         mCurrent->updateParam(aParam);
     }
-    mParam = aParam;
 }
 
 bool FFDEditor::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCursor)
@@ -308,10 +312,12 @@ void FFDEditor::createMode()
 
     switch (mParam.type)
     {
-    case 0:
-    case 1:
-        mCurrent.reset(new ffd::DrawMode(mProject, mTargets));
+    case FFDParam::Type_Pencil:
+    case FFDParam::Type_Eraser:
+        mCurrent.reset(new ffd::BrushMode(mProject, mTargets));
         break;
+    case FFDParam::Type_Drag:
+        mCurrent.reset(new ffd::DragMode(mProject, mTargets));
     default:
         break;
     }

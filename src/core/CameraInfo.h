@@ -59,6 +59,8 @@ public:
     QVector2D toWorldVector(const QVector2D& aScreenVector) const;
     QVector3D toWorldVector(const QVector3D& aScreenVector) const;
 
+    float toWorldLength(float aValue) const;
+
     QMatrix4x4 viewMatrix() const;
 
 private:

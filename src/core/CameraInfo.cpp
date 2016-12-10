@@ -118,6 +118,11 @@ QVector3D CameraInfo::toWorldVector(const QVector3D& aScreenVector) const
     return QVector3D(toWorldVector(aScreenVector.toVector2D()), aScreenVector.z());
 }
 
+float CameraInfo::toWorldLength(float aValue) const
+{
+    return aValue / mScale;
+}
+
 std::array<QVector2D, 4> CameraInfo::toScreenQuadangle(const QRectF& aWorldRect) const
 {
     return std::array<QVector2D, 4>{

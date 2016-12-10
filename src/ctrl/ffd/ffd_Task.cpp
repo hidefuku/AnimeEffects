@@ -15,6 +15,7 @@ namespace ffd {
 //-------------------------------------------------------------------------------------------------
 Task::Task(TaskResource& aResource, core::MeshTransformerResource& aMeshRes)
     : mResource(aResource)
+    , mType(Type_TERM)
     , mMeshTransformer(aMeshRes)
     , mMeshBuffer()
     , mSrcMesh()
@@ -28,16 +29,30 @@ Task::Task(TaskResource& aResource, core::MeshTransformerResource& aMeshRes)
     , mOutWeight(GL_TRANSFORM_FEEDBACK_BUFFER)
     , mOriginMesh()
     , mDstMesh()
+    , mDstWeight()
     , mVtxCount()
     , mDstBufferCount()
     , mParam()
     , mBrushCenter()
     , mBrushVel()
     , mUseBlur()
+    , mFocusIndex(-1)
+    , mDragIndex(-1)
+    , mDragMove()
 {
     //GLint val;
     //glGetIntegerv(GL_MAX_TEXTURE_SIZE, &val);
     //qDebug() << val;
+}
+
+void Task::setType(Type aType)
+{
+    mType = aType;
+}
+
+void Task::setDragIndex(int aIndex)
+{
+    mDragIndex = aIndex;
 }
 
 void Task::resetDst(int aVtxCount)
@@ -77,7 +92,7 @@ void Task::writeSrc(
     mParam = aParam;
     mOriginMesh = aOriginMesh.positions();
 
-    mUseBlur = aParam.type == TaskResource::kTypeDeformer && aParam.blur > 0.0f;
+    mUseBlur = aParam.type == FFDParam::Type_Pencil && aParam.blur > 0.0f;
     if (mUseBlur)
     {
         mWorkInMesh.resetData<gl::Vector3>(vtxCount, GL_STREAM_COPY);
@@ -106,25 +121,41 @@ void Task::setBrush(
     mBrushVel = aBrushVel;
 }
 
+int Task::shaderType() const
+{
+    switch (mType)
+    {
+    case Type_Deformer: return TaskResource::kTypeDeformer;
+    case Type_Eraser: return TaskResource::kTypeEraser;
+    case Type_Focuser: return TaskResource::kTypeFocuser;
+    default: XC_ASSERT(0); return 0;
+    }
+}
+
 void Task::onRequested()
 {
+    XC_ASSERT(0 <= mType && mType < Type_TERM);
     XC_PTR_ASSERT(mSrcExpans);
-    XC_ASSERT(mSrcMesh && mOutMesh && mParam.radius > 0.0f);
+    XC_ASSERT(mSrcMesh);
+    XC_ASSERT(mOutMesh);
+    XC_ASSERT(mParam.radius > 0.0f);
     XC_ASSERT(mSrcMesh.count() <= mOutMesh.dataCount());
 
     mMeshBuffer.reserve(mSrcMesh.count());
     mMeshTransformer.callGL(*mSrcExpans, mMeshBuffer, mSrcOriginOffset, mSrcMesh);
 
-    gl::Global::Functions& ggl = gl::Global::functions();
-    gl::EasyShaderProgram& program = mResource.program(mParam.type, mParam.hardness);
-    const int srcVtxCount = mSrcMesh.count();
-
-    gl::Util::resetRenderState();
-    ggl.glEnable(GL_RASTERIZER_DISCARD);
+    if (mType != Type_Dragger)
     {
+        gl::Global::Functions& ggl = gl::Global::functions();
+        gl::EasyShaderProgram& program = mResource.program(shaderType(), mParam.hardness);
+        const int srcVtxCount = mSrcMesh.count();
+
+        gl::Util::resetRenderState();
+        ggl.glEnable(GL_RASTERIZER_DISCARD);
+
         program.bind();
 
-        if (mParam.type == TaskResource::kTypeDeformer)
+        if (mType == Type_Deformer)
         {
             program.setAttributeArray("inPosition", mSrcMesh.array(), srcVtxCount);
             program.setAttributeBuffer("inWorldPosition", mMeshTransformer.positions(), GL_FLOAT, 3);
@@ -140,7 +171,7 @@ void Task::onRequested()
             ggl.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, mOutMesh.id());
             ggl.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, mOutWeight.id());
         }
-        else
+        else if (mType == Type_Eraser)
         {
             program.setAttributeArray("inPosition", mSrcMesh.array(), srcVtxCount);
             program.setAttributeBuffer("inWorldPosition", mMeshTransformer.positions(), GL_FLOAT, 3);
@@ -152,21 +183,31 @@ void Task::onRequested()
 
             ggl.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, mOutMesh.id());
         }
+        else if (mType == Type_Focuser)
+        {
+            program.setAttributeBuffer("inWorldPosition", mMeshTransformer.positions(), GL_FLOAT, 3);
+
+            program.setUniformValue("uBrushCenter", mBrushCenter);
+            program.setUniformValue("uBrushRadius", (float)mParam.radius);
+
+            ggl.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, mOutMesh.id());
+            ggl.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, mOutWeight.id());
+        }
 
         ggl.glBeginTransformFeedback(GL_POINTS);
         ggl.glDrawArrays(GL_POINTS, 0, mSrcMesh.count());
         ggl.glEndTransformFeedback();
 
         program.release();
-    }
-    ggl.glDisable(GL_RASTERIZER_DISCARD);
+        ggl.glDisable(GL_RASTERIZER_DISCARD);
 
-    if (mUseBlur)
-    {
-        requestBlur();
+        // blur for pencil
+        if (mUseBlur)
+        {
+            requestBlur();
+        }
     }
-
-    XC_ASSERT(ggl.glGetError() == GL_NO_ERROR);
+    GL_CHECK_ERROR();
 }
 
 void Task::requestBlur()
@@ -226,22 +267,84 @@ void Task::requestBlur()
     //ggl.glDisable(GL_TEXTURE_1D);
     ggl.glDisable(GL_RASTERIZER_DISCARD);
 
-    XC_ASSERT(ggl.glGetError() == GL_NO_ERROR);
+    GL_CHECK_ERROR();
 }
 
 void Task::onFinished()
 {
     //QElapsedTimer timer; timer.start();
-
     gl::Global::Functions& ggl = gl::Global::functions();
 
-    // read output mesh
-    mOutMesh.bind();
-    ggl.glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0,
-                           sizeof(gl::Vector3) * mVtxCount, mDstMesh.data());
-    mOutMesh.release();
+    if (mType == Type_Dragger)
+    {
+        XC_ASSERT(mDragIndex < mVtxCount);
+        if (mDragIndex >= 0)
+        {
+            mMeshTransformer.positions().bind();
+            ggl.glGetBufferSubData(GL_ARRAY_BUFFER, sizeof(gl::Vector3) * mDragIndex,
+                                   sizeof(gl::Vector3), mDstMesh.data());
+            mMeshTransformer.positions().release();
+            auto pos = mDstMesh[0];
 
-    XC_ASSERT(ggl.glGetError() == GL_NO_ERROR);
+            mMeshTransformer.xArrows().bind();
+            ggl.glGetBufferSubData(GL_ARRAY_BUFFER, sizeof(gl::Vector3) * mDragIndex,
+                                   sizeof(gl::Vector3), mDstMesh.data());
+            mMeshTransformer.xArrows().release();
+            auto xArrow = mDstMesh[0].pos2D();
+
+            mMeshTransformer.yArrows().bind();
+            ggl.glGetBufferSubData(GL_ARRAY_BUFFER, sizeof(gl::Vector3) * mDragIndex,
+                                   sizeof(gl::Vector3), mDstMesh.data());
+            mMeshTransformer.yArrows().release();
+            auto yArrow = mDstMesh[0].pos2D();
+
+            GL_CHECK_ERROR();
+
+            auto lenX = std::max(xArrow.length(), Constant::dividable());
+            auto lenY = std::max(yArrow.length(), Constant::dividable());
+
+            mDragMove = QVector2D(
+                        QVector2D::dotProduct(mBrushVel, xArrow) / (lenX * lenX),
+                        QVector2D::dotProduct(mBrushVel, yArrow) / (lenY * lenY));
+        }
+    }
+    else if (mType == Type_Focuser)
+    {
+        mDstWeight.reset(new GLfloat[mVtxCount]);
+
+        // read output mesh
+        mOutMesh.bind();
+        ggl.glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0,
+                               sizeof(gl::Vector3) * mVtxCount, mDstMesh.data());
+        mOutMesh.release();
+
+        // read output weight
+        mOutWeight.bind();
+        ggl.glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0,
+                               sizeof(GLfloat) * mVtxCount, mDstWeight.data());
+        mOutWeight.release();
+        GL_CHECK_ERROR();
+
+        // find focus
+        mFocusIndex = -1;
+        for (int i = 0; i < mVtxCount; ++i)
+        {
+            if (mDstWeight[i] > 0.0f)
+            {
+                mFocusIndex = i;
+                break;
+            }
+        }
+    }
+    else
+    {
+        // read output mesh
+        mOutMesh.bind();
+        ggl.glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0,
+                               sizeof(gl::Vector3) * mVtxCount, mDstMesh.data());
+        mOutMesh.release();
+    }
+    GL_CHECK_ERROR();
     //qDebug() << timer.nsecsElapsed();
 }
 

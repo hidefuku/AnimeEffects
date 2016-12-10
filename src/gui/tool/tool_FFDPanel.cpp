@@ -30,16 +30,17 @@ FFDPanel::FFDPanel(QWidget* aParent, GUIResources& aResources)
 void FFDPanel::createBrush()
 {
     // type
-    mTypeGroup.reset(new SingleOutItem(2, QSize(kButtonSpace, kButtonSpace), this));
+    mTypeGroup.reset(new SingleOutItem(3, QSize(kButtonSpace, kButtonSpace), this));
     mTypeGroup->setChoice(mParam.type);
-    mTypeGroup->setToolTips(QStringList() << "Deform Mesh" << "Erase Deforming");
+    mTypeGroup->setToolTips(QStringList() << "Deform Mesh" << "Erase Deforming" << "Drag Vertex");
     mTypeGroup->setIcons(QVector<QIcon>() <<
                          mResources.icon("pencil") <<
-                         mResources.icon("eraser"));
+                         mResources.icon("eraser") <<
+                         mResources.icon("move"));
     mTypeGroup->connect([=](int aIndex)
     {
-        this->mParam.type = aIndex;
-        this->updateTypeParam(aIndex);
+        this->mParam.type = (ctrl::FFDParam::Type)aIndex;
+        this->updateTypeParam(this->mParam.type);
         this->onParamUpdated(true);
     });
 
@@ -105,24 +106,17 @@ void FFDPanel::createBrush()
     });
 }
 
-void FFDPanel::updateTypeParam(int aType)
+void FFDPanel::updateTypeParam(ctrl::FFDParam::Type aType)
 {
-    if (aType == 0)
-    {
-        mRadius->show();
-        mPressure->show();
-        mBlur->show();
-        mEraseRadius->hide();
-        mErasePressure->hide();
-    }
-    else
-    {
-        mRadius->hide();
-        mPressure->hide();
-        mBlur->hide();
-        mEraseRadius->show();
-        mErasePressure->show();
-    }
+    const bool showPencil = (aType == ctrl::FFDParam::Type_Pencil);
+    const bool showEraser = (aType == ctrl::FFDParam::Type_Eraser);
+
+    mRadius->setVisible(showPencil);
+    mPressure->setVisible(showPencil);
+    mBlur->setVisible(showPencil);
+
+    mEraseRadius->setVisible(showEraser);
+    mErasePressure->setVisible(showEraser);
 }
 
 int FFDPanel::updateGeometry(const QPoint& aPos, int aWidth)
@@ -143,7 +137,7 @@ int FFDPanel::updateGeometry(const QPoint& aPos, int aWidth)
     curPos.setY(mHardnessGroup->updateGeometry(curPos, itemWidth) + curPos.y() + 5);
 
 
-    if (mParam.type == 0)
+    if (mParam.type == ctrl::FFDParam::Type_Pencil)
     {
         // radius
         curPos.setY(mRadius->updateGeometry(curPos, itemWidth) + curPos.y() + 5);
@@ -152,7 +146,7 @@ int FFDPanel::updateGeometry(const QPoint& aPos, int aWidth)
         // blur
         curPos.setY(mBlur->updateGeometry(curPos, itemWidth) + curPos.y() + 5);
     }
-    else
+    else if (mParam.type == ctrl::FFDParam::Type_Eraser)
     {
         // eraseRadius
         curPos.setY(mEraseRadius->updateGeometry(curPos, itemWidth) + curPos.y() + 5);

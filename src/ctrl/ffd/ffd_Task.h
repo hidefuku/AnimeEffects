@@ -22,8 +22,19 @@ namespace ffd {
 class Task : public gl::Task
 {
 public:
+    enum Type
+    {
+        Type_Deformer,
+        Type_Eraser,
+        Type_Focuser,
+        Type_Dragger,
+        Type_TERM
+    };
 
     Task(TaskResource& aResource, core::MeshTransformerResource& aMeshRes);
+
+    void setType(Type aType);
+    void setDragIndex(int aIndex); // for Dragger
 
     void resetDst(int aVtxCount);
     void writeSrc(
@@ -39,13 +50,18 @@ public:
     gl::Vector3* dstMesh() const { return mDstMesh.data(); }
     size_t dstSize() const { return sizeof(gl::Vector3) * mVtxCount; }
 
+    QVector2D dragMove() const { return mDragMove; } // for Dragger
+    int focusIndex() const { return mFocusIndex; } // for Focuser
+
 private:
     virtual void onRequested();
     virtual void onFinished();
     void requestBlur();
+    int shaderType() const;
 
     TaskResource& mResource;
 
+    Type mType;
     core::MeshTransformer mMeshTransformer;
     core::LayerMesh::MeshBuffer mMeshBuffer;
     util::ArrayBlock<const gl::Vector3> mSrcMesh;
@@ -61,6 +77,7 @@ private:
 
     const gl::Vector3* mOriginMesh;
     QScopedArrayPointer<gl::Vector3> mDstMesh;
+    QScopedArrayPointer<GLfloat> mDstWeight;
     int mVtxCount;
     int mDstBufferCount;
 
@@ -68,6 +85,10 @@ private:
     QVector2D mBrushCenter;
     QVector2D mBrushVel;
     bool mUseBlur;
+
+    int mFocusIndex;
+    int mDragIndex;
+    QVector2D mDragMove;
 };
 
 } // namespace ffd

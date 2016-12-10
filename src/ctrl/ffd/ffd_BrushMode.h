@@ -1,5 +1,5 @@
-#ifndef CTRL_FFD_DRAWMODE_H
-#define CTRL_FFD_DRAWMODE_H
+#ifndef CTRL_FFD_BRUSHMODE_H
+#define CTRL_FFD_BRUSHMODE_H
 
 #include "core/Project.h"
 #include "ctrl/ffd/ffd_Target.h"
@@ -9,10 +9,10 @@
 namespace ctrl {
 namespace ffd {
 
-class DrawMode : public IMode
+class BrushMode : public IMode
 {
 public:
-    DrawMode(core::Project& aProject, Targets& aTargets);
+    BrushMode(core::Project& aProject, Targets& aTargets);
     virtual void updateParam(const FFDParam&);
     virtual bool updateCursor(const core::CameraInfo&, const core::AbstractCursor&);
     virtual void renderQt(const core::RenderInfo& aInfo, QPainter& aPainter);
@@ -29,7 +29,7 @@ private:
         Status();
         void clear();
         bool hasValidBrush() const;
-        bool isDrawing() const { return state == State_Draw; }
+        bool isDrawing() const;
         State state;
         util::Circle brush;
         MoveVertices* commandRef;
@@ -46,4 +46,4 @@ private:
 } // namespace ffd
 } // namespace ctrl
 
-#endif // CTRL_FFD_DRAWMODE_H
+#endif // CTRL_FFD_BRUSHMODE_H

@@ -29,7 +29,7 @@ public:
 
 private:
     void createBrush();
-    void updateTypeParam(int aType);
+    void updateTypeParam(ctrl::FFDParam::Type aType);
 
     GUIResources& mResources;
     ctrl::FFDParam mParam;

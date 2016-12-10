@@ -42,6 +42,7 @@ public:
     int updateGeometry(const QPoint& aPos, int aWidth);
     void show() { mSlider->show(); mLabel->show(); }
     void hide() { mSlider->hide(); mLabel->hide(); }
+    void setVisible(bool aIs) { mSlider->setVisible(aIs); mLabel->setVisible(aIs); }
 
 private:
     void updateText(int aValue);
@@ -60,6 +61,7 @@ public:
     int updateGeometry(const QPoint& aPos, int aWidth);
     void show() { mCheckBox->show(); }
     void hide() { mCheckBox->hide(); }
+    void setVisible(bool aIsVisible) { mCheckBox->setVisible(aIsVisible); }
 
 private:
     QCheckBox* mCheckBox;

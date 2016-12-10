@@ -9,14 +9,14 @@ namespace ffd {
 class TaskResource
 {
 public:
-    enum { kType = 2, kHardness = 3, kVariation = 6 };
-    enum { kTypeDeformer = 0 };
-    enum { kTypeEraser = 1 };
+    enum { kType = 3, kHardness = 3, kVariation = 7 };
+    enum { kTypeDeformer = 0, kTypeEraser = 1, kTypeFocuser = 2 };
 
     TaskResource();
 
     void setup(const QString& aBrushPath,
                const QString& aEraserPath,
+               const QString& aFocuserPath,
                const QString& aBlurPath);
 
     gl::EasyShaderProgram& program(int aType, int aHard);

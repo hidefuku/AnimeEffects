@@ -103,7 +103,8 @@ SOURCES += \
     TimeLineRow.cpp \
     time/time_Current.cpp \
     ffd/ffd_Target.cpp \
-    ffd/ffd_DrawMode.cpp
+    ffd/ffd_DragMode.cpp \
+    ffd/ffd_BrushMode.cpp
 
 HEADERS += \
     Driver.h \
@@ -184,4 +185,5 @@ HEADERS += \
     time/time_Current.h \
     ffd/ffd_Target.h \
     ffd/ffd_IMode.h \
-    ffd/ffd_DrawMode.h
+    ffd/ffd_DragMode.h \
+    ffd/ffd_BrushMode.h

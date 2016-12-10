@@ -9,11 +9,11 @@ namespace ffd {
 //-------------------------------------------------------------------------------------------------
 TaskResource::TaskResource()
 {
-    XC_ASSERT(kType * kHardness == kVariation);
 }
 
 void TaskResource::setup(
-        const QString& aBrushPath, const QString& aEraserPath, const QString& aBlurPath)
+        const QString& aBrushPath, const QString& aEraserPath,
+        const QString& aFocuserPath, const QString& aBlurPath)
 {
     // load brush shader
     {
@@ -22,7 +22,8 @@ void TaskResource::setup(
 
         for (int hard = 0; hard < kHardness; ++hard)
         {
-            buildShader(mProgram[kTypeDeformer * kHardness + hard], code, kTypeDeformer, hard);
+            buildShader(mProgram[kTypeDeformer * kHardness + hard],
+                    code, kTypeDeformer, hard);
         }
     }
 
@@ -33,8 +34,18 @@ void TaskResource::setup(
 
         for (int hard = 0; hard < kHardness; ++hard)
         {
-            buildShader(mProgram[kTypeEraser * kHardness + hard], code, kTypeEraser, hard);
+            buildShader(mProgram[kTypeEraser * kHardness + hard],
+                    code, kTypeEraser, hard);
         }
+    }
+
+    // load focuser shader
+    {
+        QString code;
+        loadFile(aFocuserPath, code);
+
+        buildShader(mProgram[kTypeFocuser * kHardness],
+                code, kTypeFocuser, 0);
     }
 
     // load blur path
@@ -47,14 +58,24 @@ void TaskResource::setup(
 
 gl::EasyShaderProgram& TaskResource::program(int aType, int aHard)
 {
-    XC_ASSERT(aType < kType && aHard < kHardness);
-    return mProgram[aType * kHardness + aHard];
+    switch (aType)
+    {
+    case kTypeDeformer: return mProgram[kTypeDeformer * kHardness + aHard];
+    case kTypeEraser: return mProgram[kTypeEraser * kHardness + aHard];
+    case kTypeFocuser: return mProgram[kTypeFocuser * kHardness + 0];
+    default: XC_ASSERT(0); return mProgram[0];
+    }
 }
 
 const gl::EasyShaderProgram& TaskResource::program(int aType, int aHard) const
 {
-    XC_ASSERT(aType < kType && aHard < kHardness);
-    return mProgram[aType * kHardness + aHard];
+    switch (aType)
+    {
+    case kTypeDeformer: return mProgram[kTypeDeformer * kHardness + aHard];
+    case kTypeEraser: return mProgram[kTypeEraser * kHardness + aHard];
+    case kTypeFocuser: return mProgram[kTypeFocuser * kHardness + 0];
+    default: XC_ASSERT(0); return mProgram[0];
+    }
 }
 
 void TaskResource::loadFile(const QString& aPath, QString& aDstCode)
@@ -81,7 +102,10 @@ void TaskResource::buildShader(
     source.openFromText(aCode);
 
     // set variation
-    source.setVariationValue("HARDNESS", QString::number(aHard));
+    if (aType != kTypeFocuser)
+    {
+        source.setVariationValue("HARDNESS", QString::number(aHard));
+    }
 
     // resolve variation
     if (!source.resolveVariation())
@@ -105,12 +129,19 @@ void TaskResource::buildShader(
         };
         ggl.glTransformFeedbackVaryings(aProgram.id(), 2, kVaryings, GL_SEPARATE_ATTRIBS);
     }
-    else
+    else if (aType == kTypeEraser)
     {
         static const GLchar* kVaryings[] = {
             "outPosition"
         };
         ggl.glTransformFeedbackVaryings(aProgram.id(), 1, kVaryings, GL_SEPARATE_ATTRIBS);
+    }
+    else if (aType == kTypeFocuser)
+    {
+        static const GLchar* kVaryings[] = {
+            "outPosition", "outWeight"
+        };
+        ggl.glTransformFeedbackVaryings(aProgram.id(), 2, kVaryings, GL_SEPARATE_ATTRIBS);
     }
 
     // link shader
