@@ -173,6 +173,11 @@ void CheckBoxItem::setToolTip(const QString& aTip)
     mCheckBox->setToolTip(aTip);
 }
 
+void CheckBoxItem::setChecked(bool aChecked)
+{
+    mCheckBox->setChecked(aChecked);
+}
+
 void CheckBoxItem::connect(const std::function<void(bool)>& aValueChanged)
 {
     mCheckBox->connect(mCheckBox, &QCheckBox::clicked, aValueChanged);

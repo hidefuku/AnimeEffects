@@ -30,6 +30,7 @@ class CentroidMover : public cmnd::Stable
     core::ObjectNode& mTarget;
     QVector2D mPrev;
     QVector2D mNext;
+    bool mAdjustsPostures;
     QVector<KeyData> mKeys;
     QVector<ChildKeyData> mChildKeys;
     QVector<ImageKeyData> mImageKeys;
@@ -38,12 +39,17 @@ class CentroidMover : public cmnd::Stable
     bool mExecuteOnce;
 
 public:
-    static void pushEventTargets(core::ObjectNode& aTarget, core::TimeLineEvent& aEvent);
+    static void pushEventTargets(core::ObjectNode& aTarget,
+                                 core::TimeLineEvent& aEvent,
+                                 bool aAdjustPostures);
 
     CentroidMover(core::Project& aProject,
                   core::ObjectNode& aTarget,
                   const QVector2D& aPrev,
-                  const QVector2D& aNext);
+                  const QVector2D& aNext,
+                  bool aAdjustPostures);
+
+    bool adjustsPostures() const { return mAdjustsPostures; }
 
     void modifyValue(const QVector2D& aNext);
     virtual void exec();

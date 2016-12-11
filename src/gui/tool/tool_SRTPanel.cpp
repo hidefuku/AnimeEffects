@@ -18,6 +18,7 @@ SRTPanel::SRTPanel(QWidget* aParent, GUIResources& aResources)
     , mAddMove()
     , mAddRotate()
     , mAddScale()
+    , mAdjust()
 {
     this->setTitle("SRT Transform");
     createMode();
@@ -59,22 +60,27 @@ void SRTPanel::createMode()
         this->mParam.necessarilyScale = aChecked;
         this->onParamUpdated(false);
     });
+
+    mAdjust.reset(new CheckBoxItem("adjust existing", this));
+    mAdjust->setToolTip("Adjust existing postures.");
+    mAdjust->setChecked(mParam.adjustExistingPostures);
+    mAdjust->connect([=](bool aChecked)
+    {
+        this->mParam.adjustExistingPostures = aChecked;
+        this->onParamUpdated(false);
+    });
 }
 
 void SRTPanel::updateTypeParam(int aType)
 {
-    if (aType == 0)
-    {
-        mAddMove->show();
-        mAddRotate->show();
-        mAddScale->show();
-    }
-    else
-    {
-        mAddMove->hide();
-        mAddRotate->hide();
-        mAddScale->hide();
-    }
+    auto showSRT = aType == 0;
+    auto showCent = aType == 1;
+
+    mAddMove->setVisible(showSRT);
+    mAddRotate->setVisible(showSRT);
+    mAddScale->setVisible(showSRT);
+
+    mAdjust->setVisible(showCent);
 }
 
 int SRTPanel::updateGeometry(const QPoint& aPos, int aWidth)
@@ -93,6 +99,11 @@ int SRTPanel::updateGeometry(const QPoint& aPos, int aWidth)
         curPos.setY(mAddMove->updateGeometry(curPos, itemWidth) + curPos.y());
         curPos.setY(mAddRotate->updateGeometry(curPos, itemWidth) + curPos.y());
         curPos.setY(mAddScale->updateGeometry(curPos, itemWidth) + curPos.y());
+        curPos.setY(curPos.y() + 5);
+    }
+    else
+    {
+        curPos.setY(mAdjust->updateGeometry(curPos, itemWidth) + curPos.y());
         curPos.setY(curPos.y() + 5);
     }
 

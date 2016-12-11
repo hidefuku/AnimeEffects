@@ -34,6 +34,7 @@ private:
     QScopedPointer<CheckBoxItem> mAddMove;
     QScopedPointer<CheckBoxItem> mAddRotate;
     QScopedPointer<CheckBoxItem> mAddScale;
+    QScopedPointer<CheckBoxItem> mAdjust;
 };
 
 } // namespace tool

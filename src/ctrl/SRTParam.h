@@ -12,11 +12,13 @@ public:
         , necessarilyMove()
         , necessarilyRotate()
         , necessarilyScale()
+        , adjustExistingPostures(true)
     {}
     int mode;
     bool necessarilyMove;
     bool necessarilyRotate;
     bool necessarilyScale;
+    bool adjustExistingPostures;
 };
 
 } // namespace ctrl

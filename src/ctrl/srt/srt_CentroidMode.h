@@ -15,6 +15,7 @@ class CentroidMode : public IMode
 {
 public:
     CentroidMode(core::Project& aProject, core::ObjectNode& aTarget, KeyOwner& aKey);
+    virtual void updateParam(const SRTParam&);
     virtual bool updateCursor(const core::CameraInfo&, const core::AbstractCursor&);
     virtual void renderQt(const core::RenderInfo& aInfo, QPainter& aPainter);
 
@@ -30,6 +31,7 @@ private:
     QVector2D mBaseVec;
     QVector2D mBaseCenter;
     CentroidMover* mCommandRef;
+    bool mAdjustPostures;
 };
 
 } // namespace srt

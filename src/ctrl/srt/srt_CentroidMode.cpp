@@ -27,8 +27,14 @@ CentroidMode::CentroidMode(Project& aProject, ObjectNode& aTarget, KeyOwner& aKe
     , mMoving()
     , mBaseVec()
     , mCommandRef()
+    , mAdjustPostures()
 {
     XC_PTR_ASSERT(mTarget.timeLine());
+}
+
+void CentroidMode::updateParam(const SRTParam& aParam)
+{
+    mAdjustPostures = aParam.adjustExistingPostures;
 }
 
 bool CentroidMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCursor)
@@ -114,7 +120,7 @@ void CentroidMode::moveCentroid(const QVector2D& aNewCenter)
         // singleshot notify
         TimeLineEvent event;
         event.setType(TimeLineEvent::Type_ChangeKeyValue);
-        CentroidMover::pushEventTargets(mTarget, event);
+        CentroidMover::pushEventTargets(mTarget, event, mCommandRef->adjustsPostures());
         mProject.onTimeLineModified(event, false);
         mProject.onNodeAttributeModified(mTarget, false); ///@todo Is there any means?
     }
@@ -126,13 +132,14 @@ void CentroidMode::moveCentroid(const QVector2D& aNewCenter)
         {
             auto tln = new TimeLineUtil::Notifier(mProject);
             tln->event().setType(TimeLineEvent::Type_ChangeKeyValue);
-            CentroidMover::pushEventTargets(mTarget, tln->event());
+            CentroidMover::pushEventTargets(mTarget, tln->event(), mAdjustPostures);
             macro.grabListener(tln);
         }
         macro.grabListener(new ObjectNodeUtil::AttributeNotifier(mProject, mTarget));
 
         // create command
-        mCommandRef = new CentroidMover(mProject, mTarget, mBaseCenter, newCenter);
+        mCommandRef = new CentroidMover(mProject, mTarget, mBaseCenter,
+                                        newCenter, mAdjustPostures);
 
         // push command
         stack.push(mCommandRef);

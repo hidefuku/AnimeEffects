@@ -58,6 +58,7 @@ class CheckBoxItem
 public:
     CheckBoxItem(const QString& aLabel, QWidget* aParent);
     void setToolTip(const QString& aTip);
+    void setChecked(bool aChecked);
     void connect(const std::function<void(bool)>& aValueChanged);
     int updateGeometry(const QPoint& aPos, int aWidth);
     void show() { mCheckBox->show(); }

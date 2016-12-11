@@ -32,9 +32,13 @@ void addAllKeysToEvent(ObjectNode& aTarget, TimeKeyType aType, TimeLineEvent& aE
 }
 
 //-------------------------------------------------------------------------------------------------
-void CentroidMover::pushEventTargets(ObjectNode& aTarget, TimeLineEvent& aEvent)
+void CentroidMover::pushEventTargets(
+        ObjectNode& aTarget, TimeLineEvent& aEvent, bool aAdjustPostures)
 {
-    addAllKeysToEvent(aTarget, TimeKeyType_Move, aEvent, true);
+    if (aAdjustPostures)
+    {
+        addAllKeysToEvent(aTarget, TimeKeyType_Move, aEvent, true);
+    }
     addAllKeysToEvent(aTarget, TimeKeyType_Mesh, aEvent, true);
     addAllKeysToEvent(aTarget, TimeKeyType_Image, aEvent, true);
 
@@ -48,11 +52,13 @@ void CentroidMover::pushEventTargets(ObjectNode& aTarget, TimeLineEvent& aEvent)
 CentroidMover::CentroidMover(Project& aProject,
                              ObjectNode& aTarget,
                              const QVector2D& aPrev,
-                             const QVector2D& aNext)
+                             const QVector2D& aNext,
+                             bool aAdjustPostures)
     : mProject(aProject)
     , mTarget(aTarget)
     , mPrev(aPrev)
     , mNext(aNext)
+    , mAdjustsPostures(aAdjustPostures)
     , mKeys()
     , mChildKeys()
     , mImageKeys()
@@ -156,16 +162,19 @@ void CentroidMover::exec()
     const QVector2D keyMove = mNext - mPrev;
     const QVector3D keyMove3D(keyMove);
 
-    // translate moveKeys
-    addAllTargets(mTarget, TimeKeyType_Move, true, [=](TimeKey* aKey)
+    if (mAdjustsPostures)
     {
-        TIMEKEY_PTR_TYPE_ASSERT(aKey, Move);
-        MoveKey* moveKey = (MoveKey*)aKey;
-        const QVector2D prev = moveKey->pos();
-        const QVector2D next = prev + (getLocalSRMatrix(*moveKey) * keyMove3D).toVector2D();
-        KeyData keyData = { moveKey, prev, next };
-        this->mKeys.push_back(keyData);
-    });
+        // translate moveKeys
+        addAllTargets(mTarget, TimeKeyType_Move, true, [=](TimeKey* aKey)
+        {
+            TIMEKEY_PTR_TYPE_ASSERT(aKey, Move);
+            MoveKey* moveKey = (MoveKey*)aKey;
+            const QVector2D prev = moveKey->pos();
+            const QVector2D next = prev + (getLocalSRMatrix(*moveKey) * keyMove3D).toVector2D();
+            KeyData keyData = { moveKey, prev, next };
+            this->mKeys.push_back(keyData);
+        });
+    }
 
     // translate imageKeys negatively
     addAllTargets(mTarget, TimeKeyType_Image, true, [=](TimeKey* aKey)
