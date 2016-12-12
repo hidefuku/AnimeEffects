@@ -4,7 +4,7 @@
 
 namespace core
 {
-const MoveKey::SplineType MoveKey::kDefaultSplineType = MoveKey::SplineType_CatmullRom;
+const MoveKey::SplineType MoveKey::kDefaultSplineType = MoveKey::SplineType_Linear;
 
 //-------------------------------------------------------------------------------------------------
 MoveKey::Data::Data()
