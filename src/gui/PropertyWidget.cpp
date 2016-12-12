@@ -18,13 +18,12 @@ PropertyWidget::PropertyWidget(ViaPoint& aViaPoint, QWidget* aParent)
 {
     this->setFocusPolicy(Qt::NoFocus);
 
-    //this->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    //this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
     //this->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     //this->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::MinimumExpanding);
+    this->setWidgetResizable(true);
 
     mBoard = new prop::Backboard(aViaPoint, this);
     this->setWidget(mBoard);
