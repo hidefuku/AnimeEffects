@@ -400,7 +400,7 @@
     <message>
         <location filename="../../src/gui/tool/tool_ModePanel.cpp" line="21"/>
         <source>Scale Rotate Translate</source>
-        <translation>移動、回転、倍率を操作する</translation>
+        <translation>移動、回転、拡縮を操作する</translation>
     </message>
     <message>
         <location filename="../../src/gui/tool/tool_ModePanel.cpp" line="22"/>
@@ -428,7 +428,7 @@
     <message>
         <location filename="../../src/gui/tool/tool_SRTPanel.cpp" line="23"/>
         <source>SRT Transform</source>
-        <translation>移動、回転、倍率</translation>
+        <translation>移動、回転、拡縮</translation>
     </message>
     <message>
         <location filename="../../src/gui/tool/tool_SRTPanel.cpp" line="34"/>
@@ -463,12 +463,12 @@
     <message>
         <location filename="../../src/gui/tool/tool_SRTPanel.cpp" line="58"/>
         <source>necessarily scale</source>
-        <translation>必ず倍率</translation>
+        <translation>必ず拡縮</translation>
     </message>
     <message>
         <location filename="../../src/gui/tool/tool_SRTPanel.cpp" line="59"/>
         <source>Necessarily add a ScaleKey if the posture is modified.</source>
-        <translation>姿勢を修正した際に必ず倍率キーを追加する</translation>
+        <translation>姿勢を修正した際に必ず拡縮キーを追加する</translation>
     </message>
     <message>
         <location filename="../../src/gui/tool/tool_SRTPanel.cpp" line="66"/>
