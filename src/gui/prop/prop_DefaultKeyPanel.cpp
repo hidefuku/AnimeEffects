@@ -12,36 +12,30 @@ namespace gui {
 namespace prop {
 
 //-------------------------------------------------------------------------------------------------
-DefaultKeyPanel::DepthPanel::DepthPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
-    : mAccessor(aAccessor)
-    , mGroup()
+DefaultDepthGroup::DefaultDepthGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
+    : KeyGroup(tr("Depth"), aLabelWidth)
+    , mAccessor(aAccessor)
     , mDepth()
 {
-    mGroup = new KeyGroup("Depth", aLabelWidth);
     {
-        aPanel.addGroup(mGroup);
+        aPanel.addGroup(this);
 
         // depth
-        mDepth = new DecimalItem(mGroup);
+        mDepth = new DecimalItem(this);
         mDepth->setRange(core::Constant::transMin(), core::Constant::transMax());
         mDepth->onValueUpdated = [=](double, double aNext)
         {
             this->mAccessor.assignDefaultDepth(aNext);
         };
-        mGroup->addItem("position :", mDepth);
+        this->addItem(tr("position :"), mDepth);
     }
-    mGroup->setEnabled(false);
+    this->setEnabled(false);
 }
 
-void DefaultKeyPanel::DepthPanel::setEnabled(bool aEnabled)
-{
-    mGroup->setEnabled(aEnabled);
-}
-
-void DefaultKeyPanel::DepthPanel::setKeyValue(const core::TimeLine& aLine)
+void DefaultDepthGroup::setKeyValue(const core::TimeLine& aLine)
 {
     auto key = (core::DepthKey*)aLine.defaultKey(core::TimeKeyType_Depth);
-    mGroup->setVisible((bool)key);
+    this->setVisible((bool)key);
     if (key)
     {
         mDepth->setValue(key->depth());
@@ -49,36 +43,30 @@ void DefaultKeyPanel::DepthPanel::setKeyValue(const core::TimeLine& aLine)
 }
 
 //-------------------------------------------------------------------------------------------------
-DefaultKeyPanel::OpaPanel::OpaPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
-    : mAccessor(aAccessor)
-    , mGroup()
+DefaultOpaGroup::DefaultOpaGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
+    : KeyGroup(tr("Opacity"), aLabelWidth)
+    , mAccessor(aAccessor)
     , mOpacity()
 {
-    mGroup = new KeyGroup("Opacity", aLabelWidth);
     {
-        aPanel.addGroup(mGroup);
+        aPanel.addGroup(this);
 
         // opacity
-        mOpacity = new DecimalItem(mGroup);
+        mOpacity = new DecimalItem(this);
         mOpacity->setRange(0.0f, 1.0f);
         mOpacity->onValueUpdated = [=](double, double aNext)
         {
             this->mAccessor.assignDefaultOpacity(aNext);
         };
-        mGroup->addItem("rate :", mOpacity);
+        this->addItem(tr("rate :"), mOpacity);
     }
-    mGroup->setEnabled(false);
+    this->setEnabled(false);
 }
 
-void DefaultKeyPanel::OpaPanel::setEnabled(bool aEnabled)
-{
-    mGroup->setEnabled(aEnabled);
-}
-
-void DefaultKeyPanel::OpaPanel::setKeyValue(const core::TimeLine& aLine)
+void DefaultOpaGroup::setKeyValue(const core::TimeLine& aLine)
 {
     auto key = (core::OpaKey*)aLine.defaultKey(core::TimeKeyType_Opa);
-    mGroup->setVisible((bool)key);
+    this->setVisible((bool)key);
     if (key)
     {
         mOpacity->setValue(key->opacity());
@@ -86,23 +74,21 @@ void DefaultKeyPanel::OpaPanel::setKeyValue(const core::TimeLine& aLine)
 }
 
 //-------------------------------------------------------------------------------------------------
-DefaultKeyPanel::ImagePanel::ImagePanel(
+DefaultImageGroup::DefaultImageGroup(
         Panel& aPanel, KeyAccessor& aAccessor,
         int aLabelWidth, ViaPoint& aViaPoint)
-    : mAccessor(aAccessor)
-    , mGroup()
+    : KeyGroup(tr("Image"), aLabelWidth)
+    , mAccessor(aAccessor)
     , mBrowse()
     , mOffset()
     , mCellSize()
     , mViaPoint(aViaPoint)
 {
-    mGroup = new KeyGroup("Image", aLabelWidth);
     {
-        aPanel.addGroup(mGroup);
+        aPanel.addGroup(this);
 
         // browse
-        mBrowse = new BrowseItem(mGroup);
-        mGroup->addItem("resource :", mBrowse);
+        mBrowse = new BrowseItem(this);
         mBrowse->onButtonPushed = [=]()
         {
             auto resNode = this->mViaPoint.requireOneResource();
@@ -112,37 +98,34 @@ DefaultKeyPanel::ImagePanel::ImagePanel(
                 this->mAccessor.assignDefaultImageResource(*resNode);
             }
         };
+        this->addItem(tr("resource :"), mBrowse);
+
         // offset
-        mOffset = new Vector2DItem(mGroup);
+        mOffset = new Vector2DItem(this);
         mOffset->setRange(core::Constant::transMin(), core::Constant::transMax());
         mOffset->onValueUpdated = [=](QVector2D, QVector2D aNext)
         {
             this->mAccessor.assignDefaultImageOffset(-aNext);
         };
-        mGroup->addItem("center :", mOffset);
+        this->addItem(tr("center :"), mOffset);
 
         // cell size
-        mCellSize = new IntegerItem(mGroup);
+        mCellSize = new IntegerItem(this);
         mCellSize->setRange(core::Constant::imageCellSizeMin(),
                             core::Constant::imageCellSizeMax());
         mCellSize->onValueUpdated = [=](int, int aNext)
         {
             this->mAccessor.assignDefaultImageCellSize(aNext);
         };
-        mGroup->addItem("mesh cell :", mCellSize);
+        this->addItem(tr("mesh cell :"), mCellSize);
     }
     setEnabled(false);
 }
 
-void DefaultKeyPanel::ImagePanel::setEnabled(bool aEnabled)
-{
-    mGroup->setEnabled(aEnabled);
-}
-
-void DefaultKeyPanel::ImagePanel::setKeyValue(const core::TimeLine& aLine)
+void DefaultImageGroup::setKeyValue(const core::TimeLine& aLine)
 {
     auto key = (const core::ImageKey*)aLine.defaultKey(core::TimeKeyType_Image);
-    mGroup->setVisible((bool)key);
+    this->setVisible((bool)key);
     if (key)
     {
         TIMEKEY_PTR_TYPE_ASSERT(key, Image);
@@ -166,7 +149,7 @@ DefaultKeyPanel::DefaultKeyPanel(ViaPoint& aViaPoint, core::Project& aProject, c
     , mImagePanel()
 {
     mKeyAccessor.setProject(&aProject);
-    mLabelWidth = this->fontMetrics().boundingRect("MaxTextWidth :").width();
+    mLabelWidth = this->fontMetrics().boundingRect(tr("MaxTextWidth :")).width();
 
     build();
     this->hide();
@@ -179,7 +162,7 @@ void DefaultKeyPanel::setTarget(core::ObjectNode* aTarget)
 
     if (mTarget)
     {
-        this->setTitle(mTarget->name() + " Default Keys");
+        this->setTitle(mTarget->name() + " : " + tr("Default Keys"));
         this->show();
     }
     else
@@ -210,9 +193,9 @@ void DefaultKeyPanel::build()
 {
     using core::Constant;
 
-    mDepthPanel.reset(new DepthPanel(*this, mKeyAccessor, mLabelWidth));
-    mOpaPanel.reset(new OpaPanel(*this, mKeyAccessor, mLabelWidth));
-    mImagePanel.reset(new ImagePanel(*this, mKeyAccessor, mLabelWidth, mViaPoint));
+    mDepthPanel.reset(new DefaultDepthGroup(*this, mKeyAccessor, mLabelWidth));
+    mOpaPanel.reset(new DefaultOpaGroup(*this, mKeyAccessor, mLabelWidth));
+    mImagePanel.reset(new DefaultImageGroup(*this, mKeyAccessor, mLabelWidth, mViaPoint));
 
     this->addStretch();
 }

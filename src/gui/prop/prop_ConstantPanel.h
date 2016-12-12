@@ -13,6 +13,7 @@ namespace prop {
 
 class ConstantPanel : public Panel
 {
+    Q_OBJECT
 public:
     ConstantPanel(ViaPoint& aViaPoint, core::Project& aProject, const QString& aTitle, QWidget* aParent);
     void setTarget(core::ObjectNode* aTarget);

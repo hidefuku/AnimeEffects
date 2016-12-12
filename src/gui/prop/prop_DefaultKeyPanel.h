@@ -13,8 +13,50 @@
 namespace gui {
 namespace prop {
 
+//-------------------------------------------------------------------------------------------------
+class DefaultDepthGroup : public KeyGroup
+{
+    Q_OBJECT
+public:
+    DefaultDepthGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+    void setKeyValue(const core::TimeLine& aLine);
+private:
+    KeyAccessor& mAccessor;
+    DecimalItem* mDepth;
+};
+
+//-------------------------------------------------------------------------------------------------
+class DefaultOpaGroup : public KeyGroup
+{
+    Q_OBJECT
+public:
+    DefaultOpaGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
+    void setKeyValue(const core::TimeLine& aLine);
+private:
+    KeyAccessor& mAccessor;
+    DecimalItem* mOpacity;
+};
+
+//-------------------------------------------------------------------------------------------------
+class DefaultImageGroup : public KeyGroup
+{
+    Q_OBJECT
+public:
+    DefaultImageGroup(Panel& aPanel, KeyAccessor& aAccessor,
+                      int aLabelWidth, ViaPoint& aViaPoint);
+    void setKeyValue(const core::TimeLine& aLine);
+private:
+    KeyAccessor& mAccessor;
+    BrowseItem* mBrowse;
+    Vector2DItem* mOffset;
+    IntegerItem* mCellSize;
+    ViaPoint& mViaPoint;
+};
+
+//-------------------------------------------------------------------------------------------------
 class DefaultKeyPanel : public Panel
 {
+    Q_OBJECT
 public:
     DefaultKeyPanel(ViaPoint& aViaPoint, core::Project& aProject, const QString& aTitle, QWidget* aParent);
     void setTarget(core::ObjectNode* aTarget);
@@ -22,49 +64,6 @@ public:
     void updateKey();
 
 private:
-    class DepthPanel
-    {
-    public:
-        DepthPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
-        void setEnabled(bool);
-        void setKeyValue(const core::TimeLine& aLine);
-
-    private:
-        KeyAccessor& mAccessor;
-        KeyGroup* mGroup;
-        DecimalItem* mDepth;
-    };
-
-    class OpaPanel
-    {
-    public:
-        OpaPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth);
-        void setEnabled(bool);
-        void setKeyValue(const core::TimeLine& aLine);
-
-    private:
-        KeyAccessor& mAccessor;
-        KeyGroup* mGroup;
-        DecimalItem* mOpacity;
-    };
-
-    class ImagePanel
-    {
-    public:
-        ImagePanel(Panel& aPanel, KeyAccessor& aAccessor,
-                   int aLabelWidth, ViaPoint& aViaPoint);
-        void setEnabled(bool);
-        void setKeyValue(const core::TimeLine& aLine);
-
-    private:
-        KeyAccessor& mAccessor;
-        KeyGroup* mGroup;
-        BrowseItem* mBrowse;
-        Vector2DItem* mOffset;
-        IntegerItem* mCellSize;
-        ViaPoint& mViaPoint;
-    };
-
     void build();
     void updateKeyExists();
     void updateKeyValue();
@@ -75,9 +74,9 @@ private:
     KeyAccessor mKeyAccessor;
     int mLabelWidth;
 
-    QScopedPointer<DepthPanel> mDepthPanel;
-    QScopedPointer<OpaPanel> mOpaPanel;
-    QScopedPointer<ImagePanel> mImagePanel;
+    QScopedPointer<DefaultDepthGroup> mDepthPanel;
+    QScopedPointer<DefaultOpaGroup> mOpaPanel;
+    QScopedPointer<DefaultImageGroup> mImagePanel;
 };
 
 } // namespace prop

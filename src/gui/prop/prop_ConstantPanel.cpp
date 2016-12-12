@@ -38,7 +38,7 @@ ConstantPanel::ConstantPanel(ViaPoint& aViaPoint, core::Project& aProject, const
     , mBlendMode()
     , mClipped()
 {
-    mLabelWidth = this->fontMetrics().boundingRect("MaxTextWidth :").width();
+    mLabelWidth = this->fontMetrics().boundingRect(tr("MaxTextWidth :")).width();
 
     build();
     this->hide();
@@ -50,7 +50,7 @@ void ConstantPanel::setTarget(core::ObjectNode* aTarget)
 
     if (mTarget)
     {
-        this->setTitle(mTarget->name() + " Constant");
+        this->setTitle(mTarget->name() + " : " + tr("Constant"));
         this->show();
     }
     else
@@ -70,7 +70,7 @@ void ConstantPanel::build()
 {
     using core::Constant;
 
-    mRenderingAttributes = new AttrGroup("Rendering", mLabelWidth);
+    mRenderingAttributes = new AttrGroup(tr("Rendering"), mLabelWidth);
     {
         this->addGroup(mRenderingAttributes);
 
@@ -85,7 +85,7 @@ void ConstantPanel::build()
         {
             assignBlendMode(this->mProject, this->mTarget, (img::BlendMode)aNext);
         };
-        mRenderingAttributes->addItem("blend :", mBlendMode);
+        mRenderingAttributes->addItem(tr("blend :"), mBlendMode);
 
         // clipped
         mClipped = new CheckItem(mRenderingAttributes);
@@ -93,7 +93,7 @@ void ConstantPanel::build()
         {
             assignClipped(this->mProject, this->mTarget, aNext);
         };
-        mRenderingAttributes->addItem("clipped :", mClipped);
+        mRenderingAttributes->addItem(tr("clipped :"), mClipped);
     }
 
     this->addStretch();

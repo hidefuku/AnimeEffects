@@ -455,6 +455,261 @@
     </message>
 </context>
 <context>
+    <name>gui::prop::ConstantPanel</name>
+    <message>
+        <location filename="../../src/gui/prop/prop_ConstantPanel.cpp" line="41"/>
+        <source>MaxTextWidth :</source>
+        <translation>最大テキスト表示幅 :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_ConstantPanel.cpp" line="53"/>
+        <source>Constant</source>
+        <translation>固定値</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_ConstantPanel.cpp" line="73"/>
+        <source>Rendering</source>
+        <translation>描画</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_ConstantPanel.cpp" line="88"/>
+        <source>blend :</source>
+        <translation>合成モード :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_ConstantPanel.cpp" line="96"/>
+        <source>clipped :</source>
+        <translation>クリッピング :</translation>
+    </message>
+</context>
+<context>
+    <name>gui::prop::CurrentKeyPanel</name>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="555"/>
+        <source>MaxTextWidth :</source>
+        <translation>最大テキスト表示幅 :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="568"/>
+        <source>Current Keys</source>
+        <translation>現在のキー</translation>
+    </message>
+</context>
+<context>
+    <name>gui::prop::DefaultDepthGroup</name>
+    <message>
+        <location filename="../../src/gui/prop/prop_DefaultKeyPanel.cpp" line="16"/>
+        <source>Depth</source>
+        <translation>深度</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_DefaultKeyPanel.cpp" line="30"/>
+        <source>position :</source>
+        <translation>位置 :</translation>
+    </message>
+</context>
+<context>
+    <name>gui::prop::DefaultImageGroup</name>
+    <message>
+        <location filename="../../src/gui/prop/prop_DefaultKeyPanel.cpp" line="80"/>
+        <source>Image</source>
+        <translation>画像</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_DefaultKeyPanel.cpp" line="101"/>
+        <source>resource :</source>
+        <translation>リソース :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_DefaultKeyPanel.cpp" line="110"/>
+        <source>center :</source>
+        <translation>中心 :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_DefaultKeyPanel.cpp" line="120"/>
+        <source>mesh cell :</source>
+        <translation>メッシュ単位 :</translation>
+    </message>
+</context>
+<context>
+    <name>gui::prop::DefaultKeyPanel</name>
+    <message>
+        <location filename="../../src/gui/prop/prop_DefaultKeyPanel.cpp" line="152"/>
+        <source>MaxTextWidth :</source>
+        <translation>最大テキスト表示幅 :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_DefaultKeyPanel.cpp" line="165"/>
+        <source>Default Keys</source>
+        <translation>初期キー</translation>
+    </message>
+</context>
+<context>
+    <name>gui::prop::DefaultOpaGroup</name>
+    <message>
+        <location filename="../../src/gui/prop/prop_DefaultKeyPanel.cpp" line="47"/>
+        <source>Opacity</source>
+        <translation>不透明度</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_DefaultKeyPanel.cpp" line="61"/>
+        <source>rate :</source>
+        <translation>割合 :</translation>
+    </message>
+</context>
+<context>
+    <name>gui::prop::DepthKeyGroup</name>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="217"/>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="224"/>
+        <source>Depth</source>
+        <translation>深度</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="233"/>
+        <source>easing :</source>
+        <translation>イージング :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="246"/>
+        <source>position :</source>
+        <translation>位置 :</translation>
+    </message>
+</context>
+<context>
+    <name>gui::prop::FFDKeyGroup</name>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="396"/>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="402"/>
+        <source>FFD</source>
+        <translation>自由変形</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="411"/>
+        <source>easing :</source>
+        <translation>イージング :</translation>
+    </message>
+</context>
+<context>
+    <name>gui::prop::ImageKeyGroup</name>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="449"/>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="458"/>
+        <source>Image</source>
+        <translation>画像</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="476"/>
+        <source>resource :</source>
+        <translation>リソース :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="485"/>
+        <source>center :</source>
+        <translation>中心 :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="495"/>
+        <source>mesh cell :</source>
+        <translation>メッシュ単位 :</translation>
+    </message>
+</context>
+<context>
+    <name>gui::prop::MoveKeyGroup</name>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="16"/>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="24"/>
+        <source>Move</source>
+        <translation>移動</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="33"/>
+        <source>easing :</source>
+        <translation>イージング :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="47"/>
+        <source>spline :</source>
+        <translation>スプライン :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="56"/>
+        <source>position :</source>
+        <translation>位置 :</translation>
+    </message>
+</context>
+<context>
+    <name>gui::prop::OpaKeyGroup</name>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="280"/>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="287"/>
+        <source>Opacity</source>
+        <translation>不透明度</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="296"/>
+        <source>easing :</source>
+        <translation>イージング :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="310"/>
+        <source>rate :</source>
+        <translation>割合 :</translation>
+    </message>
+</context>
+<context>
+    <name>gui::prop::PoseKeyGroup</name>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="344"/>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="350"/>
+        <source>Pose</source>
+        <translation>ポーズ</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="359"/>
+        <source>easing :</source>
+        <translation>イージング :</translation>
+    </message>
+</context>
+<context>
+    <name>gui::prop::RotateKeyGroup</name>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="91"/>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="98"/>
+        <source>Rotate</source>
+        <translation>回転</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="107"/>
+        <source>easing :</source>
+        <translation>イージング :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="120"/>
+        <source>angle :</source>
+        <translation>角度 :</translation>
+    </message>
+</context>
+<context>
+    <name>gui::prop::ScaleKeyGroup</name>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="154"/>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="161"/>
+        <source>Scale</source>
+        <translation>拡縮</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="170"/>
+        <source>easing :</source>
+        <translation>イージング :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/prop/prop_CurrentKeyPanel.cpp" line="183"/>
+        <source>rate :</source>
+        <translation>割合 :</translation>
+    </message>
+</context>
+<context>
     <name>gui::res::ResourceTree</name>
     <message>
         <location filename="../../src/gui/res/res_ResourceTree.cpp" line="46"/>
@@ -537,7 +792,7 @@
     <message>
         <location filename="../../src/gui/tool/tool_FFDPanel.cpp" line="26"/>
         <source>FreeFormDeform</source>
-        <translation>自由形状変形(FFD)</translation>
+        <translation>自由変形(FFD)</translation>
     </message>
     <message>
         <location filename="../../src/gui/tool/tool_FFDPanel.cpp" line="37"/>

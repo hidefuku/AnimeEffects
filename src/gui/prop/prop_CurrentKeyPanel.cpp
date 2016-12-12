@@ -12,68 +12,67 @@ namespace gui {
 namespace prop {
 
 //-------------------------------------------------------------------------------------------------
-CurrentKeyPanel::MovePanel::MovePanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
-    : mAccessor(aAccessor)
+MoveKeyGroup::MoveKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
+    : KeyGroup(tr("Move"), aLabelWidth)
+    , mAccessor(aAccessor)
     , mKnocker()
-    , mGroup()
     , mEasing()
     , mSpline()
     , mMove()
     , mKeyExists(false)
 {
-    mKnocker = new KeyKnocker("Move");
+    mKnocker = new KeyKnocker(tr("Move"));
     mKnocker->set([=](){ this->mAccessor.knockNewMove(); });
     aPanel.addGroup(mKnocker);
 
-    mGroup = new KeyGroup("Move", aLabelWidth);
     {
-        aPanel.addGroup(mGroup);
+        aPanel.addGroup(this);
 
         // easing
-        mEasing = new EasingItem(mGroup);
-        mGroup->addItem("easing :", mEasing);
+        mEasing = new EasingItem(this);
+        this->addItem(tr("easing :"), mEasing);
         mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
         {
             this->mAccessor.assignMoveEasing(aNext);
         };
 
         // spline
-        mSpline = new ComboItem(mGroup);
+        mSpline = new ComboItem(this);
         mSpline->box().addItems(QStringList() << "Linear" << "CatmullRom");
         mSpline->setValue(core::MoveKey::kDefaultSplineType, false);
         mSpline->onValueUpdated = [=](int, int aNext)
         {
             this->mAccessor.assignMoveSpline(aNext);
         };
-        mGroup->addItem("spline :", mSpline);
+        this->addItem(tr("spline :"), mSpline);
 
         // move
-        mMove = new Vector2DItem(mGroup);
+        mMove = new Vector2DItem(this);
         mMove->setRange(core::Constant::transMin(), core::Constant::transMax());
         mMove->onValueUpdated = [=](QVector2D, QVector2D aNext)
         {
             this->mAccessor.assignMovePosition(aNext);
         };
-        mGroup->addItem("position :", mMove);
+        this->addItem(tr("position :"), mMove);
     }
-    setEnabled(false);
+    setKeyEnabled(false);
     setKeyExists(false);
 }
 
-void CurrentKeyPanel::MovePanel::setEnabled(bool aEnabled)
+void MoveKeyGroup::setKeyEnabled(bool aEnabled)
 {
     mKnocker->setEnabled(aEnabled);
-    mGroup->setEnabled(aEnabled);
+    this->setEnabled(aEnabled);
 }
 
-void CurrentKeyPanel::MovePanel::setKeyExists(bool aIsExists)
+void MoveKeyGroup::setKeyExists(bool aIsExists)
 {
     mKeyExists = aIsExists;
     mKnocker->setVisible(!aIsExists);
-    mGroup->setVisible(aIsExists);
+    this->setVisible(aIsExists);
 }
 
-void CurrentKeyPanel::MovePanel::setKeyValue(const core::TimeKey* aKey)
+void MoveKeyGroup::setKeyValue(const core::TimeKey* aKey)
 {
     TIMEKEY_PTR_TYPE_ASSERT(aKey, Move);
     const core::MoveKey::Data data = ((const core::MoveKey*)aKey)->data();
@@ -82,63 +81,62 @@ void CurrentKeyPanel::MovePanel::setKeyValue(const core::TimeKey* aKey)
     mMove->setValue(data.pos());
 }
 
-bool CurrentKeyPanel::MovePanel::keyExists() const
+bool MoveKeyGroup::keyExists() const
 {
     return mKeyExists;
 }
 
 //-------------------------------------------------------------------------------------------------
-CurrentKeyPanel::RotatePanel::RotatePanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
-    : mAccessor(aAccessor)
+RotateKeyGroup::RotateKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
+    : KeyGroup(tr("Rotate"), aLabelWidth)
+    , mAccessor(aAccessor)
     , mKnocker()
-    , mGroup()
     , mEasing()
     , mRotate()
     , mKeyExists(false)
 {
-    mKnocker = new KeyKnocker("Rotate");
+    mKnocker = new KeyKnocker(tr("Rotate"));
     mKnocker->set([=](){ this->mAccessor.knockNewRotate(); });
     aPanel.addGroup(mKnocker);
 
-    mGroup = new KeyGroup("Rotate", aLabelWidth);
     {
-        aPanel.addGroup(mGroup);
+        aPanel.addGroup(this);
 
         // easing
-        mEasing = new EasingItem(mGroup);
-        mGroup->addItem("easing :", mEasing);
+        mEasing = new EasingItem(this);
+        this->addItem(tr("easing :"), mEasing);
         mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
         {
             this->mAccessor.assignRotateEasing(aNext);
         };
 
         // rotate
-        mRotate = new DecimalItem(mGroup);
+        mRotate = new DecimalItem(this);
         mRotate->setRange(core::Constant::rotateMin(), core::Constant::rotateMax());
         mRotate->onValueUpdated = [=](double, double aNext)
         {
             this->mAccessor.assignRotateAngle(aNext);
         };
-        mGroup->addItem("angle :", mRotate);
+        this->addItem(tr("angle :"), mRotate);
     }
-    setEnabled(false);
+    setKeyEnabled(false);
     setKeyExists(false);
 }
 
-void CurrentKeyPanel::RotatePanel::setEnabled(bool aEnabled)
+void RotateKeyGroup::setKeyEnabled(bool aEnabled)
 {
     mKnocker->setEnabled(aEnabled);
-    mGroup->setEnabled(aEnabled);
+    this->setEnabled(aEnabled);
 }
 
-void CurrentKeyPanel::RotatePanel::setKeyExists(bool aIsExists)
+void RotateKeyGroup::setKeyExists(bool aIsExists)
 {
     mKeyExists = aIsExists;
     mKnocker->setVisible(!aIsExists);
-    mGroup->setVisible(aIsExists);
+    this->setVisible(aIsExists);
 }
 
-void CurrentKeyPanel::RotatePanel::setKeyValue(const core::TimeKey* aKey)
+void RotateKeyGroup::setKeyValue(const core::TimeKey* aKey)
 {
     TIMEKEY_PTR_TYPE_ASSERT(aKey, Rotate);
     const core::RotateKey::Data data = ((const core::RotateKey*)aKey)->data();
@@ -146,63 +144,62 @@ void CurrentKeyPanel::RotatePanel::setKeyValue(const core::TimeKey* aKey)
     mRotate->setValue(data.rotate());
 }
 
-bool CurrentKeyPanel::RotatePanel::keyExists() const
+bool RotateKeyGroup::keyExists() const
 {
     return mKeyExists;
 }
 
 //-------------------------------------------------------------------------------------------------
-CurrentKeyPanel::ScalePanel::ScalePanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
-    : mAccessor(aAccessor)
+ScaleKeyGroup::ScaleKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
+    : KeyGroup(tr("Scale"), aLabelWidth)
+    , mAccessor(aAccessor)
     , mKnocker()
-    , mGroup()
     , mEasing()
     , mScale()
     , mKeyExists(false)
 {
-    mKnocker = new KeyKnocker("Scale");
+    mKnocker = new KeyKnocker(tr("Scale"));
     mKnocker->set([=](){ this->mAccessor.knockNewScale(); });
     aPanel.addGroup(mKnocker);
 
-    mGroup = new KeyGroup("Scale", aLabelWidth);
     {
-        aPanel.addGroup(mGroup);
+        aPanel.addGroup(this);
 
         // easing
-        mEasing = new EasingItem(mGroup);
-        mGroup->addItem("easing :", mEasing);
+        mEasing = new EasingItem(this);
+        this->addItem(tr("easing :"), mEasing);
         mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
         {
             this->mAccessor.assignScaleEasing(aNext);
         };
 
         // scale
-        mScale = new Vector2DItem(mGroup);
+        mScale = new Vector2DItem(this);
         mScale->setRange(core::Constant::scaleMin(), core::Constant::scaleMax());
         mScale->onValueUpdated = [=](QVector2D, QVector2D aNext)
         {
             this->mAccessor.assignScaleRate(aNext);
         };
-        mGroup->addItem("rate :", mScale);
+        this->addItem(tr("rate :"), mScale);
     }
-    setEnabled(false);
+    setKeyEnabled(false);
     setKeyExists(false);
 }
 
-void CurrentKeyPanel::ScalePanel::setEnabled(bool aEnabled)
+void ScaleKeyGroup::setKeyEnabled(bool aEnabled)
 {
     mKnocker->setEnabled(aEnabled);
-    mGroup->setEnabled(aEnabled);
+    this->setEnabled(aEnabled);
 }
 
-void CurrentKeyPanel::ScalePanel::setKeyExists(bool aIsExists)
+void ScaleKeyGroup::setKeyExists(bool aIsExists)
 {
     mKeyExists = aIsExists;
     mKnocker->setVisible(!aIsExists);
-    mGroup->setVisible(aIsExists);
+    this->setVisible(aIsExists);
 }
 
-void CurrentKeyPanel::ScalePanel::setKeyValue(const core::TimeKey* aKey)
+void ScaleKeyGroup::setKeyValue(const core::TimeKey* aKey)
 {
     TIMEKEY_PTR_TYPE_ASSERT(aKey, Scale);
     const core::ScaleKey::Data data = ((const core::ScaleKey*)aKey)->data();
@@ -210,63 +207,62 @@ void CurrentKeyPanel::ScalePanel::setKeyValue(const core::TimeKey* aKey)
     mScale->setValue(data.scale());
 }
 
-bool CurrentKeyPanel::ScalePanel::keyExists() const
+bool ScaleKeyGroup::keyExists() const
 {
     return mKeyExists;
 }
 
 //-------------------------------------------------------------------------------------------------
-CurrentKeyPanel::DepthPanel::DepthPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
-    : mAccessor(aAccessor)
+DepthKeyGroup::DepthKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
+    : KeyGroup(tr("Depth"), aLabelWidth)
+    , mAccessor(aAccessor)
     , mKnocker()
-    , mGroup()
     , mEasing()
     , mDepth()
     , mKeyExists(false)
 {
-    mKnocker = new KeyKnocker("Depth");
+    mKnocker = new KeyKnocker(tr("Depth"));
     mKnocker->set([=](){ this->mAccessor.knockNewDepth(); });
     aPanel.addGroup(mKnocker);
 
-    mGroup = new KeyGroup("Depth", aLabelWidth);
     {
-        aPanel.addGroup(mGroup);
+        aPanel.addGroup(this);
 
         // easing
-        mEasing = new EasingItem(mGroup);
-        mGroup->addItem("easing :", mEasing);
+        mEasing = new EasingItem(this);
+        this->addItem(tr("easing :"), mEasing);
         mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
         {
             this->mAccessor.assignDepthEasing(aNext);
         };
 
         // depth
-        mDepth = new DecimalItem(mGroup);
+        mDepth = new DecimalItem(this);
         mDepth->setRange(core::Constant::transMin(), core::Constant::transMax());
         mDepth->onValueUpdated = [=](double, double aNext)
         {
             this->mAccessor.assignDepthPosition(aNext);
         };
-        mGroup->addItem("position :", mDepth);
+        this->addItem(tr("position :"), mDepth);
     }
-    setEnabled(false);
+    setKeyEnabled(false);
     setKeyExists(false);
 }
 
-void CurrentKeyPanel::DepthPanel::setEnabled(bool aEnabled)
+void DepthKeyGroup::setKeyEnabled(bool aEnabled)
 {
     mKnocker->setEnabled(aEnabled);
-    mGroup->setEnabled(aEnabled);
+    this->setEnabled(aEnabled);
 }
 
-void CurrentKeyPanel::DepthPanel::setKeyExists(bool aIsExists)
+void DepthKeyGroup::setKeyExists(bool aIsExists)
 {
     mKeyExists = aIsExists;
     mKnocker->setVisible(!aIsExists);
-    mGroup->setVisible(aIsExists);
+    this->setVisible(aIsExists);
 }
 
-void CurrentKeyPanel::DepthPanel::setKeyValue(const core::TimeKey* aKey)
+void DepthKeyGroup::setKeyValue(const core::TimeKey* aKey)
 {
     TIMEKEY_PTR_TYPE_ASSERT(aKey, Depth);
     const core::DepthKey::Data& data = ((const core::DepthKey*)aKey)->data();
@@ -274,64 +270,63 @@ void CurrentKeyPanel::DepthPanel::setKeyValue(const core::TimeKey* aKey)
     mDepth->setValue(data.depth());
 }
 
-bool CurrentKeyPanel::DepthPanel::keyExists() const
+bool DepthKeyGroup::keyExists() const
 {
     return mKeyExists;
 }
 
 //-------------------------------------------------------------------------------------------------
-CurrentKeyPanel::OpaPanel::OpaPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
-    : mAccessor(aAccessor)
+OpaKeyGroup::OpaKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
+    : KeyGroup(tr("Opacity"), aLabelWidth)
+    , mAccessor(aAccessor)
     , mKnocker()
-    , mGroup()
     , mEasing()
     , mOpacity()
     , mKeyExists(false)
 {
-    mKnocker = new KeyKnocker("Opacity");
+    mKnocker = new KeyKnocker(tr("Opacity"));
     mKnocker->set([=](){ this->mAccessor.knockNewOpacity(); });
     aPanel.addGroup(mKnocker);
 
-    mGroup = new KeyGroup("Opacity", aLabelWidth);
     {
-        aPanel.addGroup(mGroup);
+        aPanel.addGroup(this);
 
         // easing
-        mEasing = new EasingItem(mGroup);
-        mGroup->addItem("easing :", mEasing);
+        mEasing = new EasingItem(this);
+        this->addItem(tr("easing :"), mEasing);
         mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
         {
             this->mAccessor.assignOpaEasing(aNext);
         };
 
         // opacity
-        mOpacity = new DecimalItem(mGroup);
+        mOpacity = new DecimalItem(this);
         mOpacity->setRange(0.0f, 1.0f);
         mOpacity->box().setSingleStep(0.1);
         mOpacity->onValueUpdated = [=](double, double aNext)
         {
             this->mAccessor.assignOpacity(aNext);
         };
-        mGroup->addItem("rate :", mOpacity);
+        this->addItem(tr("rate :"), mOpacity);
     }
-    setEnabled(false);
+    setKeyEnabled(false);
     setKeyExists(false);
 }
 
-void CurrentKeyPanel::OpaPanel::setEnabled(bool aEnabled)
+void OpaKeyGroup::setKeyEnabled(bool aEnabled)
 {
     mKnocker->setEnabled(aEnabled);
-    mGroup->setEnabled(aEnabled);
+    this->setEnabled(aEnabled);
 }
 
-void CurrentKeyPanel::OpaPanel::setKeyExists(bool aIsExists)
+void OpaKeyGroup::setKeyExists(bool aIsExists)
 {
     mKeyExists = aIsExists;
     mKnocker->setVisible(!aIsExists);
-    mGroup->setVisible(aIsExists);
+    this->setVisible(aIsExists);
 }
 
-void CurrentKeyPanel::OpaPanel::setKeyValue(const core::TimeKey* aKey)
+void OpaKeyGroup::setKeyValue(const core::TimeKey* aKey)
 {
     TIMEKEY_PTR_TYPE_ASSERT(aKey, Opa);
     const core::OpaKey::Data& data = ((const core::OpaKey*)aKey)->data();
@@ -339,140 +334,136 @@ void CurrentKeyPanel::OpaPanel::setKeyValue(const core::TimeKey* aKey)
     mOpacity->setValue(data.opacity());
 }
 
-bool CurrentKeyPanel::OpaPanel::keyExists() const
+bool OpaKeyGroup::keyExists() const
 {
     return mKeyExists;
 }
 
 //-------------------------------------------------------------------------------------------------
-CurrentKeyPanel::PosePanel::PosePanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
-    : mAccessor(aAccessor)
+PoseKeyGroup::PoseKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
+    : KeyGroup(tr("Pose"), aLabelWidth)
+    , mAccessor(aAccessor)
     , mKnocker()
-    , mGroup()
     , mEasing()
     , mKeyExists(false)
 {
-    mKnocker = new KeyKnocker("Pose");
+    mKnocker = new KeyKnocker(tr("Pose"));
     mKnocker->set([=](){ this->mAccessor.knockNewPose(); });
     aPanel.addGroup(mKnocker);
 
-    mGroup = new KeyGroup("Pose", aLabelWidth);
     {
-        aPanel.addGroup(mGroup);
+        aPanel.addGroup(this);
 
         // easing
-        mEasing = new EasingItem(mGroup);
-        mGroup->addItem("easing :", mEasing);
+        mEasing = new EasingItem(this);
+        this->addItem(tr("easing :"), mEasing);
         mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
         {
             this->mAccessor.assignPoseEasing(aNext);
         };
     }
-    setEnabled(false);
+    setKeyEnabled(false);
     setKeyExists(false, false);
 }
 
-void CurrentKeyPanel::PosePanel::setEnabled(bool aEnabled)
+void PoseKeyGroup::setKeyEnabled(bool aEnabled)
 {
     mKnocker->setEnabled(aEnabled);
-    mGroup->setEnabled(aEnabled);
+    this->setEnabled(aEnabled);
 }
 
-void CurrentKeyPanel::PosePanel::setKeyExists(bool aIsExists, bool aIsKnockable)
+void PoseKeyGroup::setKeyExists(bool aIsExists, bool aIsKnockable)
 {
     mKeyExists = aIsExists;
     mKnocker->setVisible(!aIsExists && aIsKnockable);
-    mGroup->setVisible(aIsExists);
+    this->setVisible(aIsExists);
 }
 
-void CurrentKeyPanel::PosePanel::setKeyValue(const core::TimeKey* aKey)
+void PoseKeyGroup::setKeyValue(const core::TimeKey* aKey)
 {
     TIMEKEY_PTR_TYPE_ASSERT(aKey, Pose);
     const core::PoseKey::Data& data = ((const core::PoseKey*)aKey)->data();
     mEasing->setValue(data.easing(), false);
 }
 
-bool CurrentKeyPanel::PosePanel::keyExists() const
+bool PoseKeyGroup::keyExists() const
 {
     return mKeyExists;
 }
 
 //-------------------------------------------------------------------------------------------------
-CurrentKeyPanel::FFDPanel::FFDPanel(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
-    : mAccessor(aAccessor)
+FFDKeyGroup::FFDKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
+    : KeyGroup(tr("FFD"), aLabelWidth)
+    , mAccessor(aAccessor)
     , mKnocker()
-    , mGroup()
     , mEasing()
     , mKeyExists(false)
 {
-    mKnocker = new KeyKnocker("FFD");
+    mKnocker = new KeyKnocker(tr("FFD"));
     mKnocker->set([=](){ this->mAccessor.knockNewFFD(); });
     aPanel.addGroup(mKnocker);
 
-    mGroup = new KeyGroup("FFD", aLabelWidth);
     {
-        aPanel.addGroup(mGroup);
+        aPanel.addGroup(this);
 
         // easing
-        mEasing = new EasingItem(mGroup);
-        mGroup->addItem("easing :", mEasing);
+        mEasing = new EasingItem(this);
+        this->addItem(tr("easing :"), mEasing);
         mEasing->onValueUpdated = [=](util::Easing::Param, util::Easing::Param aNext)
         {
             this->mAccessor.assignFFDEasing(aNext);
         };
     }
-    setEnabled(false);
+    setKeyEnabled(false);
     setKeyExists(false, false);
 }
 
-void CurrentKeyPanel::FFDPanel::setEnabled(bool aEnabled)
+void FFDKeyGroup::setKeyEnabled(bool aEnabled)
 {
     mKnocker->setEnabled(aEnabled);
-    mGroup->setEnabled(aEnabled);
+    this->setEnabled(aEnabled);
 }
 
-void CurrentKeyPanel::FFDPanel::setKeyExists(bool aIsExists, bool aIsKnockable)
+void FFDKeyGroup::setKeyExists(bool aIsExists, bool aIsKnockable)
 {
     mKeyExists = aIsExists;
     mKnocker->setVisible(!aIsExists && aIsKnockable);
-    mGroup->setVisible(aIsExists);
+    this->setVisible(aIsExists);
 }
 
-void CurrentKeyPanel::FFDPanel::setKeyValue(const core::TimeKey* aKey)
+void FFDKeyGroup::setKeyValue(const core::TimeKey* aKey)
 {
     TIMEKEY_PTR_TYPE_ASSERT(aKey, FFD);
     const core::FFDKey::Data& data = ((const core::FFDKey*)aKey)->data();
     mEasing->setValue(data.easing(), false);
 }
 
-bool CurrentKeyPanel::FFDPanel::keyExists() const
+bool FFDKeyGroup::keyExists() const
 {
     return mKeyExists;
 }
 
 //-------------------------------------------------------------------------------------------------
-CurrentKeyPanel::ImagePanel::ImagePanel(Panel& aPanel, KeyAccessor& aAccessor,
-                                    int aLabelWidth, ViaPoint& aViaPoint)
-    : mAccessor(aAccessor)
+ImageKeyGroup::ImageKeyGroup(Panel& aPanel, KeyAccessor& aAccessor,
+                             int aLabelWidth, ViaPoint& aViaPoint)
+    : KeyGroup(tr("Image"), aLabelWidth)
+    , mAccessor(aAccessor)
     , mKnocker()
-    , mGroup()
     , mBrowse()
     , mOffset()
     , mCellSize()
     , mKeyExists(false)
     , mViaPoint(aViaPoint)
 {
-    mKnocker = new KeyKnocker("Image");
+    mKnocker = new KeyKnocker(tr("Image"));
     mKnocker->set([=]() { this->knockNewKey(); });
     aPanel.addGroup(mKnocker);
 
-    mGroup = new KeyGroup("Image", aLabelWidth);
     {
-        aPanel.addGroup(mGroup);
+        aPanel.addGroup(this);
 
         // browse
-        mBrowse = new BrowseItem(mGroup);
-        mGroup->addItem("resource :", mBrowse);
+        mBrowse = new BrowseItem(this);
         mBrowse->onButtonPushed = [=]()
         {
             auto resNode = this->mViaPoint.requireOneResource();
@@ -482,30 +473,32 @@ CurrentKeyPanel::ImagePanel::ImagePanel(Panel& aPanel, KeyAccessor& aAccessor,
                 this->mAccessor.assignImageResource(*resNode);
             }
         };
+        this->addItem(tr("resource :"), mBrowse);
+
         // offset
-        mOffset = new Vector2DItem(mGroup);
+        mOffset = new Vector2DItem(this);
         mOffset->setRange(core::Constant::transMin(), core::Constant::transMax());
         mOffset->onValueUpdated = [=](QVector2D, QVector2D aNext)
         {
             this->mAccessor.assignImageOffset(-aNext);
         };
-        mGroup->addItem("center :", mOffset);
+        this->addItem(tr("center :"), mOffset);
 
         // cell size
-        mCellSize = new IntegerItem(mGroup);
+        mCellSize = new IntegerItem(this);
         mCellSize->setRange(core::Constant::imageCellSizeMin(),
                             core::Constant::imageCellSizeMax());
         mCellSize->onValueUpdated = [=](int, int aNext)
         {
             this->mAccessor.assignImageCellSize(aNext);
         };
-        mGroup->addItem("mesh cell :", mCellSize);
+        this->addItem(tr("mesh cell :"), mCellSize);
     }
-    setEnabled(false);
+    setKeyEnabled(false);
     setKeyExists(false, false);
 }
 
-void CurrentKeyPanel::ImagePanel::knockNewKey()
+void ImageKeyGroup::knockNewKey()
 {
     auto resNode = mViaPoint.requireOneResource();
     if (resNode)
@@ -514,20 +507,20 @@ void CurrentKeyPanel::ImagePanel::knockNewKey()
     }
 }
 
-void CurrentKeyPanel::ImagePanel::setEnabled(bool aEnabled)
+void ImageKeyGroup::setKeyEnabled(bool aEnabled)
 {
     mKnocker->setEnabled(aEnabled);
-    mGroup->setEnabled(aEnabled);
+    this->setEnabled(aEnabled);
 }
 
-void CurrentKeyPanel::ImagePanel::setKeyExists(bool aIsExists, bool aIsKnockable)
+void ImageKeyGroup::setKeyExists(bool aIsExists, bool aIsKnockable)
 {
     mKeyExists = aIsExists;
     mKnocker->setVisible(!aIsExists && aIsKnockable);
-    mGroup->setVisible(aIsExists);
+    this->setVisible(aIsExists);
 }
 
-void CurrentKeyPanel::ImagePanel::setKeyValue(const core::TimeKey* aKey)
+void ImageKeyGroup::setKeyValue(const core::TimeKey* aKey)
 {
     TIMEKEY_PTR_TYPE_ASSERT(aKey, Image);
     const core::ImageKey::Data& data = ((const core::ImageKey*)aKey)->data();
@@ -536,7 +529,7 @@ void CurrentKeyPanel::ImagePanel::setKeyValue(const core::TimeKey* aKey)
     mCellSize->setValue(data.gridMesh().cellSize());
 }
 
-bool CurrentKeyPanel::ImagePanel::keyExists() const
+bool ImageKeyGroup::keyExists() const
 {
     return mKeyExists;
 }
@@ -559,7 +552,7 @@ CurrentKeyPanel::CurrentKeyPanel(ViaPoint& aViaPoint, core::Project& aProject, c
     , mImagePanel()
 {
     mKeyAccessor.setProject(&aProject);
-    mLabelWidth = this->fontMetrics().boundingRect("MaxTextWidth :").width();
+    mLabelWidth = this->fontMetrics().boundingRect(tr("MaxTextWidth :")).width();
 
     build();
     this->hide();
@@ -572,7 +565,7 @@ void CurrentKeyPanel::setTarget(core::ObjectNode* aTarget)
 
     if (mTarget)
     {
-        this->setTitle(mTarget->name() + " Current Keys");
+        this->setTitle(mTarget->name() + " : " + tr("Current Keys"));
         this->show();
     }
     else
@@ -613,21 +606,32 @@ void CurrentKeyPanel::build()
 {
     using core::Constant;
 
-    mMovePanel.reset(new MovePanel(*this, mKeyAccessor, mLabelWidth));
-    mRotatePanel.reset(new RotatePanel(*this, mKeyAccessor, mLabelWidth));
-    mScalePanel.reset(new ScalePanel(*this, mKeyAccessor, mLabelWidth));
-    mDepthPanel.reset(new DepthPanel(*this, mKeyAccessor, mLabelWidth));
-    mOpaPanel.reset(new OpaPanel(*this, mKeyAccessor, mLabelWidth));
-    mPosePanel.reset(new PosePanel(*this, mKeyAccessor, mLabelWidth));
-    mFFDPanel.reset(new FFDPanel(*this, mKeyAccessor, mLabelWidth));
-    mImagePanel.reset(new ImagePanel(*this, mKeyAccessor, mLabelWidth, mViaPoint));
+    mMovePanel.reset(new MoveKeyGroup(*this, mKeyAccessor, mLabelWidth));
+    mRotatePanel.reset(new RotateKeyGroup(*this, mKeyAccessor, mLabelWidth));
+    mScalePanel.reset(new ScaleKeyGroup(*this, mKeyAccessor, mLabelWidth));
+    mDepthPanel.reset(new DepthKeyGroup(*this, mKeyAccessor, mLabelWidth));
+    mOpaPanel.reset(new OpaKeyGroup(*this, mKeyAccessor, mLabelWidth));
+    mPosePanel.reset(new PoseKeyGroup(*this, mKeyAccessor, mLabelWidth));
+    mFFDPanel.reset(new FFDKeyGroup(*this, mKeyAccessor, mLabelWidth));
+    mImagePanel.reset(new ImageKeyGroup(*this, mKeyAccessor, mLabelWidth, mViaPoint));
 
     this->addStretch();
 }
 
 void CurrentKeyPanel::updateKeyExists()
 {
-    if (mTarget && mTarget->timeLine())
+    const bool enabled = mTarget && mTarget->timeLine();
+
+    mMovePanel->setKeyEnabled(enabled);
+    mRotatePanel->setKeyEnabled(enabled);
+    mScalePanel->setKeyEnabled(enabled);
+    mDepthPanel->setKeyEnabled(enabled);
+    mOpaPanel->setKeyEnabled(enabled);
+    mPosePanel->setKeyEnabled(enabled);
+    mFFDPanel->setKeyEnabled(enabled);
+    mImagePanel->setKeyEnabled(enabled);
+
+    if (enabled)
     {
         const core::TimeLine& timeLine = *mTarget->timeLine();
         const int frame = mProject.animator().currentFrame().get();
@@ -635,33 +639,14 @@ void CurrentKeyPanel::updateKeyExists()
         const bool hasAnyMesh = mTarget->hasAnyMesh();
         const bool hasAnyImage = mTarget->hasAnyImage();
 
-        mMovePanel->setEnabled(true);
         mMovePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Move, frame));
-        mRotatePanel->setEnabled(true);
         mRotatePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Rotate, frame));
-        mScalePanel->setEnabled(true);
         mScalePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Scale, frame));
-        mDepthPanel->setEnabled(true);
         mDepthPanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Depth, frame));
-        mOpaPanel->setEnabled(true);
         mOpaPanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Opa, frame));
-        mPosePanel->setEnabled(true);
         mPosePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Pose, frame), hasAreaBone);
-        mFFDPanel->setEnabled(true);
         mFFDPanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_FFD, frame), hasAnyMesh);
-        mImagePanel->setEnabled(true);
         mImagePanel->setKeyExists(timeLine.hasTimeKey(core::TimeKeyType_Image, frame), hasAnyImage);
-    }
-    else
-    {
-        mMovePanel->setEnabled(false);
-        mRotatePanel->setEnabled(false);
-        mScalePanel->setEnabled(false);
-        mDepthPanel->setEnabled(false);
-        mOpaPanel->setEnabled(false);
-        mPosePanel->setEnabled(false);
-        mFFDPanel->setEnabled(false);
-        mImagePanel->setEnabled(false);
     }
 }
 
