@@ -16,7 +16,7 @@ class ViewPanel : public QGroupBox
 public:
     typedef std::function<void(bool)> PushDelegate;
 
-    ViewPanel(QWidget* aParent, GUIResources& aResources);
+    ViewPanel(QWidget* aParent, GUIResources& aResources, const QString& aTitle);
 
     void addButton(const QString& aIconName, bool aCheckable,
                    const QString& aToolTip, const PushDelegate& aDelegate);

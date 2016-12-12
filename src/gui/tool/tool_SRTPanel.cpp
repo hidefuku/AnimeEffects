@@ -20,7 +20,7 @@ SRTPanel::SRTPanel(QWidget* aParent, GUIResources& aResources)
     , mAddScale()
     , mAdjust()
 {
-    this->setTitle("SRT Transform");
+    this->setTitle(tr("SRT Transform"));
     createMode();
     updateTypeParam(mParam.mode);
 }
@@ -30,7 +30,9 @@ void SRTPanel::createMode()
     // mode
     mTypeGroup.reset(new SingleOutItem(2, QSize(kButtonSpace, kButtonSpace), this));
     mTypeGroup->setChoice(mParam.mode);
-    mTypeGroup->setToolTips(QStringList() << "Transform SRT" << "Transform Centroid");
+    mTypeGroup->setToolTips(QStringList() <<
+                            tr("Transform SRT") <<
+                            tr("Transform Centroid"));
     mTypeGroup->setIcons(QVector<QIcon>() << mResources.icon("move") << mResources.icon("transcent"));
     mTypeGroup->connect([=](int aIndex)
     {
@@ -39,30 +41,30 @@ void SRTPanel::createMode()
         this->onParamUpdated(true);
     });
 
-    mAddMove.reset(new CheckBoxItem("necessarily move", this));
-    mAddMove->setToolTip("Necessarily add a MoveKey if the posture is modified.");
+    mAddMove.reset(new CheckBoxItem(tr("necessarily move"), this));
+    mAddMove->setToolTip(tr("Necessarily add a MoveKey if the posture is modified."));
     mAddMove->connect([=](bool aChecked)
     {
         this->mParam.necessarilyMove = aChecked;
         this->onParamUpdated(false);
     });
-    mAddRotate.reset(new CheckBoxItem("necessarily rotate", this));
-    mAddRotate->setToolTip("Necessarily add a RotateKey if the posture is modified.");
+    mAddRotate.reset(new CheckBoxItem(tr("necessarily rotate"), this));
+    mAddRotate->setToolTip(tr("Necessarily add a RotateKey if the posture is modified."));
     mAddRotate->connect([=](bool aChecked)
     {
         this->mParam.necessarilyRotate = aChecked;
         this->onParamUpdated(false);
     });
-    mAddScale.reset(new CheckBoxItem("necessarily scale", this));
-    mAddScale->setToolTip("Necessarily add a ScaleKey if the posture is modified.");
+    mAddScale.reset(new CheckBoxItem(tr("necessarily scale"), this));
+    mAddScale->setToolTip(tr("Necessarily add a ScaleKey if the posture is modified."));
     mAddScale->connect([=](bool aChecked)
     {
         this->mParam.necessarilyScale = aChecked;
         this->onParamUpdated(false);
     });
 
-    mAdjust.reset(new CheckBoxItem("adjust existing", this));
-    mAdjust->setToolTip("Adjust existing postures.");
+    mAdjust.reset(new CheckBoxItem(tr("adjust existing postures"), this));
+    mAdjust->setToolTip(tr("Adjust existing keys abount the posture."));
     mAdjust->setChecked(mParam.adjustExistingPostures);
     mAdjust->connect([=](bool aChecked)
     {

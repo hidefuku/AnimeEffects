@@ -17,6 +17,7 @@ namespace tool {
 
 class FFDPanel : public QGroupBox
 {
+    Q_OBJECT
 public:
     FFDPanel(QWidget* aParent, GUIResources& aResources);
 

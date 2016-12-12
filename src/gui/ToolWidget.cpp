@@ -91,31 +91,31 @@ void ToolWidget::setDriver(ctrl::Driver* aDriver)
 void ToolWidget::createViewPanel()
 {
     if (mViewPanel) delete mViewPanel;
-    mViewPanel = new tool::ViewPanel(this, mResources);
+    mViewPanel = new tool::ViewPanel(this, mResources, tr("ViewSettings"));
 
-    mViewPanel->addButton("showmesh", true, "Show Layer Mesh", [=](bool aChecked)
+    mViewPanel->addButton("showmesh", true, tr("Show Polygon Wireframe"), [=](bool aChecked)
     {
         this->viewSetting().showLayerMesh = aChecked;
         this->onViewSettingChanged(this->viewSetting());
     });
-    mViewPanel->addButton("cutimages", true, "Cut Images by the Frame", [=](bool aChecked)
+    mViewPanel->addButton("cutimages", true, tr("Cut Images by the Frame"), [=](bool aChecked)
     {
         this->viewSetting().cutImagesByTheFrame = aChecked;
         this->onViewSettingChanged(this->viewSetting());
     });
-    mViewPanel->addButton("rotateac", false, "Rotate the View Anticlockwise", [=](bool)
+    mViewPanel->addButton("rotateac", false, tr("Rotate the View Anticlockwise"), [=](bool)
     {
         this->viewSetting().rotateViewACW = true;
         this->onViewSettingChanged(this->viewSetting());
         this->viewSetting().rotateViewACW = false;
     });
-    mViewPanel->addButton("resetrot", false, "Reset Rotation of the View", [=](bool)
+    mViewPanel->addButton("resetrot", false, tr("Reset Rotation of the View"), [=](bool)
     {
         this->viewSetting().resetRotateView = true;
         this->onViewSettingChanged(this->viewSetting());
         this->viewSetting().resetRotateView = false;
     });
-    mViewPanel->addButton("rotatecw", false, "Rotate the View Clockwise", [=](bool)
+    mViewPanel->addButton("rotatecw", false, tr("Rotate the View Clockwise"), [=](bool)
     {
         this->viewSetting().rotateViewCW = true;
         this->onViewSettingChanged(this->viewSetting());

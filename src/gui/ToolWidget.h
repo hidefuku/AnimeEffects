@@ -22,6 +22,7 @@ namespace gui
 
 class ToolWidget : public QWidget
 {
+    Q_OBJECT
 public:
     ToolWidget(ViaPoint& aViaPoint, GUIResources& aResources,
                const QSize& aSizeHint, QWidget* aParent);

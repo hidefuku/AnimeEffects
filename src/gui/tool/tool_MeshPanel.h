@@ -14,6 +14,7 @@ namespace tool {
 
 class MeshPanel : public QGroupBox
 {
+    Q_OBJECT
 public:
     MeshPanel(QWidget* aParent, GUIResources& aResources);
 

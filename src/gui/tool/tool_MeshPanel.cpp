@@ -16,7 +16,7 @@ MeshPanel::MeshPanel(QWidget* aParent, GUIResources& aResources)
     , mParam()
     , mTypeGroup()
 {
-    this->setTitle("MeshCreating");
+    this->setTitle(tr("MeshCreating"));
     createMode();
 }
 
@@ -26,9 +26,9 @@ void MeshPanel::createMode()
     mTypeGroup.reset(new SingleOutItem(3, QSize(kButtonSpace, kButtonSpace), this));
     mTypeGroup->setChoice(mParam.mode);
     mTypeGroup->setToolTips(QStringList() <<
-                            "Add Vertices" <<
-                            "Erase Vertices" <<
-                            "Split Polygons");
+                            tr("Add Vertices") <<
+                            tr("Erase Vertices") <<
+                            tr("Split Polygons"));
     mTypeGroup->setIcons(QVector<QIcon>() <<
                          mResources.icon("plus") <<
                          mResources.icon("minus") <<

@@ -13,16 +13,16 @@ ModePanel::ModePanel(QWidget* aParent, GUIResources& aResources, const PushDeleg
     , mLayout(this, 0, 2, 2)
     , mOnPushed(aOnPushed)
 {
-    this->setTitle("ToolBox");
+    this->setTitle(tr("ToolBox"));
     mGroup->setExclusive(true);
     this->setLayout(&mLayout);
 
-    addButton(ctrl::ToolType_Cursor, "cursor", "Camera Cursor");
-    addButton(ctrl::ToolType_SRT,    "srt",    "Scale Rotate Translate");
-    addButton(ctrl::ToolType_Bone,   "bone",   "Bone Creating");
-    addButton(ctrl::ToolType_Pose,   "pose",   "Bone Posing");
-    addButton(ctrl::ToolType_Mesh,   "mesh",   "Mesh Creating");
-    addButton(ctrl::ToolType_FFD,    "ffd",    "Free Form Deform");
+    addButton(ctrl::ToolType_Cursor, "cursor", tr("Camera Cursor"));
+    addButton(ctrl::ToolType_SRT,    "srt",    tr("Scale Rotate Translate"));
+    addButton(ctrl::ToolType_Bone,   "bone",   tr("Bone Creating"));
+    addButton(ctrl::ToolType_Pose,   "pose",   tr("Bone Posing"));
+    addButton(ctrl::ToolType_Mesh,   "mesh",   tr("Mesh Creating"));
+    addButton(ctrl::ToolType_FFD,    "ffd",    tr("Free Form Deform"));
 
 }
 

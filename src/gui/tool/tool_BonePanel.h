@@ -14,6 +14,7 @@ namespace tool {
 
 class BonePanel : public QGroupBox
 {
+    Q_OBJECT
 public:
     BonePanel(QWidget* aParent, GUIResources& aResources);
 

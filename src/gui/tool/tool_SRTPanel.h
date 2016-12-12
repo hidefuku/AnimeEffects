@@ -14,6 +14,7 @@ namespace tool {
 
 class SRTPanel : public QGroupBox
 {
+    Q_OBJECT
 public:
     SRTPanel(QWidget* aParent, GUIResources& aResources);
 

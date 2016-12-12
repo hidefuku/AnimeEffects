@@ -3,13 +3,13 @@
 namespace gui {
 namespace tool {
 
-ViewPanel::ViewPanel(QWidget* aParent, GUIResources& aResources)
+ViewPanel::ViewPanel(QWidget* aParent, GUIResources& aResources, const QString& aTitle)
     : QGroupBox(aParent)
     , mResources(aResources)
     , mButtons()
     , mLayout(this, 0, 2, 2)
 {
-    this->setTitle("ViewSettings");
+    this->setTitle(aTitle);
     this->setLayout(&mLayout);
 }
 

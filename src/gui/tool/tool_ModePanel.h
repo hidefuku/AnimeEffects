@@ -15,6 +15,7 @@ namespace tool {
 
 class ModePanel : public QGroupBox
 {
+    Q_OBJECT
 public:
     typedef std::function<void(ctrl::ToolType, bool)> PushDelegate;
 
