@@ -3,12 +3,16 @@
 
 #include <QMenuBar>
 #include <QAction>
+#include <QCheckBox>
+#include <QSpinBox>
 #include "core/Project.h"
+#include "gui/EasyDialog.h"
 namespace gui { class MainWindow; }
 namespace gui { class ViaPoint; }
 namespace gui
 {
 
+//-------------------------------------------------------------------------------------------------
 class MainMenuBar : public QMenuBar
 {
     Q_OBJECT
@@ -32,6 +36,45 @@ private:
     core::Project* mProject;
     QVector<QAction*> mProjectActions;
     QAction* mShowResourceWindow;
+};
+
+//-------------------------------------------------------------------------------------------------
+class ProjectCanvasSizeSettingDialog : public EasyDialog
+{
+    Q_OBJECT
+public:
+    ProjectCanvasSizeSettingDialog(
+            ViaPoint& aViaPoint, core::Project& aProject, QWidget* aParent);
+    QSize canvasSize() const { return QSize(mWidthBox->value(), mHeightBox->value()); }
+private:
+    ViaPoint& mViaPoint;
+    core::Project& mProject;
+    QSpinBox* mWidthBox;
+    QSpinBox* mHeightBox;
+};
+
+//-------------------------------------------------------------------------------------------------
+class ProjectMaxFrameSettingDialog : public EasyDialog
+{
+    Q_OBJECT
+public:
+    ProjectMaxFrameSettingDialog(core::Project& aProject, QWidget* aParent);
+    int maxFrame() const { return mMaxFrameBox->value(); }
+private:
+    bool confirmMaxFrameUpdating(int aNewMaxFrame) const;
+    core::Project& mProject;
+    QSpinBox* mMaxFrameBox;
+};
+
+//-------------------------------------------------------------------------------------------------
+class ProjectLoopSettingDialog : public EasyDialog
+{
+    Q_OBJECT
+public:
+    ProjectLoopSettingDialog(core::Project& aProject, QWidget* aParent);
+    bool isCheckedLoopBox() const { return mLoopBox->isChecked(); }
+private:
+    QCheckBox* mLoopBox;
 };
 
 } // namespace gui

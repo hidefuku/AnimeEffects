@@ -24,18 +24,18 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
 
     QMenu* fileMenu = new QMenu(tr("File"), this);
     {
-        QAction* newProject   = new QAction("New Project...", this);
-        QAction* openProject  = new QAction("Open Project...", this);
-        QAction* saveProject  = new QAction("Save Project", this);
-        QAction* closeProject = new QAction("Close Project", this);
+        QAction* newProject   = new QAction(tr("New Project..."), this);
+        QAction* openProject  = new QAction(tr("Open Project..."), this);
+        QAction* saveProject  = new QAction(tr("Save Project"), this);
+        QAction* closeProject = new QAction(tr("Close Project"), this);
 
-        QMenu* exportAs = new QMenu("Export As", this);
+        QMenu* exportAs = new QMenu(tr("Export As"), this);
         {
-            QAction* pngs = new QAction("PNG Sequence...", this);
-            QAction* mp4  = new QAction("MPEG-4 Video...", this);
-            QAction* webm = new QAction("WebM Video...", this);
-            QAction* ogv  = new QAction("Ogg Video...", this);
-            QAction* avil = new QAction("Lossless AVI Video...", this);
+            QAction* pngs = new QAction(tr("PNG Sequence..."), this);
+            QAction* mp4  = new QAction(tr("MPEG-4 Video..."), this);
+            QAction* webm = new QAction(tr("WebM Video..."), this);
+            QAction* ogv  = new QAction(tr("Ogg Video..."), this);
+            QAction* avil = new QAction(tr("Lossless AVI Video..."), this);
             connect(pngs, &QAction::triggered, mainWindow, &MainWindow::onExportPngSeqTriggered);
             connect(mp4,  &QAction::triggered, [=](){ mainWindow->onExportVideoTriggered("mp4"); });
             connect(webm, &QAction::triggered, [=](){ mainWindow->onExportVideoTriggered("webm"); });
@@ -68,8 +68,8 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
 
     QMenu* editMenu = new QMenu(tr("Edit"), this);
     {
-        QAction* undo = new QAction("Undo", this);
-        QAction* redo = new QAction("Redo", this);
+        QAction* undo = new QAction(tr("Undo"), this);
+        QAction* redo = new QAction(tr("Redo"), this);
 
         mProjectActions.push_back(undo);
         mProjectActions.push_back(redo);
@@ -83,9 +83,9 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
 
     QMenu* projMenu = new QMenu(tr("Project"), this);
     {
-        QAction* canvSize = new QAction("Canvas Size...", this);
-        QAction* maxFrame = new QAction("Max Frame...", this);
-        QAction* loopAnim = new QAction("Loop...", this);
+        QAction* canvSize = new QAction(tr("Canvas Size..."), this);
+        QAction* maxFrame = new QAction(tr("Max Frame..."), this);
+        QAction* loopAnim = new QAction(tr("Loop..."), this);
 
         mProjectActions.push_back(canvSize);
         mProjectActions.push_back(maxFrame);
@@ -102,7 +102,7 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
 
     QMenu* windowMenu = new QMenu(tr("Window"), this);
     {
-        QAction* resource = new QAction("Resource Window", this);
+        QAction* resource = new QAction(tr("Resource Window"), this);
         resource->setCheckable(true);
         mShowResourceWindow = resource;
 
@@ -126,7 +126,7 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
 
     QMenu* optionMenu = new QMenu(tr("Option"), this);
     {
-        QAction* keyBind = new QAction("Key Binding...", this);
+        QAction* keyBind = new QAction(tr("Key Binding..."), this);
 
         connect(keyBind, &QAction::triggered, [&](bool)
         {
@@ -141,7 +141,7 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
 
     QMenu* helpMenu = new QMenu(tr("Help"), this);
     {
-        QAction* aboutMe = new QAction("About AnimeEffects...", this);
+        QAction* aboutMe = new QAction(tr("About AnimeEffects..."), this);
         connect(aboutMe, &QAction::triggered, [=]()
         {
             QMessageBox msgBox;
@@ -207,17 +207,15 @@ void MainMenuBar::setShowResourceWindow(bool aShow)
     mShowResourceWindow->setChecked(aShow);
 }
 
-void MainMenuBar::onCanvasSizeTriggered()
+//-------------------------------------------------------------------------------------------------
+ProjectCanvasSizeSettingDialog::ProjectCanvasSizeSettingDialog(
+        ViaPoint& aViaPoint, core::Project& aProject, QWidget *aParent)
+    : EasyDialog(tr("Set Canvas Size"), aParent)
+    , mViaPoint(aViaPoint)
+    , mProject(aProject)
 {
-    if (!mProject) return;
-
-    // create dialog
-    QScopedPointer<EasyDialog> dialog(new EasyDialog("Set Canvas Size", this));
-
     // create inner widgets
-    QSpinBox* widthBox = nullptr;
-    QSpinBox* heightBox = nullptr;
-    auto curSize = mProject->attribute().imageSize();
+    auto curSize = mProject.attribute().imageSize();
     {
         auto devInfo = mViaPoint.glDeviceInfo();
         const int maxBufferSize = std::min(
@@ -231,65 +229,42 @@ void MainMenuBar::onCanvasSizeTriggered()
 
         auto sizeLayout = new QHBoxLayout();
         {
-            widthBox = new QSpinBox();
-            widthBox->setRange(1, maxBufferSize);
-            widthBox->setValue(curSize.width());
-            sizeLayout->addWidget(widthBox);
+            mWidthBox = new QSpinBox();
+            mWidthBox->setRange(1, maxBufferSize);
+            mWidthBox->setValue(curSize.width());
+            sizeLayout->addWidget(mWidthBox);
 
-            heightBox = new QSpinBox();
-            heightBox->setRange(1, maxBufferSize);
-            heightBox->setValue(curSize.height());
-            sizeLayout->addWidget(heightBox);
+            mHeightBox = new QSpinBox();
+            mHeightBox->setRange(1, maxBufferSize);
+            mHeightBox->setValue(curSize.height());
+            sizeLayout->addWidget(mHeightBox);
         }
-        form->addRow("size :", sizeLayout);
+        form->addRow(tr("size :"), sizeLayout);
 
-#if 0
-        auto origin = new QGridLayout();
-        {
-            for (int y = 0; y < 3; ++y)
-            {
-                for (int x = 0; x < 3; ++x)
-                {
-                    auto button = new QPushButton();
-                    button->setFixedSize(QSize(24, 24));
-                    //button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-                    //button->setContentsMargins(0, 0, 0, 0);
-                    origin->addWidget(button, x, y, Qt::AlignCenter);
-                }
-            }
-
-            origin->setContentsMargins(0, 0, 0, 0);
-            origin->setSpacing(0);
-            origin->setSizeConstraint(QLayout::SetFixedSize);
-
-            /*
-            origin->setMargin(0);
-            for (int i = 0; i < 3; ++i)
-            {
-                origin->setRowMinimumHeight(i, 1);
-                origin->setColumnMinimumWidth(i, 1);
-            }
-            */
-
-            auto originWrap = new QGroupBox();
-            originWrap->setLayout(origin);
-            form->addRow("origin : ", originWrap);
-        }
-#endif
-
-        auto group = new QGroupBox("Parameter");
+        auto group = new QGroupBox(tr("Parameter"));
         group->setLayout(form);
-        dialog->setMainWidget(group);
+        this->setMainWidget(group);
     }
-    dialog->setOkCancel();
-    dialog->fixSize();
+    this->setOkCancel();
+    this->fixSize();
+}
+
+void MainMenuBar::onCanvasSizeTriggered()
+{
+    if (!mProject) return;
+
+    auto curSize = mProject->attribute().imageSize();
+
+    // create dialog
+    QScopedPointer<ProjectCanvasSizeSettingDialog> dialog(
+                new ProjectCanvasSizeSettingDialog(mViaPoint, *mProject, this));
 
     // execute dialog
     dialog->exec();
     if (dialog->result() != QDialog::Accepted) return;
 
     // get new canvas size
-    const QSize newSize(widthBox->value(), heightBox->value());
+    const QSize newSize = dialog->canvasSize();
     XC_ASSERT(!newSize.isEmpty());
     if (curSize == newSize) return;
 
@@ -318,16 +293,14 @@ void MainMenuBar::onCanvasSizeTriggered()
     }
 }
 
-void MainMenuBar::onMaxFrameTriggered()
+//-------------------------------------------------------------------------------------------------
+ProjectMaxFrameSettingDialog::ProjectMaxFrameSettingDialog(core::Project& aProject, QWidget *aParent)
+    : EasyDialog(tr("Set Max Frame"), aParent)
+    , mProject(aProject)
+    , mMaxFrameBox()
 {
-    if (!mProject) return;
-
-    // create dialog
-    QScopedPointer<EasyDialog> dialog(new EasyDialog("Set Max Frame", this));
-
     // create inner widgets
-    QSpinBox* maxFrameBox = nullptr;
-    auto curMaxFrame = mProject->attribute().maxFrame();
+    auto curMaxFrame = mProject.attribute().maxFrame();
     {
         auto form = new QFormLayout();
         form->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
@@ -335,34 +308,64 @@ void MainMenuBar::onMaxFrameTriggered()
 
         auto layout = new QHBoxLayout();
         {
-            maxFrameBox = new QSpinBox();
-            maxFrameBox->setRange(1, std::numeric_limits<int>::max());
-            maxFrameBox->setValue(curMaxFrame);
-            layout->addWidget(maxFrameBox);
+            mMaxFrameBox = new QSpinBox();
+            mMaxFrameBox->setRange(1, std::numeric_limits<int>::max());
+            mMaxFrameBox->setValue(curMaxFrame);
+            layout->addWidget(mMaxFrameBox);
         }
-        form->addRow("max frame :", layout);
+        form->addRow(tr("max frame :"), layout);
 
-        auto group = new QGroupBox("Parameter");
+        auto group = new QGroupBox(tr("Parameter"));
         group->setLayout(form);
-        dialog->setMainWidget(group);
+        this->setMainWidget(group);
     }
 
-    dialog->setOkCancel([=](int aIndex)->bool
+    this->setOkCancel([=](int aIndex)->bool
     {
         if (aIndex == 0)
         {
-            return this->confirmMaxFrameUpdating(maxFrameBox->value());
+            return this->confirmMaxFrameUpdating(this->mMaxFrameBox->value());
         }
         return true;
     });
-    dialog->fixSize();
+    this->fixSize();
+}
+
+bool ProjectMaxFrameSettingDialog::confirmMaxFrameUpdating(int aNewMaxFrame) const
+{
+    XC_ASSERT(aNewMaxFrame > 0);
+
+    auto curMaxFrame = mProject.attribute().maxFrame();
+    if (curMaxFrame <= aNewMaxFrame) return true;
+
+    if (!core::ObjectNodeUtil::thereAreSomeKeysExceedingFrame(
+                mProject.objectTree().topNode(), aNewMaxFrame))
+    {
+        return true;
+    }
+
+    auto message1 = tr("Can not set the specified frame.");
+    auto message2 = tr("There are some keys that exeeding the specified frame.");
+    QMessageBox::warning(nullptr, tr("Operation Error"), message1 + "\n" + message2);
+    return false;
+}
+
+void MainMenuBar::onMaxFrameTriggered()
+{
+    if (!mProject) return;
+
+    auto curMaxFrame = mProject->attribute().maxFrame();
+
+    // create dialog
+    QScopedPointer<ProjectMaxFrameSettingDialog> dialog(
+                new ProjectMaxFrameSettingDialog(*mProject, this));
 
     // execute dialog
     dialog->exec();
     if (dialog->result() != QDialog::Accepted) return;
 
     // get new canvas size
-    const int newMaxFrame = maxFrameBox->value();
+    const int newMaxFrame = dialog->maxFrame();
     XC_ASSERT(newMaxFrame > 0);
     if (curMaxFrame == newMaxFrame) return;
 
@@ -391,38 +394,12 @@ void MainMenuBar::onMaxFrameTriggered()
     }
 }
 
-bool MainMenuBar::confirmMaxFrameUpdating(int aNewMaxFrame) const
+//-------------------------------------------------------------------------------------------------
+ProjectLoopSettingDialog::ProjectLoopSettingDialog(core::Project& aProject, QWidget* aParent)
+    : EasyDialog(tr("Set Animation Loop"), aParent)
 {
-    XC_ASSERT(aNewMaxFrame > 0);
-    if (!mProject) return false;
-
-    auto curMaxFrame = mProject->attribute().maxFrame();
-    if (curMaxFrame <= aNewMaxFrame) return true;
-
-    if (!core::ObjectNodeUtil::thereAreSomeKeysExceedingFrame(
-                mProject->objectTree().topNode(), aNewMaxFrame))
-    {
-        return true;
-    }
-
-    QMessageBox msgBox;
-    msgBox.setText("Can not set the specified frame.");
-    msgBox.setInformativeText("There are some keys that exeeding the specified frame.");
-    msgBox.exec();
-
-    return false;
-}
-
-void MainMenuBar::onLoopTriggered()
-{
-    if (!mProject) return;
-
-    // create dialog
-    QScopedPointer<EasyDialog> dialog(new EasyDialog("Set Animation Loop", this));
-
     // create inner widgets
-    QCheckBox* loopBox = nullptr;
-    auto curLoop = mProject->attribute().loop();
+    auto curLoop = aProject.attribute().loop();
     {
         auto form = new QFormLayout();
         form->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
@@ -430,26 +407,36 @@ void MainMenuBar::onLoopTriggered()
 
         auto layout = new QHBoxLayout();
         {
-            loopBox = new QCheckBox();
-            loopBox->setChecked(curLoop);
-            layout->addWidget(loopBox);
+            mLoopBox = new QCheckBox();
+            mLoopBox->setChecked(curLoop);
+            layout->addWidget(mLoopBox);
         }
-        form->addRow("loop animation :", layout);
+        form->addRow(tr("loop animation :"), layout);
 
-        auto group = new QGroupBox("Parameter");
+        auto group = new QGroupBox(tr("Parameter"));
         group->setLayout(form);
-        dialog->setMainWidget(group);
+        this->setMainWidget(group);
     }
 
-    dialog->setOkCancel();
-    dialog->fixSize();
+    this->setOkCancel();
+    this->fixSize();
+}
+
+void MainMenuBar::onLoopTriggered()
+{
+    if (!mProject) return;
+
+    auto curLoop = mProject->attribute().loop();
+
+    // create dialog
+    QScopedPointer<ProjectLoopSettingDialog> dialog(new ProjectLoopSettingDialog(*mProject, this));
 
     // execute dialog
     dialog->exec();
     if (dialog->result() != QDialog::Accepted) return;
 
     // get new loop setting
-    const bool newLoop = loopBox->isChecked();
+    const bool newLoop = dialog->isCheckedLoopBox();
     if (curLoop == newLoop) return;
 
     // create commands

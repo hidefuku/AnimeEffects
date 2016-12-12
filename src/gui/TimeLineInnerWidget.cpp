@@ -289,7 +289,7 @@ void TimeLineInnerWidget::onPasteKeyTriggered(bool)
 {
     if (!mEditor->pasteCopiedKeys(mCopyTargets, mPastePos))
     {
-        QMessageBox::warning(nullptr, "operation error", "Failed to paste keys.");
+        QMessageBox::warning(nullptr, "Operation Error", "Failed to paste keys.");
     }
 }
 
