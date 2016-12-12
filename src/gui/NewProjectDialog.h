@@ -9,6 +9,7 @@ namespace gui
 
 class NewProjectDialog : public EasyDialog
 {
+    Q_OBJECT
 public:
     NewProjectDialog(QWidget* aParent);
     QString fileName() const { return mFileName; }

@@ -30,45 +30,50 @@ KeyCommandMap::KeyCommand::KeyCommand(
 
 //-------------------------------------------------------------------------------------------------
 KeyCommandMap::KeyCommandMap(QWidget& aParent)
-    : mCommands()
+    : QObject(&aParent)
+    , mCommands()
     , mSubKeyCommands()
     , mSearchMap()
     , mParent(aParent)
 {
-    addNewKey("Undo", "General", "Undo last action",
+    auto general = tr("General");
+    auto view = tr("View");
+    auto tools = tr("Tools");
+
+    addNewKey("Undo", general, tr("Undo last action"),
               ctrl::KeyBinding(Qt::Key_Z, Qt::ControlModifier));
 
-    addNewKey("Redo", "General", "Redo last action",
+    addNewKey("Redo", general, tr("Redo last action"),
               ctrl::KeyBinding(Qt::Key_Z, Qt::ControlModifier | Qt::ShiftModifier));
 
-    addNewKey("SaveProject", "General", "Save project",
+    addNewKey("SaveProject", general, tr("Save project"),
               ctrl::KeyBinding(Qt::Key_S, Qt::ControlModifier));
 
-    addNewKey("MoveCanvas", "View", "Move canvas",
+    addNewKey("MoveCanvas", view, tr("Move canvas"),
               ctrl::KeyBinding(Qt::Key_Space, Qt::ControlModifier));
 
-    addNewKey("RotateCanvas", "View", "Rotate canvas",
+    addNewKey("RotateCanvas", view, tr("Rotate canvas"),
               ctrl::KeyBinding(Qt::Key_Space, Qt::ControlModifier | Qt::ShiftModifier));
 
-    addNewKey("ResetCanvasAngle", "View", "Reset canvas angle",
+    addNewKey("ResetCanvasAngle", view, tr("Reset canvas angle"),
               ctrl::KeyBinding(Qt::Key_Space, Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_F1));
 
-    addNewKey("SelectCursor", "Tools", "Select cursor",
+    addNewKey("SelectCursor", tools, tr("Select cursor tool"),
               ctrl::KeyBinding());
 
-    addNewKey("SelectSRT", "Tools", "Select SRT editor",
+    addNewKey("SelectSRT", tools, tr("Select SRT editor"),
               ctrl::KeyBinding());
 
-    addNewKey("SelectBone", "Tools", "Select bone editor",
+    addNewKey("SelectBone", tools, tr("Select bone editor"),
               ctrl::KeyBinding());
 
-    addNewKey("SelectPose", "Tools", "Select pose editor",
+    addNewKey("SelectPose", tools, tr("Select pose editor"),
               ctrl::KeyBinding());
 
-    addNewKey("SelectMesh", "Tools", "Select mesh editor",
+    addNewKey("SelectMesh", tools, tr("Select mesh editor"),
               ctrl::KeyBinding());
 
-    addNewKey("SelectFFD", "Tools", "Select FFD editor",
+    addNewKey("SelectFFD", tools, tr("Select FFD editor"),
               ctrl::KeyBinding());
 
     resetSubKeyCommands();

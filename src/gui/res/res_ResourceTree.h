@@ -16,6 +16,7 @@ namespace res {
 
 class ResourceTree : public QTreeWidget
 {
+    Q_OBJECT
 public:
     enum { kItemColumn = 0 };
     enum { kColumnCount = 1 };

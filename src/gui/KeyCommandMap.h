@@ -11,8 +11,9 @@
 namespace gui
 {
 
-class KeyCommandMap
+class KeyCommandMap : public QObject
 {
+    Q_OBJECT
 public:
     struct KeyCommand
     {

@@ -43,15 +43,15 @@ ResourceTree::ResourceTree(ViaPoint& aViaPoint, bool aUseCustomContext, QWidget*
         this->connect(this, &QWidget::customContextMenuRequested,
                       this, &ResourceTree::onContextMenuRequested);
 
-        mChangePathAction = new QAction("change file path", this);
+        mChangePathAction = new QAction(tr("change file path"), this);
         mChangePathAction->connect(mChangePathAction, &QAction::triggered,
                                    this, &ResourceTree::onChangePathActionTriggered);
 
-        mReloadAction = new QAction("reload images", this);
+        mReloadAction = new QAction(tr("reload images"), this);
         mReloadAction->connect(mReloadAction, &QAction::triggered,
                                this, &ResourceTree::onReloadActionTriggered);
 
-        mDeleteAction = new QAction("delete", this);
+        mDeleteAction = new QAction(tr("delete"), this);
         mDeleteAction->connect(mDeleteAction, &QAction::triggered,
                                this, &ResourceTree::onDeleteActionTriggered);
     }
@@ -219,7 +219,7 @@ void ResourceTree::onChangePathActionTriggered(bool)
     if (item && item->isTopNode())
     {
         const QString fileName = QFileDialog::getOpenFileName(
-                    this, "Open File", "", "ImageFile (*.psd *.jpg *.jpeg *.png *.gif)");
+                    this, tr("Open File"), "", "ImageFile (*.psd *.jpg *.jpeg *.png *.gif)");
         if (fileName.isEmpty()) return;
 
         if (mHolder)

@@ -2,6 +2,145 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ja_JP">
 <context>
+    <name>gui::ExportDialog</name>
+    <message>
+        <location filename="../../src/gui/ExportDialog.cpp" line="38"/>
+        <source>Export Dialog</source>
+        <translation>出力ダイアログ</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ExportDialog.cpp" line="55"/>
+        <source>Parameters</source>
+        <translation>パラメーター</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ExportDialog.cpp" line="119"/>
+        <source>bit rate (Kbps) :</source>
+        <translation>ビットレート(Kbps) :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ExportDialog.cpp" line="143"/>
+        <source>prefix name :</source>
+        <translation>前置名 :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ExportDialog.cpp" line="201"/>
+        <source>image width :</source>
+        <translation>画像幅 :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ExportDialog.cpp" line="202"/>
+        <source>image height :</source>
+        <translation>画像高さ :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ExportDialog.cpp" line="203"/>
+        <source>fix aspect :</source>
+        <translation>アスペクト比を固定 :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ExportDialog.cpp" line="243"/>
+        <source>start frame :</source>
+        <translation>開始フレーム :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ExportDialog.cpp" line="244"/>
+        <source>end frame :</source>
+        <translation>終了フレーム :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ExportDialog.cpp" line="259"/>
+        <source>fps :</source>
+        <translation>フレームレート :</translation>
+    </message>
+</context>
+<context>
+    <name>gui::KeyBindingDialog</name>
+    <message>
+        <location filename="../../src/gui/KeyBindingDialog.cpp" line="88"/>
+        <source>Key Binding Dialog</source>
+        <translation>ショートカットキー設定ダイアログ</translation>
+    </message>
+</context>
+<context>
+    <name>gui::KeyCommandMap</name>
+    <message>
+        <location filename="../../src/gui/KeyCommandMap.cpp" line="39"/>
+        <source>General</source>
+        <translation>一般</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/KeyCommandMap.cpp" line="40"/>
+        <source>View</source>
+        <translation>表示</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/KeyCommandMap.cpp" line="41"/>
+        <source>Tools</source>
+        <translation>ツール</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/KeyCommandMap.cpp" line="43"/>
+        <source>Undo last action</source>
+        <translation>元に戻す</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/KeyCommandMap.cpp" line="46"/>
+        <source>Redo last action</source>
+        <translation>やり直す</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/KeyCommandMap.cpp" line="49"/>
+        <source>Save project</source>
+        <translation>プロジェクトを保存</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/KeyCommandMap.cpp" line="52"/>
+        <source>Move canvas</source>
+        <translation>キャンバスを移動</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/KeyCommandMap.cpp" line="55"/>
+        <source>Rotate canvas</source>
+        <translation>キャンバスを回転</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/KeyCommandMap.cpp" line="58"/>
+        <source>Reset canvas angle</source>
+        <translation>キャンバスの回転をリセット</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/KeyCommandMap.cpp" line="61"/>
+        <source>Select cursor tool</source>
+        <translation>カーソルツールを選択</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/KeyCommandMap.cpp" line="64"/>
+        <source>Select SRT editor</source>
+        <translation>SRTエディタを選択</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/KeyCommandMap.cpp" line="67"/>
+        <source>Select bone editor</source>
+        <translation>ボーンエディタを選択</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/KeyCommandMap.cpp" line="70"/>
+        <source>Select pose editor</source>
+        <translation>ポーズエディタを選択</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/KeyCommandMap.cpp" line="73"/>
+        <source>Select mesh editor</source>
+        <translation>メッシュエディタを選択</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/KeyCommandMap.cpp" line="76"/>
+        <source>Select FFD editor</source>
+        <translation>FFDエディタを選択</translation>
+    </message>
+</context>
+<context>
     <name>gui::MainMenuBar</name>
     <message>
         <location filename="../../src/gui/MainMenuBar.cpp" line="25"/>
@@ -148,6 +287,49 @@
     </message>
 </context>
 <context>
+    <name>gui::NewProjectDialog</name>
+    <message>
+        <location filename="../../src/gui/NewProjectDialog.cpp" line="15"/>
+        <source>New Project Dialog</source>
+        <translation>新規プロジェクトダイアログ</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/NewProjectDialog.cpp" line="52"/>
+        <source>Open File</source>
+        <translation>ファイルを開く</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/NewProjectDialog.cpp" line="60"/>
+        <source>initial resource :</source>
+        <translation>初期リソース :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/NewProjectDialog.cpp" line="74"/>
+        <source>max frame :</source>
+        <translation>最大フレーム数 :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/NewProjectDialog.cpp" line="107"/>
+        <source>specify canvas size :</source>
+        <translation>キャンバスサイズを指定する :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/NewProjectDialog.cpp" line="108"/>
+        <source>canvas width :</source>
+        <translation>キャンバス幅 :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/NewProjectDialog.cpp" line="109"/>
+        <source>canvas height :</source>
+        <translation>キャンバス高さ :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/NewProjectDialog.cpp" line="112"/>
+        <source>Parameters</source>
+        <translation>パラメーター</translation>
+    </message>
+</context>
+<context>
     <name>gui::ProjectCanvasSizeSettingDialog</name>
     <message>
         <location filename="../../src/gui/MainMenuBar.cpp" line="213"/>
@@ -161,7 +343,7 @@
     </message>
     <message>
         <location filename="../../src/gui/MainMenuBar.cpp" line="244"/>
-        <source>Parameter</source>
+        <source>Parameters</source>
         <translation>パラメーター</translation>
     </message>
 </context>
@@ -179,7 +361,7 @@
     </message>
     <message>
         <location filename="../../src/gui/MainMenuBar.cpp" line="416"/>
-        <source>Parameter</source>
+        <source>Parameters</source>
         <translation>パラメーター</translation>
     </message>
 </context>
@@ -197,7 +379,7 @@
     </message>
     <message>
         <location filename="../../src/gui/MainMenuBar.cpp" line="318"/>
-        <source>Parameter</source>
+        <source>Parameters</source>
         <translation>パラメーター</translation>
     </message>
     <message>
@@ -214,6 +396,29 @@
         <location filename="../../src/gui/MainMenuBar.cpp" line="349"/>
         <source>Operation Error</source>
         <translation>操作エラー</translation>
+    </message>
+</context>
+<context>
+    <name>gui::ResourceDialog</name>
+    <message>
+        <location filename="../../src/gui/ResourceDialog.cpp" line="18"/>
+        <source>Resource Dialog</source>
+        <translation>リソースダイアログ</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ResourceDialog.cpp" line="27"/>
+        <source>File</source>
+        <translation>ファイル</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ResourceDialog.cpp" line="28"/>
+        <source>Add Resource</source>
+        <translation>リソースを追加する</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ResourceDialog.cpp" line="120"/>
+        <source>Open File</source>
+        <translation>ファイルを開く</translation>
     </message>
 </context>
 <context>
@@ -247,6 +452,29 @@
         <location filename="../../src/gui/ToolWidget.cpp" line="118"/>
         <source>Rotate the View Clockwise</source>
         <translation>時計回りに回転する</translation>
+    </message>
+</context>
+<context>
+    <name>gui::res::ResourceTree</name>
+    <message>
+        <location filename="../../src/gui/res/res_ResourceTree.cpp" line="46"/>
+        <source>change file path</source>
+        <translation>ファイルパスを変更</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/res/res_ResourceTree.cpp" line="50"/>
+        <source>reload images</source>
+        <translation>画像を再読み込みする</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/res/res_ResourceTree.cpp" line="54"/>
+        <source>delete</source>
+        <translation>削除</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/res/res_ResourceTree.cpp" line="222"/>
+        <source>Open File</source>
+        <translation>ファイルを開く</translation>
     </message>
 </context>
 <context>
@@ -309,7 +537,7 @@
     <message>
         <location filename="../../src/gui/tool/tool_FFDPanel.cpp" line="26"/>
         <source>FreeFormDeform</source>
-        <translation>自由形状変形</translation>
+        <translation>自由形状変形(FFD)</translation>
     </message>
     <message>
         <location filename="../../src/gui/tool/tool_FFDPanel.cpp" line="37"/>
@@ -428,12 +656,12 @@
     <message>
         <location filename="../../src/gui/tool/tool_SRTPanel.cpp" line="23"/>
         <source>SRT Transform</source>
-        <translation>移動、回転、拡縮</translation>
+        <translation>移動、回転、拡縮(SRT)</translation>
     </message>
     <message>
         <location filename="../../src/gui/tool/tool_SRTPanel.cpp" line="34"/>
         <source>Transform SRT</source>
-        <translation>変形する</translation>
+        <translation>SRTを変形する</translation>
     </message>
     <message>
         <location filename="../../src/gui/tool/tool_SRTPanel.cpp" line="35"/>

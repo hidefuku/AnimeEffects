@@ -85,7 +85,7 @@ void KeyBindingDialog::KeyEdit::flushToOrigin()
 
 //-------------------------------------------------------------------------------------------------
 KeyBindingDialog::KeyBindingDialog(KeyCommandMap& aMap, QWidget* aParent)
-    : EasyDialog("Key Binding Dialog", aParent)
+    : EasyDialog(tr("Key Binding Dialog"), aParent)
     , mKeyCommandMap(aMap)
     , mKeys()
     , mTabs(new QTabWidget(this))

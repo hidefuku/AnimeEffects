@@ -241,7 +241,7 @@ ProjectCanvasSizeSettingDialog::ProjectCanvasSizeSettingDialog(
         }
         form->addRow(tr("size :"), sizeLayout);
 
-        auto group = new QGroupBox(tr("Parameter"));
+        auto group = new QGroupBox(tr("Parameters"));
         group->setLayout(form);
         this->setMainWidget(group);
     }
@@ -315,7 +315,7 @@ ProjectMaxFrameSettingDialog::ProjectMaxFrameSettingDialog(core::Project& aProje
         }
         form->addRow(tr("max frame :"), layout);
 
-        auto group = new QGroupBox(tr("Parameter"));
+        auto group = new QGroupBox(tr("Parameters"));
         group->setLayout(form);
         this->setMainWidget(group);
     }
@@ -413,7 +413,7 @@ ProjectLoopSettingDialog::ProjectLoopSettingDialog(core::Project& aProject, QWid
         }
         form->addRow(tr("loop animation :"), layout);
 
-        auto group = new QGroupBox(tr("Parameter"));
+        auto group = new QGroupBox(tr("Parameters"));
         group->setLayout(form);
         this->setMainWidget(group);
     }

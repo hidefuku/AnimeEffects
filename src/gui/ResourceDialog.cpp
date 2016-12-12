@@ -15,7 +15,7 @@ namespace gui
 {
 
 ResourceDialog::ResourceDialog(ViaPoint& aViaPoint, bool aModal, QWidget* aParent)
-    : EasyDialog("Resource Dialog", aParent, aModal)
+    : EasyDialog(tr("Resource Dialog"), aParent, aModal)
     , mViaPoint(aViaPoint)
     , mProject()
     , mTree()
@@ -24,8 +24,8 @@ ResourceDialog::ResourceDialog(ViaPoint& aViaPoint, bool aModal, QWidget* aParen
     if (!aModal)
     {
         auto menuBar = new QMenuBar(this);
-        auto fileMenu = new QMenu("File", menuBar);
-        auto addResource = new QAction("Add Resource", fileMenu);
+        auto fileMenu = new QMenu(tr("File"), menuBar);
+        auto addResource = new QAction(tr("Add Resource"), fileMenu);
         connect(addResource, &QAction::triggered, this, &ResourceDialog::onAddResourceTriggered);
         fileMenu->addAction(addResource);
         menuBar->addMenu(fileMenu);
@@ -117,7 +117,7 @@ void ResourceDialog::onAddResourceTriggered(bool)
     if (!mProject) return;
 
     const QString fileName = QFileDialog::getOpenFileName(
-                this, "Open File", "", "ImageFile (*.psd *.jpg *.jpeg *.png *.gif)");
+                this, tr("Open File"), "", "ImageFile (*.psd *.jpg *.jpeg *.png *.gif)");
     if (fileName.isEmpty()) return;
 
     res::ResourceUpdater updater(mViaPoint, *mProject);

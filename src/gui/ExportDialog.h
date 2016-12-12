@@ -13,6 +13,7 @@ namespace gui
 
 class ExportDialog : public EasyDialog
 {
+    Q_OBJECT
 public:
     ExportDialog(
             core::Project& aProject,

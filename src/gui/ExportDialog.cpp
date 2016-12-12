@@ -35,7 +35,7 @@ ExportDialog::ExportDialog(
         const QString& aPath,
         bool aVideoExporting,
         QWidget* aParent)
-    : EasyDialog("Export Dialog", aParent)
+    : EasyDialog(tr("Export Dialog"), aParent)
     , mProject(aProject)
     , mCommonParam()
     , mVideoParam()
@@ -52,7 +52,7 @@ ExportDialog::ExportDialog(
     mFrameMax = mProject.currentTimeInfo().frameMax;
 
     // option
-    auto group = new QGroupBox("Options");
+    auto group = new QGroupBox(tr("Parameters"));
     if (mVideoExporting)
     {
         group->setLayout(createVideoOption());
@@ -116,7 +116,7 @@ QLayout* ExportDialog::createVideoOption()
             this->mVideoParam.bps = kbps->value() * 1000;
         });
 
-        form->addRow("bit rate (Kbps) :", kbps);
+        form->addRow(tr("bit rate (Kbps) :"), kbps);
     }
 
     return form;
@@ -140,7 +140,7 @@ QLayout* ExportDialog::createPngOption()
             this->mPngParam.name = name->text();
         });
 
-        form->addRow("prefix name :", name);
+        form->addRow(tr("prefix name :"), name);
     }
 
     pushSizeBox(*form);
@@ -156,7 +156,7 @@ void ExportDialog::pushSizeBox(QFormLayout& aLayout)
     {
         auto x = new QSpinBox();
         auto y = new QSpinBox();
-        auto fix = new QCheckBox("fix");
+        auto fix = new QCheckBox();
         x->setRange(1, 32767);
         y->setRange(1, 32767);
         x->setValue(mCommonParam.size.width());
@@ -198,9 +198,9 @@ void ExportDialog::pushSizeBox(QFormLayout& aLayout)
             this->mFixAspect = aCheck;
         });
 
-        aLayout.addRow("image width :", x);
-        aLayout.addRow("image height :", y);
-        aLayout.addRow("image aspect :", fix);
+        aLayout.addRow(tr("image width :"), x);
+        aLayout.addRow(tr("image height :"), y);
+        aLayout.addRow(tr("fix aspect :"), fix);
     }
 }
 
@@ -240,8 +240,8 @@ void ExportDialog::pushFrameBox(QFormLayout& aLayout)
         }
     });
 
-    aLayout.addRow("start frame :", start);
-    aLayout.addRow("end frame :", end);
+    aLayout.addRow(tr("start frame :"), start);
+    aLayout.addRow(tr("end frame :"), end);
 }
 
 void ExportDialog::pushFpsBox(QFormLayout& aLayout)
@@ -256,7 +256,7 @@ void ExportDialog::pushFpsBox(QFormLayout& aLayout)
         this->mCommonParam.fps = fps->value();
     });
 
-    aLayout.addRow("fps :", fps);
+    aLayout.addRow(tr("fps :"), fps);
 }
 
 } // namespace gui

@@ -13,6 +13,7 @@ namespace gui
 
 class KeyBindingDialog : public EasyDialog
 {
+    Q_OBJECT
 public:
     KeyBindingDialog(KeyCommandMap& aMap, QWidget* aParent);
 

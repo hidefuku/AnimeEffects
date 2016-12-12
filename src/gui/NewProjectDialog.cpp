@@ -12,7 +12,7 @@ namespace gui
 {
 
 NewProjectDialog::NewProjectDialog(QWidget* aParent)
-    : EasyDialog("New Project Dialog", aParent)
+    : EasyDialog(tr("New Project Dialog"), aParent)
     , mFileName()
     , mAttribute()
     , mSpecifiesCanvasSize()
@@ -49,7 +49,7 @@ QWidget* NewProjectDialog::createOption()
         this->connect(button, &QPushButton::clicked, [=]()
         {
             this->mFileName = QFileDialog::getOpenFileName(
-                        this, "Open File", "", "ImageFile (*.psd *.jpg *.jpeg *.png *.gif)");
+                        this, tr("Open File"), "", "ImageFile (*.psd *.jpg *.jpeg *.png *.gif)");
 
             line->setText(mFileName);
         });
@@ -57,7 +57,7 @@ QWidget* NewProjectDialog::createOption()
         button->setFocusPolicy(Qt::NoFocus);
         layout->addWidget(button);
 
-        form->addRow("initial resource :", layout);
+        form->addRow(tr("initial resource :"), layout);
     }
 
     // frame
@@ -71,7 +71,7 @@ QWidget* NewProjectDialog::createOption()
             this->mAttribute.setMaxFrame(frame->value());
         });
 
-        form->addRow("frame :", frame);
+        form->addRow(tr("max frame :"), frame);
     }
 
     // canvas size
@@ -104,12 +104,12 @@ QWidget* NewProjectDialog::createOption()
             height->setEnabled(aChecked);
         });
 
-        form->addRow("specify canvas size :", check);
-        form->addRow("canvas width :", width);
-        form->addRow("canvas height :", height);
+        form->addRow(tr("specify canvas size :"), check);
+        form->addRow(tr("canvas width :"), width);
+        form->addRow(tr("canvas height :"), height);
     }
 
-    auto group = new QGroupBox("Options");
+    auto group = new QGroupBox(tr("Parameters"));
     group->setLayout(form);
 
     return group;

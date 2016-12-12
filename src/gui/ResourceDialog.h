@@ -14,6 +14,7 @@ namespace gui
 
 class ResourceDialog : public EasyDialog
 {
+    Q_OBJECT
 public:
     typedef QList<img::ResourceNode*> NodeList;
     ResourceDialog(ViaPoint& aViaPoint, bool aModal, QWidget* aParent);
