@@ -435,10 +435,13 @@ void MainWindow::onUndoTriggered()
 {
     if (mCurrent)
     {
-        auto ret = mCurrent->commandStack().undo();
-        qDebug() << "Undone:" << ret;
-        mViaPoint.pushLog(tr("Undone : ") + ret);
-        mMainDisplay->updateRender();
+        bool undone = false;
+        auto ret = mCurrent->commandStack().undo(&undone);
+        if (undone)
+        {
+            mViaPoint.pushUndoneLog(tr("Undone : ") + ret);
+            mMainDisplay->updateRender();
+        }
     }
 }
 
@@ -446,10 +449,13 @@ void MainWindow::onRedoTriggered()
 {
     if (mCurrent)
     {
-        auto ret = mCurrent->commandStack().redo();
-        qDebug() << "Redone:" << ret;
-        mViaPoint.pushLog(tr("Redone : ") + ret);
-        mMainDisplay->updateRender();
+        bool redone = false;
+        auto ret = mCurrent->commandStack().redo(&redone);
+        if (redone)
+        {
+            mViaPoint.pushRedoneLog(tr("Redone : ") + ret);
+            mMainDisplay->updateRender();
+        }
     }
 }
 

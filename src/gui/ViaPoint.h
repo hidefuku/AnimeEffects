@@ -33,6 +33,8 @@ public:
 
     void setLogView(QPlainTextEdit* aLogView);
     void pushLog(const QString& aText);
+    void pushUndoneLog(const QString& aText);
+    void pushRedoneLog(const QString& aText);
 
     void setGLDeviceInfo(const gl::DeviceInfo&);
     const gl::DeviceInfo& glDeviceInfo() const;

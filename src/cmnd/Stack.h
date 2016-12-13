@@ -26,8 +26,8 @@ public:
     bool isSuspended() const { return mSuspendCount > 0; }
     void push(Base* aCommand);
     void push(const std::vector<Base*>&& aCommands);
-    QString undo();
-    QString redo();
+    QString undo(bool* undone = nullptr);
+    QString redo(bool* redone = nullptr);
     void clear();
 
     bool isModifiable(const Base* aBase) const;

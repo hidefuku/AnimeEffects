@@ -75,6 +75,22 @@ void ViaPoint::pushLog(const QString& aText)
     }
 }
 
+void ViaPoint::pushUndoneLog(const QString& aText)
+{
+    if (mLogView)
+    {
+        mLogView->appendHtml("<font color=\"#606060\">" + aText + "</font>");
+    }
+}
+
+void ViaPoint::pushRedoneLog(const QString& aText)
+{
+    if (mLogView)
+    {
+        mLogView->appendHtml("<font color=\"#000030\">" + aText + "</font>");
+    }
+}
+
 void ViaPoint::setGLDeviceInfo(const gl::DeviceInfo& aInfo)
 {
     mGLDeviceInfo = aInfo;

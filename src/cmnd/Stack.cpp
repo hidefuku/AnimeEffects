@@ -111,8 +111,10 @@ void Stack::pushImpl(Base* aCommand)
     updateEditStatus();
 }
 
-QString Stack::undo()
+QString Stack::undo(bool* undone)
 {
+    if (undone) *undone = false;
+
     if (!isSuspended())
     {
         mModifiable = NULL;
@@ -130,6 +132,7 @@ QString Stack::undo()
             if (success)
             {
                 updateEditStatus();
+                if (undone) *undone = true;
                 return (*mCurrent)->name();
             }
         }
@@ -139,8 +142,10 @@ QString Stack::undo()
     return QString();
 }
 
-QString Stack::redo()
+QString Stack::redo(bool* redone)
 {
+    if (redone) *redone = false;
+
     if (!isSuspended())
     {
         mModifiable = NULL;
@@ -160,6 +165,7 @@ QString Stack::redo()
             if (success)
             {
                 updateEditStatus();
+                if (redone) *redone = true;
                 return name;
             }
         }
