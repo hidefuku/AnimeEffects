@@ -6,6 +6,7 @@
 #include "core/FFDKeyUpdater.h"
 #include "core/ResourceUpdatingWorkspace.h"
 #include "ctrl/TimeLineUtil.h"
+#include "ctrl/CmndName.h"
 
 using namespace core;
 
@@ -219,7 +220,8 @@ void assignMoveKeyData(
     assignKeyData<MoveKey, TimeKeyType_Move>(
                 aProject, aTarget, aFrame, aNewData,
                 aFrame == TimeLine::kDefaultKeyIndex ?
-                    "assign default move" : "assign move key");
+                    CmndName::tr("update a default movement") :
+                    CmndName::tr("update a movement key"));
 }
 
 void assignRotateKeyData(
@@ -229,7 +231,8 @@ void assignRotateKeyData(
     assignKeyData<RotateKey, TimeKeyType_Rotate>(
                 aProject, aTarget, aFrame, aNewData,
                 aFrame == TimeLine::kDefaultKeyIndex ?
-                    "assign default rotate" : "assign rotate key");
+                    CmndName::tr("update a default rotation") :
+                    CmndName::tr("update a rotation key"));
 }
 
 void assignScaleKeyData(
@@ -239,7 +242,8 @@ void assignScaleKeyData(
     assignKeyData<ScaleKey, TimeKeyType_Scale>(
                 aProject, aTarget, aFrame, aNewData,
                 aFrame == TimeLine::kDefaultKeyIndex ?
-                "assign default scale" : "assign scale key");
+                    CmndName::tr("update a default scaling") :
+                    CmndName::tr("update a scaling key"));
 }
 
 void assignDepthKeyData(
@@ -249,7 +253,8 @@ void assignDepthKeyData(
     assignKeyData<DepthKey, TimeKeyType_Depth>(
                 aProject, aTarget, aFrame, aNewData,
                 aFrame == TimeLine::kDefaultKeyIndex ?
-                "assign default depth" : "assign depth key");
+                    CmndName::tr("update a default depth") :
+                    CmndName::tr("update a depth key"));
 }
 
 void assignOpaKeyData(
@@ -259,7 +264,8 @@ void assignOpaKeyData(
     assignKeyData<OpaKey, TimeKeyType_Opa>(
                 aProject, aTarget, aFrame, aNewData,
                 aFrame == TimeLine::kDefaultKeyIndex ?
-                "assign default opacity" : "assign opacity key");
+                    CmndName::tr("update a default opacity") :
+                    CmndName::tr("update a opacity key"));
 }
 
 void assignPoseKeyEasing(
@@ -269,7 +275,8 @@ void assignPoseKeyEasing(
     assignKeyEasing<PoseKey, TimeKeyType_Pose>(
                 aProject, aTarget, aFrame, aNewData,
                 aFrame == TimeLine::kDefaultKeyIndex ?
-                "assign default pose" : "assign pose key");
+                    CmndName::tr("update a default posing") :
+                    CmndName::tr("update a posing key"));
 }
 
 void assignFFDKeyEasing(
@@ -279,20 +286,23 @@ void assignFFDKeyEasing(
     assignKeyEasing<FFDKey, TimeKeyType_FFD>(
                 aProject, aTarget, aFrame, aNewData,
                 aFrame == TimeLine::kDefaultKeyIndex ?
-                "assign default ffd" : "assign ffd key");
+                    CmndName::tr("update a default FFD") :
+                    CmndName::tr("update a FFD key"));
 }
 
 void assignImageKeyResource(
         Project& aProject, ObjectNode& aTarget, int aFrame,
         img::ResourceNode& aNewData)
 {
-    ResourceUpdatingWorkspacePtr workspace = std::make_shared<ResourceUpdatingWorkspace>();
+    ResourceUpdatingWorkspacePtr workspace =
+            std::make_shared<ResourceUpdatingWorkspace>();
     const bool createTransitions = !aTarget.timeLine()->isEmpty(TimeKeyType_FFD);
 
     assignKeyBy<ImageKey, TimeKeyType_Image>(
                 aProject, aTarget, aFrame,
                 aFrame == TimeLine::kDefaultKeyIndex ?
-                "assign default image resource" : "assign image key resource",
+                    CmndName::tr("update a resource of a default image") :
+                    CmndName::tr("update a resource of a image key"),
                 [&](ImageKey* aKey)
     {
         // image key
@@ -316,7 +326,8 @@ void assignImageKeyOffset(
     assignKeyBy<ImageKey, TimeKeyType_Image>(
                 aProject, aTarget, aFrame,
                 aFrame == TimeLine::kDefaultKeyIndex ?
-                "assign default image center" : "assign image key center",
+                    CmndName::tr("update a center of a default image") :
+                    CmndName::tr("update a center of a image key"),
                 [&](ImageKey* aKey)
     {
         auto prevOffset = aKey->data().imageOffset();
@@ -342,7 +353,8 @@ void assignImageKeyCellSize(
     assignKeyBy<ImageKey, TimeKeyType_Image>(
                 aProject, aTarget, aFrame,
                 aFrame == TimeLine::kDefaultKeyIndex ?
-                "assign default image cell size" : "assign image key cell size",
+                    CmndName::tr("update a mesh cell size of a default image") :
+                    CmndName::tr("update a mesh cell size of a image key"),
                 [&](ImageKey* aKey)
     {
         // image key
@@ -393,34 +405,34 @@ void pushNewMoveKey(
         Project& aProject, ObjectNode& aTarget, int aFrame, MoveKey* aKey)
 {
     pushNewKey<MoveKey, TimeKeyType_Move>(
-                aProject, aTarget, aFrame, aKey, "push new move key");
+                aProject, aTarget, aFrame, aKey, CmndName::tr("push new moving key"));
 }
 void pushNewRotateKey(
         Project& aProject, ObjectNode& aTarget, int aFrame, RotateKey* aKey)
 {
     pushNewKey<RotateKey, TimeKeyType_Rotate>(
-                aProject, aTarget, aFrame, aKey, "push new rotate key");
+                aProject, aTarget, aFrame, aKey, CmndName::tr("push new rotation key"));
 }
 
 void pushNewScaleKey(
         Project& aProject, ObjectNode& aTarget, int aFrame, ScaleKey* aKey)
 {
     pushNewKey<ScaleKey, TimeKeyType_Scale>(
-                aProject, aTarget, aFrame, aKey, "push new scale key");
+                aProject, aTarget, aFrame, aKey, CmndName::tr("push new scaling key"));
 }
 
 void pushNewDepthKey(
         Project& aProject, ObjectNode& aTarget, int aFrame, DepthKey* aKey)
 {
     pushNewKey<DepthKey, TimeKeyType_Depth>(
-                aProject, aTarget, aFrame, aKey, "push new depth key");
+                aProject, aTarget, aFrame, aKey, CmndName::tr("push new depth key"));
 }
 
 void pushNewOpaKey(
         Project& aProject, ObjectNode& aTarget, int aFrame, OpaKey* aKey)
 {
     pushNewKey<OpaKey, TimeKeyType_Opa>(
-                aProject, aTarget, aFrame, aKey, "push new opacity key");
+                aProject, aTarget, aFrame, aKey, CmndName::tr("push new opacity key"));
 }
 
 void pushNewPoseKey(
@@ -430,7 +442,7 @@ void pushNewPoseKey(
     XC_PTR_ASSERT(aParentKey);
     pushNewKey<PoseKey, TimeKeyType_Pose>(
                 aProject, aTarget, aFrame, aKey,
-                "push new pose key", aParentKey);
+                CmndName::tr("push new posing key"), aParentKey);
 }
 
 void pushNewFFDKey(
@@ -442,14 +454,14 @@ void pushNewFFDKey(
               aParentKey->type() == TimeKeyType_Image);
     pushNewKey<FFDKey, TimeKeyType_FFD>(
                 aProject, aTarget, aFrame, aKey,
-                "push new ffd key", aParentKey);
+                CmndName::tr("push new FFD key"), aParentKey);
 }
 
 void pushNewImageKey(
         Project& aProject, ObjectNode& aTarget, int aFrame, ImageKey* aKey)
 {
     pushNewKey<ImageKey, TimeKeyType_Image>(
-                aProject, aTarget, aFrame, aKey, "push new image key");
+                aProject, aTarget, aFrame, aKey, CmndName::tr("push new image key"));
 }
 
 //-------------------------------------------------------------------------------------------------

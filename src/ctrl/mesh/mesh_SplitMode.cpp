@@ -5,6 +5,7 @@
 #include "core/Constant.h"
 #include "core/TimeLine.h"
 #include "ctrl/TimeLineUtil.h"
+#include "ctrl/CmndName.h"
 #include "ctrl/mesh/mesh_SplitMode.h"
 #include "ctrl/mesh/mesh_Renderer.h"
 #include "ctrl/mesh/mesh_Notifier.h"
@@ -179,7 +180,7 @@ MeshVtx* SplitMode::splitTriangle()
 
     MeshVtx* tailVtx = nullptr;
     {
-        cmnd::ScopedMacro macro(stack, "split triangle");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("split a triangle of a mesh key"));
         // set notifier
         macro.grabListener(new Notifier(mProject, mTarget, *mKeyOwner.key, eventType));
         // push command

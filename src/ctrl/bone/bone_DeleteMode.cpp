@@ -2,6 +2,7 @@
 #include "cmnd/ScopedMacro.h"
 #include "core/TimeLine.h"
 #include "ctrl/TimeLineUtil.h"
+#include "ctrl/CmndName.h"
 #include "ctrl/bone/bone_DeleteMode.h"
 #include "ctrl/bone/bone_Renderer.h"
 #include "ctrl/bone/bone_PushNewPoses.h"
@@ -68,7 +69,7 @@ void DeleteMode::deleteBone(Bone2& aBone)
     cmnd::Stack& stack = mProject.commandStack();
     BoneKey& key = *mKeyOwner.key;
 
-    cmnd::ScopedMacro macro(stack, "delete a bone");
+    cmnd::ScopedMacro macro(stack, CmndName::tr("delete a bone"));
 
     // set notifier
     macro.grabListener(new Notifier(mProject, mTarget, key, TimeLineEvent::Type_ChangeKeyValue));

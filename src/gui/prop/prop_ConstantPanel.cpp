@@ -1,6 +1,7 @@
 #include "cmnd/ScopedMacro.h"
 #include "cmnd/BasicCommands.h"
 #include "core/Constant.h"
+#include "ctrl/CmndName.h"
 #include "gui/ResourceDialog.h"
 #include "gui/prop/prop_ConstantPanel.h"
 #include "gui/prop/prop_Items.h"
@@ -134,7 +135,7 @@ void ConstantPanel::assignBlendMode(core::Project& aProject, core::ObjectNode* a
     if (!aTarget || !aTarget->renderer()) return; // fail safe code
 
     auto prev = aTarget->renderer()->blendMode();
-    cmnd::ScopedMacro macro(aProject.commandStack(), "assign blend mode");
+    cmnd::ScopedMacro macro(aProject.commandStack(), CmndName::tr("update a blending mode"));
     macro.grabListener(new ObjectNodeAttrNotifier(aProject, *aTarget));
 
     auto exec = [=](){ aTarget->renderer()->setBlendMode(aValue); };
@@ -149,7 +150,7 @@ void ConstantPanel::assignClipped(core::Project& aProject, core::ObjectNode* aTa
     if (!aTarget || !aTarget->renderer()) return; // fail safe code
 
     const bool prev = aTarget->renderer()->isClipped();
-    cmnd::ScopedMacro macro(aProject.commandStack(), "assign node clippping flag");
+    cmnd::ScopedMacro macro(aProject.commandStack(), CmndName::tr("update a clippping flag"));
     macro.grabListener(new ObjectNodeAttrNotifier(aProject, *aTarget));
 
     auto exec = [=](){ aTarget->renderer()->setClipped(aValue); };

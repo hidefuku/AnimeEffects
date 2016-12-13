@@ -2,6 +2,7 @@
 #include "cmnd/ScopedMacro.h"
 #include "core/TimeLine.h"
 #include "ctrl/TimeLineUtil.h"
+#include "ctrl/CmndName.h"
 #include "ctrl/bone/bone_CreateMode.h"
 #include "ctrl/bone/bone_Renderer.h"
 #include "ctrl/bone/bone_PushNewPoses.h"
@@ -125,7 +126,7 @@ void CreateMode::pushNewBone(core::Bone2& aParent, core::Bone2& aNewChild)
     //TimeLine& timeLine = *mTarget.timeLine();
     cmnd::Stack& stack = mProject.commandStack();
 
-    cmnd::ScopedMacro macro(stack, "push new bone");
+    cmnd::ScopedMacro macro(stack, CmndName::tr("push new bone"));
 
     // set notifier
     macro.grabListener(new Notifier(mProject, mTarget, *mKeyOwner.key, TimeLineEvent::Type_ChangeKeyValue));
@@ -144,7 +145,7 @@ void CreateMode::pushNewTopBone(Bone2& aNewRoot, Bone2& aNewChild)
                 TimeLineEvent::Type_PushKey :
                 TimeLineEvent::Type_ChangeKeyValue;
 
-    cmnd::ScopedMacro macro(stack, "push new top bone");
+    cmnd::ScopedMacro macro(stack, CmndName::tr("push new top bone"));
 
     // set notifier
     macro.grabListener(new Notifier(mProject, mTarget, *mKeyOwner.key, eventType));

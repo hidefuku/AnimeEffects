@@ -12,6 +12,7 @@
 #include "core/LayerNode.h"
 #include "core/FolderNode.h"
 #include "ctrl/TimeLineRow.h"
+#include "ctrl/CmndName.h"
 #include "gui/ObjectTreeWidget.h"
 #include "gui/ResourceDialog.h"
 #include "gui/ProjectHook.h"
@@ -252,7 +253,7 @@ void ObjectTreeWidget::storeInsertion(
             mObjTreeNotifier = new core::ObjectTreeNotifier(*mProject);
             mObjTreeNotifier->event().setType(core::ObjectTreeEvent::Type_Move);
 
-            mMacroScope.construct(mProject->commandStack(), "change object tree");
+            mMacroScope.construct(mProject->commandStack(), CmndName::tr("move a object"));
             mMacroScope->grabListener(mObjTreeNotifier);
         }
         // record target
@@ -317,7 +318,7 @@ void ObjectTreeWidget::endEdit()
 
         virtual QString name() const
         {
-            return "change object name";
+            return CmndName::tr("change a object name");
         }
 
         virtual void exec()
@@ -588,7 +589,8 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
             ptr->setDefaultOpacity(1.0f); // @todo support default opacity
 
 
-            cmnd::ScopedMacro macro(mProject->commandStack(), "create object");
+            cmnd::ScopedMacro macro(mProject->commandStack(),
+                                    CmndName::tr("create a layer object"));
             // notifier
             {
                 auto coreNotifier = new core::ObjectTreeNotifier(*mProject);
@@ -658,7 +660,8 @@ void ObjectTreeWidget::onFolderActionTriggered(bool)
 
         // create command
         {
-            cmnd::ScopedMacro macro(mProject->commandStack(), "create object folder");
+            cmnd::ScopedMacro macro(mProject->commandStack(),
+                                    CmndName::tr("create a folder object"));
 
             // create node
             core::FolderNode* ptr = new core::FolderNode("folder0");
@@ -707,7 +710,7 @@ void ObjectTreeWidget::onDeleteActionTriggered(bool)
 
         // delete command
         {
-            cmnd::ScopedMacro macro(mProject->commandStack(), "delete object");
+            cmnd::ScopedMacro macro(mProject->commandStack(), CmndName::tr("delete a object"));
             {
                 auto coreNotifier = new core::ObjectTreeNotifier(*mProject);
                 coreNotifier->event().setType(core::ObjectTreeEvent::Type_Delete);

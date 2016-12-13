@@ -10,6 +10,7 @@
 #include "img/BlendMode.h"
 #include "cmnd/ScopedMacro.h"
 #include "cmnd/BasicCommands.h"
+#include "ctrl/CmndName.h"
 #include "gui/res/res_ImageSetter.h"
 #include "gui/res/res_ResourceUpdater.h"
 
@@ -162,7 +163,7 @@ void ResourceUpdater::load(const QString& aFilePath)
         auto& stack = mProject.commandStack();
         auto& holder = mProject.resourceHolder();
 
-        cmnd::ScopedMacro macro(stack, "add new resource");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("add new resource"));
 
         // notifier
         macro.grabListener(new AddNewOneNotifier(mViaPoint, mProject));
@@ -497,7 +498,7 @@ bool ResourceUpdater::tryReloadCorrespondingImages(
                               newNode->data().identifier().toLatin1().data());
 
         auto& stack = mProject.commandStack();
-        cmnd::ScopedMacro macro(stack, "reload images");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("reload images"));
 
         // notifier
         auto notifier = new ModificationNotifier(mViaPoint, mProject, getTreePos(item));
@@ -552,7 +553,7 @@ void ResourceUpdater::remove(Item& aItem)
         auto& stack = mProject.commandStack();
         auto& holder = mProject.resourceHolder();
 
-        cmnd::ScopedMacro macro(stack, "delete resources");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("delete images"));
 
         // notifier
         macro.grabListener(new DeleteNotifier(mViaPoint, mProject));

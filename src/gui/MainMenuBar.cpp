@@ -4,6 +4,7 @@
 #include "cmnd/BasicCommands.h"
 #include "cmnd/ScopedMacro.h"
 #include "core/ObjectNodeUtil.h"
+#include "ctrl/CmndName.h"
 #include "gui/MainMenuBar.h"
 #include "gui/MainWindow.h"
 #include "gui/ResourceDialog.h"
@@ -270,7 +271,8 @@ void MainMenuBar::onCanvasSizeTriggered()
 
     // create commands
     {
-        cmnd::ScopedMacro macro(mProject->commandStack(), "change canvas size");
+        cmnd::ScopedMacro macro(mProject->commandStack(),
+                                CmndName::tr("change the canvas size"));
 
         core::Project* projectPtr = mProject;
         auto command = new cmnd::Delegatable([=]()
@@ -371,7 +373,8 @@ void MainMenuBar::onMaxFrameTriggered()
 
     // create commands
     {
-        cmnd::ScopedMacro macro(mProject->commandStack(), "change max frame");
+        cmnd::ScopedMacro macro(mProject->commandStack(),
+                                CmndName::tr("change the max frame"));
 
         core::Project* projectPtr = mProject;
         auto command = new cmnd::Delegatable([=]()
@@ -441,7 +444,8 @@ void MainMenuBar::onLoopTriggered()
 
     // create commands
     {
-        cmnd::ScopedMacro macro(mProject->commandStack(), "change animation loop setting");
+        cmnd::ScopedMacro macro(mProject->commandStack(),
+                                CmndName::tr("change the animation loop setting"));
 
         core::Project* projectPtr = mProject;
         auto command = new cmnd::Delegatable([=]()

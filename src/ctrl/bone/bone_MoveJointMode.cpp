@@ -1,5 +1,6 @@
 #include "cmnd/ScopedMacro.h"
 #include "ctrl/TimeLineUtil.h"
+#include "ctrl/CmndName.h"
 #include "ctrl/bone/bone_MoveJointMode.h"
 #include "ctrl/bone/bone_Renderer.h"
 #include "ctrl/bone/bone_Notifier.h"
@@ -96,7 +97,7 @@ void MoveJointMode::moveBone(core::Bone2& aTarget, const QVector2D& aMove)
     }
     else
     {
-        cmnd::ScopedMacro macro(stack, "move bone");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("move a bone"));
         macro.grabListener(new Notifier(mProject, mTarget, *mKeyOwner.key, eventType));
 
         // push command

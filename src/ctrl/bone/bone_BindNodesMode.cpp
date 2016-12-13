@@ -2,6 +2,7 @@
 #include "cmnd/BasicCommands.h"
 #include "core/TimeKeyBlender.h"
 #include "ctrl/TimeLineUtil.h"
+#include "ctrl/CmndName.h"
 #include "ctrl/bone/bone_BindNodesMode.h"
 #include "ctrl/bone/bone_Renderer.h"
 #include "ctrl/bone/bone_Notifier.h"
@@ -84,7 +85,7 @@ void BindNodesMode::bindNode(Bone2& aBone, ObjectNode& aNode)
 
     cmnd::Stack& stack = mProject.commandStack();
     {
-        cmnd::ScopedMacro macro(stack, "bind a node to a bone");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("bind a object to a bone"));
         macro.grabListener(new Notifier(mProject, mTarget, *mKeyOwner.key,
                                         TimeLineEvent::Type_ChangeKeyValue));
 
@@ -112,7 +113,7 @@ void BindNodesMode::unbindNode(ObjectNode& aNode)
     }
 
     cmnd::Stack& stack = mProject.commandStack();
-    cmnd::ScopedMacro macro(stack, "unbind a node from bones");
+    cmnd::ScopedMacro macro(stack, CmndName::tr("unbind a object from bones"));
     macro.grabListener(new Notifier(mProject, mTarget, *mKeyOwner.key,
                                     TimeLineEvent::Type_ChangeKeyValue));
 

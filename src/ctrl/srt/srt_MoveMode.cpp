@@ -3,6 +3,7 @@
 #include "core/Constant.h"
 #include "core/TimeKeyBlender.h"
 #include "ctrl/TimeLineUtil.h"
+#include "ctrl/CmndName.h"
 #include "ctrl/srt/srt_MoveMode.h"
 
 using namespace core;
@@ -205,7 +206,7 @@ void MoveMode::assignMoveKey(MoveKey::Data& aNewData)
     }
     else
     {
-        cmnd::ScopedMacro macro(stack, "update move");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("update a moving key"));
         setAssignNotifier(macro, TimeKeyType_Move, mKeyOwner.ownsMoveKey);
         // push commands
         mKeyOwner.pushOwningMoveKey(stack, timeLine, frame);
@@ -243,7 +244,7 @@ void MoveMode::assignRotateKey(RotateKey::Data& aNewData)
     }
     else
     {
-        cmnd::ScopedMacro macro(stack, "update rotate");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("update a rotation key"));
         setAssignNotifier(macro, TimeKeyType_Rotate, mKeyOwner.ownsRotateKey);
         // push commands
         mKeyOwner.pushOwningRotateKey(stack, timeLine, frame);
@@ -281,7 +282,7 @@ void MoveMode::assignScaleKey(ScaleKey::Data& aNewData)
     }
     else
     {
-        cmnd::ScopedMacro macro(stack, "update scale");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("update a scaling key"));
         setAssignNotifier(macro, TimeKeyType_Scale, mKeyOwner.ownsScaleKey);
         // push commands
         mKeyOwner.pushOwningScaleKey(stack, timeLine, frame);

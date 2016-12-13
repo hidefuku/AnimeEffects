@@ -3,6 +3,7 @@
 #include "cmnd/ScopedMacro.h"
 #include "core/Constant.h"
 #include "ctrl/TimeLineUtil.h"
+#include "ctrl/CmndName.h"
 #include "ctrl/bone/bone_InfluenceMode.h"
 #include "ctrl/bone/bone_Renderer.h"
 #include "ctrl/bone/bone_Notifier.h"
@@ -139,7 +140,7 @@ void InfluenceMode::assignInfluence(core::Bone2& aTarget, int aIndex, const QVec
     }
     else
     {
-        cmnd::ScopedMacro macro(stack, "assign influence");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("update influence of a bone"));
         macro.grabListener(new Notifier(mProject, mTarget, *mKeyOwner.key, eventType));
 
         // push command

@@ -3,6 +3,7 @@
 #include "util/TreeUtil.h"
 #include "cmnd/BasicCommands.h"
 #include "cmnd/ScopedMacro.h"
+#include "ctrl/CmndName.h"
 #include "gui/res/res_ResourceTree.h"
 #include "gui/res/res_Item.h"
 #include "gui/res/res_ResourceUpdater.h"
@@ -225,7 +226,7 @@ void ResourceTree::onChangePathActionTriggered(bool)
         if (mHolder)
         {
             auto& stack = mProject->commandStack();
-            cmnd::ScopedMacro macro(stack, "change resource file path");
+            cmnd::ScopedMacro macro(stack, CmndName::tr("update a resource file path"));
 
             // notifier
             auto notifier = new ChangeFilePathNotifier(mViaPoint, item->node());

@@ -2,6 +2,7 @@
 #include "cmnd/BasicCommands.h"
 #include "gl/Global.h"
 #include "ctrl/TimeLineUtil.h"
+#include "ctrl/CmndName.h"
 #include "ctrl/ffd/ffd_BrushMode.h"
 
 using namespace core;
@@ -152,7 +153,7 @@ bool BrushMode::executeDrawTask(const QVector2D& aCenter, const QVector2D& aMove
 
         if (!mStatus.commandRef)
         {
-            cmnd::ScopedMacro macro(stack, "update FFD");
+            cmnd::ScopedMacro macro(stack, CmndName::tr("update FFD"));
 
             // set notifier
             auto notifier = new TimeLineUtil::Notifier(mProject);

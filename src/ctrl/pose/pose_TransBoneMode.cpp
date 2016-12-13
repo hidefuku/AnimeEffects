@@ -3,6 +3,7 @@
 #include "cmnd/ScopedMacro.h"
 #include "core/Constant.h"
 #include "ctrl/TimeLineUtil.h"
+#include "ctrl/CmndName.h"
 #include "ctrl/pose/pose_TransBoneMode.h"
 #include "ctrl/bone/bone_Renderer.h"
 
@@ -116,7 +117,7 @@ void TransBoneMode::rotateBone(Bone2& aTarget, float aRotate)
     }
     else
     {
-        cmnd::ScopedMacro macro(stack, "rotate bone");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("rotate a bone of a posing key"));
 
         // set notifier
         {

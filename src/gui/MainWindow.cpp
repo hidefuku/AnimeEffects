@@ -436,8 +436,8 @@ void MainWindow::onUndoTriggered()
     if (mCurrent)
     {
         auto ret = mCurrent->commandStack().undo();
-        qDebug() << "undone:" << ret;
-        mViaPoint.pushLog("undone : " + ret);
+        qDebug() << "Undone:" << ret;
+        mViaPoint.pushLog(tr("Undone : ") + ret);
         mMainDisplay->updateRender();
     }
 }
@@ -447,8 +447,8 @@ void MainWindow::onRedoTriggered()
     if (mCurrent)
     {
         auto ret = mCurrent->commandStack().redo();
-        qDebug() << "redone:" << ret;
-        mViaPoint.pushLog("redone : " + ret);
+        qDebug() << "Redone:" << ret;
+        mViaPoint.pushLog(tr("Redone : ") + ret);
         mMainDisplay->updateRender();
     }
 }
@@ -506,7 +506,8 @@ void MainWindow::onOpenProjectTriggered()
     // stop animation and main display rendering
     EventSuspender suspender(*mMainDisplay, *mTarget);
 
-    QString fileName = QFileDialog::getOpenFileName(this, "Open File", "", "ProjectFile (*.anie)");
+    QString fileName = QFileDialog::getOpenFileName(
+                this, tr("Open File"), "", "ProjectFile (*.anie)");
     if (fileName.isEmpty()) return;
 
     // clear old project
@@ -541,7 +542,8 @@ void MainWindow::onSaveProjectTriggered()
 
         if (mCurrent->isNameless())
         {
-            QString fileName = QFileDialog::getSaveFileName(this, "Save File", "", "ProjectFile (*.anie)");
+            QString fileName = QFileDialog::getSaveFileName(
+                        this, tr("Save File"), "", "ProjectFile (*.anie)");
             if (fileName.isEmpty()) return;
 
             if (QFileInfo(fileName).suffix().isEmpty())
@@ -581,7 +583,7 @@ void MainWindow::onExportPngSeqTriggered()
     EventSuspender suspender(*mMainDisplay, *mTarget);
 
     // exporting directory
-    QString dirName = QFileDialog::getExistingDirectory(this, "Exporting Folder");
+    QString dirName = QFileDialog::getExistingDirectory(this, tr("Exporting Folder"));
 
     // make sure existing
     if (dirName.isEmpty()) return;

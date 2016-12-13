@@ -104,7 +104,8 @@ SOURCES += \
     time/time_Current.cpp \
     ffd/ffd_Target.cpp \
     ffd/ffd_DragMode.cpp \
-    ffd/ffd_BrushMode.cpp
+    ffd/ffd_BrushMode.cpp \
+    CmndName.cpp
 
 HEADERS += \
     Driver.h \
@@ -186,4 +187,5 @@ HEADERS += \
     ffd/ffd_Target.h \
     ffd/ffd_IMode.h \
     ffd/ffd_DragMode.h \
-    ffd/ffd_BrushMode.h
+    ffd/ffd_BrushMode.h \
+    CmndName.h

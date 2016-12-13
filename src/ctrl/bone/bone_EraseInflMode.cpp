@@ -3,6 +3,7 @@
 #include "cmnd/ScopedMacro.h"
 #include "core/Constant.h"
 #include "ctrl/TimeLineUtil.h"
+#include "ctrl/CmndName.h"
 #include "ctrl/bone/bone_EraseInflMode.h"
 #include "ctrl/bone/bone_Renderer.h"
 #include "ctrl/bone/bone_Notifier.h"
@@ -187,7 +188,7 @@ void EraseInflMode::assignInfluence(
     }
     else
     {
-        cmnd::ScopedMacro macro(stack, "assign influence");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("update influence of a bone"));
         macro.grabListener(new Notifier(mProject, mTarget, *mKeyOwner.key, eventType));
 
         // push command

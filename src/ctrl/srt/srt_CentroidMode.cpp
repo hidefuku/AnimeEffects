@@ -5,6 +5,7 @@
 #include "core/TimeKeyExpans.h"
 #include "core/TimeKeyBlender.h"
 #include "ctrl/TimeLineUtil.h"
+#include "ctrl/CmndName.h"
 #include "ctrl/srt/srt_CentroidMode.h"
 
 namespace
@@ -126,7 +127,7 @@ void CentroidMode::moveCentroid(const QVector2D& aNewCenter)
     }
     else
     {
-        cmnd::ScopedMacro macro(stack, "move centroid");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("move a centroid"));
 
         // set notifier
         {

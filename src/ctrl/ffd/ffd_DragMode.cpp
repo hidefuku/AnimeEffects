@@ -2,6 +2,7 @@
 #include "cmnd/BasicCommands.h"
 #include "gl/Global.h"
 #include "ctrl/TimeLineUtil.h"
+#include "ctrl/CmndName.h"
 #include "ctrl/ffd/ffd_DragMode.h"
 
 namespace
@@ -210,7 +211,7 @@ void DragMode::assignDragging(const QVector2D& aMove)
 
     if (!mCommandRef || !stack.isModifiable(mCommandRef))
     {
-        cmnd::ScopedMacro macro(stack, "drag FFD vertex");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("move a vertex of a FFD key"));
 
         // set notifier
         auto notifier = new TimeLineUtil::Notifier(mProject);

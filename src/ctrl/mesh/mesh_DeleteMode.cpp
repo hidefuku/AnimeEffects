@@ -4,6 +4,7 @@
 #include "core/Constant.h"
 #include "core/TimeLine.h"
 #include "ctrl/TimeLineUtil.h"
+#include "ctrl/CmndName.h"
 #include "ctrl/mesh/mesh_DeleteMode.h"
 #include "ctrl/mesh/mesh_Renderer.h"
 #include "ctrl/mesh/mesh_Notifier.h"
@@ -73,7 +74,7 @@ void DeleteMode::removeVtx(MeshVtx& aVtx)
     auto eventType = TimeLineEvent::Type_ChangeKeyValue;
 
     {
-        cmnd::ScopedMacro macro(stack, "remove mesh vertex");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("remove a vertex of a mesh key"));
         // set notifier
         macro.grabListener(new Notifier(mProject, mTarget, *mKeyOwner.key, eventType));
         // push command
@@ -87,7 +88,7 @@ void DeleteMode::removeFace(MeshFace& aFace)
     auto eventType = TimeLineEvent::Type_ChangeKeyValue;
 
     {
-        cmnd::ScopedMacro macro(stack, "remove mesh face");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("remove a face of a mesh key"));
         // set notifier
         macro.grabListener(new Notifier(mProject, mTarget, *mKeyOwner.key, eventType));
         // push command

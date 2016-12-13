@@ -4,6 +4,7 @@
 #include "core/Constant.h"
 #include "core/TimeLine.h"
 #include "ctrl/TimeLineUtil.h"
+#include "ctrl/CmndName.h"
 #include "ctrl/mesh/mesh_CreateMode.h"
 #include "ctrl/mesh/mesh_Renderer.h"
 #include "ctrl/mesh/mesh_Notifier.h"
@@ -89,7 +90,7 @@ MeshFace* CreateMode::pushTriangle(
 
     MeshFace* faceCreated = nullptr;
     {
-        cmnd::ScopedMacro macro(stack, "push mesh triangle");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("push a triangle of a mesh key"));
         // set notifier
         macro.grabListener(new Notifier(mProject, mTarget, *mKeyOwner.key, eventType));
 
@@ -126,7 +127,7 @@ void CreateMode::moveVtx(MeshVtx& aVtx, const QVector2D& aPos)
     }
     else
     {
-        cmnd::ScopedMacro macro(stack, "move mesh vertex");
+        cmnd::ScopedMacro macro(stack, CmndName::tr("move a vertex of a mesh key"));
         macro.grabListener(new Notifier(mProject, mTarget, *mKeyOwner.key, eventType));
 
         mMoverRef = new VtxMover(*mKeyOwner.key, aVtx, aPos);

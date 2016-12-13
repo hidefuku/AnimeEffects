@@ -21,8 +21,8 @@ public:
     void updateAttribute();
 
 private:
-    static void assignBlendMode(core::Project&, core::ObjectNode*, img::BlendMode);
-    static void assignClipped(core::Project&, core::ObjectNode*, bool);
+    void assignBlendMode(core::Project&, core::ObjectNode*, img::BlendMode);
+    void assignClipped(core::Project&, core::ObjectNode*, bool);
 
     void build();
 
