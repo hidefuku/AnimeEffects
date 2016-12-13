@@ -309,8 +309,11 @@ void MainWindow::saveCurrentSettings(int aResultCode)
     if (aResultCode == 0)
     {
         QSettings settings;
-        settings.setValue("mainwindow/size", this->size());
         settings.setValue("mainwindow/ismaximized", this->isMaximized());
+        if (!this->isMaximized())
+        {
+            settings.setValue("mainwindow/size", this->size());
+        }
     }
 #else
     (void)aResultCode;
