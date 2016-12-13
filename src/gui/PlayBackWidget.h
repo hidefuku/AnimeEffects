@@ -12,6 +12,7 @@ namespace gui
 
 class PlayBackWidget : public QWidget
 {
+    Q_OBJECT
 public:
     enum PushType
     {

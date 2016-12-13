@@ -195,7 +195,8 @@ img::ResourceNode* ResourceUpdater::createQImageTree(const QString& aFilePath, b
     QImage image(aFilePath);
     if (image.isNull())
     {
-        QMessageBox::warning(nullptr, "QImage Error", "Failed to load image file.");
+        QMessageBox::warning(nullptr, tr("QImage Error"),
+                             tr("Failed to load image file."));
         return nullptr;
     }
     return img::Util::createResourceNode(image, "topnode", aLoadImage);
@@ -207,7 +208,8 @@ img::ResourceNode* ResourceUpdater::createPsdTree(const QString& aFilePath, bool
     std::ifstream file(aFilePath.toLocal8Bit(), std::ios::binary);
     if (file.fail())
     {
-        QMessageBox::warning(nullptr, "FileIO Error", "Can not found a PSD file.");
+        QMessageBox::warning(nullptr, tr("FileIO Error"),
+                             tr("Can not found a PSD file."));
         return nullptr;
     }
 
@@ -218,7 +220,7 @@ img::ResourceNode* ResourceUpdater::createPsdTree(const QString& aFilePath, bool
         const QString errorText =
                 "error(" + QString::number(reader.resultCode()) + ") " +
                 QString::fromStdString(reader.resultMessage());
-        QMessageBox::warning(nullptr, "PSD Parse Error", errorText);
+        QMessageBox::warning(nullptr, tr("PSD Parse Error"), errorText);
         return nullptr;
     }
     file.close();
@@ -455,8 +457,9 @@ bool ResourceUpdater::tryReloadCorrespondingImages(
         auto corresponds = findCorrespondingNode(newNode->children(), *node);
         if (corresponds.first != 1)
         {
-            auto text = QString("Failed to find a corresponding node.") + " (" + node->data().identifier() + ")";
-            QMessageBox::warning(nullptr, "Corresponding Error", text);
+            auto text = tr("Failed to find a corresponding node.") +
+                    " (" + node->data().identifier() + ")";
+            QMessageBox::warning(nullptr, tr("Operation Error"), text);
             return false;
         }
         XC_PTR_ASSERT(corresponds.second);
@@ -467,12 +470,12 @@ bool ResourceUpdater::tryReloadCorrespondingImages(
     auto beIdentified = allChildrenCanBeIdentified(targetNode, *newNode);
     if (!beIdentified.first)
     {
-        auto text = QString("Failed to identify nodes by following duplications.\n");
+        auto text = tr("Failed to identify nodes by following duplications.") + "\n";
         for (auto& duplicated : beIdentified.second)
         {
             text += duplicated->treePath() + "\n";
         }
-        QMessageBox::warning(nullptr, "Corresponding Error", text);
+        QMessageBox::warning(nullptr, tr("Operation Error"), text);
         return false;
     }
 
@@ -529,7 +532,9 @@ void ResourceUpdater::remove(Item& aItem)
         {
             if (itr.next()->isKeeped())
             {
-                QMessageBox::warning(nullptr, "Operation Error", "Some layers are referenced by objects yet.");
+                QMessageBox::warning(
+                            nullptr, tr("Operation Error"),
+                            tr("Some layers are referenced by objects yet."));
                 return;
             }
         }

@@ -11,8 +11,9 @@
 namespace gui {
 namespace res {
 
-class ResourceUpdater
+class ResourceUpdater : public QObject
 {
+    Q_OBJECT
 public:
     ResourceUpdater(ViaPoint& aViaPoint, core::Project& aProject);
     void load(const QString& aFilePath);

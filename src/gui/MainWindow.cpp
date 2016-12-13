@@ -605,8 +605,8 @@ void MainWindow::onExportPngSeqTriggered()
     auto overwriteConfirmer = [=](const QString&) -> bool
     {
         QMessageBox msgBox;
-        msgBox.setText("File already exists.");
-        msgBox.setInformativeText("Do you want to overwrite the existing file?");
+        msgBox.setText(tr("File already exists."));
+        msgBox.setInformativeText(tr("Do you want to overwrite the existing file?"));
         msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Ok);
         int ret = msgBox.exec();
@@ -625,7 +625,7 @@ void MainWindow::onExportPngSeqTriggered()
 
         if (!exporter.isCanceled())
         {
-            QMessageBox::warning(nullptr, "Exporting Error", exporter.log());
+            QMessageBox::warning(nullptr, tr("Exporting Error"), exporter.log());
         }
         return;
     }
@@ -657,7 +657,8 @@ void MainWindow::onExportVideoTriggered(const QString& aSuffix, QString aCodec)
     }
     else if (fileInfo.suffix() != aSuffix)
     {
-        QMessageBox::warning(nullptr, "Operation Error", "Invalid suffix specification.");
+        QMessageBox::warning(nullptr, tr("Operation Error"),
+                             tr("Invalid suffix specification."));
         return;
     }
 
@@ -705,7 +706,7 @@ void MainWindow::onExportVideoTriggered(const QString& aSuffix, QString aCodec)
 
         if (!exporter.isCanceled())
         {
-            QMessageBox::warning(nullptr, "Exporting Error", exporter.log());
+            QMessageBox::warning(nullptr, tr("Exporting Error"), exporter.log());
         }
         return;
     }

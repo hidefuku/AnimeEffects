@@ -26,12 +26,12 @@ PlayBackWidget::PlayBackWidget(GUIResources& aResources, QWidget* aParent)
 
     this->setGeometry(0, 0, kButtonSize, kButtonSize * kButtonCount);
 
-    mButtons.push_back(createButton("rewind",   false, 0, "Rewind to Beginning"));
-    mButtons.push_back(createButton("stepback", false, 1, "Frame by Frame Reverse"));
-    mButtons.push_back(createButton("play",     true,  2, "Play"));
-    mButtons.push_back(createButton("step",     false, 3, "Frame by Frame Forward"));
-    mButtons.push_back(createButton("fast",     false, 4, "Forward to End"));
-    mButtons.push_back(createButton("loop",     true,  5, "Loop"));
+    mButtons.push_back(createButton("rewind",   false, 0, tr("Rewind to Beginning")));
+    mButtons.push_back(createButton("stepback", false, 1, tr("Frame by Frame Reverse")));
+    mButtons.push_back(createButton("play",     true,  2, tr("Play")));
+    mButtons.push_back(createButton("step",     false, 3, tr("Frame by Frame Forward")));
+    mButtons.push_back(createButton("fast",     false, 4, tr("Forward to End")));
+    mButtons.push_back(createButton("loop",     true,  5, tr("Loop")));
 }
 
 void PlayBackWidget::setPushDelegate(const PushDelegate &aDelegate)
@@ -44,7 +44,7 @@ void PlayBackWidget::setPushDelegate(const PushDelegate &aDelegate)
         const bool isChecked = owner->mButtons.at(2)->isChecked();
         const char* name = isChecked ? "play" : "pause";
         owner->mButtons.at(2)->setIcon(owner->mResources.icon(name));
-        owner->mButtons.at(2)->setToolTip(isChecked ? "Play" : "Pause");
+        owner->mButtons.at(2)->setToolTip(isChecked ? tr("Play") : tr("Pause"));
         owner->mPushDelegate(isChecked ? PushType_Pause : PushType_Play);
 
     });

@@ -88,19 +88,19 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
     this->connect(this, &QTreeWidget::itemSelectionChanged, this, &ObjectTreeWidget::onItemSelectionChanged);
 
     {
-        mSlimAction = new QAction("slim down object", this);
+        mSlimAction = new QAction(tr("slim down object"), this);
         mSlimAction->connect(mSlimAction, &QAction::triggered, this, &ObjectTreeWidget::onSlimActionTriggered);
 
-        mNameAction = new QAction("change object name", this);
+        mNameAction = new QAction(tr("change object name"), this);
         mNameAction->connect(mNameAction, &QAction::triggered, this, &ObjectTreeWidget::onNameActionTriggered);
 
-        mObjectAction = new QAction("create image object", this);
+        mObjectAction = new QAction(tr("create layer object"), this);
         mObjectAction->connect(mObjectAction, &QAction::triggered, this, &ObjectTreeWidget::onObjectActionTriggered);
 
-        mFolderAction = new QAction("create folder object", this);
+        mFolderAction = new QAction(tr("create folder object"), this);
         mFolderAction->connect(mFolderAction, &QAction::triggered, this, &ObjectTreeWidget::onFolderActionTriggered);
 
-        mDeleteAction = new QAction("delete object", this);
+        mDeleteAction = new QAction(tr("delete object"), this);
         mDeleteAction->connect(mDeleteAction, &QAction::triggered, this, &ObjectTreeWidget::onDeleteActionTriggered);
     }
 }
@@ -469,7 +469,7 @@ void ObjectTreeWidget::onContextMenuRequested(const QPoint& aPos)
         {
             mSlimAction->setText(
                         objItem->node().isSlimmedDown() ?
-                            "fatten object" : "slim down object");
+                            tr("fatten object") : tr("slim down object"));
             menu.addAction(mSlimAction);
             menu.addSeparator();
         }

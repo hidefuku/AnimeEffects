@@ -281,9 +281,35 @@
         <translation>ツールドック</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="642"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="608"/>
+        <source>File already exists.</source>
+        <translation>同名のファイルがすでに存在します</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/MainWindow.cpp" line="609"/>
+        <source>Do you want to overwrite the existing file?</source>
+        <translation>既存のファイルに上書きしますか？</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/MainWindow.cpp" line="628"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="709"/>
+        <source>Exporting Error</source>
+        <translation>出力エラー</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/MainWindow.cpp" line="645"/>
         <source>Exporting File</source>
         <translation>出力ファイル</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/MainWindow.cpp" line="660"/>
+        <source>Operation Error</source>
+        <translation>操作エラー</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/MainWindow.cpp" line="661"/>
+        <source>Invalid suffix specification.</source>
+        <translation>無効な拡張子が指定されています</translation>
     </message>
 </context>
 <context>
@@ -327,6 +353,79 @@
         <location filename="../../src/gui/NewProjectDialog.cpp" line="112"/>
         <source>Parameters</source>
         <translation>パラメーター</translation>
+    </message>
+</context>
+<context>
+    <name>gui::ObjectTreeWidget</name>
+    <message>
+        <location filename="../../src/gui/ObjectTreeWidget.cpp" line="91"/>
+        <location filename="../../src/gui/ObjectTreeWidget.cpp" line="472"/>
+        <source>slim down object</source>
+        <translation>オブジェクトをスリム化</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ObjectTreeWidget.cpp" line="94"/>
+        <source>change object name</source>
+        <translation>オブジェクト名を変更</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ObjectTreeWidget.cpp" line="97"/>
+        <source>create layer object</source>
+        <translation>レイヤーオブジェクトを作成</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ObjectTreeWidget.cpp" line="100"/>
+        <source>create folder object</source>
+        <translation>フォルダオブジェクトを作成</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ObjectTreeWidget.cpp" line="103"/>
+        <source>delete object</source>
+        <translation>オブジェクトを削除</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ObjectTreeWidget.cpp" line="472"/>
+        <source>fatten object</source>
+        <translation>オブジェクトを肥大化</translation>
+    </message>
+</context>
+<context>
+    <name>gui::PlayBackWidget</name>
+    <message>
+        <location filename="../../src/gui/PlayBackWidget.cpp" line="29"/>
+        <source>Rewind to Beginning</source>
+        <translation>開始フレームに戻す</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/PlayBackWidget.cpp" line="30"/>
+        <source>Frame by Frame Reverse</source>
+        <translation>1フレーム戻す</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/PlayBackWidget.cpp" line="31"/>
+        <location filename="../../src/gui/PlayBackWidget.cpp" line="47"/>
+        <source>Play</source>
+        <translation>再生する</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/PlayBackWidget.cpp" line="32"/>
+        <source>Frame by Frame Forward</source>
+        <translation>1フレーム進める</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/PlayBackWidget.cpp" line="33"/>
+        <source>Forward to End</source>
+        <translation>最終フレームへ進める</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/PlayBackWidget.cpp" line="34"/>
+        <source>Loop</source>
+        <translation>ループさせる</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/PlayBackWidget.cpp" line="47"/>
+        <source>Pause</source>
+        <translation type="unfinished">停止する</translation>
     </message>
 </context>
 <context>
@@ -419,6 +518,34 @@
         <location filename="../../src/gui/ResourceDialog.cpp" line="120"/>
         <source>Open File</source>
         <translation>ファイルを開く</translation>
+    </message>
+</context>
+<context>
+    <name>gui::TimeLineInnerWidget</name>
+    <message>
+        <location filename="../../src/gui/TimeLineInnerWidget.cpp" line="72"/>
+        <source>copy key</source>
+        <translation>キーをコピー</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/TimeLineInnerWidget.cpp" line="75"/>
+        <source>paste key</source>
+        <translation>キーを貼り付け</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/TimeLineInnerWidget.cpp" line="78"/>
+        <source>delete key</source>
+        <translation>キーを削除</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/TimeLineInnerWidget.cpp" line="292"/>
+        <source>Operation Error</source>
+        <translation>操作エラー</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/TimeLineInnerWidget.cpp" line="292"/>
+        <source>Failed to paste keys.</source>
+        <translation>キーの貼り付けに失敗しました</translation>
     </message>
 </context>
 <context>
@@ -730,6 +857,56 @@
         <location filename="../../src/gui/res/res_ResourceTree.cpp" line="222"/>
         <source>Open File</source>
         <translation>ファイルを開く</translation>
+    </message>
+</context>
+<context>
+    <name>gui::res::ResourceUpdater</name>
+    <message>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="198"/>
+        <source>QImage Error</source>
+        <translation>QImageエラー</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="199"/>
+        <source>Failed to load image file.</source>
+        <translation>画像ファイルの読み込みに失敗しました</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="211"/>
+        <source>FileIO Error</source>
+        <translation>ファイル入出力エラー</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="212"/>
+        <source>Can not found a PSD file.</source>
+        <translation>PSDファイルが見つかりませんでした</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="223"/>
+        <source>PSD Parse Error</source>
+        <translation>PSD解析エラー</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="460"/>
+        <source>Failed to find a corresponding node.</source>
+        <translation>一致する名前のノードが見つかりませんでした</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="473"/>
+        <source>Failed to identify nodes by following duplications.</source>
+        <translation>下記の重複により、ノードの特定ができませんでした</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="462"/>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="478"/>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="536"/>
+        <source>Operation Error</source>
+        <translation>操作エラー</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="537"/>
+        <source>Some layers are referenced by objects yet.</source>
+        <translation>いくつかのレイヤーがまだオブジェクトに参照されています</translation>
     </message>
 </context>
 <context>

@@ -12,6 +12,7 @@ namespace gui
 
 class TimeLineInnerWidget : public QWidget
 {
+    Q_OBJECT
 public:
     TimeLineInnerWidget(QWidget* aParent);
 

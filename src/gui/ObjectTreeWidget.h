@@ -23,6 +23,7 @@ namespace gui
 //-------------------------------------------------------------------------------------------------
 class ObjectTreeWidget : public QTreeWidget
 {
+    Q_OBJECT
 public:
     enum { kItemColumn = 0 };
     enum { kColumnCount = 1 };

@@ -69,13 +69,13 @@ TimeLineInnerWidget::TimeLineInnerWidget(QWidget* aParent)
                 this, &TimeLineInnerWidget::onContextMenuRequested);
 
     {
-        mCopyKey = new QAction("copy key", this);
+        mCopyKey = new QAction(tr("copy key"), this);
         mCopyKey->connect(mCopyKey, &QAction::triggered, this, &TimeLineInnerWidget::onCopyKeyTriggered);
 
-        mPasteKey = new QAction("paste key", this);
+        mPasteKey = new QAction(tr("paste key"), this);
         mPasteKey->connect(mPasteKey, &QAction::triggered, this, &TimeLineInnerWidget::onPasteKeyTriggered);
 
-        mDeleteKey = new QAction("delete key", this);
+        mDeleteKey = new QAction(tr("delete key"), this);
         mDeleteKey->connect(mDeleteKey, &QAction::triggered, this, &TimeLineInnerWidget::onDeleteKeyTriggered);
     }
 }
@@ -289,7 +289,7 @@ void TimeLineInnerWidget::onPasteKeyTriggered(bool)
 {
     if (!mEditor->pasteCopiedKeys(mCopyTargets, mPastePos))
     {
-        QMessageBox::warning(nullptr, "Operation Error", "Failed to paste keys.");
+        QMessageBox::warning(nullptr, tr("Operation Error"), tr("Failed to paste keys."));
     }
 }
 
