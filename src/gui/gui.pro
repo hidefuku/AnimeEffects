@@ -106,7 +106,10 @@ SOURCES += \
     CanvasMover.cpp \
     prop/prop_ConstantPanel.cpp \
     prop/prop_DefaultKeyPanel.cpp \
-    prop/prop_CurrentKeyPanel.cpp
+    prop/prop_CurrentKeyPanel.cpp \
+    MSVCMemoryLeakDebugger.cpp \
+    MSVCBackTracer.cpp \
+    LocaleDecider.cpp
 
 HEADERS += \
     MainDisplayMode.h \
@@ -167,7 +170,10 @@ HEADERS += \
     CanvasMover.h \
     prop/prop_ConstantPanel.h \
     prop/prop_DefaultKeyPanel.h \
-    prop/prop_CurrentKeyPanel.h
+    prop/prop_CurrentKeyPanel.h \
+    MSVCMemoryLeakDebugger.h \
+    MSVCBackTracer.h \
+    LocaleDecider.h
 
 FORMS +=
 
