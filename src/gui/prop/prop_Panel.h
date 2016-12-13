@@ -16,6 +16,7 @@ class Panel : public QGroupBox
     Q_OBJECT
 public:
     Panel(const QString& aTitle, QWidget* aParent);
+    virtual ~Panel() {}
     //void addGroup(QWidget* aGroup);
     void addGroup(QGroupBox* aGroup);
     void addStretch();

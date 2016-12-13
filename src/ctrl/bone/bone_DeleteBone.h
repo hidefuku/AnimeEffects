@@ -40,7 +40,7 @@ class DeleteBoneImpl : public cmnd::Stable
 
 public:
     DeleteBoneImpl(QList<core::Bone2*>& aTopBones, core::Bone2& aBone, bool aIsOrigin);
-    ~DeleteBoneImpl();
+    virtual ~DeleteBoneImpl();
 
     virtual void exec();
     virtual void undo();
