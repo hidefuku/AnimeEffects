@@ -172,7 +172,8 @@ public:
         uint32 x;
         mIo.read((char*)(&x), 4);
         x = tSwapper::swap(x);
-        return *((float32*)&x);
+        void* xp = &x; // for avoid warning
+        return *((float32*)xp);
     }
 
     uint64 readUInt64()

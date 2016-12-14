@@ -386,7 +386,7 @@ typename tKey::Data getDefaultKeyData(const ObjectNode& aNode)
         auto key = (tKey*)aNode.timeLine()->defaultKey(tType);
         if (key) return key->data();
     }
-    return tKey::Data();
+    return typename tKey::Data();
 }
 
 void TimeKeyBlender::getMoveExpans(SRTExpans& aExpans, const ObjectNode& aNode, const TimeInfo& aTime)

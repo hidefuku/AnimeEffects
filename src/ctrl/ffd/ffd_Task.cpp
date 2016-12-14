@@ -289,7 +289,6 @@ void Task::onFinished()
             ggl.glGetBufferSubData(GL_ARRAY_BUFFER, sizeof(gl::Vector3) * mDragIndex,
                                    sizeof(gl::Vector3), mDstMesh.data());
             mMeshTransformer.positions().release();
-            auto pos = mDstMesh[0];
 
             mMeshTransformer.xArrows().bind();
             ggl.glGetBufferSubData(GL_ARRAY_BUFFER, sizeof(gl::Vector3) * mDragIndex,
