@@ -11,6 +11,10 @@ OBJECTS_DIR = .obj
 MOC_DIR     = .moc
 RCC_DIR     = .rcc
 
+win32 {
+RC_ICONS = ../AnimeEffects.ico
+}
+
 msvc:LIBS            += ../util/util.lib ../thr/thr.lib ../cmnd/cmnd.lib ../gl/gl.lib ../img/img.lib ../core/core.lib ../ctrl/ctrl.lib
 msvc:PRE_TARGETDEPS  += ../util/util.lib ../thr/thr.lib ../cmnd/cmnd.lib ../gl/gl.lib ../img/img.lib ../core/core.lib ../ctrl/ctrl.lib
 
