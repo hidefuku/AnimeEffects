@@ -16,6 +16,7 @@
 #include "ctrl/MeshEditor.h"
 #include "ctrl/GraphicStyle.h"
 #include "ctrl/DriverResources.h"
+#include "ctrl/UILogger.h"
 
 namespace ctrl
 {
@@ -23,7 +24,8 @@ namespace ctrl
 class Driver
 {
 public:
-    Driver(core::Project& aProject, DriverResources& aResources, GraphicStyle& aGraphicStyle);
+    Driver(core::Project& aProject, DriverResources& aResources,
+           GraphicStyle& aGraphicStyle, UILogger& aUILogger);
 
     void setTarget(core::ObjectNode* aNode);
     core::ObjectNode* currentTarget() const { return mCurrentNode; }
@@ -50,6 +52,7 @@ private:
     core::Project& mProject;
     DriverResources& mResources;
     GraphicStyle& mGraphicStyle;
+    UILogger& mUILogger;
     ToolType mToolType;
     core::TimeKeyBlender mBlender;
     QScopedPointer<IEditor> mEditor;

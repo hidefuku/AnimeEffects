@@ -7,11 +7,12 @@
 #include "core/BoneKey.h"
 #include "ctrl/BoneEditMode.h"
 #include "ctrl/BoneParam.h"
+#include "ctrl/IEditor.h"
+#include "ctrl/GraphicStyle.h"
+#include "ctrl/UILogger.h"
 #include "ctrl/bone/bone_IMode.h"
 #include "ctrl/bone/bone_KeyOwner.h"
 #include "ctrl/bone/bone_Target.h"
-#include "ctrl/IEditor.h"
-#include "ctrl/GraphicStyle.h"
 
 namespace ctrl
 {
@@ -19,7 +20,7 @@ namespace ctrl
 class BoneEditor : public IEditor
 {
 public:
-    BoneEditor(core::Project& aProject, GraphicStyle& aStyle);
+    BoneEditor(core::Project& aProject, GraphicStyle& aStyle, UILogger& aUILogger);
     ~BoneEditor();
 
     virtual bool setTarget(core::ObjectNode* aTarget);
@@ -34,12 +35,13 @@ public:
 
 private:
     void finalize();
-    void resetCurrentTarget();
+    void resetCurrentTarget(QString* aMessage = nullptr);
     void createMode();
     void initializeKey(core::TimeLine& aLine);
 
     core::Project& mProject;
     GraphicStyle& mGraphicStyle;
+    UILogger& mUILogger;
     BoneParam mParam;
     QScopedPointer<bone::IMode> mCurrent;
     bone::Target mTarget;

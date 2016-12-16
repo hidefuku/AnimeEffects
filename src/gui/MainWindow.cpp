@@ -201,7 +201,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const QS
 
     // create driver holder
     {
-        mDriverHolder.reset(new DriverHolder());
+        mDriverHolder.reset(new DriverHolder(mViaPoint));
     }
 
     // connection

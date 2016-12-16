@@ -11,9 +11,10 @@ namespace ctrl
 
 
 //-----------------------------------------------------------------------------------
-SRTEditor::SRTEditor(Project& aProject)
+SRTEditor::SRTEditor(Project& aProject, UILogger& aUILogger)
     : mProject(aProject)
     , mLifeLink()
+    , mUILogger(aUILogger)
     , mParam()
     , mTarget()
     , mKeyOwner()
@@ -25,7 +26,7 @@ SRTEditor::~SRTEditor()
     finalize();
 }
 
-bool SRTEditor::initializeKey(TimeLine& aLine)
+bool SRTEditor::initializeKey(TimeLine& aLine, QString* aMessage)
 {
     const TimeLine::MapType& moveMap   = aLine.map(TimeKeyType_Move);
     const TimeLine::MapType& rotateMap = aLine.map(TimeKeyType_Rotate);
@@ -76,6 +77,10 @@ bool SRTEditor::initializeKey(TimeLine& aLine)
     if (!mKeyOwner.updatePosture(current))
     {
         mKeyOwner.deleteOwningKeys();
+        if (aMessage)
+        {
+            *aMessage = UILog::tr("The object which has an invalid posture was given.");
+        }
         return false;
     }
 
@@ -122,13 +127,18 @@ bool SRTEditor::setTarget(ObjectNode* aTarget)
     if (aTarget && aTarget->timeLine())
     {
         mTarget = aTarget;
-        if (initializeKey(*mTarget->timeLine()))
+        QString message;
+        if (initializeKey(*mTarget->timeLine(), &message))
         {
             createMode();
         }
         else
         {
             mTarget = nullptr;
+            if (!message.isEmpty())
+            {
+                mUILogger.pushLog(UILog::tr("SRTEditor : ") + message, UILogType_Warn);
+            }
         }
     }
     return mTarget && mKeyOwner;

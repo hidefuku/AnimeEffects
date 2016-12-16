@@ -7,6 +7,7 @@
 #include "util/NonCopyable.h"
 #include "gl/DeviceInfo.h"
 #include "core/Project.h"
+#include "ctrl/UILogger.h"
 namespace img { class ResourceNode; }
 namespace gui { class ResourceDialog; }
 namespace gui { class MainMenuBar; }
@@ -17,7 +18,9 @@ namespace gui { class MainViewSetting; }
 namespace gui
 {
 
-class ViaPoint : private util::NonCopyable
+class ViaPoint
+        : private util::NonCopyable
+        , public ctrl::UILogger
 {
 public:
     ViaPoint(QWidget* aParent);
@@ -32,7 +35,7 @@ public:
     img::ResourceNode* requireOneResource();
 
     void setLogView(QPlainTextEdit* aLogView);
-    void pushLog(const QString& aText);
+    virtual void pushLog(const QString& aText, ctrl::UILogType aType);
     void pushUndoneLog(const QString& aText);
     void pushRedoneLog(const QString& aText);
 

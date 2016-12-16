@@ -10,8 +10,9 @@ using namespace core;
 namespace ctrl
 {
 
-MeshEditor::MeshEditor(Project& aProject)
+MeshEditor::MeshEditor(Project& aProject, UILogger& aUILogger)
     : mProject(aProject)
+    , mUILogger(aUILogger)
     , mParam()
     , mCurrent()
     , mTarget()
@@ -32,10 +33,23 @@ bool MeshEditor::setTarget(core::ObjectNode* aTarget)
 
     if (!aTarget || !aTarget->timeLine()) return false;
 
-    // for layer only
-    if (aTarget->type() != ObjectType_Layer) return false;
+    auto group = UILog::tr("MeshEditor : ");
 
-    resetTarget(prev, aTarget);
+    // for layer only
+    if (aTarget->type() != ObjectType_Layer)
+    {
+        mUILogger.pushLog(group + UILog::tr("The object can't own a mesh key."), UILogType_Info);
+        return false;
+    }
+
+    QString message;
+
+    resetTarget(prev, aTarget, &message);
+
+    if (!message.isEmpty())
+    {
+        mUILogger.pushLog(group + message, UILogType_Warn);
+    }
 
     return mTarget && mKeyOwner;
 }
@@ -85,7 +99,7 @@ void MeshEditor::finalize()
     mTarget.clear();
 }
 
-void MeshEditor::resetTarget(ObjectNode* aPrev, ObjectNode* aNext)
+void MeshEditor::resetTarget(ObjectNode* aPrev, ObjectNode* aNext, QString* aMessage)
 {
     (void)aPrev;
     mTarget.node = aNext;
@@ -105,6 +119,10 @@ void MeshEditor::resetTarget(ObjectNode* aPrev, ObjectNode* aNext)
         if (!success)
         {
             mTarget.node = nullptr;
+            if (aMessage)
+            {
+                *aMessage = UILog::tr("The object which has an invalid posture was given.");
+            }
         }
     }
 

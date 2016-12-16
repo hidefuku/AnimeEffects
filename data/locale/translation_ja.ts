@@ -324,6 +324,57 @@
     </message>
 </context>
 <context>
+    <name>ctrl::UILog</name>
+    <message>
+        <location filename="../../src/ctrl/BoneEditor.cpp" line="45"/>
+        <source>BoneEditor : </source>
+        <translation>ボーンエディタ : </translation>
+    </message>
+    <message>
+        <location filename="../../src/ctrl/BoneEditor.cpp" line="146"/>
+        <location filename="../../src/ctrl/MeshEditor.cpp" line="124"/>
+        <location filename="../../src/ctrl/PoseEditor.cpp" line="114"/>
+        <location filename="../../src/ctrl/SRTEditor.cpp" line="82"/>
+        <source>The object which has an invalid posture was given.</source>
+        <translation>無効な姿勢を持つオブジェクトが与えられました</translation>
+    </message>
+    <message>
+        <location filename="../../src/ctrl/FFDEditor.cpp" line="197"/>
+        <source>FFDEditor : </source>
+        <translation>FFDエディタ : </translation>
+    </message>
+    <message>
+        <location filename="../../src/ctrl/FFDEditor.cpp" line="293"/>
+        <source>There is no object which has meshes.</source>
+        <translation>メッシュを持つオブジェクトがいません</translation>
+    </message>
+    <message>
+        <location filename="../../src/ctrl/MeshEditor.cpp" line="36"/>
+        <source>MeshEditor : </source>
+        <translation>メッシュエディタ : </translation>
+    </message>
+    <message>
+        <location filename="../../src/ctrl/MeshEditor.cpp" line="41"/>
+        <source>The object can&apos;t own a mesh key.</source>
+        <translation>現在のオブジェクトはメッシュを持つことが出来ません</translation>
+    </message>
+    <message>
+        <location filename="../../src/ctrl/PoseEditor.cpp" line="38"/>
+        <source>PoseEditor : </source>
+        <translation>ポーズエディタ : </translation>
+    </message>
+    <message>
+        <location filename="../../src/ctrl/PoseEditor.cpp" line="129"/>
+        <source>There is no bone key which can be a parent.</source>
+        <translation>親となるボーンキーがありません</translation>
+    </message>
+    <message>
+        <location filename="../../src/ctrl/SRTEditor.cpp" line="140"/>
+        <source>SRTEditor : </source>
+        <translation>SRTエディタ : </translation>
+    </message>
+</context>
+<context>
     <name>gui::ExportDialog</name>
     <message>
         <location filename="../../src/gui/ExportDialog.cpp" line="38"/>
@@ -603,58 +654,58 @@
         <translation>ツールドック</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="440"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="442"/>
         <source>Undone : </source>
         <translation>元に戻す : </translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="451"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="456"/>
         <source>Redone : </source>
         <translation>やり直す : </translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="510"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="516"/>
         <source>Open File</source>
         <translation>ファイルを開く</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="546"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="552"/>
         <source>Save File</source>
         <translation>ファイルを保存する</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="586"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="592"/>
         <source>Exporting Folder</source>
         <translation>出力フォルダ</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="610"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="616"/>
         <source>File already exists.</source>
         <translation>同名のファイルがすでに存在します</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="611"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="617"/>
         <source>Do you want to overwrite the existing file?</source>
         <translation>既存のファイルに上書きしますか？</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="630"/>
-        <location filename="../../src/gui/MainWindow.cpp" line="711"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="636"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="717"/>
         <source>Exporting Error</source>
         <translation>出力エラー</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="647"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="653"/>
         <source>Exporting File</source>
         <translation>出力ファイル</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="662"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="668"/>
         <source>Operation Error</source>
         <translation>操作エラー</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="663"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="669"/>
         <source>Invalid suffix specification.</source>
         <translation>無効な拡張子が指定されています</translation>
     </message>

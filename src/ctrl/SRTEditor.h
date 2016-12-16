@@ -9,6 +9,7 @@
 #include "core/AbstractCursor.h"
 #include "ctrl/IEditor.h"
 #include "ctrl/SRTParam.h"
+#include "ctrl/UILogger.h"
 #include "ctrl/srt/srt_KeyOwner.h"
 #include "ctrl/srt/srt_IMode.h"
 
@@ -18,7 +19,7 @@ namespace ctrl
 class SRTEditor : public IEditor
 {
 public:
-    SRTEditor(core::Project& aProject);
+    SRTEditor(core::Project& aProject, UILogger& aUILogger);
     ~SRTEditor();
 
     virtual bool setTarget(core::ObjectNode* aTarget);
@@ -36,12 +37,13 @@ public:
 
 private:
     void resetCurrentTarget();
-    bool initializeKey(core::TimeLine& aLine);
+    bool initializeKey(core::TimeLine& aLine, QString* aMessage = nullptr);
     void finalize();
     void createMode();
 
     core::Project& mProject;
     util::LifeLink mLifeLink;
+    UILogger& mUILogger;
 
     SRTParam mParam;
     core::ObjectNode* mTarget;

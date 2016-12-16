@@ -3,8 +3,9 @@
 namespace gui
 {
 
-DriverHolder::DriverHolder()
-    : mDriverResources()
+DriverHolder::DriverHolder(ViaPoint& aViaPoint)
+    : mViaPoint(aViaPoint)
+    , mDriverResources()
     , mDriver()
     , mProject()
     , mTimeLineSlot()
@@ -27,7 +28,7 @@ void DriverHolder::create(core::Project& aProject, ctrl::GraphicStyle& aGraphicS
     mResourceSlot = mProject->onResourceModified.connect(this, &DriverHolder::onResourceUpdated);
     mTreeSlot     = mProject->onTreeRestructured.connect(this, &DriverHolder::onTreeRestructured);
 
-    mDriver.reset(new ctrl::Driver(aProject, mDriverResources, aGraphicStyle));
+    mDriver.reset(new ctrl::Driver(aProject, mDriverResources, aGraphicStyle, mViaPoint));
     onVisualUpdated();
 }
 

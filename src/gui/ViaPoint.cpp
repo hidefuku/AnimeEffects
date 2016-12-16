@@ -67,8 +67,9 @@ void ViaPoint::setLogView(QPlainTextEdit* aLogView)
     mLogView = aLogView;
 }
 
-void ViaPoint::pushLog(const QString& aText)
+void ViaPoint::pushLog(const QString& aText, ctrl::UILogType aType)
 {
+    (void)aType;
     if (mLogView)
     {
         mLogView->appendPlainText(aText);

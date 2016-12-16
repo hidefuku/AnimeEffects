@@ -13,9 +13,12 @@ namespace ctrl
 {
 
 //-------------------------------------------------------------------------------------------------
-FFDEditor::FFDEditor(Project& aProject, DriverResources& aDriverResources)
+FFDEditor::FFDEditor(Project& aProject,
+                     DriverResources& aDriverResources,
+                     UILogger& aUILogger)
     : mProject(aProject)
     , mDriverResources(aDriverResources)
+    , mUILogger(aUILogger)
     , mParam()
     , mCurrent()
     , mRootTarget()
@@ -185,9 +188,14 @@ bool FFDEditor::setTarget(ObjectNode* aTarget)
     mRootTarget = aTarget;
     if (mRootTarget)
     {
-        if (!resetCurrentTarget())
+        QString message;
+        if (!resetCurrentTarget(&message))
         {
             mRootTarget = nullptr;
+            if (!message.isEmpty())
+            {
+                mUILogger.pushLog(UILog::tr("FFDEditor : ") + message, UILogType_Warn);
+            }
         }
     }
     return mRootTarget;
@@ -231,7 +239,7 @@ core::LayerMesh* FFDEditor::getCurrentAreaMesh(core::ObjectNode& aNode) const
     return aNode.timeLine()->current().ffdMesh();
 }
 
-bool FFDEditor::resetCurrentTarget()
+bool FFDEditor::resetCurrentTarget(QString* aMessage)
 {
     mCurrent.reset();
     QVector<ffd::Target*> prevTargets = mTargets;
@@ -279,6 +287,10 @@ bool FFDEditor::resetCurrentTarget()
     if (mTargets.hasValidTarget())
     {
         createMode();
+    }
+    else if (aMessage)
+    {
+        *aMessage = UILog::tr("There is no object which has meshes.");
     }
 
     return !mTargets.isEmpty();

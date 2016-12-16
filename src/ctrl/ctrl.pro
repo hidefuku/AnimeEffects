@@ -188,4 +188,7 @@ HEADERS += \
     ffd/ffd_IMode.h \
     ffd/ffd_DragMode.h \
     ffd/ffd_BrushMode.h \
-    CmndName.h
+    CmndName.h \
+    UILogger.h \
+    UILogType.h \
+    UILog.h

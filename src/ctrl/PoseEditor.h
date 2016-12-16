@@ -6,6 +6,7 @@
 #include "core/ObjectNode.h"
 #include "core/AbstractCursor.h"
 #include "ctrl/IEditor.h"
+#include "ctrl/UILogger.h"
 #include "ctrl/pose/pose_KeyOwner.h"
 #include "ctrl/pose/pose_Target.h"
 namespace ctrl { namespace pose { class TransBoneMode; } }
@@ -16,7 +17,7 @@ namespace ctrl
 class PoseEditor : public IEditor
 {
 public:
-    PoseEditor(core::Project& aProject);
+    PoseEditor(core::Project& aProject, UILogger& aUILogger);
     ~PoseEditor();
 
     virtual bool setTarget(core::ObjectNode* aTarget);
@@ -31,10 +32,11 @@ public:
 
 private:
     void finalize();
-    void resetCurrentTarget();
+    void resetCurrentTarget(QString* aMessage = nullptr);
     bool initializeKey(core::TimeLine& aLine);
 
     core::Project& mProject;
+    UILogger& mUILogger;
     pose::Target mTarget;
     pose::KeyOwner mKeyOwner;
     QScopedPointer<pose::TransBoneMode> mCurrent;

@@ -14,19 +14,15 @@ using namespace core;
 namespace ctrl
 {
 
-BoneEditor::BoneEditor(Project& aProject, GraphicStyle& aStyle)
+BoneEditor::BoneEditor(Project& aProject, GraphicStyle& aStyle, UILogger& aUILogger)
     : mProject(aProject)
     , mGraphicStyle(aStyle)
+    , mUILogger(aUILogger)
     , mParam()
     , mCurrent()
     , mTarget()
     , mKeyOwner()
 {
-    /// @todo
-    /// jugdge a targetability by a binding tree
-    /// merge a holder timeline
-    /// support timeline modifying to a holder key
-    /// brush up a rendering userbility
 }
 
 BoneEditor::~BoneEditor()
@@ -41,7 +37,13 @@ bool BoneEditor::setTarget(core::ObjectNode* aTarget)
     if (!aTarget || !aTarget->timeLine()) return false;
 
     mTarget.node = aTarget;
-    resetCurrentTarget();
+    QString message;
+    resetCurrentTarget(&message);
+
+    if (!message.isEmpty())
+    {
+        mUILogger.pushLog(UILog::tr("BoneEditor : ") + message, UILogType_Warn);
+    }
 
     return mTarget && mKeyOwner;
 }
@@ -123,7 +125,7 @@ void BoneEditor::finalize()
     mTarget.clear();
 }
 
-void BoneEditor::resetCurrentTarget()
+void BoneEditor::resetCurrentTarget(QString* aMessage)
 {
     mCurrent.reset();
     mKeyOwner.deleteOwnsKey();
@@ -139,6 +141,10 @@ void BoneEditor::resetCurrentTarget()
         if (!success)
         {
             mTarget.node = nullptr;
+            if (aMessage)
+            {
+                *aMessage = UILog::tr("The object which has an invalid posture was given.");
+            }
         }
     }
 

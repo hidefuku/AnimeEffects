@@ -12,6 +12,7 @@
 #include "ctrl/IEditor.h"
 #include "ctrl/DriverResources.h"
 #include "ctrl/FFDParam.h"
+#include "ctrl/UILogger.h"
 #include "ctrl/ffd/ffd_Target.h"
 #include "ctrl/ffd/ffd_IMode.h"
 
@@ -21,7 +22,9 @@ namespace ctrl
 class FFDEditor : public IEditor
 {
 public:
-    FFDEditor(core::Project& aProject, DriverResources& aDriverResources);
+    FFDEditor(core::Project& aProject,
+              DriverResources& aDriverResources,
+              UILogger& aUILogger);
     ~FFDEditor();
 
     virtual bool setTarget(core::ObjectNode* aTarget);
@@ -36,13 +39,14 @@ public:
 
 private:
     core::LayerMesh* getCurrentAreaMesh(core::ObjectNode& aNode) const;
-    bool resetCurrentTarget();
+    bool resetCurrentTarget(QString* aMessage = nullptr);
     void updateTargetsKeys();
     void createMode();
     void finalize();
 
     core::Project& mProject;
     DriverResources& mDriverResources;
+    UILogger& mUILogger;
     FFDParam mParam;
     QScopedPointer<ffd::IMode> mCurrent;
 

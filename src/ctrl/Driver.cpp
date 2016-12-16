@@ -16,10 +16,12 @@ struct ScopeCounter
 namespace ctrl
 {
 
-Driver::Driver(core::Project& aProject, DriverResources& aResources, GraphicStyle& aGraphicStyle)
+Driver::Driver(core::Project& aProject, DriverResources& aResources,
+               GraphicStyle& aGraphicStyle, UILogger& aUILogger)
     : mProject(aProject)
     , mResources(aResources)
     , mGraphicStyle(aGraphicStyle)
+    , mUILogger(aUILogger)
     , mToolType(ToolType_TERM)
     , mBlender(aProject.objectTree())
     , mEditor()
@@ -56,23 +58,23 @@ void Driver::setTool(ToolType aType)
     }
     else if (mToolType == ToolType_SRT)
     {
-        mEditor.reset(new SRTEditor(mProject));
+        mEditor.reset(new SRTEditor(mProject, mUILogger));
     }
     else if (mToolType == ToolType_Bone)
     {
-        mEditor.reset(new BoneEditor(mProject, mGraphicStyle));
+        mEditor.reset(new BoneEditor(mProject, mGraphicStyle, mUILogger));
     }
     else if (mToolType == ToolType_Pose)
     {
-        mEditor.reset(new PoseEditor(mProject));
+        mEditor.reset(new PoseEditor(mProject, mUILogger));
     }
     else if (mToolType == ToolType_Mesh)
     {
-        mEditor.reset(new MeshEditor(mProject));
+        mEditor.reset(new MeshEditor(mProject, mUILogger));
     }
     else if (mToolType == ToolType_FFD)
     {
-        mEditor.reset(new FFDEditor(mProject, mResources));
+        mEditor.reset(new FFDEditor(mProject, mResources, mUILogger));
     }
 
     setTarget(mCurrentNode);

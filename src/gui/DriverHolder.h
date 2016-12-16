@@ -9,6 +9,7 @@
 #include "ctrl/ToolType.h"
 #include "ctrl/DriverResources.h"
 #include "ctrl/GraphicStyle.h"
+#include "gui/ViaPoint.h"
 
 namespace gui
 {
@@ -16,7 +17,7 @@ namespace gui
 class DriverHolder
 {
 public:
-    DriverHolder();
+    DriverHolder(ViaPoint& aViaPoint);
     ~DriverHolder();
 
     void create(core::Project& aProject, ctrl::GraphicStyle& aGraphicStyle);
@@ -38,6 +39,7 @@ public:
 
 private:
 
+    ViaPoint& mViaPoint;
     ctrl::DriverResources mDriverResources;
     QScopedPointer<ctrl::Driver> mDriver;
     util::LinkPointer<core::Project> mProject;

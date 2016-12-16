@@ -6,10 +6,11 @@
 #include "core/AbstractCursor.h"
 #include "core/MeshKey.h"
 #include "ctrl/MeshParam.h"
+#include "ctrl/UILogger.h"
+#include "ctrl/IEditor.h"
 #include "ctrl/mesh/mesh_IMode.h"
 #include "ctrl/mesh/mesh_KeyOwner.h"
 #include "ctrl/mesh/mesh_Target.h"
-#include "ctrl/IEditor.h"
 
 namespace ctrl
 {
@@ -17,7 +18,7 @@ namespace ctrl
 class MeshEditor : public IEditor
 {
 public:
-    MeshEditor(core::Project& aProject);
+    MeshEditor(core::Project& aProject, UILogger& aUILogger);
     ~MeshEditor();
 
     virtual bool setTarget(core::ObjectNode* aTarget);
@@ -32,12 +33,14 @@ public:
 
 private:
     void finalize();
-    void resetTarget(core::ObjectNode* aPrev, core::ObjectNode* aNext);
+    void resetTarget(core::ObjectNode* aPrev, core::ObjectNode* aNext,
+                     QString* aMessage = nullptr);
     void resetCurrentTarget();
     void createMode();
     void initializeKey(core::TimeLine& aLine);
 
     core::Project& mProject;
+    UILogger& mUILogger;
     MeshParam mParam;
     QScopedPointer<mesh::IMode> mCurrent;
     mesh::Target mTarget;

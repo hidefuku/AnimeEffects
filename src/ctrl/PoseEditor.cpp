@@ -9,8 +9,9 @@ using namespace core;
 namespace ctrl
 {
 
-PoseEditor::PoseEditor(Project& aProject)
+PoseEditor::PoseEditor(Project& aProject, UILogger& aUILogger)
     : mProject(aProject)
+    , mUILogger(aUILogger)
     , mTarget()
     , mKeyOwner()
     , mCurrent()
@@ -29,7 +30,13 @@ bool PoseEditor::setTarget(core::ObjectNode* aTarget)
     if (!aTarget || !aTarget->timeLine()) return false;
 
     mTarget.node = aTarget;
-    resetCurrentTarget();
+    QString message;
+    resetCurrentTarget(&message);
+
+    if (!message.isEmpty())
+    {
+        mUILogger.pushLog(UILog::tr("PoseEditor : ") + message, UILogType_Warn);
+    }
 
     return mTarget && mKeyOwner;
 }
@@ -76,7 +83,7 @@ void PoseEditor::finalize()
     mTarget.clear();
 }
 
-void PoseEditor::resetCurrentTarget()
+void PoseEditor::resetCurrentTarget(QString* aMessage)
 {
     mCurrent.reset();
     mKeyOwner.deleteOwnsKey();
@@ -102,6 +109,10 @@ void PoseEditor::resetCurrentTarget()
         if (!success)
         {
             mTarget.node = nullptr;
+            if (aMessage)
+            {
+                *aMessage = UILog::tr("The object which has an invalid posture was given.");
+            }
         }
     }
 
@@ -110,6 +121,13 @@ void PoseEditor::resetCurrentTarget()
         if (initializeKey(*mTarget->timeLine()))
         {
             mCurrent.reset(new pose::TransBoneMode(mProject, mTarget, mKeyOwner));
+        }
+        else
+        {
+            if (aMessage)
+            {
+                *aMessage = UILog::tr("There is no bone key which can be a parent.");
+            }
         }
     }
 }
