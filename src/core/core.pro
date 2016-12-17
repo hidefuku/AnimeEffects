@@ -105,7 +105,6 @@ HEADERS += \
     ObjectNode.h \
     ObjectNodeUtil.h \
     ObjectTree.h \
-    PenInfo.h \
     Project.h \
     Renderer.h \
     RenderInfo.h \

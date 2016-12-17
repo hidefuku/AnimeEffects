@@ -80,10 +80,10 @@ void Driver::setTool(ToolType aType)
     setTarget(mCurrentNode);
 }
 
-bool Driver::updateCursor(const core::AbstractCursor& aCursor, const core::PenInfo& aPenInfo, const core::CameraInfo& aCamera)
+bool Driver::updateCursor(const core::AbstractCursor& aCursor,
+                          const core::CameraInfo& aCamera)
 {
     ScopeCounter counter(mOnUpdating);
-    (void)aPenInfo;
 
     // stop animation
     if (aCursor.emitsPressedEvent())

@@ -41,6 +41,8 @@ private:
     Targets& mTargets;
     FFDParam mParam;
     Status mStatus;
+    float mToolPressure;
+    float mPenPressure;
 };
 
 } // namespace ffd

@@ -72,8 +72,7 @@ private:
     virtual void wheelEvent(QWheelEvent* event);
     virtual void tabletEvent(QTabletEvent* event);
 
-    void updateCursor(const core::AbstractCursor& aCursor);
-    void updatePenInfo(QEvent::Type aType, const QPoint& aPos, float aPressure);
+    void updateCursor();
 
     ViaPoint& mViaPoint;
     gl::DeviceInfo mGLDeviceInfo;
@@ -89,7 +88,6 @@ private:
     QReadWriteLock mRenderingLock;
     core::RenderInfo* mRenderInfo;
     core::AbstractCursor mAbstractCursor;
-    core::PenInfo mPenInfo;
     ctrl::Driver* mDriver;
     ProjectTabBar* mProjectTabBar;
     bool mUsingTablet;

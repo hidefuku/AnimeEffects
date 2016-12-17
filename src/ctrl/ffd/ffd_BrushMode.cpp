@@ -40,6 +40,8 @@ BrushMode::BrushMode(core::Project& aProject, Targets& aTargets)
     , mTargets(aTargets)
     , mParam()
     , mStatus()
+    , mToolPressure(1.0f)
+    , mPenPressure(1.0f)
 {
 }
 
@@ -49,10 +51,13 @@ void BrushMode::updateParam(const FFDParam& aParam)
                 aParam.type == FFDParam::Type_Pencil ?
                     aParam.radius : aParam.eraseRadius);
     mParam = aParam;
+    mToolPressure = mParam.pressure;
 }
 
 bool BrushMode::updateCursor(const core::CameraInfo&, const core::AbstractCursor& aCursor)
 {
+    mPenPressure = aCursor.pressure();
+
     if (mStatus.state == State_Idle)
     {
         mStatus.brush.setCenter(aCursor.worldPos());
@@ -114,6 +119,8 @@ bool BrushMode::executeDrawTask(const QVector2D& aCenter, const QVector2D& aMove
 
     // setup input buffers
     gl::Global::makeCurrent();
+
+    mParam.pressure = mToolPressure * mPenPressure;
 
     // request gl task
     for (int i = 0; i < mTargets.size(); ++i)

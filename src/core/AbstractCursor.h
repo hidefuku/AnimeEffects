@@ -38,6 +38,10 @@ public:
     bool setMouseRelease(QMouseEvent* aEvent, const CameraInfo& aCameraInfo);
     bool setMouseDoubleClick(QMouseEvent* aEvent, const CameraInfo& aCameraInfo);
     /// @}
+
+    /// tablet event
+    void setTabletPressure(QTabletEvent* aEvent);
+
     void suspendEvent(const std::function<void()>& aEventReflector);
     void resumeEvent();
 
@@ -49,6 +53,7 @@ public:
     inline QPoint worldPoint() const { return mWorldPos.toPoint(); }
     inline QVector2D worldPos() const { return mWorldPos; }
     inline QVector2D worldVel() const { return mWorldVel; }
+    inline float pressure() const { return mPressure; }
 
     inline bool isPressed(Button aButton) const { return mIsPressed.at(aButton); }
     inline bool isPressedLeft() const { return mIsPressed[Button_Left]; }
@@ -73,6 +78,8 @@ private:
     QVector2D mScreenVel;
     QVector2D mWorldPos;
     QVector2D mWorldVel;
+    float mPressure;
+    bool mIsPressedTablet;
 
     int mSuspendedCount;
     std::array<bool, Button_TERM> mBlankAfterSuspending;

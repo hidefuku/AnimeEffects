@@ -3,7 +3,6 @@
 
 #include "core/Project.h"
 #include "core/AbstractCursor.h"
-#include "core/PenInfo.h"
 #include "core/RenderInfo.h"
 #include "core/ObjectNode.h"
 #include "core/TimeKeyBlender.h"
@@ -30,7 +29,8 @@ public:
     void setTarget(core::ObjectNode* aNode);
     core::ObjectNode* currentTarget() const { return mCurrentNode; }
     void setTool(ToolType aType);
-    bool updateCursor(const core::AbstractCursor& aCursor, const core::PenInfo& aPenInfo, const core::CameraInfo& aCamera);
+    bool updateCursor(const core::AbstractCursor& aCursor,
+                      const core::CameraInfo& aCamera);
     void updateFrame();
     void updateKey(core::TimeLineEvent& aEvent, bool aUndo);
     void updateTree(core::ObjectTreeEvent& aEvent, bool aUndo);

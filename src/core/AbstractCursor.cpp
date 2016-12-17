@@ -14,6 +14,8 @@ AbstractCursor::AbstractCursor()
     , mScreenVel()
     , mWorldPos()
     , mWorldVel()
+    , mPressure(1.0f)
+    , mIsPressedTablet()
     , mSuspendedCount(0)
     , mBlankAfterSuspending()
 {
@@ -128,6 +130,30 @@ bool AbstractCursor::setMouseDoubleClick(QMouseEvent* aEvent, const CameraInfo& 
     }
 
     return mSuspendedCount == 0;
+}
+
+void AbstractCursor::setTabletPressure(QTabletEvent* aEvent)
+{
+    auto type = aEvent->type();
+    auto pressure = aEvent->pressure();
+
+    if (type == QEvent::TabletPress)
+    {
+        mIsPressedTablet = true;
+        mPressure = pressure;
+    }
+    else if (type == QEvent::TabletMove)
+    {
+        if (mIsPressedTablet)
+        {
+            mPressure = 0.5f * mPressure + 0.5f * pressure;
+        }
+    }
+    else if (type == QEvent::TabletRelease)
+    {
+        mIsPressedTablet = false;
+        mPressure = 1.0f;
+    }
 }
 
 void AbstractCursor::suspendEvent(const std::function<void()>& aEventReflector)

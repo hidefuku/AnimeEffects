@@ -33,7 +33,6 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mRenderingLock()
     , mRenderInfo()
     , mAbstractCursor()
-    , mPenInfo()
     , mDriver()
     , mProjectTabBar()
     , mUsingTablet(false)
@@ -64,7 +63,7 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
             {
                 key->invoker = [=]()
                 {
-                    mAbstractCursor.suspendEvent([=]() { updateCursor(mAbstractCursor); });
+                    mAbstractCursor.suspendEvent([=]() { updateCursor(); });
                     mMovingCanvasByKey = true;
                     mCanvasMover.setDragAndMove(mMovingCanvasByKey || mMovingCanvasByTool);
                 };
@@ -84,7 +83,7 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
             {
                 key->invoker = [=]()
                 {
-                    mAbstractCursor.suspendEvent([=]() { updateCursor(mAbstractCursor); });
+                    mAbstractCursor.suspendEvent([=]() { updateCursor(); });
                     mCanvasMover.setDragAndRotate(true);
                 };
                 key->releaser = [=]()
@@ -130,7 +129,6 @@ void MainDisplayWidget::setProject(core::Project* aProject)
 
     mRenderInfo = nullptr;
     mAbstractCursor = core::AbstractCursor();
-    mPenInfo = core::PenInfo();
 
     if (aProject)
     {
@@ -365,7 +363,7 @@ void MainDisplayWidget::mouseMoveEvent(QMouseEvent* aEvent)
     {
         if (mAbstractCursor.setMouseMove(aEvent, mRenderInfo->camera))
         {
-            updateCursor(mAbstractCursor);
+            updateCursor();
             //if (!mUsingTablet) qDebug() << "move" << aEvent->pos();
         }
 
@@ -385,7 +383,7 @@ void MainDisplayWidget::mousePressEvent(QMouseEvent* aEvent)
     {
         if (mAbstractCursor.setMousePress(aEvent, mRenderInfo->camera))
         {
-            updateCursor(mAbstractCursor);
+            updateCursor();
             //if (!mUsingTablet) qDebug() << "press";
         }
     }
@@ -397,7 +395,7 @@ void MainDisplayWidget::mouseReleaseEvent(QMouseEvent* aEvent)
     {
         if (mAbstractCursor.setMouseRelease(aEvent, mRenderInfo->camera))
         {
-            updateCursor(mAbstractCursor);
+            updateCursor();
             //if (!mUsingTablet) qDebug() << "release";
         }
     }
@@ -411,39 +409,10 @@ void MainDisplayWidget::wheelEvent(QWheelEvent* aEvent)
     }
 }
 
-#if 0
-void MainDisplayWidget::keyPressEvent(QKeyEvent* aEvent)
-{
-    //qDebug() << "maindisplay: input key =" << aEvent->key() << "text =" << aEvent->text();
-    bool use = false;
-
-    if (!use)
-    {
-        aEvent->ignore();
-    }
-}
-#endif
-
 void MainDisplayWidget::tabletEvent(QTabletEvent* aEvent)
 {
-    updatePenInfo(aEvent->type(), aEvent->pos(), aEvent->pressure());
+    mAbstractCursor.setTabletPressure(aEvent);
     aEvent->accept();
-    updateRender();
-
-#if 0
-    if (aEvent->type() == QEvent::TabletPress)
-    {
-        qDebug() << "tablet press" << aEvent->pressure();
-    }
-    else if (aEvent->type() == QEvent::TabletRelease)
-    {
-        qDebug() << "tablet release" << aEvent->pressure();
-    }
-    else
-    {
-        qDebug() << "tablet move" << aEvent->pressure() << aEvent->pos();
-    }
-#endif
 }
 
 void MainDisplayWidget::onVisualUpdated()
@@ -469,7 +438,7 @@ void MainDisplayWidget::onToolChanged(ctrl::ToolType aType)
 
 void MainDisplayWidget::onFinalizeTool(ctrl::ToolType)
 {
-    mAbstractCursor.suspendEvent([=]() { updateCursor(mAbstractCursor); });
+    mAbstractCursor.suspendEvent([=]() { updateCursor(); });
     mAbstractCursor.resumeEvent();
 }
 
@@ -505,65 +474,16 @@ void MainDisplayWidget::onProjectAttributeUpdated()
     }
 }
 
-void MainDisplayWidget::updateCursor(const core::AbstractCursor& aCursor)
+void MainDisplayWidget::updateCursor()
 {
-    QEvent::Type tabletType = QEvent::None;
-    if (aCursor.emitsLeftPressedEvent()) tabletType = QEvent::TabletPress;
-    else if (aCursor.emitsLeftDraggedEvent()) tabletType = QEvent::TabletMove;
-    else if (aCursor.emitsLeftReleasedEvent()) tabletType = QEvent::TabletRelease;
-
-    if (!mUsingTablet && tabletType != QEvent::None)
-    {
-        updatePenInfo(tabletType, aCursor.screenPoint(), 1.0f);
-    }
-
     if (mDriver)
     {
         XC_PTR_ASSERT(mRenderInfo);
-        if (mDriver->updateCursor(mAbstractCursor, mPenInfo, mRenderInfo->camera))
+        if (mDriver->updateCursor(mAbstractCursor, mRenderInfo->camera))
         {
             updateRender();
         }
     }
-}
-
-void MainDisplayWidget::updatePenInfo(QEvent::Type aType, const QPoint& aPos, float aPressure)
-{
-    if (!mRenderInfo) return;
-
-    const QVector2D pos(aPos.x(), aPos.y());
-
-    core::CameraInfo& camera = mRenderInfo->camera;
-    bool isMoving = false;
-    mPenInfo.screenVel = QVector2D();
-    mPenInfo.screenWidth = camera.screenWidth();
-    mPenInfo.screenHeight = camera.screenHeight();
-
-    if (aType== QEvent::TabletPress)
-    {
-        mPenInfo.isPressing = true;
-        mUsingTablet = true;
-    }
-    else if (aType == QEvent::TabletRelease)
-    {
-        mPenInfo.isPressing = false;
-        mUsingTablet = false;
-    }
-    else if (aType == QEvent::TabletMove)
-    {
-        isMoving = true;
-    }
-
-    if (mPenInfo.isPressing && isMoving)
-    {
-        mPenInfo.screenVel = pos - mPenInfo.screenPos;
-    }
-
-    mPenInfo.screenPos = pos;
-    mPenInfo.pressure = aPressure;
-
-    mPenInfo.pos = camera.toWorldPos(mPenInfo.screenPos);
-    mPenInfo.vel = camera.toWorldVector(mPenInfo.screenVel);
 }
 
 } // namespace gui
