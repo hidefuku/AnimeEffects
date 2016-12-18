@@ -38,6 +38,7 @@ public:
 
     bool hasProject() const { return !mProjects.isEmpty(); }
     int projectCount() const { return mProjects.count(); }
+    bool hasModifiedProject() const;
 
     core::Project* project(int aIndex);
     const core::Project* project(int aIndex) const;

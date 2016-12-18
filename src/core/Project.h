@@ -61,6 +61,8 @@ public:
     const QString& fileName() const { return mFileName; }
     bool isNameless() const { return mFileName.isEmpty(); }
 
+    bool isModified() const { return mCommandStack.isEdited(); }
+
     Attribute& attribute() { return mAttribute; }
     const Attribute& attribute() const { return mAttribute; }
 

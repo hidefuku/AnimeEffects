@@ -431,6 +431,91 @@ void MainWindow::keyReleaseEvent(QKeyEvent* aEvent)
     QMainWindow::keyReleaseEvent(aEvent);
 }
 
+void MainWindow::closeEvent(QCloseEvent* aEvent)
+{
+    if (mSystem.hasModifiedProject())
+    {
+        auto result = confirmProjectClosing(false);
+
+        if (result == QMessageBox::Yes)
+        {
+            // save all
+            for (int i = 0; i < mSystem.projectCount(); ++i)
+            {
+                auto project = mSystem.project(i);
+                XC_PTR_ASSERT(project);
+                if (!project->isModified()) continue;
+
+                if (!processProjectSaving(*mSystem.project(i)))
+                { // failed or canceled
+                    aEvent->ignore();
+                    return;
+                }
+            }
+        }
+        else if (result == QMessageBox::Cancel)
+        {
+            aEvent->ignore();
+            return;
+        }
+    }
+    aEvent->accept();
+}
+
+int MainWindow::confirmProjectClosing(bool aCurrentOnly)
+{
+    QString singleName;
+
+    if (aCurrentOnly)
+    {
+        if (mCurrent)
+        {
+            singleName = mProjectTabBar->getTabName(*mCurrent);
+        }
+    }
+    else
+    {
+        bool found = false;
+        for (int i = 0; i < mSystem.projectCount(); ++i)
+        {
+            auto project = mSystem.project(i);
+            XC_PTR_ASSERT(project);
+            if (project->isModified())
+            {
+                if (found) { singleName.clear(); break; }
+                singleName = mProjectTabBar->getTabName(*project);
+                found = true;
+            }
+        }
+    }
+
+    QMessageBox msgBox;
+
+    if (!singleName.isEmpty())
+    {
+        msgBox.setText(singleName + tr(" has been modified. Save changes?"));
+    }
+    else
+    {
+        msgBox.setText(tr("Some projects have been modified. Save changes?"));
+    }
+
+    msgBox.addButton(tr("Save Changes"), QMessageBox::YesRole);
+    msgBox.addButton(tr("Discard Changes"), QMessageBox::NoRole);
+    auto cancel = msgBox.addButton(tr("Cancel Closing"), QMessageBox::RejectRole);
+    msgBox.setDefaultButton(cancel);
+    msgBox.exec();
+    auto clicked = msgBox.clickedButton();
+    if (clicked)
+    {
+        auto role = msgBox.buttonRole(clicked);
+        if (role == QMessageBox::YesRole) return QMessageBox::Yes;
+        else if (role == QMessageBox::NoRole) return QMessageBox::No;
+        else if (role == QMessageBox::RejectRole) return QMessageBox::Cancel;
+    }
+    return QMessageBox::Cancel;
+}
+
 void MainWindow::onUndoTriggered()
 {
     if (mCurrent)
@@ -539,40 +624,68 @@ void MainWindow::onOpenProjectTriggered()
     }
 }
 
+bool MainWindow::processProjectSaving(core::Project& aProject)
+{
+    // stop animation and main display rendering
+    EventSuspender suspender(*mMainDisplay, *mTarget);
+
+    if (aProject.isNameless())
+    {
+        QString fileName = QFileDialog::getSaveFileName(
+                    this, tr("Save File"), "", "ProjectFile (*.anie)");
+
+        // check cancel
+        if (fileName.isEmpty())
+        {
+            return false;
+        }
+
+        if (QFileInfo(fileName).suffix().isEmpty())
+        {
+            fileName += ".anie";
+        }
+        aProject.setFileName(fileName);
+    }
+
+    // save
+    if (!mSystem.saveProject(aProject))
+    {
+        return false; // failed
+    }
+
+    mProjectTabBar->updateTabNames();
+    return true;
+}
+
 void MainWindow::onSaveProjectTriggered()
 {
     if (mCurrent)
     {
-        // stop animation and main display rendering
-        EventSuspender suspender(*mMainDisplay, *mTarget);
-
-        if (mCurrent->isNameless())
-        {
-            QString fileName = QFileDialog::getSaveFileName(
-                        this, tr("Save File"), "", "ProjectFile (*.anie)");
-            if (fileName.isEmpty()) return;
-
-            if (QFileInfo(fileName).suffix().isEmpty())
-            {
-                fileName += ".anie";
-            }
-            mCurrent->setFileName(fileName);
-        }
-
-        // save
-        mSystem.saveProject(*mCurrent);
-
-        mProjectTabBar->updateTabNames();
+        processProjectSaving(*mCurrent);
     }
 }
 
 void MainWindow::onCloseProjectTriggered()
 {
     if (mCurrent)
-    {        
-        mProjectTabBar->removeProject(*mCurrent);
-        resetProjectRefs(nullptr);
-        mSystem.closeProject(*mCurrent);
+    {
+        if (mCurrent->isModified())
+        {
+            auto result = confirmProjectClosing(true);
+            if (result == QMessageBox::Cancel)
+            {
+                return;
+            }
+            else if (result == QMessageBox::Yes && !processProjectSaving(*mCurrent))
+            {
+                return;
+            }
+        }
+
+        auto closeProject = mCurrent;
+        mProjectTabBar->removeProject(*closeProject);
+        resetProjectRefs(nullptr); ///@note update mCurrent
+        mSystem.closeProject(*closeProject);
 
         if (mProjectTabBar->currentProject())
         {

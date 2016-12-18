@@ -176,6 +176,15 @@ const core::Project* System::project(int aIndex) const
     return mProjects[aIndex];
 }
 
+bool System::hasModifiedProject() const
+{
+    for (auto project : mProjects)
+    {
+        if (project->isModified()) return true;
+    }
+    return false;
+}
+
 bool System::makeSureCacheDirectory(const QString& aCacheDir)
 {
     if (!QDir::current().exists(aCacheDir))

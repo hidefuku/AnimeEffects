@@ -20,8 +20,10 @@ public:
     core::Project* currentProject() const;
     util::Signaler<void(core::Project&)> onCurrentChanged;
 
-private:
     QString getTabName(const core::Project&) const;
+
+private:
+    QString getTabNameWithStatus(const core::Project&) const;
     void onTabChanged(int aIndex);
 
     QVector<core::Project*> mProjects;

@@ -52,8 +52,11 @@ public:
 private:
     virtual void keyPressEvent(QKeyEvent* aEvent);
     virtual void keyReleaseEvent(QKeyEvent* aEvent);
+    virtual void closeEvent(QCloseEvent* aEvent);
 
     void resetProjectRefs(core::Project* aProject);
+    bool processProjectSaving(core::Project& aProject);
+    int confirmProjectClosing(bool aCurrentOnly);
     void onProjectTabChanged(core::Project&);
 
     ctrl::System& mSystem;

@@ -37,14 +37,12 @@ void ProjectTabBar::updateTabPosition(const QSize& aDisplaySize)
 QString ProjectTabBar::getTabName(const core::Project& aProject) const
 {
     QString name = aProject.fileName();
-    if (name.isEmpty())
-    {
-        name = "New Project";
-    }
-    else
-    {
-        name = QFileInfo(name).fileName();
-    }
+    return name.isEmpty() ? QString("New Project") : QFileInfo(name).fileName();
+}
+
+QString ProjectTabBar::getTabNameWithStatus(const core::Project& aProject) const
+{
+    QString name = getTabName(aProject);
     if (aProject.commandStack().isEdited())
     {
         name += "*";
@@ -58,7 +56,7 @@ bool ProjectTabBar::pushProject(core::Project& aProject)
     {
         mSignal = false;
         mProjects.push_back(&aProject);
-        const int index = this->addTab(getTabName(aProject));
+        const int index = this->addTab(getTabNameWithStatus(aProject));
         this->setCurrentIndex(index);
         mSignal = true;
 
@@ -113,7 +111,7 @@ void ProjectTabBar::updateTabNames()
 {
     for (int i = 0; i < mProjects.count(); ++i)
     {
-        this->setTabText(i, getTabName(*mProjects[i]));
+        this->setTabText(i, getTabNameWithStatus(*mProjects[i]));
     }
 }
 
