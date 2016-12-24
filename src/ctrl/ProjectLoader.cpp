@@ -126,11 +126,23 @@ bool ProjectLoader::readHeader(util::LEStreamReader& aIn)
 
     // major version
     const int majorVersion = aIn.readUInt32();
-    if (majorVersion > AE_PROJECT_FORMAT_MAJOR_VERSION) return false;
-
     // minor version
     const int minorVersion = aIn.readUInt32();
-    if (minorVersion > AE_PROJECT_FORMAT_MINOR_VERSION) return false;
+
+    if (majorVersion < AE_PROJECT_FORMAT_OLDEST_MAJOR_VERSION ||
+            (majorVersion == AE_PROJECT_FORMAT_OLDEST_MAJOR_VERSION &&
+             minorVersion < AE_PROJECT_FORMAT_OLDEST_MINOR_VERSION))
+    {
+        mLog.push_back("The version of the file is too old to read it.");
+        return false;
+    }
+    else if (majorVersion > AE_PROJECT_FORMAT_MAJOR_VERSION ||
+             (majorVersion == AE_PROJECT_FORMAT_MAJOR_VERSION &&
+              minorVersion > AE_PROJECT_FORMAT_MINOR_VERSION))
+    {
+        mLog.push_back("The file has a version defined later than this executable.");
+        return false;
+    }
 
     // reserved
     if (!aIn.skipZeroArea(16)) return false;
