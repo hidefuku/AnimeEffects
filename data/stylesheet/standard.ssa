@@ -1,5 +1,5 @@
 QWidget {
-font-size: 9pt;
+font-size: 8pt;
 }
 
 QMenuBar {
@@ -106,7 +106,6 @@ background-color: transparent;
 }
 
 QGroupBox {
-font-size: 10pt;
 background-color: #fcfcfc;
 border: 1px solid transparent;
 border-radius: 8px;

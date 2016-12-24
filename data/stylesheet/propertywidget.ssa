@@ -59,16 +59,12 @@ QCheckBox#keyIcon::indicator:checked {
 image: url(data/icon/branchopen.png);
 }
 
-QGroupBox {
-font-size: 9pt;
-}
-
 QGroupBox#keyGroup {
 background-color: #f8f8f8;
 border:0px solid transparent;
 border-radius:4px;
 margin-top: 0ex;
-padding-top: 13px;
+padding-top: 7px;
 }
 
 QGroupBox#keyGroup::title {
@@ -83,7 +79,7 @@ background-color: #f8f8f8;
 border:0px solid transparent;
 border-radius:4px;
 margin-top: 0ex;
-padding-top: 13px;
+padding-top: 7px;
 }
 
 QGroupBox#attrGroup::title {
@@ -139,12 +135,11 @@ image: url(data/icon/file.png);
 }
 
 QGroupBox#propertyPanel {
-font-size: 10pt;
 background-color: #c8c8c8;
 border:0px solid transparent;
 border-radius:8px;
 margin-top: 0ex;
-padding-top: 10px;
+padding-top: 7px;
 }
 
 QGroupBox#propertyPanel::title {
