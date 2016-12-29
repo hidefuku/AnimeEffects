@@ -13,24 +13,44 @@ namespace ctrl
 class System : private util::NonCopyable
 {
 public:
+    struct SaveResult
+    {
+        bool success;
+        QString message;
+        SaveResult();
+        SaveResult(bool, const QString&);
+        explicit operator bool() const { return success; }
+    };
+
+    struct LoadResult
+    {
+        core::Project* project;
+        QStringList message;
+        LoadResult();
+        LoadResult(core::Project*, const QString&);
+        LoadResult(core::Project*, const QStringList&);
+        QString messages() const;
+        explicit operator bool() const { return project; }
+    };
+
     System(const QString& aResourceDir, const QString& aCacheDir);
     ~System();
 
     void setAnimator(core::Animator& aAnimator);
 
-    core::Project* newProject(
+    LoadResult newProject(
             const QString& aFileName,
             const core::Project::Attribute& aAttr,
             core::Project::Hook* aHookGrabbed,
             util::IProgressReporter& aReporter,
             bool aSpecifiesCanvasSize);
 
-    core::Project* openProject(
+    LoadResult openProject(
             const QString& aFileName,
             core::Project::Hook* aHookGrabbed,
             util::IProgressReporter& aReporter);
 
-    bool saveProject(core::Project& aProject);
+    SaveResult saveProject(core::Project& aProject);
 
     bool closeProject(core::Project& aProject);
 

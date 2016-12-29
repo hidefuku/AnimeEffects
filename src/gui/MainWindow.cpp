@@ -327,13 +327,13 @@ void MainWindow::testNewProject(const QString& aFilePath)
     menu::ProgressReporter progress(false, this);
 
     core::Project::Attribute attribute;
-    auto project = mSystem.newProject(
+    auto result = mSystem.newProject(
                 aFilePath, attribute, new ProjectHook(), progress, false);
 
-    if (project)
+    if (result)
     {
-        resetProjectRefs(project);
-        mProjectTabBar->pushProject(*project);
+        resetProjectRefs(result.project);
+        mProjectTabBar->pushProject(*result.project);
 
         mMainDisplay->resetCamera();
     }
@@ -569,22 +569,27 @@ void MainWindow::onNewProjectTriggered()
     // clear old project
     resetProjectRefs(nullptr);
 
-    menu::ProgressReporter progress(false, this);
-
-    // create
-    auto project = mSystem.newProject(
-                fileName, attribute, new ProjectHook(),
-                progress, specifiesCanvasSize);
-
-    if (project)
+    // try loading
+    ctrl::System::LoadResult result;
     {
-        resetProjectRefs(project);
-        mProjectTabBar->pushProject(*project);
+        menu::ProgressReporter progress(false, this);
+
+        result = mSystem.newProject(
+                    fileName, attribute, new ProjectHook(),
+                    progress, specifiesCanvasSize);
+    }
+
+    if (result.project)
+    {
+        resetProjectRefs(result.project);
+        mProjectTabBar->pushProject(*result.project);
 
         mMainDisplay->resetCamera();
     }
     else
     {
+        QMessageBox::warning(nullptr, tr("Loading Error"), result.messages());
+
         if (mProjectTabBar->currentProject())
         {
             resetProjectRefs(mProjectTabBar->currentProject());
@@ -604,19 +609,24 @@ void MainWindow::onOpenProjectTriggered()
     // clear old project
     resetProjectRefs(nullptr);
 
-    menu::ProgressReporter progress(false, this);
-
-    // open
-    auto project = mSystem.openProject(fileName, new ProjectHook(), progress);
-    if (project)
+    // try loading
+    ctrl::System::LoadResult result;
     {
-        resetProjectRefs(project);
-        mProjectTabBar->pushProject(*project);
+        menu::ProgressReporter progress(false, this);
+        result = mSystem.openProject(fileName, new ProjectHook(), progress);
+    }
+
+    if (result)
+    {
+        resetProjectRefs(result.project);
+        mProjectTabBar->pushProject(*result.project);
 
         mMainDisplay->resetCamera();
     }
     else
     {
+        QMessageBox::warning(nullptr, tr("Loading Error"), result.messages());
+
         if (mProjectTabBar->currentProject())
         {
             resetProjectRefs(mProjectTabBar->currentProject());
@@ -648,8 +658,10 @@ bool MainWindow::processProjectSaving(core::Project& aProject)
     }
 
     // save
-    if (!mSystem.saveProject(aProject))
+    auto result = mSystem.saveProject(aProject);
+    if (!result)
     {
+        QMessageBox::warning(nullptr, "Saving Error", result.message);
         return false; // failed
     }
 

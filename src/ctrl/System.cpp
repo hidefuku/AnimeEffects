@@ -16,7 +16,49 @@ static const int kStandardFps = 60;
 
 namespace ctrl
 {
+//-------------------------------------------------------------------------------------------------
+System::SaveResult::SaveResult()
+    : success()
+    , message()
+{
+}
 
+System::SaveResult::SaveResult(bool aSuccess, const QString& aMessage)
+    : success(aSuccess)
+    , message(aMessage)
+{
+}
+
+//-------------------------------------------------------------------------------------------------
+System::LoadResult::LoadResult()
+    : project()
+    , message()
+{
+}
+
+System::LoadResult::LoadResult(core::Project* aProject, const QString& aMessage)
+    : project(aProject)
+    , message(aMessage)
+{
+}
+
+System::LoadResult::LoadResult(core::Project* aProject, const QStringList& aMessage)
+    : project(aProject)
+    , message(aMessage)
+{
+}
+
+QString System::LoadResult::messages() const
+{
+    QString msgs;
+    for (auto it = message.rbegin(); it != message.rend(); ++it)
+    {
+        msgs += *it + "\n";
+    }
+    return msgs;
+}
+
+//-------------------------------------------------------------------------------------------------
 System::System(const QString& aResourceDir, const QString& aCacheDir)
     : mResourceDir(aResourceDir)
     , mCacheDir(aCacheDir)
@@ -35,7 +77,7 @@ void System::setAnimator(Animator& aAnimator)
     mAnimator = &aAnimator;
 }
 
-core::Project* System::newProject(
+System::LoadResult System::newProject(
         const QString& aFileName,
         const core::Project::Attribute& aAttr,
         core::Project::Hook* aHookGrabbed,
@@ -60,14 +102,16 @@ core::Project* System::newProject(
     if (loader.load(aFileName, *projectScope, aReporter))
     {
         mProjects.push_back(projectScope.take());
-        return mProjects.back();
+        return LoadResult(mProjects.back(), "Success.");
     }
 
-    qDebug() << "failed to load image : " << loader.log();
-    return nullptr;
+    LoadResult result;
+    result.message.append(loader.log());
+    result.message.append("Failed to load the image file.");
+    return result;
 }
 
-core::Project* System::openProject(
+System::LoadResult System::openProject(
         const QString& aFileName,
         Project::Hook* aHookGrabbed,
         util::IProgressReporter& aReporter)
@@ -88,24 +132,30 @@ core::Project* System::openProject(
         if (loader.load(aFileName, *projectScope, gl::DeviceInfo::instance(), aReporter))
         {
             mProjects.push_back(projectScope.take());
-            return mProjects.back();
+            return LoadResult(mProjects.back(), "Success.");
         }
+
         for (auto log : loader.log())
         {
             qDebug() << log;
         }
+
+        LoadResult result;
+        result.message.append(loader.log());
+        result.message.append("Failed to load project.");
+        return result;
     }
 
-    return nullptr;
+    return LoadResult(nullptr, "Empty file.");
 }
 
-bool System::saveProject(core::Project& aProject)
+System::SaveResult System::saveProject(core::Project& aProject)
 {
     const int index = mProjects.indexOf(&aProject);
 
     if (index < 0 || mProjects.count() <= index)
     {
-        return false;
+        return SaveResult(false, "Invalid project reference.");
     }
 
     auto project = mProjects.at(index);
@@ -118,30 +168,27 @@ bool System::saveProject(core::Project& aProject)
         // create cache directory
         if (!makeSureCacheDirectory(mCacheDir))
         {
-            qDebug() << "failed to create cache directory.";
-            return false;
+            return SaveResult(false, "Failed to create cache directory.");
         }
 
         ctrl::ProjectSaver saver;
 
         if (!saver.save(cachePath, *project))
         {
-            qDebug() << "failed to save a project.\n" << outputPath;
-            qDebug() << saver.log();
-            return false;
+            return SaveResult(false, "Failed to save project. (" + saver.log() + ")");
         }
 
         if (!safeRename(cachePath, outputPath))
         {
-            qDebug() << "failed to rename a project file.\n" << outputPath;
-            return false;
+            return SaveResult(false, "Failed to rename the project file.");
         }
 
         project->commandStack().resetEditingOrigin();
-        qDebug() << "save a project file. " << outputPath;
-        return true;
+        qDebug() << "save the project file. " << outputPath;
+        return SaveResult(true, "Success.");
     }
-    return false;
+
+    return SaveResult(false, "Invalid operation.");
 }
 
 bool System::closeProject(core::Project& aProject)

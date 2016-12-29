@@ -21,7 +21,7 @@ bool ProjectLoader::load(
 
     if (file.fail())
     {
-        mLog.push_back("can not open a project file");
+        mLog.push_back("Can not open the project file.");
         return false;
     }
 
@@ -48,13 +48,13 @@ bool ProjectLoader::load(
 
     if (!readHeader(in))
     {
-        mLog.push_back("failed to read header");
+        mLog.push_back("Failed to read header.");
         return false;
     }
 
     if (!readGlobalBlock(in, aProject))
     {
-        mLog.push_back("failed to read global block");
+        mLog.push_back("Failed to read global block.");
         return false;
     }
 
@@ -67,7 +67,7 @@ bool ProjectLoader::load(
     // resources block
     if (!aProject.resourceHolder().deserialize(deserializer))
     {
-        QString log = "failed to read resources block : ";
+        QString log = "Failed to read resources block. : ";
         for (auto scope : deserializer.logScopes())
         {
             log += scope + "/";
@@ -86,7 +86,7 @@ bool ProjectLoader::load(
     // object tree block
     if (!aProject.objectTree().deserialize(deserializer))
     {
-        QString log = "failed to read object tree block : ";
+        QString log = "Failed to read object tree block. : ";
         for (auto scope : deserializer.logScopes())
         {
             log += scope + "/";
@@ -105,11 +105,11 @@ bool ProjectLoader::load(
     // solve id references
     if (!idSolver.solve())
     {
-        mLog.push_back("failed to solve id references");
+        mLog.push_back("Failed to solve id references.");
         return false;
     }
 
-    mLog.push_back("success");
+    mLog.push_back("Success.");
     return true;
 }
 

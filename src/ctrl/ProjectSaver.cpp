@@ -16,7 +16,7 @@ bool ProjectSaver::save(const QString& aFilePath, const core::Project& aProject)
 
     if (file.fail())
     {
-        mLog = "can not create a project file";
+        mLog = "Can not create the project file.";
         return false;
     }
 
@@ -24,13 +24,13 @@ bool ProjectSaver::save(const QString& aFilePath, const core::Project& aProject)
 
     if (!writeHeader(out))
     {
-        mLog = "failed to write header";
+        mLog = "Failed to write header.";
         return false;
     }
 
     if (!writeGlobalBlock(out, aProject))
     {
-        mLog = "failed to write global block";
+        mLog = "Failed to write global block.";
         return false;
     }
 
@@ -38,18 +38,18 @@ bool ProjectSaver::save(const QString& aFilePath, const core::Project& aProject)
 
     if (!aProject.resourceHolder().serialize(serializer))
     {
-        mLog = "failed to write resources block";
+        mLog = "Failed to write resources block.";
         return false;
     }
 
     // write object tree
     if (!aProject.objectTree().serialize(serializer))
     {
-        mLog = "failed to write object tree block";
+        mLog = "Failed to write object tree block.";
         return false;
     }
 
-    mLog = "success";
+    mLog = "Success.";
     return true;
 }
 
