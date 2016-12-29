@@ -7,7 +7,7 @@
 class LocaleDecider
 {
 public:
-    LocaleDecider(bool aForceDefault);
+    LocaleDecider();
     const QString& preferFont() const { return mPreferFont; }
     QTranslator* translator() { return mHasTranslator ? &mTranslator : nullptr; }
 

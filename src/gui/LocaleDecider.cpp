@@ -1,27 +1,43 @@
 #include <QFile>
 #include <QTextStream>
+#include <QSettings>
 #include "gui/LocaleDecider.h"
 
-LocaleDecider::LocaleDecider(bool aForceDefault)
+LocaleDecider::LocaleDecider()
     : mPreferFont()
     , mTranslator()
     , mHasTranslator()
 {
     QString locAbb;
 
-    if (!aForceDefault)
     {
-        auto language = QLocale::system().language();
-        if (language == QLocale::Japanese)
+        QSettings settings;
+        auto langVar = settings.value("generalsettings/language");
+        auto language = langVar.isValid() ? langVar.toString() : QString();
+
+        if (language == "English")
+        {
+        }
+        else if (language == "Japanese")
         {
             locAbb = "ja";
+        }
+        else
+        {
+            auto language = QLocale::system().language();
+            if (language == QLocale::Japanese)
+            {
+                locAbb = "ja";
+            }
         }
     }
 
     if (!locAbb.isEmpty())
     {
-        mTranslator.load("translation_" + locAbb, "data/locale");
-        mHasTranslator = true;
+        if (mTranslator.load("translation_" + locAbb, "data/locale"))
+        {
+            mHasTranslator = true;
+        }
     }
 
     {

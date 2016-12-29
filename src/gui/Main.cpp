@@ -121,7 +121,7 @@ int entryPoint(int argc, char *argv[])
     QCoreApplication::setApplicationName("AnimeEffects");
 
     // language
-    QScopedPointer<LocaleDecider> locale(new LocaleDecider(false));
+    QScopedPointer<LocaleDecider> locale(new LocaleDecider());
     if (locale->translator())
     {
         app.installTranslator(locale->translator());

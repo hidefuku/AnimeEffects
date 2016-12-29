@@ -113,7 +113,8 @@ SOURCES += \
     prop/prop_CurrentKeyPanel.cpp \
     MSVCMemoryLeakDebugger.cpp \
     MSVCBackTracer.cpp \
-    LocaleDecider.cpp
+    LocaleDecider.cpp \
+    GeneralSettingDialog.cpp
 
 HEADERS += \
     MainDisplayMode.h \
@@ -177,7 +178,8 @@ HEADERS += \
     prop/prop_CurrentKeyPanel.h \
     MSVCMemoryLeakDebugger.h \
     MSVCBackTracer.h \
-    LocaleDecider.h
+    LocaleDecider.h \
+    GeneralSettingDialog.h
 
 FORMS +=
 

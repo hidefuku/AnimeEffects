@@ -10,6 +10,7 @@
 #include "gui/ResourceDialog.h"
 #include "gui/EasyDialog.h"
 #include "gui/KeyBindingDialog.h"
+#include "gui/GeneralSettingDialog.h"
 
 namespace gui
 {
@@ -127,7 +128,15 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
 
     QMenu* optionMenu = new QMenu(tr("Option"), this);
     {
-        QAction* keyBind = new QAction(tr("Key Binding..."), this);
+        QAction* general = new QAction(tr("General Settings..."), this);
+        QAction* keyBind = new QAction(tr("Key Bindings..."), this);
+
+        connect(general, &QAction::triggered, [&](bool)
+        {
+            QScopedPointer<GeneralSettingDialog> dialog(
+                        new GeneralSettingDialog(this));
+            dialog->exec();
+        });
 
         connect(keyBind, &QAction::triggered, [&](bool)
         {
@@ -137,6 +146,7 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
             dialog->exec();
         });
 
+        optionMenu->addAction(general);
         optionMenu->addAction(keyBind);
     }
 
