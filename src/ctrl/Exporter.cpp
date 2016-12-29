@@ -43,11 +43,85 @@ Exporter::PngParam::PngParam()
 }
 
 //-------------------------------------------------------------------------------------------------
+Exporter::GifParam::GifParam()
+    : optimizePalette()
+    , intermediateBps()
+{
+}
+
+//-------------------------------------------------------------------------------------------------
 Exporter::VideoParam::VideoParam()
-    : format()
-    , codec()
+    : codec()
     , bps()
 {
+}
+
+//-------------------------------------------------------------------------------------------------
+Exporter::FFMpeg::FFMpeg()
+    : mProcess()
+    , mErrorOccurred()
+    , mErrorString()
+{
+}
+
+bool Exporter::FFMpeg::start(const QString& aArgments)
+{
+#if defined(Q_OS_WIN)
+    const QFileInfo localEncoderInfo("./tools/ffmpeg.exe");
+    const bool hasLocalEncoder = localEncoderInfo.exists() && localEncoderInfo.isExecutable();
+    const QString program = hasLocalEncoder ? QString(".\\tools\\ffmpeg") : QString("ffmpeg");
+#else
+    const QFileInfo localEncoderInfo("./tools/ffmpeg");
+    const bool hasLocalEncoder = localEncoderInfo.exists() && localEncoderInfo.isExecutable();
+    const QString program = hasLocalEncoder ? QString("./tools/ffmpeg") : QString("ffmpeg");
+#endif
+
+    mErrorOccurred = false;
+    mErrorString.clear();
+    mProcess.reset(new QProcess(nullptr));
+    mProcess->setProcessChannelMode(QProcess::MergedChannels);
+
+    auto process = mProcess.data();
+    mProcess->connect(process, &QProcess::readyRead, [=]()
+    {
+        qDebug() << QString(process->readAll().data());
+    });
+    mProcess->connect(process, &QProcess::errorOccurred, [=](QProcess::ProcessError)
+    {
+        this->mErrorOccurred = true;
+        this->mErrorString = this->mProcess->errorString();
+    });
+
+    mProcess->start(program + " " + aArgments, QIODevice::ReadWrite);
+
+    return !mErrorOccurred;
+}
+
+void Exporter::FFMpeg::write(const QByteArray& aBytes)
+{
+    XC_ASSERT(mProcess);
+    mProcess->write(aBytes);
+}
+
+bool Exporter::FFMpeg::finish()
+{
+    XC_ASSERT(mProcess);
+
+    mProcess->closeWriteChannel();
+    mProcess->waitForFinished();
+    auto exitStatus = mProcess->exitStatus();
+    //qDebug() << "exit status" << exitStatus;
+    //qDebug() << "exit code" << mFFMpeg->exitCode();
+
+    mProcess.reset();
+    return (exitStatus == QProcess::NormalExit);
+}
+
+bool Exporter::FFMpeg::execute(const QString& aArgments)
+{
+    if (!start(aArgments)) return false;
+    if (!finish()) return false;
+    return true;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -62,11 +136,9 @@ Exporter::Exporter(core::Project& aProject)
     , mOverwriteConfirmation()
     , mProgressReporter()
     , mCommonParam()
-    , mPngParam()
-    , mVideoParam()
+    , mPngName()
     , mVideoExporting()
     , mFFMpeg()
-    , mFFMpegErrorOccurred()
     , mExporting(false)
     , mIndex(0)
     , mDigitCount(0)
@@ -113,7 +185,7 @@ bool Exporter::execute(const CommonParam& aCommon, const PngParam& aPng)
     }
 
     mCommonParam = aCommon;
-    mPngParam = aPng;
+    mPngName = aPng.name;
     mVideoExporting = false;
     mOriginTimeInfo = mProject.currentTimeInfo();
     mOverwriteConfirmation = false;
@@ -121,6 +193,50 @@ bool Exporter::execute(const CommonParam& aCommon, const PngParam& aPng)
     mIsCanceled = false;
 
     return execute();
+}
+
+bool Exporter::execute(const CommonParam& aCommon, const GifParam& aGif)
+{
+    const QString outFile = QFileInfo(aCommon.path).absoluteFilePath();
+    const QString workFile = outFile + "videocache.mp4";
+    const QString palette = outFile + "palettecache.png";
+
+    CommonParam commonParam = aCommon;
+    VideoParam videoParam;
+
+    if (aGif.optimizePalette)
+    {
+        commonParam.path = workFile;
+        videoParam.bps = aGif.intermediateBps;
+    }
+    else
+    {
+        videoParam.bps = 0;
+    }
+
+    if (!execute(commonParam, videoParam))
+    {
+        return false;
+    }
+
+    if (aGif.optimizePalette)
+    {
+
+        if (mFFMpeg.execute(" -i " + workFile + " -vf palettegen -y " + palette))
+        {
+            mFFMpeg.execute(" -i " + workFile + " -i " + palette + " -lavfi paletteuse -y " + outFile);
+        }
+
+        QFile::remove(workFile);
+        QFile::remove(palette);
+
+        if (mFFMpeg.errorOccurred())
+        {
+            mLog = "FFmpeg error occurred.\n" + mFFMpeg.errorString();
+            return false;
+        }
+    }
+    return true;
 }
 
 bool Exporter::execute(const CommonParam& aCommon, const VideoParam& aVideo)
@@ -143,61 +259,30 @@ bool Exporter::execute(const CommonParam& aCommon, const VideoParam& aVideo)
     }
 
     mCommonParam = aCommon;
-    mVideoParam = aVideo;
     mVideoExporting = true;
     mOriginTimeInfo = mProject.currentTimeInfo();
-    mFFMpegErrorOccurred = false;
     mLog.clear();
     mIsCanceled = false;
 
     {
-#if defined(Q_OS_WIN)
-        const QFileInfo localEncoderInfo("./tools/ffmpeg.exe");
-        const bool hasLocalEncoder = localEncoderInfo.exists() && localEncoderInfo.isExecutable();
-        const QString program = hasLocalEncoder ? QString(".\\tools\\ffmpeg") : QString("ffmpeg");
-#else
-        const QFileInfo localEncoderInfo("./tools/ffmpeg");
-        const bool hasLocalEncoder = localEncoderInfo.exists() && localEncoderInfo.isExecutable();
-        const QString program = hasLocalEncoder ? QString("./tools/ffmpeg") : QString("ffmpeg");
-#endif
         const QString out = " \"" + filePath.absoluteFilePath() + "\"";
         const QString ifps = " -r " + QString::number(mCommonParam.fps);
-        const QString ofps = " -r " + QString::number(mCommonParam.fps);
-
+        const QString ofps = ifps;
         const QString ocodec =
-                !mVideoParam.codec.isEmpty() ?
-                    " -vcodec " + mVideoParam.codec : "";
+                !aVideo.codec.isEmpty() ? " -vcodec " + aVideo.codec : "";
         const QString obps =
-                mVideoParam.bps > 0 ?
-                    " -b:v " + QString::number(mVideoParam.bps) : "";
+                aVideo.bps > 0 ? " -b:v " + QString::number(aVideo.bps) : "";
+        const QString thrs = ""; //" -threads 8";
 
-        QString command =
-                program +
-                " -y" + /// overwrite files without asking
+        QString argments =
+                QString(" -y") + /// overwrite files without asking
                 " -f image2pipe" +
                 ifps + " -vcodec png" + " -i -" +
-                obps + ofps + ocodec + out;
+                obps + ofps + ocodec + thrs + out;
 
-        //qDebug() << command;
-
-        mFFMpeg.reset(new QProcess(nullptr));
-        mFFMpeg->setProcessChannelMode(QProcess::MergedChannels);
-
-        auto process = mFFMpeg.data();
-        mFFMpeg->connect(process, &QProcess::readyRead, [=]()
+        if (!mFFMpeg.start(argments))
         {
-            qDebug() << QString(process->readAll().data());
-        });
-        mFFMpeg->connect(process, &QProcess::errorOccurred, [=](QProcess::ProcessError)
-        {
-            this->mFFMpegErrorOccurred = true;
-        });
-
-        mFFMpeg->start(command, QIODevice::ReadWrite);
-
-        if (mFFMpegErrorOccurred)
-        {
-            mLog = "FFmpeg error occurred.\n" + mFFMpeg->errorString();
+            mLog = "FFmpeg error occurred.\n" + mFFMpeg.errorString();
             return false;
         }
     }
@@ -404,13 +489,13 @@ bool Exporter::exportImage(const QImage& aFboImage, int aIndex)
         QByteArray byteArray;
         QBuffer buffer(&byteArray);
         buffer.open(QIODevice::ReadWrite);
-        aFboImage.save(&buffer, "PNG");
+        aFboImage.save(&buffer, "PNG", 90);
         buffer.close();
-        mFFMpeg->write(byteArray);
+        mFFMpeg.write(byteArray);
 
-        if (mFFMpegErrorOccurred)
+        if (mFFMpeg.errorOccurred())
         {
-            mLog = "FFmpeg error occurred.\n" + mFFMpeg->errorString();
+            mLog = "FFmpeg error occurred.\n" + mFFMpeg.errorString();
             return false;
         }
     }
@@ -433,16 +518,11 @@ bool Exporter::finish()
     {
         if (mVideoExporting)
         {
-            mFFMpeg->closeWriteChannel();
-            mFFMpeg->waitForFinished();
-            auto exitStatus = mFFMpeg->exitStatus();
-            //qDebug() << "exit status" << exitStatus;
-            if (exitStatus == QProcess::NormalExit)
+            result = mFFMpeg.finish();
+            if (!result)
             {
-                //qDebug() << "exit code" << mFFMpeg->exitCode();
-                result = true;
+                mLog = "FFmpeg error occurred.\n" + mFFMpeg.errorString();
             }
-            mFFMpeg.reset();
         }
         else
         {
@@ -520,7 +600,7 @@ void Exporter::setTextureParam(QOpenGLFramebufferObject& aFbo)
 bool Exporter::decidePngPath(int aIndex, QFileInfo& aPath)
 {
     const QString number = QString("%1").arg(aIndex, mDigitCount, 10, QChar('0'));
-    QFileInfo filePath(mCommonParam.path + "/" + mPngParam.name + number + ".png");
+    QFileInfo filePath(mCommonParam.path + "/" + mPngName + number + ".png");
 
     // check overwrite
     if (!checkOverwriting(filePath))

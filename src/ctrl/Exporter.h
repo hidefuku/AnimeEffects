@@ -39,9 +39,15 @@ public:
     struct VideoParam
     {
         VideoParam();
-        QString format;
         QString codec;
         int bps;
+    };
+
+    struct GifParam
+    {
+        GifParam();
+        bool optimizePalette;
+        int intermediateBps;
     };
 
     struct PngParam
@@ -57,6 +63,7 @@ public:
     void setProgressReporter(util::IProgressReporter& aReporter);
 
     bool execute(const CommonParam& aCommon, const PngParam& aPng);
+    bool execute(const CommonParam& aCommon, const GifParam& aGif);
     bool execute(const CommonParam& aCommon, const VideoParam& aVideo);
 
     const QString& log() const { return mLog; }
@@ -65,6 +72,22 @@ public:
 private:
     typedef std::unique_ptr<QOpenGLFramebufferObject> FramebufferPtr;
     typedef std::list<FramebufferPtr> FramebufferList;
+
+    class FFMpeg
+    {
+    public:
+        FFMpeg();
+        bool start(const QString& aArgments);
+        void write(const QByteArray& aBytes);
+        bool finish();
+        bool execute(const QString& aArgments);
+        bool errorOccurred() const { return mErrorOccurred; }
+        QString errorString() const { return mErrorString; }
+    private:
+        QScopedPointer<QProcess> mProcess;
+        bool mErrorOccurred;
+        QString mErrorString;
+    };
 
     bool execute();
     bool start();
@@ -90,12 +113,10 @@ private:
     util::IProgressReporter* mProgressReporter;
 
     CommonParam mCommonParam;
-    PngParam mPngParam;
-    VideoParam mVideoParam;
+    QString mPngName;
     bool mVideoExporting;
-    QScopedPointer<QProcess> mFFMpeg;
-    bool mFFMpegErrorOccurred;
 
+    FFMpeg mFFMpeg;
     bool mExporting;
     int mIndex;
     int mDigitCount;

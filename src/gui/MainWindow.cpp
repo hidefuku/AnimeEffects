@@ -713,7 +713,7 @@ void MainWindow::onExportPngSeqTriggered()
     ctrl::Exporter::PngParam pparam;
     {
         QScopedPointer<ExportDialog> dialog(
-                    new ExportDialog(*mCurrent, dirName, false, this));
+                    new ExportDialog(*mCurrent, dirName, ExportDialog::Type_Png, this));
 
         dialog->exec();
         if (dialog->result() != QDialog::Accepted) return;
@@ -786,17 +786,20 @@ void MainWindow::onExportVideoTriggered(const QString& aSuffix, QString aCodec)
     // export param
     ctrl::Exporter::CommonParam cparam;
     ctrl::Exporter::VideoParam vparam;
+    ctrl::Exporter::GifParam gparam;
+    auto isGif = (aSuffix == "gif");
     {
+        auto type = isGif ? ExportDialog::Type_Gif : ExportDialog::Type_Video;
         QScopedPointer<ExportDialog> dialog(
-                    new ExportDialog(*mCurrent, fileName, true, this));
+                    new ExportDialog(*mCurrent, fileName, type, this));
 
         dialog->exec();
         if (dialog->result() != QDialog::Accepted) return;
 
         cparam = dialog->commonParam();
         vparam = dialog->videoParam();
+        gparam = dialog->gifParam();
     }
-    vparam.format = aSuffix;
     vparam.codec = aCodec;
 
 #if 0
@@ -821,7 +824,11 @@ void MainWindow::onExportVideoTriggered(const QString& aSuffix, QString aCodec)
     exporter.setProgressReporter(progress);
 
     // execute
-    if (!exporter.execute(cparam, vparam))
+    bool success = isGif ?
+                exporter.execute(cparam, gparam) :
+                exporter.execute(cparam, vparam);
+
+    if (!success)
     {
         progress.dialog().cancel();
 

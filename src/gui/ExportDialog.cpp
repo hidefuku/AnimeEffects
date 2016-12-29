@@ -31,16 +31,14 @@ namespace gui
 {
 
 ExportDialog::ExportDialog(
-        core::Project& aProject,
-        const QString& aPath,
-        bool aVideoExporting,
-        QWidget* aParent)
+        core::Project& aProject, const QString& aPath, Type aType, QWidget* aParent)
     : EasyDialog(tr("Export Dialog"), aParent)
     , mProject(aProject)
     , mCommonParam()
     , mVideoParam()
+    , mGifParam()
     , mPngParam()
-    , mVideoExporting(aVideoExporting)
+    , mType(aType)
     , mSize()
     , mFrameMax()
     , mFixAspect(true)
@@ -53,9 +51,13 @@ ExportDialog::ExportDialog(
 
     // option
     auto group = new QGroupBox(tr("Parameters"));
-    if (mVideoExporting)
+    if (mType == Type_Video)
     {
         group->setLayout(createVideoOption());
+    }
+    else if (mType == Type_Gif)
+    {
+        group->setLayout(createGifOption());
     }
     else
     {
@@ -78,12 +80,18 @@ void ExportDialog::initializeParameter(const QString& aPath)
     mCommonParam.frame = util::Range(0, std::min(60, time.frameMax));
     mCommonParam.fps = time.fps;
 
-    if (mVideoExporting)
+    if (mType == Type_Video)
     {
         mCommonParam.path = aPath;
-        mVideoParam.format = "";
         mVideoParam.codec = "";
         mVideoParam.bps = 1 * 1000 * 1000;
+    }
+    else if (mType == Type_Gif)
+    {
+        mCommonParam.path = aPath;
+        mCommonParam.fps = std::min(mCommonParam.fps, 30);
+        mGifParam.optimizePalette = false;
+        mGifParam.intermediateBps = 5 * 1000 * 1000;
     }
     else
     {
@@ -117,6 +125,48 @@ QLayout* ExportDialog::createVideoOption()
         });
 
         form->addRow(tr("bit rate (Kbps) :"), kbps);
+    }
+
+    return form;
+}
+
+QLayout* ExportDialog::createGifOption()
+{
+    auto form = new QFormLayout();
+    form->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
+    form->setLabelAlignment(Qt::AlignRight);
+
+    pushSizeBox(*form);
+    pushFrameBox(*form);
+    pushFpsBox(*form);
+
+    // bit rate
+    auto kbps = new QSpinBox();
+    {
+        setMinMaxOptionWidth(kbps);
+        kbps->setRange(1, 100 * 1000);
+        kbps->setValue(mGifParam.intermediateBps / 1000);
+
+        this->connect(kbps, &QSpinBox::editingFinished, [=]()
+        {
+            this->mGifParam.intermediateBps = kbps->value() * 1000;
+        });
+    }
+
+    // optimize palette
+    {
+        auto opti = new QCheckBox();
+        opti->setChecked(mGifParam.optimizePalette);
+        kbps->setEnabled(mGifParam.optimizePalette);
+
+        this->connect(opti, &QCheckBox::clicked, [=](bool aCheck)
+        {
+            this->mGifParam.optimizePalette = aCheck;
+            kbps->setEnabled(aCheck);
+        });
+
+        form->addRow(tr("optimize palette :"), opti);
+        form->addRow(tr("relay bit rate (Kbps) :"), kbps);
     }
 
     return form;
