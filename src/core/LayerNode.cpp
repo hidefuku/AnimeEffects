@@ -429,6 +429,11 @@ cmnd::Vector LayerNode::createResourceUpdater(const ResourceEvent& aEvent)
 {
     cmnd::Vector result;
 
+    if (aEvent.type() != ResourceEvent::Type_Reload)
+    {
+        return result;
+    }
+
     ResourceUpdatingWorkspacePtr workspace = std::make_shared<ResourceUpdatingWorkspace>();
     const bool createTransitions = !mTimeLine.isEmpty(TimeKeyType_FFD);
 

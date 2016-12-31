@@ -11,9 +11,23 @@ namespace core
 class ResourceEvent
 {
 public:
+    enum Type
+    {
+        Type_AddTree,
+        Type_Delete,
+        Type_Reload,
+        Type_Rename,
+        Type_TERM
+    };
+
     typedef QVector<const img::ResourceNode*> Targets;
 
     ResourceEvent(Project& aProject);
+
+    void setType(Type aType)
+    {
+        mType = aType;
+    }
 
     void setRoot(img::ResourceNode& aNode)
     {
@@ -25,7 +39,11 @@ public:
         mTargets.push_back(&aNode);
     }
 
+    void setSingleTarget(img::ResourceNode& aNode);
+
     Project& project() const { return mProject; }
+
+    Type type() const { return mType; }
 
     img::ResourceNode* root() { return mRoot; }
     const img::ResourceNode* root() const { return mRoot; }
@@ -38,6 +56,7 @@ public:
 
 private:
     Project& mProject;
+    Type mType;
     img::ResourceNode* mRoot;
     Targets mTargets;
 };

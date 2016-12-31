@@ -2,6 +2,7 @@
 #define GUI_RES_ITEM_H
 
 #include <QTreeWidgetItem>
+#include "util/TreePos.h"
 #include "img/ResourceNode.h"
 
 namespace gui {
@@ -17,6 +18,8 @@ public:
     img::ResourceNode& node() { return mNode; }
     const img::ResourceNode& node() const { return mNode; }
     bool isTopNode() const { return !mNode.parent(); }
+
+    util::TreePos treePos();
 
 private:
     const QTreeWidget& mTree;

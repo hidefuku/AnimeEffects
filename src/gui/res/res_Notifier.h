@@ -82,6 +82,9 @@ public:
             ViaPoint& aViaPoint,
             core::Project& aProject);
 
+    core::ResourceEvent& event() { return mEvent; }
+    const core::ResourceEvent& event() const { return mEvent; }
+
     void notify(bool aIsUndo = false);
 
     virtual void onExecuted()
@@ -102,6 +105,7 @@ public:
 private:
     ViaPoint& mViaPoint;
     core::Project& mProject;
+    core::ResourceEvent mEvent;
 };
 
 class DeleteNotifier : public cmnd::Listener
@@ -111,6 +115,9 @@ public:
             ViaPoint& aViaPoint,
             core::Project& aProject);
 
+    core::ResourceEvent& event() { return mEvent; }
+    const core::ResourceEvent& event() const { return mEvent; }
+
     void notify(bool aIsUndo = false);
 
     virtual void onExecuted()
@@ -131,6 +138,42 @@ public:
 private:
     ViaPoint& mViaPoint;
     core::Project& mProject;
+    core::ResourceEvent mEvent;
+};
+
+class RenameNotifier : public cmnd::Listener
+{
+public:
+    RenameNotifier(
+            ViaPoint& aViaPoint,
+            core::Project& aProject,
+            const util::TreePos& aRootPos);
+
+    core::ResourceEvent& event() { return mEvent; }
+    const core::ResourceEvent& event() const { return mEvent; }
+
+    void notify(bool aIsUndo = false);
+
+    virtual void onExecuted()
+    {
+        notify();
+    }
+
+    virtual void onUndone()
+    {
+        notify(true);
+    }
+
+    virtual void onRedone()
+    {
+        notify();
+    }
+
+private:
+    ViaPoint& mViaPoint;
+    core::Project& mProject;
+    core::ResourceEvent mEvent;
+    util::TreePos mRootPos;
 };
 
 } // namespace res

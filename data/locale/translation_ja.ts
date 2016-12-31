@@ -274,7 +274,7 @@
     </message>
     <message>
         <location filename="../../src/gui/ObjectTreeWidget.cpp" line="321"/>
-        <source>change a object name</source>
+        <source>rename a object</source>
         <translation>オブジェクト名を変更</translation>
     </message>
     <message>
@@ -303,22 +303,27 @@
         <translation>クリッピング設定を更新</translation>
     </message>
     <message>
-        <location filename="../../src/gui/res/res_ResourceTree.cpp" line="229"/>
+        <location filename="../../src/gui/res/res_ResourceTree.cpp" line="246"/>
         <source>update a resource file path</source>
         <translation>リソースファイルパスを更新</translation>
     </message>
     <message>
-        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="166"/>
+        <location filename="../../src/gui/res/res_ResourceTree.cpp" line="299"/>
+        <source>rename a resource</source>
+        <translation>リソース名を変更</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="127"/>
         <source>add new resource</source>
         <translation>新しいリソースを追加</translation>
     </message>
     <message>
-        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="501"/>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="464"/>
         <source>reload images</source>
         <translation>画像を再読み込み</translation>
     </message>
     <message>
-        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="556"/>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="519"/>
         <source>delete images</source>
         <translation>画像を削除</translation>
     </message>
@@ -727,48 +732,54 @@
         <translation>やり直す : </translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="601"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="591"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="628"/>
+        <source>Loading Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/MainWindow.cpp" line="606"/>
         <source>Open File</source>
         <translation>ファイルを開く</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="635"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="645"/>
         <source>Save File</source>
         <translation>ファイルを保存する</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="705"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="717"/>
         <source>Exporting Folder</source>
         <translation>出力フォルダ</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="729"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="741"/>
         <source>File already exists.</source>
         <translation>同名のファイルがすでに存在します</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="730"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="742"/>
         <source>Do you want to overwrite the existing file?</source>
         <translation>既存のファイルに上書きしますか？</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="749"/>
-        <location filename="../../src/gui/MainWindow.cpp" line="837"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="761"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="849"/>
         <source>Exporting Error</source>
         <translation>出力エラー</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="766"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="778"/>
         <source>Exporting File</source>
         <translation>出力ファイル</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="781"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="793"/>
         <source>Operation Error</source>
         <translation>操作エラー</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="782"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="794"/>
         <source>Invalid suffix specification.</source>
         <translation>無効な拡張子が指定されています</translation>
     </message>
@@ -821,13 +832,13 @@
     <message>
         <location filename="../../src/gui/ObjectTreeWidget.cpp" line="92"/>
         <location filename="../../src/gui/ObjectTreeWidget.cpp" line="473"/>
-        <source>slim down object</source>
-        <translation>オブジェクトをスリム化</translation>
+        <source>slim down</source>
+        <translation>スリム化</translation>
     </message>
     <message>
         <location filename="../../src/gui/ObjectTreeWidget.cpp" line="95"/>
-        <source>change object name</source>
-        <translation>オブジェクト名を変更</translation>
+        <source>rename</source>
+        <translation>名前を変更</translation>
     </message>
     <message>
         <location filename="../../src/gui/ObjectTreeWidget.cpp" line="98"/>
@@ -841,13 +852,13 @@
     </message>
     <message>
         <location filename="../../src/gui/ObjectTreeWidget.cpp" line="104"/>
-        <source>delete object</source>
-        <translation>オブジェクトを削除</translation>
+        <source>delete</source>
+        <translation>削除</translation>
     </message>
     <message>
         <location filename="../../src/gui/ObjectTreeWidget.cpp" line="473"/>
-        <source>fatten object</source>
-        <translation>オブジェクトを肥大化</translation>
+        <source>fatten</source>
+        <translation>肥大化</translation>
     </message>
 </context>
 <context>
@@ -1300,22 +1311,27 @@
 <context>
     <name>gui::res::ResourceTree</name>
     <message>
-        <location filename="../../src/gui/res/res_ResourceTree.cpp" line="47"/>
+        <location filename="../../src/gui/res/res_ResourceTree.cpp" line="54"/>
         <source>change file path</source>
         <translation>ファイルパスを変更</translation>
     </message>
     <message>
-        <location filename="../../src/gui/res/res_ResourceTree.cpp" line="51"/>
+        <location filename="../../src/gui/res/res_ResourceTree.cpp" line="58"/>
+        <source>rename</source>
+        <translation>名前を変更</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/res/res_ResourceTree.cpp" line="62"/>
         <source>reload images</source>
         <translation>画像を再読み込みする</translation>
     </message>
     <message>
-        <location filename="../../src/gui/res/res_ResourceTree.cpp" line="55"/>
+        <location filename="../../src/gui/res/res_ResourceTree.cpp" line="66"/>
         <source>delete</source>
         <translation>削除</translation>
     </message>
     <message>
-        <location filename="../../src/gui/res/res_ResourceTree.cpp" line="223"/>
+        <location filename="../../src/gui/res/res_ResourceTree.cpp" line="240"/>
         <source>Open File</source>
         <translation>ファイルを開く</translation>
     </message>
@@ -1323,49 +1339,49 @@
 <context>
     <name>gui::res::ResourceUpdater</name>
     <message>
-        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="199"/>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="162"/>
         <source>QImage Error</source>
         <translation>QImageエラー</translation>
     </message>
     <message>
-        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="200"/>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="163"/>
         <source>Failed to load image file.</source>
         <translation>画像ファイルの読み込みに失敗しました</translation>
     </message>
     <message>
-        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="212"/>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="175"/>
         <source>FileIO Error</source>
         <translation>ファイル入出力エラー</translation>
     </message>
     <message>
-        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="213"/>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="176"/>
         <source>Can not found a PSD file.</source>
         <translation>PSDファイルが見つかりませんでした</translation>
     </message>
     <message>
-        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="224"/>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="187"/>
         <source>PSD Parse Error</source>
         <translation>PSD解析エラー</translation>
     </message>
     <message>
-        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="461"/>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="424"/>
         <source>Failed to find a corresponding node.</source>
         <translation>一致する名前のノードが見つかりませんでした</translation>
     </message>
     <message>
-        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="474"/>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="437"/>
         <source>Failed to identify nodes by following duplications.</source>
         <translation>下記の重複により、ノードの特定ができませんでした</translation>
     </message>
     <message>
-        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="463"/>
-        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="479"/>
-        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="537"/>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="426"/>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="442"/>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="500"/>
         <source>Operation Error</source>
         <translation>操作エラー</translation>
     </message>
     <message>
-        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="538"/>
+        <location filename="../../src/gui/res/res_ResourceUpdater.cpp" line="501"/>
         <source>Some layers are referenced by objects yet.</source>
         <translation>いくつかのレイヤーがまだオブジェクトに参照されています</translation>
     </message>

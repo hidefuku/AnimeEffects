@@ -75,7 +75,7 @@ private:
     QModelIndex cheatDragDropPos(QPoint& aPos);
     QPoint treeTopLeftPosition() const;
     int scrollHeight() const { return -treeTopLeftPosition().y(); }
-    void endEdit();
+    void endRenameEditor();
     int itemHeight(const core::ObjectNode& aNode) const;
     bool updateItemHeights(QTreeWidgetItem* aItem);
 
@@ -87,7 +87,7 @@ private:
     void onItemSelectionChanged();
     void onContextMenuRequested(const QPoint& aPos);
     void onSlimActionTriggered(bool aIsTriggered);
-    void onNameActionTriggered(bool aIsTriggered);
+    void onRenameActionTriggered(bool aIsTriggered);
     void onObjectActionTriggered(bool aIsTriggered);
     void onFolderActionTriggered(bool aIsTriggered);
     void onDeleteActionTriggered(bool aIsTriggered);
@@ -106,7 +106,7 @@ private:
 
     QTreeWidgetItem* mActionItem;
     QAction* mSlimAction;
-    QAction* mNameAction;
+    QAction* mRenameAction;
     QAction* mObjectAction;
     QAction* mFolderAction;
     QAction* mDeleteAction;

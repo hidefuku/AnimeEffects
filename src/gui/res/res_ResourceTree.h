@@ -36,9 +36,11 @@ private:
     QTreeWidgetItem* findItem(const util::TreePos& aPos);
     void addTreeItemRecursive(QTreeWidgetItem* aItem, img::ResourceNode* aNode);
     QList<img::ResourceNode*> findSelectingNodes() const;
+    void endRenameEditor();
     void onItemSelectionChanged();
     void onContextMenuRequested(const QPoint& aPos);
     void onChangePathActionTriggered(bool aIsTriggered);
+    void onRenameActionTriggered(bool aIsTriggered);
     void onReloadActionTriggered(bool aIsTriggered);
     void onDeleteActionTriggered(bool aIsTriggered);
 
@@ -47,6 +49,7 @@ private:
     core::ResourceHolder* mHolder;
     QTreeWidgetItem* mActionItem;
     QAction* mChangePathAction;
+    QAction* mRenameAction;
     QAction* mReloadAction;
     QAction* mDeleteAction;
 };

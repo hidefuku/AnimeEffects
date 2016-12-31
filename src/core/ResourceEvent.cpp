@@ -5,9 +5,17 @@ namespace core
 
 ResourceEvent::ResourceEvent(Project& aProject)
     : mProject(aProject)
+    , mType(Type_Reload)
     , mRoot()
     , mTargets()
 {
+}
+
+void ResourceEvent::setSingleTarget(img::ResourceNode& aNode)
+{
+    mRoot = &aNode;
+    mTargets.clear();
+    mTargets.push_back(&aNode);
 }
 
 bool ResourceEvent::contains(const void* aSerialAddress) const

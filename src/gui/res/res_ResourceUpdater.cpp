@@ -17,45 +17,6 @@
 //#define RESOURCE_UPDATER_DUMP(...) XC_DEBUG_REPORT(__VA_ARGS__)
 #define RESOURCE_UPDATER_DUMP(...)
 
-namespace
-{
-//-------------------------------------------------------------------------------------------------
-void pushTreeRowRecursive(
-        util::TreePos& aDst, const QTreeWidget& aTree, QTreeWidgetItem* aObj)
-{
-    if (!aObj) return;
-
-    QTreeWidgetItem* parent = aObj->parent();
-    if (parent)
-    {
-        pushTreeRowRecursive(aDst, aTree, parent);
-        const int index = parent->indexOfChild(aObj);
-        XC_ASSERT(index >= 0);
-        aDst.pushRow(index);
-    }
-    else
-    {
-        const int index = aTree.indexOfTopLevelItem(aObj);
-        XC_ASSERT(index >= 0);
-        aDst.pushRow(index);
-    }
-}
-
-util::TreePos getTreePos(QTreeWidgetItem* aObj)
-{
-    util::TreePos pos;
-    if (!aObj) return pos;
-
-    const QTreeWidget* tree = aObj->treeWidget();
-    if (!tree) return pos;
-
-    pos.setValidity((bool)aObj);
-    pushTreeRowRecursive(pos, *tree, aObj);
-    return pos;
-}
-
-}
-
 namespace gui {
 namespace res {
 
@@ -166,7 +127,9 @@ void ResourceUpdater::load(const QString& aFilePath)
         cmnd::ScopedMacro macro(stack, CmndName::tr("add new resource"));
 
         // notifier
-        macro.grabListener(new AddNewOneNotifier(mViaPoint, mProject));
+        auto notifier = new AddNewOneNotifier(mViaPoint, mProject);
+        notifier->event().setSingleTarget(*newTree);
+        macro.grabListener(notifier);
 
         stack.push(new NewTreePusher(holder, newTree, aFilePath));
     }
@@ -501,7 +464,7 @@ bool ResourceUpdater::tryReloadCorrespondingImages(
         cmnd::ScopedMacro macro(stack, CmndName::tr("reload images"));
 
         // notifier
-        auto notifier = new ModificationNotifier(mViaPoint, mProject, getTreePos(item));
+        auto notifier = new ModificationNotifier(mViaPoint, mProject, item->treePos());
         notifier->event().setRoot(targetNode);
         macro.grabListener(notifier);
 
@@ -556,7 +519,9 @@ void ResourceUpdater::remove(Item& aItem)
         cmnd::ScopedMacro macro(stack, CmndName::tr("delete images"));
 
         // notifier
-        macro.grabListener(new DeleteNotifier(mViaPoint, mProject));
+        auto notifier = new DeleteNotifier(mViaPoint, mProject);
+        notifier->event().setSingleTarget(node);
+        macro.grabListener(notifier);
 
         stack.push(new TreeDeleter(holder, index));
     }

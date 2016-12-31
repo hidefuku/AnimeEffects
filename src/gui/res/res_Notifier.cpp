@@ -33,6 +33,7 @@ ModificationNotifier::ModificationNotifier(
     , mEvent(aProject)
 {
     XC_ASSERT(mRootPos.isValid());
+    mEvent.setType(core::ResourceEvent::Type_Reload);
 }
 
 void ModificationNotifier::notify(bool aIsUndo)
@@ -52,11 +53,15 @@ AddNewOneNotifier::AddNewOneNotifier(
         ViaPoint& aViaPoint, core::Project& aProject)
     : mViaPoint(aViaPoint)
     , mProject(aProject)
+    , mEvent(aProject)
 {
+    mEvent.setType(core::ResourceEvent::Type_AddTree);
 }
 
-void AddNewOneNotifier::notify(bool)
+void AddNewOneNotifier::notify(bool aIsUndo)
 {
+    mProject.onResourceModified(mEvent, aIsUndo);
+
     if (mViaPoint.resourceDialog())
     {
         mViaPoint.resourceDialog()->updateResources();
@@ -68,14 +73,41 @@ DeleteNotifier::DeleteNotifier(
         ViaPoint& aViaPoint, core::Project& aProject)
     : mViaPoint(aViaPoint)
     , mProject(aProject)
+    , mEvent(aProject)
 {
+    mEvent.setType(core::ResourceEvent::Type_Delete);
 }
 
-void DeleteNotifier::notify(bool)
+void DeleteNotifier::notify(bool aIsUndo)
 {
+    mProject.onResourceModified(mEvent, aIsUndo);
+
     if (mViaPoint.resourceDialog())
     {
         mViaPoint.resourceDialog()->updateResources();
+    }
+}
+
+//-------------------------------------------------------------------------------------------------
+RenameNotifier::RenameNotifier(
+        ViaPoint& aViaPoint,
+        core::Project& aProject,
+        const util::TreePos& aRootPos)
+    : mViaPoint(aViaPoint)
+    , mProject(aProject)
+    , mEvent(aProject)
+    , mRootPos(aRootPos)
+{
+    mEvent.setType(core::ResourceEvent::Type_Rename);
+}
+
+void RenameNotifier::notify(bool aIsUndo)
+{
+    mProject.onResourceModified(mEvent, aIsUndo);
+
+    if (mViaPoint.resourceDialog())
+    {
+        mViaPoint.resourceDialog()->updateResources(mRootPos);
     }
 }
 

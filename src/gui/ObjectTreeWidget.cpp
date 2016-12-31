@@ -47,7 +47,7 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
     , mDropIndicatorPos()
     , mActionItem()
     , mSlimAction()
-    , mNameAction()
+    , mRenameAction()
     , mObjectAction()
     , mFolderAction()
     , mDeleteAction()
@@ -89,11 +89,11 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
     this->connect(this, &QTreeWidget::itemSelectionChanged, this, &ObjectTreeWidget::onItemSelectionChanged);
 
     {
-        mSlimAction = new QAction(tr("slim down object"), this);
+        mSlimAction = new QAction(tr("slim down"), this);
         mSlimAction->connect(mSlimAction, &QAction::triggered, this, &ObjectTreeWidget::onSlimActionTriggered);
 
-        mNameAction = new QAction(tr("change object name"), this);
-        mNameAction->connect(mNameAction, &QAction::triggered, this, &ObjectTreeWidget::onNameActionTriggered);
+        mRenameAction = new QAction(tr("rename"), this);
+        mRenameAction->connect(mRenameAction, &QAction::triggered, this, &ObjectTreeWidget::onRenameActionTriggered);
 
         mObjectAction = new QAction(tr("create layer object"), this);
         mObjectAction->connect(mObjectAction, &QAction::triggered, this, &ObjectTreeWidget::onObjectActionTriggered);
@@ -101,7 +101,7 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
         mFolderAction = new QAction(tr("create folder object"), this);
         mFolderAction->connect(mFolderAction, &QAction::triggered, this, &ObjectTreeWidget::onFolderActionTriggered);
 
-        mDeleteAction = new QAction(tr("delete object"), this);
+        mDeleteAction = new QAction(tr("delete"), this);
         mDeleteAction->connect(mDeleteAction, &QAction::triggered, this, &ObjectTreeWidget::onDeleteActionTriggered);
     }
 }
@@ -299,7 +299,7 @@ QPoint ObjectTreeWidget::treeTopLeftPosition() const
     return QPoint();
 }
 
-void ObjectTreeWidget::endEdit()
+void ObjectTreeWidget::endRenameEditor()
 {
     class NameChanger : public cmnd::Stable
     {
@@ -318,7 +318,7 @@ void ObjectTreeWidget::endEdit()
 
         virtual QString name() const
         {
-            return CmndName::tr("change a object name");
+            return CmndName::tr("rename a object");
         }
 
         virtual void exec()
@@ -414,13 +414,13 @@ void ObjectTreeWidget::onItemChanged(QTreeWidgetItem* aItem, int aColumn)
     // is this ok?
     (void)aItem;
     (void)aColumn;
-    endEdit();
+    endRenameEditor();
 #endif
 }
 
 void ObjectTreeWidget::onItemClicked(QTreeWidgetItem* aItem, int aColumn)
 {
-    endEdit();
+    endRenameEditor();
 
     obj::Item* item = obj::Item::cast(aItem);
     if (aColumn == kItemColumn && item)
@@ -437,7 +437,7 @@ void ObjectTreeWidget::onItemClicked(QTreeWidgetItem* aItem, int aColumn)
 void ObjectTreeWidget::onItemCollapsed(QTreeWidgetItem* aItem)
 {
     (void)aItem;
-    endEdit();
+    endRenameEditor();
 
     notifyViewUpdated();
 }
@@ -445,7 +445,7 @@ void ObjectTreeWidget::onItemCollapsed(QTreeWidgetItem* aItem)
 void ObjectTreeWidget::onItemExpanded(QTreeWidgetItem* aItem)
 {
     (void)aItem;
-    endEdit();
+    endRenameEditor();
 
     notifyViewUpdated();
 }
@@ -458,7 +458,7 @@ void ObjectTreeWidget::onItemSelectionChanged()
 
 void ObjectTreeWidget::onContextMenuRequested(const QPoint& aPos)
 {
-    endEdit();
+    endRenameEditor();
 
     mActionItem = this->itemAt(aPos);
     if (mActionItem)
@@ -470,11 +470,11 @@ void ObjectTreeWidget::onContextMenuRequested(const QPoint& aPos)
         {
             mSlimAction->setText(
                         objItem->node().isSlimmedDown() ?
-                            tr("fatten object") : tr("slim down object"));
+                            tr("fatten") : tr("slim down"));
             menu.addAction(mSlimAction);
             menu.addSeparator();
         }
-        menu.addAction(mNameAction);
+        menu.addAction(mRenameAction);
         menu.addSeparator();
         menu.addAction(mObjectAction);
         menu.addAction(mFolderAction);
@@ -508,7 +508,7 @@ void ObjectTreeWidget::onSlimActionTriggered(bool)
     }
 }
 
-void ObjectTreeWidget::onNameActionTriggered(bool)
+void ObjectTreeWidget::onRenameActionTriggered(bool)
 {
     if (mActionItem)
     {

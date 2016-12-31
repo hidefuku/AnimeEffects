@@ -22,6 +22,7 @@ public:
     XCMemBlock releaseImage();
     void freeImage();
 
+    void setIdentifier(const QString& aId) { mIdentifier = aId; }
     void setPos(const QPoint& aPos);
     void setUserData(void* aData) { mUserData = aData; }
     void setIsLayer(bool aIsLayer) { mIsLayer = aIsLayer; }

@@ -7,6 +7,7 @@
 #include "gui/res/res_ResourceTree.h"
 #include "gui/res/res_Item.h"
 #include "gui/res/res_ResourceUpdater.h"
+#include "gui/res/res_Notifier.h"
 
 namespace gui {
 namespace res {
@@ -18,6 +19,7 @@ ResourceTree::ResourceTree(ViaPoint& aViaPoint, bool aUseCustomContext, QWidget*
     , mHolder()
     , mActionItem()
     , mChangePathAction()
+    , mRenameAction()
     , mReloadAction()
     , mDeleteAction()
 {
@@ -36,6 +38,11 @@ ResourceTree::ResourceTree(ViaPoint& aViaPoint, bool aUseCustomContext, QWidget*
     this->connect(this, &QTreeWidget::itemSelectionChanged,
                   this, &ResourceTree::onItemSelectionChanged);
 
+    this->connect(this, &QTreeWidget::itemChanged, [=](bool){ this->endRenameEditor(); });
+    this->connect(this, &QTreeWidget::itemClicked, [=](bool){ this->endRenameEditor(); });
+    this->connect(this, &QTreeWidget::itemCollapsed, [=](bool){ this->endRenameEditor(); });
+    this->connect(this, &QTreeWidget::itemExpanded, [=](bool){ this->endRenameEditor(); });
+
     // custom context
     if (aUseCustomContext)
     {
@@ -47,6 +54,10 @@ ResourceTree::ResourceTree(ViaPoint& aViaPoint, bool aUseCustomContext, QWidget*
         mChangePathAction = new QAction(tr("change file path"), this);
         mChangePathAction->connect(mChangePathAction, &QAction::triggered,
                                    this, &ResourceTree::onChangePathActionTriggered);
+
+        mRenameAction = new QAction(tr("rename"), this);
+        mRenameAction->connect(mRenameAction, &QAction::triggered,
+                               this, &ResourceTree::onRenameActionTriggered);
 
         mReloadAction = new QAction(tr("reload images"), this);
         mReloadAction->connect(mReloadAction, &QAction::triggered,
@@ -189,6 +200,8 @@ void ResourceTree::onItemSelectionChanged()
 
 void ResourceTree::onContextMenuRequested(const QPoint& aPos)
 {
+    endRenameEditor();
+
     mActionItem = this->itemAt(aPos);
 
     if (mActionItem)
@@ -199,8 +212,12 @@ void ResourceTree::onContextMenuRequested(const QPoint& aPos)
         if (item && item->isTopNode())
         {
             menu.addAction(mChangePathAction);
-            menu.addSeparator();
         }
+        else
+        {
+            menu.addAction(mRenameAction);
+        }
+        menu.addSeparator();
 
         menu.addAction(mReloadAction);
 
@@ -246,6 +263,55 @@ void ResourceTree::onChangePathActionTriggered(bool)
             });
 
             stack.push(command);
+        }
+    }
+}
+
+void ResourceTree::onRenameActionTriggered(bool)
+{
+    if (mActionItem)
+    {
+        this->openPersistentEditor(mActionItem, kItemColumn);
+        this->editItem(mActionItem, kItemColumn);
+    }
+}
+
+void ResourceTree::endRenameEditor()
+{
+    auto actionItem = mActionItem;
+    mActionItem = nullptr;
+
+    if (!mProject) return;
+
+    if (actionItem)
+    {
+        Item* item = Item::cast(actionItem);
+        if (!item) return;
+
+        this->closePersistentEditor(actionItem, kItemColumn);
+        auto nodePtr = &(item->node());
+        auto curName = nodePtr->data().identifier();
+        auto newName = item->text(kItemColumn);
+
+        if (curName != newName)
+        {
+            auto& stack = mProject->commandStack();
+            cmnd::ScopedMacro macro(stack, CmndName::tr("rename a resource"));
+
+            // notifier
+            auto notifier = new RenameNotifier(mViaPoint, *mProject, item->treePos());
+            notifier->event().setSingleTarget(*nodePtr);
+            macro.grabListener(notifier);
+
+            stack.push(new cmnd::Delegatable([=]()
+            {
+                //item->setText(newName);
+                nodePtr->data().setIdentifier(newName);
+            }, [=]()
+            {
+                //item->setText(curName);
+                nodePtr->data().setIdentifier(curName);
+            }));
         }
     }
 }
