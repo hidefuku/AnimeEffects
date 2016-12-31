@@ -6,22 +6,25 @@
 
 namespace
 {
+static const float kSymbolSize = 100.0f;
 static const float kScaleEdgeRange = 6.0f;
-static const float kScaleEdgeRangeSquared = kScaleEdgeRange * kScaleEdgeRange;
-static const float kTransRange = 3.0f;
+static const float kTransRange = 5.0f;
 static const float kRotCircleRange = 9.0f;
-static const float kRotCircleDrawRange = 4.5f;
-
-static const float kScaleCornerRange = kScaleEdgeRange * 1.41421356f;
-static const float kCubeCornerSpace = 40.0f * 1.41421356f;
-
-static const float kCubeSpace = 40.0f;
+static const float kRotCircleDrawRange = 5.0f;
 }
 
 using namespace core;
 
 namespace ctrl {
 namespace srt {
+
+//-----------------------------------------------------------------------------------
+float getSymbolScale(const core::CameraInfo& aCamera)
+{
+    auto scrSize = aCamera.screenSize();
+    auto symScale = xc_clamp((scrSize.width() + scrSize.height()) / 2500.0f, 0.01f, 100.0f);
+    return symScale / aCamera.scale();
+}
 
 //-----------------------------------------------------------------------------------
 Symbol::Symbol()
@@ -34,7 +37,8 @@ void Symbol::build(const QMatrix4x4& aLocalMtx,
 {
     using util::MathUtil;
 
-    const QSizeF size(100.0f, 100.0f);
+    const float scale = getSymbolScale(aCamera);
+    const QSizeF size(kSymbolSize * scale, kSymbolSize * scale);
     const QMatrix4x4 matrix = aWorldMtx * aLocalMtx;
 
     for (int i = 0; i < 4; ++i)
@@ -129,7 +133,7 @@ Symbol::FocusData Symbol::findFocus(const QVector2D& aWorldPos)
             }
 
             if (CollDetect::getMinDistanceSquared(edge, aWorldPos) <
-                    kScaleEdgeRangeSquared)
+                    kScaleEdgeRange * kScaleEdgeRange)
             {
                 if (onCorner)
                 {
@@ -161,7 +165,6 @@ void Symbol::draw(const RenderInfo& aInfo, QPainter& aPainter, FocusType aFocus)
     const QColor idleColor(100, 100, 255, 255);
     const QColor focusColor(255, 255, 255, 255);
 
-
     const QBrush centerBrush(aFocus == FocusType_Trans ? focusColor : idleColor);
     const QBrush edgeXBrush((aFocus == FocusType_Scale || aFocus == FocusType_ScaleX) ? focusColor : idleColor);
     const QBrush edgeYBrush((aFocus == FocusType_Scale || aFocus == FocusType_ScaleY) ? focusColor : idleColor);
@@ -183,9 +186,11 @@ void Symbol::draw(const RenderInfo& aInfo, QPainter& aPainter, FocusType aFocus)
     aPainter.drawLine(p[2], p[3]);
 
     // rotate handle
-    aPainter.setPen(QPen(rotateBrush, 1.5f, Qt::SolidLine));
-    aPainter.setBrush(rotateBrush);
-    aPainter.drawEllipse(p[2], kRotCircleDrawRange, kRotCircleDrawRange);
+    {
+        aPainter.setPen(QPen(rotateBrush, 1.5f, Qt::SolidLine));
+        aPainter.setBrush(rotateBrush);
+        aPainter.drawEllipse(p[2], kRotCircleDrawRange, kRotCircleDrawRange);
+    }
 }
 
 } // namespace srt
