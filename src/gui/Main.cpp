@@ -1,9 +1,10 @@
 #include "gui/MSVCMemoryLeakDebugger.h" // first of all
 #include <QApplication>
-#include <QScopedPointer>
 #include <QDir>
 #include <QFile>
 #include <QMessageBox>
+#include <QStandardPaths>
+#include <QScopedPointer>
 #include "XC.h"
 #include "gl/Global.h"
 #include "ctrl/System.h"
@@ -108,7 +109,8 @@ int entryPoint(int argc, char *argv[])
     const QString exeFilePath(uniArgs.at(0));
     const QString appDir(QFileInfo(exeFilePath).dir().path());
     const QString resourceDir(appDir + "/data");
-    const QString cacheDir(appDir + "/data/cache");
+    const QString stdCacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    const QString cacheDir = !stdCacheDir.isEmpty() ? stdCacheDir : (appDir + "/cache");
 
     XC_DEBUG_REPORT() << "exe path =" << exeFilePath;
 
