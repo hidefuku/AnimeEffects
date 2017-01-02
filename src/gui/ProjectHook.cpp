@@ -4,7 +4,7 @@ namespace gui
 {
 
 ProjectHook::ProjectHook()
-    : mObjectTree()
+    : mObjectTrees()
     , mResourceTrees()
     , mRenderInfo()
 {
@@ -12,17 +12,21 @@ ProjectHook::ProjectHook()
 
 ProjectHook::~ProjectHook()
 {
+    deleteObjectTrees();
     deleteResourceTrees();
 }
 
-void ProjectHook::grabTreeRoot(QTreeWidgetItem* aRoot)
+void ProjectHook::grabObjectTrees(QVector<QTreeWidgetItem*>* aTrees)
 {
-    mObjectTree.reset(aRoot);
+    deleteObjectTrees();
+    mObjectTrees = aTrees;
 }
 
-QTreeWidgetItem* ProjectHook::releaseTreeRoot()
+QVector<QTreeWidgetItem*>* ProjectHook::releaseObjectTrees()
 {
-    return mObjectTree.take();
+    auto trees = mObjectTrees;
+    mObjectTrees = nullptr;
+    return trees;
 }
 
 void ProjectHook::grabResourceTrees(QVector<QTreeWidgetItem*>* aTrees)
@@ -36,6 +40,19 @@ QVector<QTreeWidgetItem*>* ProjectHook::releaseResourceTrees()
     auto trees = mResourceTrees;
     mResourceTrees = nullptr;
     return trees;
+}
+
+void ProjectHook::deleteObjectTrees()
+{
+    if (mObjectTrees)
+    {
+        for (auto tree : *mObjectTrees)
+        {
+            delete tree;
+        }
+        delete mObjectTrees;
+        mObjectTrees = nullptr;
+    }
 }
 
 void ProjectHook::deleteResourceTrees()

@@ -108,33 +108,56 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
 
 void ObjectTreeWidget::setProject(core::Project* aProject)
 {
+    // finalize
     if (mProject)
     {
         mProject->onTimeLineModified.disconnect(mTimeLineSlot);
 
-        if (this->topLevelItemCount() > 0)
+        auto treeCount = this->topLevelItemCount();
+        if (treeCount > 0)
         {
-            XC_ASSERT(this->topLevelItemCount() == 1);
+            QScopedPointer<QVector<QTreeWidgetItem*>> trees(
+                        new QVector<QTreeWidgetItem*>());
+            for (int i = 0; i < treeCount; ++i)
+            {
+                trees->push_back(this->takeTopLevelItem(0));
+            }
+            // save
             auto hook = (ProjectHook*)mProject->hook();
-            hook->grabTreeRoot(this->takeTopLevelItem(0));
+            hook->grabObjectTrees(trees.take());
         }
-        mProject.reset();
     }
-
     XC_ASSERT(this->topLevelItemCount() == 0);
     this->clear(); // fail safe code
 
+    // update reference
     if (aProject)
     {
         mProject = aProject->pointee();
+    }
+    else
+    {
+        mProject.reset();
+    }
+
+    // setup
+    if (mProject)
+    {
 
         mTimeLineSlot = mProject->onTimeLineModified.connect(
                     this, &ObjectTreeWidget::onTimeLineModified);
 
         auto hook = (ProjectHook*)mProject->hook();
-        if (hook && hook->hasTreeRoot())
+        // load trees
+        if (hook && hook->hasObjectTrees())
         {
-            this->addTopLevelItem(hook->releaseTreeRoot());
+            QScopedPointer<QVector<QTreeWidgetItem*>> trees(
+                        hook->releaseObjectTrees());
+            for (auto tree : *trees)
+            {
+                this->addTopLevelItem(tree);
+            }
+            trees.reset();
         }
         else
         {

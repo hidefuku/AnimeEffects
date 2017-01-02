@@ -14,9 +14,9 @@ public:
     ProjectHook();
     virtual ~ProjectHook();
 
-    void grabTreeRoot(QTreeWidgetItem* aRoot);
-    QTreeWidgetItem* releaseTreeRoot();
-    bool hasTreeRoot() const { return mObjectTree; }
+    void grabObjectTrees(QVector<QTreeWidgetItem*>* aTrees);
+    QVector<QTreeWidgetItem*>* releaseObjectTrees();
+    bool hasObjectTrees() const { return mObjectTrees; }
 
     void grabResourceTrees(QVector<QTreeWidgetItem*>* aTrees);
     QVector<QTreeWidgetItem*>* releaseResourceTrees();
@@ -26,9 +26,10 @@ public:
     const core::RenderInfo& renderInfo() const { return mRenderInfo; }
 
 private:
+    void deleteObjectTrees();
     void deleteResourceTrees();
 
-    QScopedPointer<QTreeWidgetItem> mObjectTree;
+    QVector<QTreeWidgetItem*>* mObjectTrees;
     QVector<QTreeWidgetItem*>* mResourceTrees;
     core::RenderInfo mRenderInfo;
 };

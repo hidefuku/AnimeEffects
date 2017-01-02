@@ -106,9 +106,9 @@ void ResourceTreeWidget::setProject(core::Project* aProject)
     if (mProject)
     {
         auto hook = (ProjectHook*)mProject->hook();
+        // load trees
         if (hook && hook->hasResourceTrees())
         {
-            // load from vector
             QScopedPointer<QVector<QTreeWidgetItem*>> trees(
                         hook->releaseResourceTrees());
             for (auto tree : *trees)
