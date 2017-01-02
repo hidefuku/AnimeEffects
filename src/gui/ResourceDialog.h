@@ -7,7 +7,7 @@
 #include "core/Project.h"
 #include "gui/EasyDialog.h"
 #include "gui/ResourceDialog.h"
-#include "gui/res/res_ResourceTree.h"
+#include "gui/ResourceTreeWidget.h"
 
 namespace gui
 {
@@ -35,7 +35,7 @@ private:
 
     ViaPoint& mViaPoint;
     util::LinkPointer<core::Project> mProject;
-    res::ResourceTree* mTree;
+    ResourceTreeWidget* mTree;
     NodeList mNodeList;
 };
 

@@ -30,8 +30,9 @@ public:
     void setMainMenuBar(MainMenuBar* aMainMenuBar);
     MainMenuBar* mainMenuBar() const { return mMainMenuBar; }
 
+    void setResourceDialog(ResourceDialog* aResDialog);
     ResourceDialog* resourceDialog() const { return mResDialog; }
-    void createResourceDialog();
+
     img::ResourceNode* requireOneResource();
 
     void setLogView(QPlainTextEdit* aLogView);

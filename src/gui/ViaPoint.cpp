@@ -20,12 +20,6 @@ ViaPoint::ViaPoint(QWidget* aParent)
 void ViaPoint::setProject(core::Project* aProject)
 {
     mProject = aProject;
-
-    if (mResDialog)
-    {
-        mResDialog->setProject(aProject);
-        mResDialog->updateResources();
-    }
 }
 
 void ViaPoint::setMainMenuBar(MainMenuBar* aMainMenuBar)
@@ -33,26 +27,15 @@ void ViaPoint::setMainMenuBar(MainMenuBar* aMainMenuBar)
     mMainMenuBar = aMainMenuBar;
 }
 
-void ViaPoint::createResourceDialog()
+void ViaPoint::setResourceDialog(ResourceDialog* aResDialog)
 {
-    if (!mResDialog)
-    {
-        mResDialog = new ResourceDialog(*this, false, mParent);
-
-        if (mProject)
-        {
-            mResDialog->setProject(mProject);
-            mResDialog->updateResources();
-        }
-    }
-    mResDialog->show();
+    mResDialog = aResDialog;
 }
 
 img::ResourceNode* ViaPoint::requireOneResource()
 {
     QScopedPointer<ResourceDialog> dialog(new ResourceDialog(*this, true, mParent));
     dialog->setProject(mProject);
-    dialog->updateResources();
     dialog->exec();
 
     if (dialog->hasValidNode())

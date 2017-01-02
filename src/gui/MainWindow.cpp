@@ -39,7 +39,7 @@ namespace gui
 MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const QString& aPreferFont)
     : QMainWindow(nullptr)
     , mSystem(aSystem)
-    , mResources(aResources)
+    , mGUIResources(aResources)
     , mViaPoint(this)
     , mKeyCommandMap()
     , mKeyCommandInvoker()
@@ -51,6 +51,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const QS
     , mTarget()
     , mProperty()
     , mTool()
+    , mResourceDialog()
     , mDriverHolder()
     , mCurrent()
 {
@@ -120,7 +121,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const QS
 
     // create main display
     {
-        mMainDisplayStyle.reset(new MainDisplayStyle(*this, mResources));
+        mMainDisplayStyle.reset(new MainDisplayStyle(*this, mGUIResources));
         mMainDisplay = new MainDisplayWidget(mViaPoint, this);
         this->setCentralWidget(mMainDisplay);
 
@@ -137,7 +138,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const QS
         dockWidget->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
         this->addDockWidget(Qt::BottomDockWidgetArea, dockWidget);
 
-        mTarget = new TargetWidget(mViaPoint, mResources, dockWidget, QSize(256, 256));
+        mTarget = new TargetWidget(mViaPoint, mGUIResources, dockWidget, QSize(256, 256));
         dockWidget->setWidget(mTarget);
     }
 
@@ -195,8 +196,14 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const QS
         {
             dockWidget->setStyleSheet(QTextStream(&stylesheet).readAll());
         }
-        mTool = new ToolWidget(mViaPoint, mResources, QSize(192, 136), dockWidget);
+        mTool = new ToolWidget(mViaPoint, mGUIResources, QSize(192, 136), dockWidget);
         dockWidget->setWidget(mTool);
+    }
+
+    // create resource dialog
+    {
+        mResourceDialog = new ResourceDialog(mViaPoint, false, this);
+        mViaPoint.setResourceDialog(mResourceDialog);
     }
 
     // create driver holder
@@ -365,6 +372,7 @@ void MainWindow::resetProjectRefs(core::Project* aProject)
     mMainDisplay->setProject(aProject);
     mTarget->setProject(aProject);
     mProperty->setProject(aProject);
+    mResourceDialog->setProject(aProject);
     mViaPoint.setProject(aProject);
 
     mMainDisplay->setDriver(mDriverHolder->driver());

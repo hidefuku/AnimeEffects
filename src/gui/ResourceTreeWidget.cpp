@@ -4,15 +4,15 @@
 #include "cmnd/BasicCommands.h"
 #include "cmnd/ScopedMacro.h"
 #include "ctrl/CmndName.h"
-#include "gui/res/res_ResourceTree.h"
+#include "gui/ProjectHook.h"
+#include "gui/ResourceTreeWidget.h"
 #include "gui/res/res_Item.h"
 #include "gui/res/res_ResourceUpdater.h"
 #include "gui/res/res_Notifier.h"
 
 namespace gui {
-namespace res {
 
-ResourceTree::ResourceTree(ViaPoint& aViaPoint, bool aUseCustomContext, QWidget* aParent)
+ResourceTreeWidget::ResourceTreeWidget(ViaPoint& aViaPoint, bool aUseCustomContext, QWidget* aParent)
     : QTreeWidget(aParent)
     , mViaPoint(aViaPoint)
     , mProject()
@@ -36,7 +36,7 @@ ResourceTree::ResourceTree(ViaPoint& aViaPoint, bool aUseCustomContext, QWidget*
     this->setFocusPolicy(Qt::NoFocus);
 
     this->connect(this, &QTreeWidget::itemSelectionChanged,
-                  this, &ResourceTree::onItemSelectionChanged);
+                  this, &ResourceTreeWidget::onItemSelectionChanged);
 
     this->connect(this, &QTreeWidget::itemChanged, [=](bool){ this->endRenameEditor(); });
     this->connect(this, &QTreeWidget::itemClicked, [=](bool){ this->endRenameEditor(); });
@@ -49,51 +49,102 @@ ResourceTree::ResourceTree(ViaPoint& aViaPoint, bool aUseCustomContext, QWidget*
         this->setContextMenuPolicy(Qt::CustomContextMenu);
 
         this->connect(this, &QWidget::customContextMenuRequested,
-                      this, &ResourceTree::onContextMenuRequested);
+                      this, &ResourceTreeWidget::onContextMenuRequested);
 
         mChangePathAction = new QAction(tr("change file path"), this);
         mChangePathAction->connect(mChangePathAction, &QAction::triggered,
-                                   this, &ResourceTree::onChangePathActionTriggered);
+                                   this, &ResourceTreeWidget::onChangePathActionTriggered);
 
         mRenameAction = new QAction(tr("rename"), this);
         mRenameAction->connect(mRenameAction, &QAction::triggered,
-                               this, &ResourceTree::onRenameActionTriggered);
+                               this, &ResourceTreeWidget::onRenameActionTriggered);
 
         mReloadAction = new QAction(tr("reload images"), this);
         mReloadAction->connect(mReloadAction, &QAction::triggered,
-                               this, &ResourceTree::onReloadActionTriggered);
+                               this, &ResourceTreeWidget::onReloadActionTriggered);
 
         mDeleteAction = new QAction(tr("delete"), this);
         mDeleteAction->connect(mDeleteAction, &QAction::triggered,
-                               this, &ResourceTree::onDeleteActionTriggered);
+                               this, &ResourceTreeWidget::onDeleteActionTriggered);
     }
 }
 
-void ResourceTree::setProject(core::Project* aProject)
+void ResourceTreeWidget::setProject(core::Project* aProject)
 {
-    mProject = aProject;
+    // finalize tree
+    if (mProject)
+    {
+        auto treeCount = this->topLevelItemCount();
+        if (treeCount > 0)
+        {
+            // create vector
+            QScopedPointer<QVector<QTreeWidgetItem*>> trees(
+                        new QVector<QTreeWidgetItem*>());
+            for (int i = 0; i < treeCount; ++i)
+            {
+                trees->push_back(this->takeTopLevelItem(0));
+            }
+            // save
+            auto hook = (ProjectHook*)mProject->hook();
+            hook->grabResourceTrees(trees.take());
+        }
+    }
+    XC_ASSERT(this->topLevelItemCount() == 0);
+    this->clear(); // fail safe code
+
+    // update reference
+    if (aProject)
+    {
+        mProject = aProject->pointee();
+    }
+    else
+    {
+        mProject.reset();
+    }
+
+    // setup tree
+    if (mProject)
+    {
+        auto hook = (ProjectHook*)mProject->hook();
+        if (hook && hook->hasResourceTrees())
+        {
+            // load from vector
+            QScopedPointer<QVector<QTreeWidgetItem*>> trees(
+                        hook->releaseResourceTrees());
+            for (auto tree : *trees)
+            {
+                this->addTopLevelItem(tree);
+            }
+            trees.reset();
+        }
+        else
+        {
+            // create trees
+            resetTreeView(mProject->resourceHolder());
+        }
+    }
 }
 
-void ResourceTree::resetTreeView()
+void ResourceTreeWidget::resetTreeView()
 {
     this->clear();
     mHolder = nullptr;
 }
 
-void ResourceTree::resetTreeView(core::ResourceHolder& aHolder)
+void ResourceTreeWidget::resetTreeView(core::ResourceHolder& aHolder)
 {
     this->clear();
     mHolder = &aHolder;
 
     for (auto data : aHolder.imageTrees())
     {
-        auto item = new Item(*this, *data.topNode, data.filePath);
+        auto item = new res::Item(*this, *data.topNode, data.filePath);
         this->addTopLevelItem(item);
         addTreeItemRecursive(item, data.topNode);
     }
 }
 
-QTreeWidgetItem* ResourceTree::findItem(const util::TreePos& aPos)
+QTreeWidgetItem* ResourceTreeWidget::findItem(const util::TreePos& aPos)
 {
     if (!aPos.isValid() || aPos.depth() < 1) return nullptr;
     QTreeWidgetItem* item = this->topLevelItem(aPos.row(0));
@@ -106,7 +157,7 @@ QTreeWidgetItem* ResourceTree::findItem(const util::TreePos& aPos)
     return item;
 }
 
-void ResourceTree::resetTreeView(
+void ResourceTreeWidget::resetTreeView(
         core::ResourceHolder& aHolder, const util::TreePos& aRoot)
 {
     XC_ASSERT(aRoot.isValid());
@@ -122,7 +173,7 @@ void ResourceTree::resetTreeView(
     img::ResourceNode* rootNode = nullptr;
     {
         this->removeItemWidget(rootItem, kItemColumn);
-        Item* resItem = Item::cast(rootItem);
+        res::Item* resItem = res::Item::cast(rootItem);
         XC_PTR_ASSERT(resItem);
         rootNode = &(resItem->node());
         delete rootItem;
@@ -132,27 +183,27 @@ void ResourceTree::resetTreeView(
 
     if (parent)
     {
-        auto item = new Item(*this, *rootNode, rootNode->data().identifier());
+        auto item = new res::Item(*this, *rootNode, rootNode->data().identifier());
         parent->insertChild(index, item);
         addTreeItemRecursive(item, rootNode);
     }
     else
     {
         const QString filePath = aHolder.findRelativeFilePath(*rootNode);
-        auto item = new Item(*this, *rootNode, filePath);
+        auto item = new res::Item(*this, *rootNode, filePath);
         this->insertTopLevelItem(index, item);
         addTreeItemRecursive(item, rootNode);
     }
 }
 
-void ResourceTree::addTreeItemRecursive(QTreeWidgetItem* aItem, img::ResourceNode* aNode)
+void ResourceTreeWidget::addTreeItemRecursive(QTreeWidgetItem* aItem, img::ResourceNode* aNode)
 {
     XC_PTR_ASSERT(aNode);
     XC_PTR_ASSERT(aItem);
 
     for (auto childNode : aNode->children())
     {
-        auto childItem = new Item(*this, *childNode, childNode->data().identifier());
+        auto childItem = new res::Item(*this, *childNode, childNode->data().identifier());
         aItem->addChild(childItem);
 
         // recursive call
@@ -160,7 +211,7 @@ void ResourceTree::addTreeItemRecursive(QTreeWidgetItem* aItem, img::ResourceNod
     }
 }
 
-void ResourceTree::updateTreeRootName(core::ResourceHolder& aHolder)
+void ResourceTreeWidget::updateTreeRootName(core::ResourceHolder& aHolder)
 {
     if (mHolder != &aHolder) return;
 
@@ -168,7 +219,7 @@ void ResourceTree::updateTreeRootName(core::ResourceHolder& aHolder)
     {
         QTreeWidgetItem* item = this->topLevelItem(i);
         XC_PTR_ASSERT(item);
-        Item* resItem = Item::cast(item);
+        res::Item* resItem = res::Item::cast(item);
         XC_PTR_ASSERT(resItem);
 
         auto nodename = mHolder->findRelativeFilePath(resItem->node());
@@ -176,14 +227,14 @@ void ResourceTree::updateTreeRootName(core::ResourceHolder& aHolder)
     }
 }
 
-QList<img::ResourceNode*> ResourceTree::findSelectingNodes() const
+QList<img::ResourceNode*> ResourceTreeWidget::findSelectingNodes() const
 {
     QList<QTreeWidgetItem*> items = this->selectedItems();
     QList<img::ResourceNode*> nodes;
 
     for (auto item : items)
     {
-        Item* resItem = res::Item::cast(item);
+        res::Item* resItem = res::Item::cast(item);
         if (resItem)
         {
             nodes.push_back(&resItem->node());
@@ -192,13 +243,13 @@ QList<img::ResourceNode*> ResourceTree::findSelectingNodes() const
     return nodes;
 }
 
-void ResourceTree::onItemSelectionChanged()
+void ResourceTreeWidget::onItemSelectionChanged()
 {
     auto nodes = findSelectingNodes();
     onNodeSelectionChanged(nodes);
 }
 
-void ResourceTree::onContextMenuRequested(const QPoint& aPos)
+void ResourceTreeWidget::onContextMenuRequested(const QPoint& aPos)
 {
     endRenameEditor();
 
@@ -208,7 +259,7 @@ void ResourceTree::onContextMenuRequested(const QPoint& aPos)
     {
         QMenu menu(this);
 
-        Item* item = Item::cast(mActionItem);
+        res::Item* item = res::Item::cast(mActionItem);
         if (item && item->isTopNode())
         {
             menu.addAction(mChangePathAction);
@@ -231,9 +282,9 @@ void ResourceTree::onContextMenuRequested(const QPoint& aPos)
     }
 }
 
-void ResourceTree::onChangePathActionTriggered(bool)
+void ResourceTreeWidget::onChangePathActionTriggered(bool)
 {
-    Item* item = Item::cast(mActionItem);
+    res::Item* item = res::Item::cast(mActionItem);
     if (item && item->isTopNode())
     {
         const QString fileName = QFileDialog::getOpenFileName(
@@ -246,7 +297,7 @@ void ResourceTree::onChangePathActionTriggered(bool)
             cmnd::ScopedMacro macro(stack, CmndName::tr("update a resource file path"));
 
             // notifier
-            auto notifier = new ChangeFilePathNotifier(mViaPoint, item->node());
+            auto notifier = new res::ChangeFilePathNotifier(mViaPoint, item->node());
             macro.grabListener(notifier);
 
             img::ResourceNode* resNode = &(item->node());
@@ -267,7 +318,7 @@ void ResourceTree::onChangePathActionTriggered(bool)
     }
 }
 
-void ResourceTree::onRenameActionTriggered(bool)
+void ResourceTreeWidget::onRenameActionTriggered(bool)
 {
     if (mActionItem)
     {
@@ -276,7 +327,7 @@ void ResourceTree::onRenameActionTriggered(bool)
     }
 }
 
-void ResourceTree::endRenameEditor()
+void ResourceTreeWidget::endRenameEditor()
 {
     auto actionItem = mActionItem;
     mActionItem = nullptr;
@@ -285,7 +336,7 @@ void ResourceTree::endRenameEditor()
 
     if (actionItem)
     {
-        Item* item = Item::cast(actionItem);
+        res::Item* item = res::Item::cast(actionItem);
         if (!item) return;
 
         this->closePersistentEditor(actionItem, kItemColumn);
@@ -299,7 +350,7 @@ void ResourceTree::endRenameEditor()
             cmnd::ScopedMacro macro(stack, CmndName::tr("rename a resource"));
 
             // notifier
-            auto notifier = new RenameNotifier(mViaPoint, *mProject, item->treePos());
+            auto notifier = new res::RenameNotifier(mViaPoint, *mProject, item->treePos());
             notifier->event().setSingleTarget(*nodePtr);
             macro.grabListener(notifier);
 
@@ -316,28 +367,27 @@ void ResourceTree::endRenameEditor()
     }
 }
 
-void ResourceTree::onReloadActionTriggered(bool)
+void ResourceTreeWidget::onReloadActionTriggered(bool)
 {
     if (!mProject) return;
 
-    Item* item = Item::cast(mActionItem);
+    res::Item* item = res::Item::cast(mActionItem);
     if (!item) return;
 
-    ResourceUpdater updater(mViaPoint, *mProject);
+    res::ResourceUpdater updater(mViaPoint, *mProject);
     updater.reload(*item);
 }
 
-void ResourceTree::onDeleteActionTriggered(bool)
+void ResourceTreeWidget::onDeleteActionTriggered(bool)
 {
     if (!mProject) return;
 
-    Item* item = Item::cast(mActionItem);
+    res::Item* item = res::Item::cast(mActionItem);
     if (!item) return;
 
-    ResourceUpdater updater(mViaPoint, *mProject);
+    res::ResourceUpdater updater(mViaPoint, *mProject);
     updater.remove(*item);
 }
 
-} // namespace res
 } // namespace gui
 

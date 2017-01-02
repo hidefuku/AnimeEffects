@@ -42,7 +42,7 @@ ResourceDialog::ResourceDialog(ViaPoint& aViaPoint, bool aModal, QWidget* aParen
     }
 
     // resource tree
-    mTree = new res::ResourceTree(aViaPoint, !aModal, this);
+    mTree = new ResourceTreeWidget(aViaPoint, !aModal, this);
     this->setMainWidget(mTree, false);
 
     // modal only

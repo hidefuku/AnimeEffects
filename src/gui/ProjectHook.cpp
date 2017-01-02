@@ -4,19 +4,51 @@ namespace gui
 {
 
 ProjectHook::ProjectHook()
-    : mTreeRoot()
+    : mObjectTree()
+    , mResourceTrees()
     , mRenderInfo()
 {
 }
 
+ProjectHook::~ProjectHook()
+{
+    deleteResourceTrees();
+}
+
 void ProjectHook::grabTreeRoot(QTreeWidgetItem* aRoot)
 {
-    mTreeRoot.reset(aRoot);
+    mObjectTree.reset(aRoot);
 }
 
 QTreeWidgetItem* ProjectHook::releaseTreeRoot()
 {
-    return mTreeRoot.take();
+    return mObjectTree.take();
+}
+
+void ProjectHook::grabResourceTrees(QVector<QTreeWidgetItem*>* aTrees)
+{
+    deleteResourceTrees();
+    mResourceTrees = aTrees;
+}
+
+QVector<QTreeWidgetItem*>* ProjectHook::releaseResourceTrees()
+{
+    auto trees = mResourceTrees;
+    mResourceTrees = nullptr;
+    return trees;
+}
+
+void ProjectHook::deleteResourceTrees()
+{
+    if (mResourceTrees)
+    {
+        for (auto tree : *mResourceTrees)
+        {
+            delete tree;
+        }
+        delete mResourceTrees;
+        mResourceTrees = nullptr;
+    }
 }
 
 } // namespace gui

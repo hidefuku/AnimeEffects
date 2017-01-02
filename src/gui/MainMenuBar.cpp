@@ -113,16 +113,9 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
 
         connect(resource, &QAction::triggered, [&](bool aChecked)
         {
-            if (aChecked)
+            if (aViaPoint.resourceDialog())
             {
-                aViaPoint.createResourceDialog();
-            }
-            else
-            {
-                if (aViaPoint.resourceDialog())
-                {
-                    aViaPoint.resourceDialog()->hide();
-                }
+                aViaPoint.resourceDialog()->setVisible(aChecked);
             }
         });
 

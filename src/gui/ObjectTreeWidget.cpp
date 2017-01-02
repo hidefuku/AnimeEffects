@@ -567,7 +567,6 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
         QScopedPointer<ResourceDialog> dialog(
                     new ResourceDialog(mViaPoint, true, this));
         dialog->setProject(mProject.get());
-        dialog->updateResources();
         dialog->exec();
 
         // create command

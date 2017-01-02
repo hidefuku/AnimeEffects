@@ -19,6 +19,7 @@
 #include "gui/ProjectTabBar.h"
 #include "gui/KeyCommandMap.h"
 #include "gui/KeyCommandInvoker.h"
+#include "gui/ResourceDialog.h"
 
 namespace gui
 {
@@ -60,7 +61,7 @@ private:
     void onProjectTabChanged(core::Project&);
 
     ctrl::System& mSystem;
-    GUIResources& mResources;
+    GUIResources& mGUIResources;
     ViaPoint mViaPoint;
     QScopedPointer<KeyCommandMap> mKeyCommandMap;
     QScopedPointer<KeyCommandInvoker> mKeyCommandInvoker;
@@ -72,6 +73,7 @@ private:
     TargetWidget* mTarget;
     PropertyWidget* mProperty;
     ToolWidget* mTool;
+    ResourceDialog* mResourceDialog;
     QScopedPointer<DriverHolder> mDriverHolder;
     core::Project* mCurrent;
 };

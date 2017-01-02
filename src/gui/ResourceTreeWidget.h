@@ -1,9 +1,10 @@
-#ifndef GUI_RES_RESOURCETREE_H
-#define GUI_RES_RESOURCETREE_H
+#ifndef GUI_RESOURCETREEWIDGET_H
+#define GUI_RESOURCETREEWIDGET_H
 
 #include <QTreeWidget>
 #include <QAction>
 #include "util/Signaler.h"
+#include "util/LinkPointer.h"
 #include "cmnd/Stack.h"
 #include "img/PSDFormat.h"
 #include "core/ResourceHolder.h"
@@ -12,9 +13,8 @@
 #include "gui/res/res_Notifier.h"
 
 namespace gui {
-namespace res {
 
-class ResourceTree : public QTreeWidget
+class ResourceTreeWidget : public QTreeWidget
 {
     Q_OBJECT
 public:
@@ -22,7 +22,7 @@ public:
     enum { kColumnCount = 1 };
     typedef QList<img::ResourceNode*> NodeList;
 
-    ResourceTree(ViaPoint& aViaPoint, bool aUseCustomContext, QWidget* aParent);
+    ResourceTreeWidget(ViaPoint& aViaPoint, bool aUseCustomContext, QWidget* aParent);
     void setProject(core::Project* aProject);
 
     void resetTreeView();
@@ -45,7 +45,7 @@ private:
     void onDeleteActionTriggered(bool aIsTriggered);
 
     ViaPoint& mViaPoint;
-    core::Project* mProject;
+    util::LinkPointer<core::Project> mProject;
     core::ResourceHolder* mHolder;
     QTreeWidgetItem* mActionItem;
     QAction* mChangePathAction;
@@ -54,7 +54,6 @@ private:
     QAction* mDeleteAction;
 };
 
-} // namespace res
 } // namespace gui
 
-#endif // GUI_RES_RESOURCETREE_H
+#endif // GUI_RESOURCETREEWIDGET_H

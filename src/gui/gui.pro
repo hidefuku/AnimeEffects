@@ -83,7 +83,6 @@ SOURCES += \
     tool/tool_ItemTable.cpp \
     tool/tool_Items.cpp \
     ResourceDialog.cpp \
-    res/res_ResourceTree.cpp \
     res/res_Item.cpp \
     ExportDialog.cpp \
     prop/prop_AttrGroup.cpp \
@@ -114,7 +113,8 @@ SOURCES += \
     MSVCMemoryLeakDebugger.cpp \
     MSVCBackTracer.cpp \
     LocaleDecider.cpp \
-    GeneralSettingDialog.cpp
+    GeneralSettingDialog.cpp \
+    ResourceTreeWidget.cpp
 
 HEADERS += \
     MainDisplayMode.h \
@@ -145,7 +145,6 @@ HEADERS += \
     tool/tool_ItemTable.h \
     tool/tool_Items.h \
     ResourceDialog.h \
-    res/res_ResourceTree.h \
     res/res_Item.h \
     ExportDialog.h \
     prop/prop_AttrGroup.h \
@@ -179,7 +178,8 @@ HEADERS += \
     MSVCMemoryLeakDebugger.h \
     MSVCBackTracer.h \
     LocaleDecider.h \
-    GeneralSettingDialog.h
+    GeneralSettingDialog.h \
+    ResourceTreeWidget.h
 
 FORMS +=
 
