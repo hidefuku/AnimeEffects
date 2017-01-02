@@ -39,12 +39,6 @@ ModificationNotifier::ModificationNotifier(
 void ModificationNotifier::notify(bool aIsUndo)
 {
     mProject.onResourceModified(mEvent, aIsUndo);
-
-    if (mViaPoint.resourceDialog())
-    {
-        mViaPoint.resourceDialog()->updateResources(mRootPos);
-    }
-
     mViaPoint.onVisualUpdated();
 }
 
@@ -61,11 +55,6 @@ AddNewOneNotifier::AddNewOneNotifier(
 void AddNewOneNotifier::notify(bool aIsUndo)
 {
     mProject.onResourceModified(mEvent, aIsUndo);
-
-    if (mViaPoint.resourceDialog())
-    {
-        mViaPoint.resourceDialog()->updateResources();
-    }
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -81,11 +70,6 @@ DeleteNotifier::DeleteNotifier(
 void DeleteNotifier::notify(bool aIsUndo)
 {
     mProject.onResourceModified(mEvent, aIsUndo);
-
-    if (mViaPoint.resourceDialog())
-    {
-        mViaPoint.resourceDialog()->updateResources();
-    }
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -104,11 +88,6 @@ RenameNotifier::RenameNotifier(
 void RenameNotifier::notify(bool aIsUndo)
 {
     mProject.onResourceModified(mEvent, aIsUndo);
-
-    if (mViaPoint.resourceDialog())
-    {
-        mViaPoint.resourceDialog()->updateResources(mRootPos);
-    }
 }
 
 } // namespace res

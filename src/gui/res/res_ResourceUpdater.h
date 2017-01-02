@@ -15,10 +15,14 @@ class ResourceUpdater : public QObject
 {
     Q_OBJECT
 public:
+    static res::Item* createGUITree(const QTreeWidget& aTree,
+                                    img::ResourceNode& aNode,
+                                    const QString& aIdentifier);
+
     ResourceUpdater(ViaPoint& aViaPoint, core::Project& aProject);
-    void load(const QString& aFilePath);
+    void load(QTreeWidget& aTree, const QString& aFilePath);
     void reload(Item& aItem);
-    void remove(Item& aItem);
+    void remove(QTreeWidget& aTree, Item& aTopItem);
 
 private:
     img::ResourceNode* createResourceTree(const QString& aFilePath, bool aLoadImage);
@@ -28,11 +32,13 @@ private:
     void createImageReloaderRecursive(
             cmnd::Stack& aStack,
             ModificationNotifier& aNotifier,
+            QTreeWidgetItem& aCurItem,
             img::ResourceNode& aCurNode,
             img::ResourceNode& aNewNode);
 
     void createAbandonedImageRemoverRecursive(
-            cmnd::Stack& aStack, img::ResourceNode& aNode);
+            cmnd::Stack& aStack, QTreeWidgetItem& aItem,
+            img::ResourceNode& aNode);
 
     bool tryReloadCorrespondingImages(
             QTreeWidgetItem& aTarget,

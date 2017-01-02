@@ -71,7 +71,6 @@ ResourceDialog::ResourceDialog(ViaPoint& aViaPoint, bool aModal, QWidget* aParen
 
 void ResourceDialog::setProject(core::Project* aProject)
 {
-    mTree->resetTreeView();
     if (aProject)
     {
         mProject = aProject->pointee();
@@ -81,22 +80,6 @@ void ResourceDialog::setProject(core::Project* aProject)
         mProject.reset();
     }
     mTree->setProject(aProject);
-}
-
-void ResourceDialog::updateResources()
-{
-    if (mProject)
-    {
-        mTree->resetTreeView(mProject->resourceHolder());
-    }
-}
-
-void ResourceDialog::updateResources(const util::TreePos& aRoot)
-{
-    if (mProject)
-    {
-        mTree->resetTreeView(mProject->resourceHolder(), aRoot);
-    }
 }
 
 void ResourceDialog::updateResourcePath()
@@ -120,8 +103,7 @@ void ResourceDialog::onAddResourceTriggered(bool)
                 this, tr("Open File"), "", "ImageFile (*.psd *.jpg *.jpeg *.png *.gif)");
     if (fileName.isEmpty()) return;
 
-    res::ResourceUpdater updater(mViaPoint, *mProject);
-    updater.load(fileName);
+    mTree->load(fileName);
 }
 
 void ResourceDialog::keyPressEvent(QKeyEvent* aEvent)

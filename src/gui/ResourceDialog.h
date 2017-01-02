@@ -20,8 +20,6 @@ public:
     ResourceDialog(ViaPoint& aViaPoint, bool aModal, QWidget* aParent);
 
     void setProject(core::Project* aProject);
-    void updateResources();
-    void updateResources(const util::TreePos& aRoot);
     void updateResourcePath();
 
     bool hasValidNode() const;

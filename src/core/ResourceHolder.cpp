@@ -18,6 +18,12 @@ ResourceHolder::~ResourceHolder()
     destroy();
 }
 
+QString ResourceHolder::relativeFilePath(const QString& aAbsFilePath) const
+{
+    QDir dir(mRootPath);
+    return dir.relativeFilePath(aAbsFilePath);
+}
+
 void ResourceHolder::setRootPath(const QString& aRootPath)
 {
     QDir oldDir(mRootPath);
@@ -35,10 +41,9 @@ void ResourceHolder::pushImageTree(
         img::ResourceNode& aGrabNode,
         const QString& aFilePath)
 {
-    QDir dir(mRootPath);
     ImageTree data;
     data.topNode = &aGrabNode;
-    data.filePath = dir.relativeFilePath(aFilePath);
+    data.filePath = relativeFilePath(aFilePath);
     mImageTrees.push_back(data);
 }
 

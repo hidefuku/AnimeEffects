@@ -25,16 +25,14 @@ public:
     ResourceTreeWidget(ViaPoint& aViaPoint, bool aUseCustomContext, QWidget* aParent);
     void setProject(core::Project* aProject);
 
-    void resetTreeView();
-    void resetTreeView(core::ResourceHolder& aHolder);
-    void resetTreeView(core::ResourceHolder& aHolder, const util::TreePos& aRoot);
+    void load(const QString& aFileName);
     void updateTreeRootName(core::ResourceHolder& aHolder);
 
     util::Signaler<void(const NodeList&)> onNodeSelectionChanged;
 
 private:
+    void resetTreeView(core::ResourceHolder& aHolder);
     QTreeWidgetItem* findItem(const util::TreePos& aPos);
-    void addTreeItemRecursive(QTreeWidgetItem* aItem, img::ResourceNode* aNode);
     QList<img::ResourceNode*> findSelectingNodes() const;
     void endRenameEditor();
     void onItemSelectionChanged();
@@ -52,6 +50,7 @@ private:
     QAction* mRenameAction;
     QAction* mReloadAction;
     QAction* mDeleteAction;
+    bool mRenaming;
 };
 
 } // namespace gui

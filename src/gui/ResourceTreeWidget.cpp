@@ -22,6 +22,7 @@ ResourceTreeWidget::ResourceTreeWidget(ViaPoint& aViaPoint, bool aUseCustomConte
     , mRenameAction()
     , mReloadAction()
     , mDeleteAction()
+    , mRenaming()
 {
     //this->setSelectionMode(QAbstractItemView::ExtendedSelection);
     this->setObjectName("resourceTree");
@@ -125,10 +126,10 @@ void ResourceTreeWidget::setProject(core::Project* aProject)
     }
 }
 
-void ResourceTreeWidget::resetTreeView()
+void ResourceTreeWidget::load(const QString& aFileName)
 {
-    this->clear();
-    mHolder = nullptr;
+    res::ResourceUpdater updater(mViaPoint, *mProject);
+    updater.load(*this, aFileName);
 }
 
 void ResourceTreeWidget::resetTreeView(core::ResourceHolder& aHolder)
@@ -138,9 +139,9 @@ void ResourceTreeWidget::resetTreeView(core::ResourceHolder& aHolder)
 
     for (auto data : aHolder.imageTrees())
     {
-        auto item = new res::Item(*this, *data.topNode, data.filePath);
+        auto item = res::ResourceUpdater::createGUITree(*this, *data.topNode, data.filePath);
+        XC_PTR_ASSERT(item);
         this->addTopLevelItem(item);
-        addTreeItemRecursive(item, data.topNode);
     }
 }
 
@@ -155,60 +156,6 @@ QTreeWidgetItem* ResourceTreeWidget::findItem(const util::TreePos& aPos)
         item = item->child(aPos.row(i));
     }
     return item;
-}
-
-void ResourceTreeWidget::resetTreeView(
-        core::ResourceHolder& aHolder, const util::TreePos& aRoot)
-{
-    XC_ASSERT(aRoot.isValid());
-
-    QTreeWidgetItem* rootItem = findItem(aRoot);
-    XC_PTR_ASSERT(rootItem);
-
-    QTreeWidgetItem* parent = rootItem->parent();
-    const int index = parent ?
-                parent->indexOfChild(rootItem) :
-                this->indexOfTopLevelItem(rootItem);
-
-    img::ResourceNode* rootNode = nullptr;
-    {
-        this->removeItemWidget(rootItem, kItemColumn);
-        res::Item* resItem = res::Item::cast(rootItem);
-        XC_PTR_ASSERT(resItem);
-        rootNode = &(resItem->node());
-        delete rootItem;
-    }
-
-    mHolder = &aHolder;
-
-    if (parent)
-    {
-        auto item = new res::Item(*this, *rootNode, rootNode->data().identifier());
-        parent->insertChild(index, item);
-        addTreeItemRecursive(item, rootNode);
-    }
-    else
-    {
-        const QString filePath = aHolder.findRelativeFilePath(*rootNode);
-        auto item = new res::Item(*this, *rootNode, filePath);
-        this->insertTopLevelItem(index, item);
-        addTreeItemRecursive(item, rootNode);
-    }
-}
-
-void ResourceTreeWidget::addTreeItemRecursive(QTreeWidgetItem* aItem, img::ResourceNode* aNode)
-{
-    XC_PTR_ASSERT(aNode);
-    XC_PTR_ASSERT(aItem);
-
-    for (auto childNode : aNode->children())
-    {
-        auto childItem = new res::Item(*this, *childNode, childNode->data().identifier());
-        aItem->addChild(childItem);
-
-        // recursive call
-        addTreeItemRecursive(childItem, childNode);
-    }
 }
 
 void ResourceTreeWidget::updateTreeRootName(core::ResourceHolder& aHolder)
@@ -324,6 +271,7 @@ void ResourceTreeWidget::onRenameActionTriggered(bool)
     {
         this->openPersistentEditor(mActionItem, kItemColumn);
         this->editItem(mActionItem, kItemColumn);
+        mRenaming = true;
     }
 }
 
@@ -334,11 +282,12 @@ void ResourceTreeWidget::endRenameEditor()
 
     if (!mProject) return;
 
-    if (actionItem)
+    if (actionItem && mRenaming)
     {
         res::Item* item = res::Item::cast(actionItem);
         if (!item) return;
 
+        mRenaming = false;
         this->closePersistentEditor(actionItem, kItemColumn);
         auto nodePtr = &(item->node());
         auto curName = nodePtr->data().identifier();
@@ -356,11 +305,11 @@ void ResourceTreeWidget::endRenameEditor()
 
             stack.push(new cmnd::Delegatable([=]()
             {
-                //item->setText(newName);
+                item->setText(kItemColumn, newName);
                 nodePtr->data().setIdentifier(newName);
             }, [=]()
             {
-                //item->setText(curName);
+                item->setText(kItemColumn, curName);
                 nodePtr->data().setIdentifier(curName);
             }));
         }
@@ -386,7 +335,7 @@ void ResourceTreeWidget::onDeleteActionTriggered(bool)
     if (!item) return;
 
     res::ResourceUpdater updater(mViaPoint, *mProject);
-    updater.remove(*item);
+    updater.remove(*this, *item);
 }
 
 } // namespace gui

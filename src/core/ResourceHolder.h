@@ -45,6 +45,8 @@ public:
     QString findFilePath(const img::ResourceNode& aTopNode) const;
     QString findRelativeFilePath(const img::ResourceNode& aTopNode) const;
 
+    QString relativeFilePath(const QString& aAbsFilePath) const;
+
     bool serialize(Serializer& aOut) const;
     bool deserialize(Deserializer& aIn);
 
