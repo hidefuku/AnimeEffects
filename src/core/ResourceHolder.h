@@ -38,11 +38,11 @@ public:
     ImageTree imageTree(int aIndex) const;
     const std::list<ImageTree>& imageTrees() const { return mImageTrees; }
 
-    QString changeFilePath(
+    QString changeAbsoluteFilePath(
             img::ResourceNode& aTopNode,
             const QString& aAbsFilePath);
 
-    QString findFilePath(const img::ResourceNode& aTopNode) const;
+    QString findAbsoluteFilePath(const img::ResourceNode& aTopNode) const;
     QString findRelativeFilePath(const img::ResourceNode& aTopNode) const;
 
     QString relativeFilePath(const QString& aAbsFilePath) const;

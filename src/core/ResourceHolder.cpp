@@ -96,7 +96,7 @@ ResourceHolder::ImageTree ResourceHolder::imageTree(int aIndex) const
     return ImageTree();
 }
 
-QString ResourceHolder::changeFilePath(
+QString ResourceHolder::changeAbsoluteFilePath(
         img::ResourceNode& aTopNode,
         const QString& aAbsFilePath)
 {
@@ -113,7 +113,7 @@ QString ResourceHolder::changeFilePath(
     return QString();
 }
 
-QString ResourceHolder::findFilePath(const img::ResourceNode& aTopNode) const
+QString ResourceHolder::findAbsoluteFilePath(const img::ResourceNode& aTopNode) const
 {
     for (auto& data : mImageTrees)
     {

@@ -403,7 +403,7 @@ void ResourceUpdater::reload(Item& aItem)
 
     img::ResourceNode& node = aItem.node();
     img::ResourceNode& topNode = util::TreeUtil::getTreeRoot(node);
-    QString filePath = holder.findFilePath(topNode);
+    QString filePath = holder.findAbsoluteFilePath(topNode);
     if (filePath.isEmpty()) return;
 
     QScopedPointer<img::ResourceNode> newTree(createResourceTree(filePath, false));

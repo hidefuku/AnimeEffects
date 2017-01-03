@@ -249,15 +249,17 @@ void ResourceTreeWidget::onChangePathActionTriggered(bool)
 
             img::ResourceNode* resNode = &(item->node());
             auto absFilePath = QFileInfo(fileName).absoluteFilePath();
-            auto prevFilePath = mHolder->findRelativeFilePath(item->node());
+            auto prevFilePath = mHolder->findAbsoluteFilePath(item->node());
 
             auto command = new cmnd::Delegatable([=]()
             {
-                mHolder->changeFilePath(*resNode, absFilePath);
+                mHolder->changeAbsoluteFilePath(*resNode, absFilePath);
+                item->setText(kItemColumn, mHolder->relativeFilePath(absFilePath));
             },
             [=]()
             {
-                mHolder->changeFilePath(*resNode, prevFilePath);
+                mHolder->changeAbsoluteFilePath(*resNode, prevFilePath);
+                item->setText(kItemColumn, mHolder->relativeFilePath(prevFilePath));
             });
 
             stack.push(command);
