@@ -1,9 +1,9 @@
-#include "gui/res/res_ResourceTree.h"
+#include "gui/ResourceTreeWidget.h"
 #include "gui/res/res_Item.h"
 
 namespace
 {
-static const int kItemColumn = gui::res::ResourceTree::kItemColumn;
+static const int kItemColumn = gui::ResourceTreeWidget::kItemColumn;
 static const int kItemSize = 22;
 
 //-------------------------------------------------------------------------------------------------
