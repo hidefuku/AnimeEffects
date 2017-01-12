@@ -40,6 +40,7 @@ bool SRTEditor::initializeKey(TimeLine& aLine, QString* aMessage)
     {
         mKeyOwner.moveKey = new MoveKey();
         mKeyOwner.moveKey->setPos(current.srt().pos());
+        mKeyOwner.moveKey->setCentroid(current.srt().centroid());
     }
     else
     {

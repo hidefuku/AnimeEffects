@@ -29,7 +29,8 @@ private:
     KeyKnocker* mKnocker;
     EasingItem* mEasing;
     ComboItem* mSpline;
-    Vector2DItem* mMove;
+    Vector2DItem* mPosition;
+    Vector2DItem* mCentroid;
     bool mKeyExists;
 };
 

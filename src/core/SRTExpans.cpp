@@ -7,8 +7,10 @@ SRTExpans::SRTExpans()
     : mPos()
     , mRotate()
     , mScale(1.0f, 1.0f)
+    , mCentroid()
     , mSpline()
     , mParentMatrix()
+    , mParentCentroid()
     , mSplineCache()
 {
 }
@@ -50,6 +52,30 @@ QMatrix4x4 SRTExpans::getLocalSRMatrix(float aRotate, const QVector2D& aScale)
     mtx.rotate(util::MathUtil::getDegreeFromRadian(aRotate), QVector3D(0.0f, 0.0f, 1.0f));
     mtx.scale(QVector3D(aScale, 1.0f));
     return mtx;
+}
+
+void SRTExpans::setParentMatrix(const QMatrix4x4& aWorldMtx, const QVector2D& aCentroid)
+{
+    mParentMatrix = aWorldMtx;
+    mParentMatrix.translate(aCentroid);
+    mParentCentroid = aCentroid;
+}
+
+const QMatrix4x4& SRTExpans::parentMatrix() const
+{
+    return mParentMatrix;
+}
+
+QMatrix4x4 SRTExpans::localParentMatrix() const
+{
+    auto mtx = localMatrix();
+    mtx.translate(mParentCentroid);
+    return mtx;
+}
+
+QMatrix4x4 SRTExpans::worldMatrix() const
+{
+    return mParentMatrix * localMatrix();
 }
 
 } // namespace core

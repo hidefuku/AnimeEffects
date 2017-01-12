@@ -160,6 +160,16 @@ void KeyAccessor::assignMovePosition(const QVector2D& aNewPos)
     ctrl::TimeLineUtil::assignMoveKeyData(*mProject, *mTarget, frame, newData);
 }
 
+void KeyAccessor::assignMoveCentroid(const QVector2D& aNewCentroid)
+{
+    ASSERT_AND_RETURN_INVALID_TARGET();
+    const int frame = getFrame();
+    auto newData = getMoveKeyData(*mTarget, frame);
+    newData.setCentroid(aNewCentroid);
+
+    ctrl::TimeLineUtil::assignMoveKeyData(*mProject, *mTarget, frame, newData);
+}
+
 //-------------------------------------------------------------------------------------------------
 void KeyAccessor::assignRotateEasing(util::Easing::Param aNext)
 {
@@ -286,6 +296,7 @@ void KeyAccessor::knockNewMove()
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::MoveKey();
     newKey->setPos(currline().current().srt().pos());
+    newKey->setCentroid(currline().current().srt().centroid());
 
     ctrl::TimeLineUtil::pushNewMoveKey(*mProject, *mTarget, getFrame(), newKey);
 }

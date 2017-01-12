@@ -121,7 +121,7 @@ QMatrix4x4 TimeKeyBlender::getRelativeMatrix(
             auto currLine = curr->timeLine();
             if (currLine)
             {
-                result = currLine->working().srt().localMatrix() * result;
+                result = currLine->working().srt().localParentMatrix() * result;
             }
         }
     }
@@ -396,15 +396,21 @@ void TimeKeyBlender::getMoveExpans(SRTExpans& aExpans, const ObjectNode& aNode, 
 
     if (blend.isEmpty())
     { // no key is exists
-        aExpans.setPos(getDefaultKeyData<MoveKey, TimeKeyType_Move>(aNode).pos());
+        auto keyData = getDefaultKeyData<MoveKey, TimeKeyType_Move>(aNode);
+        aExpans.setPos(keyData.pos());
+        aExpans.setCentroid(keyData.centroid());
     }
     else if (blend.hasSameFrame())
     { // a key is exists
-        aExpans.setPos(((const MoveKey*)blend.point(0).key)->data().pos());
+        auto& keyData = ((const MoveKey*)blend.point(0).key)->data();
+        aExpans.setPos(keyData.pos());
+        aExpans.setCentroid(keyData.centroid());
     }
     else if (blend.isSingle())
     { // perfect following
-        aExpans.setPos(((const MoveKey*)blend.singlePoint().key)->data().pos());
+        auto& keyData = ((const MoveKey*)blend.singlePoint().key)->data();
+        aExpans.setPos(keyData.pos());
+        aExpans.setCentroid(keyData.centroid());
     }
     else
     {
@@ -433,6 +439,8 @@ void TimeKeyBlender::getMoveExpans(SRTExpans& aExpans, const ObjectNode& aNode, 
 
             aExpans.setPos(aExpans.spline().getByLinear(time).toVector2D());
         }
+
+        aExpans.setCentroid(k0->centroid() * (1.0f - time) + k1->centroid() * time);
     }
 }
 
@@ -509,7 +517,7 @@ void TimeKeyBlender::blendSRTKeys(PositionType aPos, const TimeInfo& aTime)
     getScaleExpans(expans.srt(), node, aTime);
 
     // update matrix
-    expans.srt().setParentMatrix(QMatrix4x4());
+    expans.srt().setParentMatrix(QMatrix4x4(), QVector2D());
     {
         auto ppos = mSeeker->parent(aPos);
         while (ppos)
@@ -530,7 +538,9 @@ void TimeKeyBlender::blendSRTKeys(PositionType aPos, const TimeInfo& aTime)
                 blendSRTKeys(ppos, aTime);
             }
 
-            expans.srt().setParentMatrix(pdata.expans->srt().worldMatrix());
+            expans.srt().setParentMatrix(
+                        pdata.expans->srt().worldMatrix(),
+                        pdata.expans->srt().centroid());
             break;
         }
     }
@@ -1071,7 +1081,7 @@ void TimeKeyBlender::setBindingMatrices(
         {
             if (aAffectedByBinding)
             {
-                aBindingMtx = aBindingMtx * expans.srt().localMatrix();
+                aBindingMtx = aBindingMtx * expans.srt().localParentMatrix();
                 expans.bone().setOuterMatrix(aBindingMtx);
                 QMatrix4x4 innerMtx;
                 expans.bone().setInnerMatrix(innerMtx);

@@ -11,13 +11,20 @@ MoveKey::Data::Data()
     : mEasing()
     , mSpline(kDefaultSplineType)
     , mPos()
+    , mCentroid()
 {
 }
 
-void MoveKey::Data::clamp()
+void MoveKey::Data::clampPos()
 {
     mPos.setX(xc_clamp(mPos.x(), Constant::transMin(), Constant::transMax()));
     mPos.setY(xc_clamp(mPos.y(), Constant::transMin(), Constant::transMax()));
+}
+
+void MoveKey::Data::clampCentroid()
+{
+    mCentroid.setX(xc_clamp(mCentroid.x(), Constant::transMin(), Constant::transMax()));
+    mCentroid.setY(xc_clamp(mCentroid.y(), Constant::transMin(), Constant::transMax()));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -90,6 +97,7 @@ bool MoveKey::serialize(Serializer& aOut) const
     aOut.write(mData.easing());
     aOut.write((int)mData.spline());
     aOut.write(mData.pos());
+    aOut.write(mData.centroid());
     return aOut.checkStream();
 }
 
@@ -115,9 +123,10 @@ bool MoveKey::deserialize(Deserializer &aIn)
     }
 
     // position
-    QVector2D pos;
-    aIn.read(pos);
-    mData.setPos(pos);
+    mData.setPos(aIn.getRead<QVector2D>());
+
+    // centroid
+    mData.setCentroid(aIn.getRead<QVector2D>());
 
     aIn.popLogScope();
     return aIn.checkStream();

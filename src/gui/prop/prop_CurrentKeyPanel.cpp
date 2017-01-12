@@ -18,7 +18,8 @@ MoveKeyGroup::MoveKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidt
     , mKnocker()
     , mEasing()
     , mSpline()
-    , mMove()
+    , mPosition()
+    , mCentroid()
     , mKeyExists(false)
 {
     mKnocker = new KeyKnocker(tr("Move"));
@@ -46,14 +47,23 @@ MoveKeyGroup::MoveKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidt
         };
         this->addItem(tr("spline :"), mSpline);
 
-        // move
-        mMove = new Vector2DItem(this);
-        mMove->setRange(core::Constant::transMin(), core::Constant::transMax());
-        mMove->onValueUpdated = [=](QVector2D, QVector2D aNext)
+        // position
+        mPosition = new Vector2DItem(this);
+        mPosition->setRange(core::Constant::transMin(), core::Constant::transMax());
+        mPosition->onValueUpdated = [=](QVector2D, QVector2D aNext)
         {
             this->mAccessor.assignMovePosition(aNext);
         };
-        this->addItem(tr("position :"), mMove);
+        this->addItem(tr("position :"), mPosition);
+
+        // centroid
+        mCentroid = new Vector2DItem(this);
+        mCentroid->setRange(core::Constant::transMin(), core::Constant::transMax());
+        mCentroid->onValueUpdated = [=](QVector2D, QVector2D aNext)
+        {
+            this->mAccessor.assignMoveCentroid(aNext);
+        };
+        this->addItem(tr("centroid :"), mCentroid);
     }
     setKeyEnabled(false);
     setKeyExists(false);
@@ -78,7 +88,8 @@ void MoveKeyGroup::setKeyValue(const core::TimeKey* aKey)
     const core::MoveKey::Data data = ((const core::MoveKey*)aKey)->data();
     mEasing->setValue(data.easing(), false);
     mSpline->setValue(data.spline(), false);
-    mMove->setValue(data.pos());
+    mPosition->setValue(data.pos());
+    mCentroid->setValue(data.centroid());
 }
 
 bool MoveKeyGroup::keyExists() const

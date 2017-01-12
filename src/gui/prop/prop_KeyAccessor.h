@@ -27,6 +27,7 @@ public:
     void assignMoveEasing(util::Easing::Param);
     void assignMoveSpline(int);
     void assignMovePosition(const QVector2D&);
+    void assignMoveCentroid(const QVector2D&);
 
     // rotate
     void assignRotateEasing(util::Easing::Param);

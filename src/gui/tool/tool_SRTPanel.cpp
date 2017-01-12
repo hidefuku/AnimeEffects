@@ -63,12 +63,12 @@ void SRTPanel::createMode()
         this->onParamUpdated(false);
     });
 
-    mAdjust.reset(new CheckBoxItem(tr("adjust existing postures"), this));
-    mAdjust->setToolTip(tr("Adjust existing keys abount the posture."));
-    mAdjust->setChecked(mParam.adjustExistingPostures);
+    mAdjust.reset(new CheckBoxItem(tr("adjust position"), this));
+    mAdjust->setToolTip(tr("Adjust position value so as not to change current posture."));
+    mAdjust->setChecked(mParam.adjustPosition);
     mAdjust->connect([=](bool aChecked)
     {
-        this->mParam.adjustExistingPostures = aChecked;
+        this->mParam.adjustPosition = aChecked;
         this->onParamUpdated(false);
     });
 }

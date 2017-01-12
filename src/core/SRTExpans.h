@@ -32,23 +32,29 @@ public:
     void setScale(const QVector2D& aScale) { mScale = aScale; }
     QVector2D scale() const { return mScale; }
 
+    void setCentroid(const QVector2D& aValue) { mCentroid = aValue; }
+    QVector2D centroid() const { return mCentroid; }
+
     SplineType& spline() { return mSpline; }
     const SplineType& spline() const { return mSpline; }
 
     QMatrix4x4 localMatrix() const;
     QMatrix4x4 localSRMatrix() const;
 
-    void setParentMatrix(const QMatrix4x4& aMtx) { mParentMatrix = aMtx; }
-    const QMatrix4x4& parentMatrix() const { return mParentMatrix; }
+    void setParentMatrix(const QMatrix4x4& aWorldMtx, const QVector2D& aParentCentroid);
+    const QMatrix4x4& parentMatrix() const;
+    QMatrix4x4 localParentMatrix() const;
 
-    QMatrix4x4 worldMatrix() const { return mParentMatrix * localMatrix(); }
+    QMatrix4x4 worldMatrix() const;
 
 private:
     QVector2D mPos;
     float mRotate;
     QVector2D mScale;
+    QVector2D mCentroid;
     SplineType mSpline;
     QMatrix4x4 mParentMatrix;
+    QVector2D mParentCentroid;
     util::Range mSplineCache;
 };
 

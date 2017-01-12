@@ -12,6 +12,7 @@ namespace core { class MeshKey; }
 namespace ctrl {
 namespace srt {
 
+#if 0
 class CentroidMover : public cmnd::Stable
 {
     struct KeyData { core::MoveKey* ptr; QVector2D prev; QVector2D next; };
@@ -56,6 +57,34 @@ public:
     virtual void undo();
     virtual void redo();
 };
+#else
+class CentroidMover : public cmnd::Stable
+{
+    core::Project& mProject;
+    core::ObjectNode& mTarget;
+    core::MoveKey* mKey;
+    QVector2D mCentroidMove;
+    QVector2D mPositionMove;
+    QVector2D mPrevPosition;
+    QVector2D mPrevCentroid;
+    int mFrame;
+    bool mAdjustPos;
+    bool mDone;
+
+public:
+    CentroidMover(core::Project& aProject,
+                  core::ObjectNode& aTarget,
+                  const QVector2D& aCentroidMove,
+                  const QVector2D& aPositionMove,
+                  int aFrame, bool aAdjustPos);
+
+    void modifyValue(const QVector2D& aNewCentroidMove,
+                     const QVector2D& aNewPositionMove);
+    virtual void exec();
+    virtual void undo();
+    virtual void redo();
+};
+#endif
 
 } // namespace srt
 } // namespace ctrl

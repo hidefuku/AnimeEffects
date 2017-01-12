@@ -11,6 +11,7 @@ using namespace core;
 namespace ctrl {
 namespace srt {
 
+#if 0
 //-------------------------------------------------------------------------------------------------
 void addAllKeysToEvent(ObjectNode& aTarget, TimeKeyType aType, TimeLineEvent& aEvent, bool aContainDefault)
 {
@@ -261,6 +262,68 @@ void CentroidMover::redo()
     }
     mDone = true;
 }
+#else
+//-------------------------------------------------------------------------------------------------
+CentroidMover::CentroidMover(Project& aProject,
+                             ObjectNode& aTarget,
+                             const QVector2D& aCentroidMove,
+                             const QVector2D& aPositionMove,
+                             int aFrame, bool aAdjustPos)
+    : mProject(aProject)
+    , mTarget(aTarget)
+    , mKey()
+    , mCentroidMove(aCentroidMove)
+    , mPositionMove(aPositionMove)
+    , mPrevPosition()
+    , mPrevCentroid()
+    , mFrame(aFrame)
+    , mAdjustPos(aAdjustPos)
+    , mDone()
+{
+}
+
+void CentroidMover::modifyValue(const QVector2D& aNewCentroidMove,
+                                const QVector2D& aNewPositionMove)
+{
+    mCentroidMove = aNewCentroidMove;
+    mPositionMove = aNewPositionMove;
+
+    if (mKey && mDone)
+    {
+        mKey->setCentroid(mPrevCentroid - mCentroidMove);
+        if (mAdjustPos)
+        {
+            mKey->setPos(mPrevPosition + mPositionMove);
+        }
+    }
+}
+
+void CentroidMover::exec()
+{
+    mKey = (MoveKey*)mTarget.timeLine()->timeKey(TimeKeyType_Move, mFrame);
+    XC_PTR_ASSERT(mKey);
+    mPrevPosition = mKey->pos();
+    mPrevCentroid = mKey->centroid();
+    redo();
+}
+
+void CentroidMover::undo()
+{
+    mKey->setCentroid(mPrevCentroid);
+    mKey->setPos(mPrevPosition);
+    mDone = false;
+}
+
+void CentroidMover::redo()
+{
+    mKey->setCentroid(mPrevCentroid - mCentroidMove);
+    if (mAdjustPos)
+    {
+        mKey->setPos(mPrevPosition + mPositionMove);
+    }
+    mDone = true;
+}
+#endif
 
 } // namespace srt
 } // namespace ctrl

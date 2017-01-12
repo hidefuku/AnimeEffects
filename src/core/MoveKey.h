@@ -24,7 +24,9 @@ public:
         util::Easing::Param mEasing;
         SplineType mSpline;
         QVector2D mPos;
-        void clamp();
+        QVector2D mCentroid;
+        void clampPos();
+        void clampCentroid();
     public:
         Data();
 
@@ -34,9 +36,13 @@ public:
         void setSpline(SplineType aType) { mSpline = aType; }
         SplineType spline() const { return mSpline; }
 
-        void setPos(const QVector2D& aPos) { mPos = aPos; clamp(); }
-        void addPos(const QVector2D& aAdd) { mPos += aAdd; clamp(); }
+        void setPos(const QVector2D& aPos) { mPos = aPos; clampPos(); }
+        void addPos(const QVector2D& aAdd) { mPos += aAdd; clampPos(); }
         const QVector2D& pos() const { return mPos; }
+
+        void setCentroid(const QVector2D& aValue) { mCentroid = aValue; clampCentroid(); }
+        void addCentroid(const QVector2D& aAdd) { mCentroid += aAdd; clampCentroid(); }
+        const QVector2D& centroid() const { return mCentroid; }
     };
 
     static std::array<QVector2D, 2> getCatmullRomVels(
@@ -46,7 +52,12 @@ public:
     MoveKey();
 
     void setPos(const QVector2D& aPos) { mData.setPos(aPos); }
+    void addPos(const QVector2D& aAdd) { mData.addPos(aAdd);}
     const QVector2D& pos() const { return mData.pos(); }
+
+    void setCentroid(const QVector2D& aValue) { mData.setCentroid(aValue); }
+    void addCentroid(const QVector2D& aAdd) { mData.addCentroid(aAdd); }
+    const QVector2D& centroid() const { return mData.centroid(); }
 
     Data& data() { return mData; }
     const Data& data() const { return mData; }

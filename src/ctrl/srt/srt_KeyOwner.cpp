@@ -83,6 +83,7 @@ bool KeyOwner::updatePosture(const TimeKeyExpans& aExpans)
     if (ownsMoveKey)
     {
         moveKey->setPos(aExpans.srt().pos());
+        moveKey->setCentroid(aExpans.srt().centroid());
     }
     if (ownsRotateKey)
     {

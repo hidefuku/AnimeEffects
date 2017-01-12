@@ -27,22 +27,27 @@ CentroidMode::CentroidMode(Project& aProject, ObjectNode& aTarget, KeyOwner& aKe
     , mFocusing()
     , mMoving()
     , mBaseVec()
+    , mBasePosition()
+    , mBaseCentroid()
     , mCommandRef()
-    , mAdjustPostures()
+    , mAdjustPosition()
 {
     XC_PTR_ASSERT(mTarget.timeLine());
 }
 
 void CentroidMode::updateParam(const SRTParam& aParam)
 {
-    mAdjustPostures = aParam.adjustExistingPostures;
+    mAdjustPosition = aParam.adjustPosition;
 }
 
 bool CentroidMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCursor)
 {
-    auto worldMtx = mKeyOwner.mtx * mKeyOwner.locSRMtx;
+    auto parentMtx = mKeyOwner.mtx;
+    auto worldSRMtx = mKeyOwner.mtx * mKeyOwner.locSRMtx;
+    bool hasParentInv = false;
     bool hasWorldInv = false;
-    auto worldInvMtx = worldMtx.inverted(&hasWorldInv);
+    auto parentInvMtx = parentMtx.inverted(&hasParentInv);
+    auto worldSRInvMtx = worldSRMtx.inverted(&hasWorldInv);
 
     auto curPos = aCursor.worldPos();
     auto center = getWorldCentroidPos();
@@ -52,21 +57,23 @@ bool CentroidMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor&
 
     if (aCursor.emitsLeftPressedEvent())
     {
-        if (mFocusing && hasWorldInv)
+        if (mFocusing && hasParentInv && hasWorldInv)
         {        
             mMoving = true;
             mBaseVec = center - curPos;
-            mBaseCenter = (worldInvMtx * QVector3D(center)).toVector2D();
+            mBaseCentroid = (worldSRInvMtx * QVector3D(center)).toVector2D();
+            mBasePosition = (parentInvMtx * QVector3D(center)).toVector2D();
             mCommandRef = nullptr;
         }
         mod = true;
     }
     else if (aCursor.emitsLeftDraggedEvent())
     {
-        if (mMoving && hasWorldInv)
+        if (mMoving && hasParentInv && hasWorldInv)
         {
-            auto newLocalCenter = worldInvMtx * QVector3D(curPos + mBaseVec);
-            moveCentroid(newLocalCenter.toVector2D());
+            auto newCentroid = (worldSRInvMtx * QVector3D(curPos + mBaseVec)).toVector2D();
+            auto newPosition = (parentInvMtx * QVector3D(curPos + mBaseVec)).toVector2D();
+            moveCentroid(newCentroid, newPosition);
             mKeyOwner.updatePosture(mTarget.timeLine()->current());
         }
         mod = true;
@@ -103,46 +110,47 @@ void CentroidMode::renderQt(const core::RenderInfo& aInfo, QPainter& aPainter)
     aPainter.drawLine(c + v, c + vs);
 }
 
-void CentroidMode::moveCentroid(const QVector2D& aNewCenter)
+void CentroidMode::moveCentroid(const QVector2D& aNewCentroid, const QVector2D& aNewPosition)
 {
     XC_PTR_ASSERT(mTarget.timeLine());
 
-    const QVector2D newCenter(
-                xc_clamp(aNewCenter.x(), Constant::transMin(), Constant::transMax()),
-                xc_clamp(aNewCenter.y(), Constant::transMin(), Constant::transMax()));
-
     cmnd::Stack& stack = mProject.commandStack();
+    const int frame = mProject.animator().currentFrame().get();
+    auto centroidMove = aNewCentroid - mBaseCentroid;
+    auto positionMove = aNewPosition - mBasePosition;
 
     if (mCommandRef && mProject.commandStack().isModifiable(mCommandRef))
     {
         // modify command
-        mCommandRef->modifyValue(newCenter);
+        mCommandRef->modifyValue(centroidMove, positionMove);
 
         // singleshot notify
         TimeLineEvent event;
         event.setType(TimeLineEvent::Type_ChangeKeyValue);
-        CentroidMover::pushEventTargets(mTarget, event, mCommandRef->adjustsPostures());
+        event.pushTarget(mTarget, TimeKeyType_Move, frame);
         mProject.onTimeLineModified(event, false);
-        mProject.onNodeAttributeModified(mTarget, false); ///@todo Is there any means?
     }
     else
     {
-        cmnd::ScopedMacro macro(stack, CmndName::tr("move a centroid"));
+        cmnd::ScopedMacro macro(stack, CmndName::tr("update centroid of a moving key"));
 
         // set notifier
         {
-            auto tln = new TimeLineUtil::Notifier(mProject);
-            tln->event().setType(TimeLineEvent::Type_ChangeKeyValue);
-            CentroidMover::pushEventTargets(mTarget, tln->event(), mAdjustPostures);
-            macro.grabListener(tln);
+            auto notifier = new TimeLineUtil::Notifier(mProject);
+            notifier->event().setType(
+                        mKeyOwner.ownsMoveKey ?
+                            TimeLineEvent::Type_PushKey :
+                            TimeLineEvent::Type_ChangeKeyValue);
+            notifier->event().pushTarget(mTarget, TimeKeyType_Move, frame);
+            macro.grabListener(notifier);
         }
-        macro.grabListener(new ObjectNodeUtil::AttributeNotifier(mProject, mTarget));
+        // push owning key if necessary
+        mKeyOwner.pushOwningMoveKey(stack, *mTarget.timeLine(), frame);
 
-        // create command
-        mCommandRef = new CentroidMover(mProject, mTarget, mBaseCenter,
-                                        newCenter, mAdjustPostures);
-
-        // push command
+        // create move command
+        mCommandRef = new CentroidMover(
+                    mProject, mTarget, centroidMove,
+                    positionMove, frame, mAdjustPosition);
         stack.push(mCommandRef);
     }
 }

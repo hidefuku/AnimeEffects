@@ -20,7 +20,7 @@ public:
     virtual void renderQt(const core::RenderInfo& aInfo, QPainter& aPainter);
 
 private:
-    void moveCentroid(const QVector2D& aNewCenter);
+    void moveCentroid(const QVector2D& aNewCentroid, const QVector2D& aNewPosition);
     QVector2D getWorldCentroidPos() const;
     core::Project& mProject;
     core::ObjectNode& mTarget;
@@ -29,9 +29,10 @@ private:
     bool mFocusing;
     bool mMoving;
     QVector2D mBaseVec;
-    QVector2D mBaseCenter;
+    QVector2D mBasePosition;
+    QVector2D mBaseCentroid;
     CentroidMover* mCommandRef;
-    bool mAdjustPostures;
+    bool mAdjustPosition;
 };
 
 } // namespace srt
