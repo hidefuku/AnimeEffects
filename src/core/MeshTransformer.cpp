@@ -73,14 +73,12 @@ void MeshTransformer::callGL(
     {
         worldMatrix = aExpans.bone().outerMatrix();
         innerMatrix = aExpans.bone().innerMatrix();
-        //innerMatrix.translate(aExpans.imageOffset());
-        innerMatrix.translate(aOriginOffset);
+        innerMatrix.translate(aExpans.srt().centroid() + aOriginOffset);
     }
     else
     {
         worldMatrix = aExpans.srt().worldMatrix();
-        //worldMatrix.translate(aExpans.imageOffset());
-        worldMatrix.translate(aOriginOffset);
+        worldMatrix.translate(aExpans.srt().centroid() + aOriginOffset);
     }
 
     gl::Global::Functions& ggl = gl::Global::functions();

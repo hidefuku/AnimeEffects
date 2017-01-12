@@ -196,6 +196,18 @@ QVector2D TimeKeyBlender::getOriginOffset(ObjectNode& aNode, const TimeInfo& aTi
     return QVector2D();
 }
 
+QVector2D TimeKeyBlender::getCentroid(const ObjectNode& aNode, const TimeInfo& aTime)
+{
+    XC_ASSERT(aTime.frame.get() != TimeLine::kDefaultKeyIndex);
+    if (aNode.timeLine())
+    {
+        SRTExpans expans;
+        getMoveExpans(expans, aNode, aTime);
+        return expans.centroid();
+    }
+    return QVector2D();
+}
+
 //-------------------------------------------------------------------------------------------------
 TimeKeyBlender::TimeKeyBlender(ObjectTree& aTree)
     : mSeeker()
@@ -970,6 +982,7 @@ void TimeKeyBlender::setBoneInfluenceMaps(
         BoneInfluenceMap* influence = nullptr;
         QMatrix4x4 outerMtx;
         QMatrix4x4 innerMtx;
+        QVector2D centroid = expans.srt().centroid();
 
         // check bone validity
         if (key)
@@ -998,6 +1011,7 @@ void TimeKeyBlender::setBoneInfluenceMaps(
 
                 influence = &cache->influence();
                 innerMtx = cache->innerMatrix();
+                centroid = cache->centroid();
             }
 
             auto cacheOwner = key->cacheOwner();
@@ -1014,6 +1028,7 @@ void TimeKeyBlender::setBoneInfluenceMaps(
         expans.bone().setInfluenceMap(influence);
         expans.bone().setOuterMatrix(outerMtx);
         expans.bone().setInnerMatrix(innerMtx);
+        expans.srt().setCentroid(centroid);
     }
 
     for (auto child : aNode.children())
