@@ -186,6 +186,16 @@ QVector2D TimeKeyBlender::getImageOffset(ObjectNode& aNode, const TimeInfo& aTim
     return imageKey ? imageKey->data().imageOffset() : QVector2D();
 }
 
+QVector2D TimeKeyBlender::getOriginOffset(ObjectNode& aNode, const TimeInfo& aTime)
+{
+    auto areaMesh = getAreaMeshImpl(aNode, aTime);
+    if (areaMesh.second)
+    {
+        return areaMesh.second->originOffset();
+    }
+    return QVector2D();
+}
+
 //-------------------------------------------------------------------------------------------------
 TimeKeyBlender::TimeKeyBlender(ObjectTree& aTree)
     : mSeeker()
@@ -960,7 +970,6 @@ void TimeKeyBlender::setBoneInfluenceMaps(
         BoneInfluenceMap* influence = nullptr;
         QMatrix4x4 outerMtx;
         QMatrix4x4 innerMtx;
-        QVector2D imageOffset = expans.imageOffset();
 
         // check bone validity
         if (key)
@@ -989,7 +998,6 @@ void TimeKeyBlender::setBoneInfluenceMaps(
 
                 influence = &cache->influence();
                 innerMtx = cache->innerMatrix();
-                imageOffset = cache->imageOffset();
             }
 
             auto cacheOwner = key->cacheOwner();
@@ -1006,7 +1014,6 @@ void TimeKeyBlender::setBoneInfluenceMaps(
         expans.bone().setInfluenceMap(influence);
         expans.bone().setOuterMatrix(outerMtx);
         expans.bone().setInnerMatrix(innerMtx);
-        expans.setImageOffset(imageOffset);
     }
 
     for (auto child : aNode.children())

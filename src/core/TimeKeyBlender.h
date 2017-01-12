@@ -42,6 +42,8 @@ public:
             ObjectNode& aNode, const TimeInfo& aTime);
     static QVector2D getImageOffset(
             ObjectNode& aNode, const TimeInfo& aTime);
+    static QVector2D getOriginOffset(
+            ObjectNode& aNode, const TimeInfo& aTime);
 
     TimeKeyBlender(ObjectTree& aTree);
     TimeKeyBlender(ObjectNode& aRootNode, bool aUseWorking);

@@ -86,7 +86,7 @@ BoneKey::Cache::Cache()
     : mInfluence()
     , mNode()
     , mInnerMtx()
-    , mImageOffset()
+    , mOriginOffset()
     , mFrameSign()
 {
     static const int kMaxBoneCount = 32;
@@ -145,11 +145,11 @@ void BoneKey::updateCaches(Project& aProject, const QList<Cache*>& aTargets)
 
             // set world matrix
             cache->setInnerMatrix(TimeKeyBlender::getRelativeMatrix(node, time, owner));
-            cache->setImageOffset(TimeKeyBlender::getImageOffset(node, time));
+            cache->setOriginOffset(TimeKeyBlender::getOriginOffset(node, time));
 
             // influence map matrix
             auto mapMtx = cache->innerMatrix();
-            mapMtx.translate(cache->imageOffset());
+            mapMtx.translate(cache->originOffset());
 
             BoneInfluenceMap& map = cache->influence();
             // allocate if necessary
@@ -390,7 +390,7 @@ bool BoneKey::serialize(Serializer& aOut) const
     {
         aOut.writeID(cache->node());
         aOut.write(cache->innerMatrix());
-        aOut.write(cache->imageOffset());
+        aOut.write(cache->originOffset());
         aOut.write(cache->frameSign());
 
         if (!cache->influence().serialize(aOut))
@@ -505,19 +505,13 @@ bool BoneKey::deserialize(Deserializer& aIn)
         }
 
         // inner matrix
-        QMatrix4x4 innerMtx;
-        aIn.read(innerMtx);
-        cache->setInnerMatrix(innerMtx);
+        cache->setInnerMatrix(aIn.getRead<QMatrix4x4>());
 
-        // image offset
-        QVector2D imageOffset;
-        aIn.read(imageOffset);
-        cache->setImageOffset(imageOffset);
+        // origin offset
+        cache->setOriginOffset(aIn.getRead<QVector2D>());
 
         // frame sign
-        Frame frameSign;
-        aIn.read(frameSign);
-        cache->setFrameSign(frameSign);
+        cache->setFrameSign(aIn.getRead<Frame>());
 
         // influence
         if (!cache->influence().deserialize(aIn))
@@ -527,8 +521,7 @@ bool BoneKey::deserialize(Deserializer& aIn)
     }
 
     // binding cache count
-    int bindingCacheCount = 0;
-    aIn.read(bindingCacheCount);
+    const int bindingCacheCount = aIn.getRead<int>();
     if (bindingCacheCount < 0)
     {
         return aIn.errored("invalid binding cache count");
@@ -573,8 +566,7 @@ bool BoneKey::deserializeBone(Deserializer& aIn, Bone2* aBone)
     if (!aBone) return true;
 
     // child count
-    int childCount = 0;
-    aIn.read(childCount);
+    const int childCount = aIn.getRead<int>();
     if (childCount < 0)
     {
         return aIn.errored("invalid child count");
