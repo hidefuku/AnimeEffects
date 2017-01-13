@@ -1,5 +1,6 @@
 #include <vector>
 #include <iostream>
+#include <cmath>
 #include "XC.h"
 #include "img/PSDUtil.h"
 

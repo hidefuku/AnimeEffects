@@ -2,6 +2,7 @@
 #define IMG_PSDFORMAT_H
 
 #include <memory>
+#include <iostream>
 #include "XC.h"
 
 namespace img

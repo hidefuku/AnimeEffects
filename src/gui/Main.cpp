@@ -107,11 +107,15 @@ int entryPoint(int argc, char *argv[])
 
     // application path
     const QString exeFilePath(uniArgs.at(0));
+#if defined(Q_OS_MAC)
+    const QString appDir = QDir(app.applicationDirPath() + "/../../../").absolutePath();
+#else
     const QString appDir(QFileInfo(exeFilePath).dir().path());
+#endif
+    QDir::setCurrent(appDir);
     const QString resourceDir(appDir + "/data");
     const QString stdCacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
     const QString cacheDir = !stdCacheDir.isEmpty() ? stdCacheDir : (appDir + "/cache");
-
     XC_DEBUG_REPORT() << "exe path =" << exeFilePath;
 
     // set fatal error handler

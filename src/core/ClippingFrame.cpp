@@ -83,7 +83,7 @@ void ClippingFrame::clearTexture()
 void ClippingFrame::createSingulationShader()
 {
     static const char* kVertexShaderText =
-            "#version 130 \n"
+            "#version 330 \n"
             "in vec2 inPosition;"
             "in vec2 inTexCoord;"
             "out vec2 vTexCoord;"
@@ -93,7 +93,7 @@ void ClippingFrame::createSingulationShader()
             "}";
 
     static const char* kFragmentShaderText =
-            "#version 130 \n"
+            "#version 330 \n"
             "uniform uint uSingulation;"
             "uniform usampler2D uTexture;"
             "in vec2 vTexCoord;"
