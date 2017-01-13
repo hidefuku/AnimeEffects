@@ -8,6 +8,7 @@ namespace gl
 //-------------------------------------------------------------------------------------------------
 EasyTextureDrawer::EasyTextureDrawer()
     : mShader()
+    , mIndices()
 {
 }
 
@@ -48,6 +49,12 @@ bool EasyTextureDrawer::init()
         XC_FATAL_ERROR("OpenGL Error", "Failed to link shader.",
                        mShader.log());
         return false;
+    }
+
+    {
+        static const GLuint kIndices[4] = { 0, 1, 3, 2 };
+        mIndices.reset(new gl::BufferObject(GL_ELEMENT_ARRAY_BUFFER));
+        mIndices->resetData(4, GL_STATIC_DRAW, kIndices);
     }
 
     return true;
@@ -130,23 +137,18 @@ void EasyTextureDrawer::draw(
 
     Util::resetRenderState();
 
-    //ggl.glEnable(GL_TEXTURE_2D);
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_2D, aTexture);
     {
-        //static const GLuint kIndices[4] = { 0, 1, 2, 3 };
-        static const GLuint kIndices[4] = { 0, 1, 3, 2 };
         mShader.bind();
         mShader.setAttributeArray("inPosition", aPositions.data(), 4);
         mShader.setAttributeArray("inTexCoord", aTexCoords.data(), 4);
         mShader.setUniformValue("uTexture0", 0);
-        //ggl.glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, kIndices);
-        ggl.glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, kIndices); // for gl removed
+        Util::drawElements(GL_TRIANGLE_STRIP, GL_UNSIGNED_INT, *mIndices);
         mShader.release();
     }
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_2D, 0);
-    //ggl.glDisable(GL_TEXTURE_2D);
 
     GL_CHECK_ERROR();
 }

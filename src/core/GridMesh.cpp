@@ -32,6 +32,7 @@ GridMesh::GridMesh()
     , mNormals()
     , mHexaConnections()
     , mMeshBuffer()
+    , mIndexBuffer()
 {
     // initialize mesh buffer
     getMeshBuffer();
@@ -51,6 +52,7 @@ GridMesh::GridMesh(const GridMesh& aRhs)
     , mNormals(aRhs.mNormals)
     , mHexaConnections(aRhs.mHexaConnections)
     , mMeshBuffer()
+    , mIndexBuffer()
 {
     // initialize mesh buffer
     getMeshBuffer();
@@ -72,6 +74,9 @@ GridMesh& GridMesh::operator=(const GridMesh& aRhs)
     mTexCoords = aRhs.mTexCoords;
     mNormals = aRhs.mNormals;
     mHexaConnections = aRhs.mHexaConnections;
+
+    // reset index buffer
+    resetIndexBuffer();
 
     // initialize mesh buffer
     getMeshBuffer();
@@ -99,6 +104,9 @@ void GridMesh::swap(GridMesh& aRhs)
     mNormals.swap(aRhs.mNormals);
     mHexaConnections.swap(aRhs.mHexaConnections);
     mMeshBuffer.swap(aRhs.mMeshBuffer);
+
+    resetIndexBuffer();
+    aRhs.resetIndexBuffer();
 }
 
 void GridMesh::freeBuffers()
@@ -109,6 +117,23 @@ void GridMesh::freeBuffers()
     mNormals.reset();
     mHexaConnections.reset();
     mIndices.reset();
+    resetIndexBuffer();
+}
+
+void GridMesh::resetIndexBuffer()
+{
+    if (mIndices && mIndexCount > 0)
+    {
+        if (!mIndexBuffer)
+        {
+            mIndexBuffer.reset(new gl::BufferObject(GL_ELEMENT_ARRAY_BUFFER));
+        }
+        mIndexBuffer->resetData(mIndexCount, GL_STATIC_DRAW, mIndices.data());
+    }
+    else
+    {
+        mIndexBuffer.reset();
+    }
 }
 
 void GridMesh::allocVertexBuffers(int aVertexCount)
@@ -120,7 +145,7 @@ void GridMesh::allocVertexBuffers(int aVertexCount)
     mHexaConnections.construct(aVertexCount);
 }
 
-void GridMesh::allocIndexBuffer(int aIndexCount)
+void GridMesh::allocIndices(int aIndexCount)
 {
     mIndices.construct(aIndexCount);
 }
@@ -170,16 +195,21 @@ void GridMesh::createGridMesh(const void* aImagePtr)
     if (mVertexCount <= 0 || mIndexCount <= 0) return;
 
     // allocate attribute buffers
-    allocIndexBuffer(mIndexCount);
+    allocIndices(mIndexCount);
     allocVertexBuffers(mVertexCount);
     initializeVertexBuffers(mVertexCount);
 
-    // setup attributes
+    // setup indices
     creator.writeIndices(mIndices.data());
+    // update gl index buffer
+    resetIndexBuffer();
+
+    // setup attributes
     creator.writeVertices((GLfloat*)mPositions.data(), (GLfloat*)mTexCoords.data());
 
     // setup connections
     creator.writeConnections(mHexaConnections.data());
+
 }
 
 void GridMesh::createQuadMesh()
@@ -189,13 +219,15 @@ void GridMesh::createQuadMesh()
     mIndexCount = 6;
 
     // allocate attribute buffers
-    allocIndexBuffer(mIndexCount);
+    allocIndices(mIndexCount);
     allocVertexBuffers(mVertexCount);
     initializeVertexBuffers(mVertexCount);
 
     // indices
     mIndices[0] = 0; mIndices[1] = 1; mIndices[2] = 2;
     mIndices[3] = 1; mIndices[4] = 3; mIndices[5] = 2;
+    // update gl index buffer
+    resetIndexBuffer();
 
     // vertices
     mPositions[0].set(0.0f, 0.0f, 0.0f);
@@ -249,6 +281,15 @@ void GridMesh::writeHeightMap(const HeightMap& aMap, const QVector2D& aMinPos)
         normal.setZ(-normal.z());
         mNormals[i].set((normal / 4).normalized());
     }
+}
+
+gl::BufferObject& GridMesh::getIndexBuffer()
+{
+    if (!mIndexBuffer)
+    {
+        mIndexBuffer.reset(new gl::BufferObject(GL_ELEMENT_ARRAY_BUFFER));
+    }
+    return *mIndexBuffer;
 }
 
 LayerMesh::MeshBuffer& GridMesh::getMeshBuffer()
@@ -535,9 +576,11 @@ bool GridMesh::deserialize(Deserializer& aIn)
     // indices
     if (mIndexCount > 0)
     {
-        allocIndexBuffer(mIndexCount);
+        allocIndices(mIndexCount);
         aIn.readGL(mIndices.data(), mIndexCount);
     }
+    // initialize index buffer
+    resetIndexBuffer();
 
     // vertex count
     aIn.read(mVertexCount);
@@ -558,6 +601,8 @@ bool GridMesh::deserialize(Deserializer& aIn)
             return aIn.errored("failed to read connections");
         }
     }
+    // initialize mesh buffer
+    getMeshBuffer();
 
     // check block end
     if (!aIn.endBlock())

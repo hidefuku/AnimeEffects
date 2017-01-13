@@ -18,7 +18,6 @@ public:
     void resize(const QSize& aSize);
     void clearTexture();
     void singulate(uint8 aId);
-    //void drawClipping(gl::BufferObject& aPositions);
     void bind();
     void release();
     void setupDrawBuffers();
@@ -40,6 +39,7 @@ private:
     QScopedPointer<gl::Texture> mTexture;
     uint8 mClippingId;
     gl::EasyShaderProgram mSingulationShader;
+    gl::BufferObject mIndices;
     uint32 mRenderStamp;
 };
 

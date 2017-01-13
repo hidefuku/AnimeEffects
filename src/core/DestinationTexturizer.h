@@ -21,7 +21,7 @@ public:
 
     void update(
             GLuint aFramebuffer, GLuint aFrameTexture, const QMatrix4x4& aViewMatrix,
-            const LayerMesh& aMesh, gl::BufferObject& aPositions);
+            LayerMesh& aMesh, gl::BufferObject& aPositions);
 
     gl::Texture& texture() { return *mTexture; }
     const gl::Texture& texture() const { return *mTexture; }

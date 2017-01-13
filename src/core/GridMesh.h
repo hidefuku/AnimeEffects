@@ -11,6 +11,7 @@
 #include "util/ArrayBuffer.h"
 #include "gl/Vector2.h"
 #include "gl/Vector3.h"
+#include "gl/BufferObject.h"
 #include "img/GridMeshCreator.h"
 #include "core/LayerMesh.h"
 #include "core/Serializer.h"
@@ -75,6 +76,7 @@ public:
     virtual int vertexCount() const { return mVertexCount; }
     virtual const GLuint* indices() const { return mIndices.data(); }
     virtual GLsizei indexCount() const { return (GLsizei)mIndexCount; }
+    virtual gl::BufferObject& getIndexBuffer();
     virtual MeshBuffer& getMeshBuffer();
     virtual void resetArrayedConnection(
             ArrayedConnectionList& aDest,
@@ -99,10 +101,11 @@ private:
     void createGridMesh(const void* aImagePtr);
     void createQuadMesh();
 
-    void allocIndexBuffer(int aIndexCount);
+    void allocIndices(int aIndexCount);
     void allocVertexBuffers(int aVertexCount);
     void initializeVertexBuffers(int aVertexCount);
     void freeBuffers();
+    void resetIndexBuffer();
     std::pair<bool, gl::Vector3> gatherValidPositions(
             int aIndex, const gl::Vector3* aPositions,
             const bool* aValidity) const;
@@ -122,6 +125,7 @@ private:
     util::ArrayBuffer<gl::Vector3> mNormals;
     util::ArrayBuffer<HexaConnection> mHexaConnections;
     QScopedPointer<MeshBuffer> mMeshBuffer;
+    QScopedPointer<gl::BufferObject> mIndexBuffer;
 };
 
 } // namespace core

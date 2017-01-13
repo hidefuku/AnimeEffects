@@ -167,6 +167,7 @@ public:
         virtual int vertexCount() const { return mPositions.count(); }
         virtual const GLuint* indices() const { return mIndices.data(); }
         virtual GLsizei indexCount() const { return mIndices.count(); }
+        virtual gl::BufferObject& getIndexBuffer();
         virtual MeshBuffer& getMeshBuffer();
         virtual void resetArrayedConnection(
                 ArrayedConnectionList& aDest,
@@ -182,6 +183,7 @@ public:
         void copyVerticesEdgesAndFaces(const Data& aRhs);
         void updateVtxIndices();
         void updateGLAttribute();
+        void resetIndexBuffer();
         bool serialize(Serializer& aOut) const;
         bool deserialize(Deserializer& aIn);
 
@@ -193,6 +195,7 @@ public:
         QVector<gl::Vector2> mTexCoords;
         QVector<GLuint> mIndices;
         QScopedPointer<MeshBuffer> mMeshBuffer;
+        QScopedPointer<gl::BufferObject> mIndexBuffer;
         MeshKey* mOwner;
     };
 

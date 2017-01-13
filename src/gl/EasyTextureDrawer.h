@@ -4,6 +4,7 @@
 #include <array>
 #include "util/NonCopyable.h"
 #include "gl/EasyShaderProgram.h"
+#include "gl/BufferObject.h"
 
 namespace gl
 {
@@ -25,6 +26,7 @@ public:
 
 private:
     gl::EasyShaderProgram mShader;
+    QScopedPointer<gl::BufferObject> mIndices;
 };
 
 } // namespace gl

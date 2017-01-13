@@ -3,6 +3,7 @@
 
 #include <QGL>
 #include <QSize>
+namespace gl { class BufferObject; }
 
 namespace gl
 {
@@ -15,6 +16,7 @@ public:
     static void resetRenderState();
     static void setAbility(GLenum aState, bool aIsEnable);
     static GLuint findTextureFromColorAttachment0();
+    static void drawElements(GLenum aPrimitive, GLenum aType, gl::BufferObject& aIndices);
 
 private:
     Util() {}

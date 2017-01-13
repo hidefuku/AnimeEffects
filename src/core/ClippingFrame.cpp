@@ -15,10 +15,14 @@ ClippingFrame::ClippingFrame()
     , mTexture()
     , mClippingId(0)
     , mSingulationShader()
+    , mIndices(GL_ELEMENT_ARRAY_BUFFER)
     , mRenderStamp()
 {
     mFramebuffer.reset(new gl::Framebuffer());
     mTexture.reset(new gl::Texture());
+
+    static const GLuint kIndices[4] = { 0, 1, 3, 2 };
+    mIndices.resetData(4, GL_STATIC_DRAW, kIndices);
 
     createSingulationShader();
 }
@@ -135,8 +139,6 @@ void ClippingFrame::singulate(uint8 aId)
 {
     if (mTexture->id() == 0) return;
 
-    //static const GLuint kIndices[4] = { 0, 1, 2, 3 };
-    static const GLuint kIndices[4] = { 0, 1, 3, 2 };
     std::array<gl::Vector2, 4> positions;
     positions[0].set(-1.0f, -1.0f);
     positions[1].set(-1.0f,  1.0f);
@@ -157,7 +159,6 @@ void ClippingFrame::singulate(uint8 aId)
     gl::Util::setViewportAsActualPixels(textureSize);
     gl::Util::resetRenderState();
 
-    //ggl.glEnable(GL_TEXTURE_2D);
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_2D, textureId);
 
@@ -166,13 +167,11 @@ void ClippingFrame::singulate(uint8 aId)
     shader.setAttributeArray("inTexCoord", texCoords.data(), 4);
     shader.setUniformValue("uSingulation", (GLuint)aId);
     shader.setUniformValue("uTexture0", 0);
-    //ggl.glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, kIndices);
-    ggl.glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, kIndices); // for gl removed
+    gl::Util::drawElements(GL_TRIANGLE_STRIP, GL_UNSIGNED_INT, mIndices);
     shader.release();
 
     ggl.glActiveTexture(GL_TEXTURE0);
     ggl.glBindTexture(GL_TEXTURE_2D, 0);
-    //ggl.glDisable(GL_TEXTURE_2D);
 
     mFramebuffer->release();
     XC_ASSERT(ggl.glGetError() == GL_NO_ERROR);
@@ -207,24 +206,5 @@ uint8 ClippingFrame::forwardClippingId()
     }
     return mClippingId;
 }
-
-/*
-void ClippingFrame::drawClipping(gl::BufferObject& aPositions)
-{
-    {
-        std::array<gl::Vector2, 4> positions;
-        positions[0].set(-1.0f, -1.0f);
-        positions[1].set(-1.0f,  1.0f);
-        positions[2].set( 1.0f,  1.0f);
-        positions[3].set( 1.0f, -1.0f);
-
-        static const GLuint kIndices[4] = { 0, 1, 3, 2 };
-        shader.bind();
-        shader.setAttributeArray("inPosition", positions.data());
-        ggl.glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, kIndices);
-        shader.release();
-    }
-}
-*/
 
 } // namespace core

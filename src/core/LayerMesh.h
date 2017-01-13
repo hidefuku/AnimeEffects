@@ -82,7 +82,8 @@ public:
     virtual const gl::Vector2* texCoords() const = 0;
     virtual int vertexCount() const = 0;
     virtual const GLuint* indices() const = 0;
-    virtual GLsizei indexCount() const = 0;    
+    virtual GLsizei indexCount() const = 0;
+    virtual gl::BufferObject& getIndexBuffer() = 0;
     virtual MeshBuffer& getMeshBuffer() = 0;
     virtual void resetArrayedConnection(
             ArrayedConnectionList& aDest,

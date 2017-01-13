@@ -63,7 +63,7 @@ void DestinationTexturizer::clearTexture()
 
 void DestinationTexturizer::update(
         GLuint aFramebuffer, GLuint aFrameTexture, const QMatrix4x4& aViewMatrix,
-        const LayerMesh& aMesh, gl::BufferObject& aPositions)
+        LayerMesh& aMesh, gl::BufferObject& aPositions)
 {
     XC_ASSERT(mTexture->size().isValid());
 
@@ -89,9 +89,10 @@ void DestinationTexturizer::update(
         mShader.setUniformValue("uScreenSize", QSizeF(mTexture->size()));
         mShader.setUniformValue("uDestTexture", 0);
 
-        ggl.glDrawElements(
-                    aMesh.primitiveMode(), aMesh.indexCount(),
-                    GL_UNSIGNED_INT, aMesh.indices());
+        gl::Util::drawElements(
+                    aMesh.primitiveMode(),
+                    GL_UNSIGNED_INT,
+                    aMesh.getIndexBuffer());
 
         mShader.release();
     }

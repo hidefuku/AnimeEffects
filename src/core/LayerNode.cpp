@@ -266,10 +266,10 @@ void LayerNode::renderClipper(
             shader.setUniformValue("uClippingId", (int)aInfo.clippingId);
         }
 
-        ggl.glDrawElements(
+        gl::Util::drawElements(
                     mCurrentMesh->primitiveMode(),
-                    mCurrentMesh->indexCount(),
-                    GL_UNSIGNED_INT, mCurrentMesh->indices());
+                    GL_UNSIGNED_INT,
+                    mCurrentMesh->getIndexBuffer());
 
         shader.release();
     }
@@ -401,10 +401,10 @@ void LayerNode::renderShape(
             shader.setUniformValue("uClippingTexture", 2);
         }
 
-        ggl.glDrawElements(
+        gl::Util::drawElements(
                     mCurrentMesh->primitiveMode(),
-                    mCurrentMesh->indexCount(),
-                    GL_UNSIGNED_INT, mCurrentMesh->indices());
+                    GL_UNSIGNED_INT,
+                    mCurrentMesh->getIndexBuffer());
 
         shader.release();
     }

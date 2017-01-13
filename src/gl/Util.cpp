@@ -1,6 +1,7 @@
 #include "XC.h"
 #include "gl/Util.h"
 #include "gl/Global.h"
+#include "gl/BufferObject.h"
 
 namespace gl
 {
@@ -86,6 +87,14 @@ GLuint Util::findTextureFromColorAttachment0()
         return (GLuint)value;
     }
     return 0;
+}
+
+void Util::drawElements(GLenum aPrimitive, GLenum aType, gl::BufferObject& aIndices)
+{
+    aIndices.bind();
+    gl::Global::functions().glDrawElements(aPrimitive, aIndices.dataCount(), aType, nullptr);
+    aIndices.release();
+    GL_CHECK_ERROR();
 }
 
 } // namespace gl

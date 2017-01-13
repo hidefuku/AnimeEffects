@@ -429,6 +429,7 @@ MeshKey::Data::Data()
     , mTexCoords()
     , mIndices()
     , mMeshBuffer()
+    , mIndexBuffer()
     , mOwner()
 {
 }
@@ -442,10 +443,13 @@ MeshKey::Data::Data(const Data& aRhs)
     , mTexCoords(aRhs.mTexCoords)
     , mIndices(aRhs.mIndices)
     , mMeshBuffer()
+    , mIndexBuffer()
     , mOwner(aRhs.mOwner)
 {
     // copy geo
     copyVerticesEdgesAndFaces(aRhs);
+    // initialize index buffer
+    resetIndexBuffer();
     // initialize mesh buffer
     getMeshBuffer();
 }
@@ -461,6 +465,8 @@ MeshKey::Data& MeshKey::Data::operator=(const Data& aRhs)
     mOwner = aRhs.mOwner;
     // copy geo
     copyVerticesEdgesAndFaces(aRhs);
+    // initialize index buffer
+    resetIndexBuffer();
     // initialize mesh buffer
     getMeshBuffer();
 
@@ -518,6 +524,15 @@ void MeshKey::Data::destroy()
     mFaces.clear();
     mEdges.clear();
     mVertices.clear();
+}
+
+gl::BufferObject& MeshKey::Data::getIndexBuffer()
+{
+    if (!mIndexBuffer)
+    {
+        mIndexBuffer.reset(new gl::BufferObject(GL_ELEMENT_ARRAY_BUFFER));
+    }
+    return *mIndexBuffer;
 }
 
 LayerMesh::MeshBuffer& MeshKey::Data::getMeshBuffer()
@@ -620,6 +635,24 @@ void MeshKey::Data::updateGLAttribute()
             mIndices[i + 2] = vtx[2]->index();
             i += 3;
         }
+    }
+    // update index buffer
+    resetIndexBuffer();
+}
+
+void MeshKey::Data::resetIndexBuffer()
+{
+    if (mIndices.count() > 0)
+    {
+        if (!mIndexBuffer)
+        {
+            mIndexBuffer.reset(new gl::BufferObject(GL_ELEMENT_ARRAY_BUFFER));
+        }
+        mIndexBuffer->resetData(mIndices.count(), GL_STATIC_DRAW, mIndices.data());
+    }
+    else
+    {
+        mIndexBuffer.reset();
     }
 }
 
