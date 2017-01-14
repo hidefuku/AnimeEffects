@@ -59,7 +59,7 @@ void AttrGroup::onClicked(bool aChecked)
     {
         mChecked = aChecked;
         this->setChecked(aChecked);
-        this->setFixedHeight(aChecked ? QWIDGETSIZE_MAX : 20);
+        this->setFixedHeight(aChecked ? QWIDGETSIZE_MAX : 22);
 
         for (auto label : mLabels)
         {

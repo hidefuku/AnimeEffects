@@ -12,6 +12,7 @@ KeyKnocker::KeyKnocker(const QString& aLabel)
     mButton->setObjectName("keyKnocker");
     mButton->setFocusPolicy(Qt::NoFocus);
 
+    mLayout->setSpacing(2);
     mLayout->setContentsMargins(0, 0, 0, 0);
     mLayout->addWidget(mButton);
     mLayout->addWidget(new QLabel(aLabel));
