@@ -4,10 +4,10 @@ http://animeeffects.org/en/
 
 Note: For the present, there may be incompatible changes without notice in advance.
 
-## Development Environment
-* Windows/Linux (maybe also Mac)
+## Environment
+* Windows/Linux/Mac
 * Qt5.7 or later
-* MSVC2015/MinGW/GCC (32-bit or 64-bit)
+* MSVC2015/MinGW/GCC/Clang (32-bit or 64-bit)
 
 ## Runtime Requirements
 * OpenGL4.0 CoreProfile or later
