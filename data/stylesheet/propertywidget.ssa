@@ -169,7 +169,7 @@ image: url(data/icon/file.png);
 QGroupBox#propertyPanel {
 background-color: #c8c8c8;
 border:0px solid transparent;
-border-radius:8px;
+border-radius:4px;
 margin-top: 2px;
 margin-bottom: 4px;
 margin-left: 2px;

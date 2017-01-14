@@ -17,7 +17,6 @@ class Panel : public QGroupBox
 public:
     Panel(const QString& aTitle, QWidget* aParent);
     virtual ~Panel() {}
-    //void addGroup(QWidget* aGroup);
     void addGroup(QGroupBox* aGroup);
     void addStretch();
 
@@ -29,6 +28,8 @@ private slots:
 
 private:
     QVBoxLayout* mLayout;
+    QVector<QGroupBox*> mGroups;
+    bool mChecked;
 };
 
 } // namespace prop

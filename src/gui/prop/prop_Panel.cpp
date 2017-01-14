@@ -4,7 +4,7 @@
 
 namespace
 {
-static const int kCollapsedPanelHeight = 20;
+static const int kCollapsedPanelHeight = 22;
 }
 
 namespace gui {
@@ -13,6 +13,8 @@ namespace prop {
 Panel::Panel(const QString& aTitle, QWidget* aParent)
     : QGroupBox(aParent)
     , mLayout(new QVBoxLayout())
+    , mGroups()
+    , mChecked(true)
 {
     mLayout->setSpacing(0);
     mLayout->setContentsMargins(0, 0, 0, 0);
@@ -20,22 +22,18 @@ Panel::Panel(const QString& aTitle, QWidget* aParent)
     this->setObjectName("propertyPanel");
     this->setTitle(aTitle);
     this->setCheckable(true);
+    this->setChecked(mChecked);
     this->setFocusPolicy(Qt::NoFocus);
     this->setLayout(mLayout);
 
     this->connect(this, &QGroupBox::clicked, this, &Panel::onClicked);
 }
 
-/*
-void Panel::addGroup(QWidget* aGroup)
-{
-    mLayout->addWidget(aGroup);
-}
-*/
 void Panel::addGroup(QGroupBox* aGroup)
 {
     mLayout->addWidget(aGroup);
     aGroup->connect(aGroup, &QGroupBox::clicked, this, &Panel::onChildrenClicked);
+    mGroups.push_back(aGroup);
 }
 
 void Panel::addStretch()
@@ -45,15 +43,12 @@ void Panel::addStretch()
 
 void Panel::onClicked(bool aChecked)
 {
-    if (aChecked)
+    if (mChecked != aChecked)
     {
-        this->setFixedHeight(QWIDGETSIZE_MAX);
+        mChecked = aChecked;
+        this->setFixedHeight(aChecked ? QWIDGETSIZE_MAX : kCollapsedPanelHeight);
+        if (onCollapsed) onCollapsed();
     }
-    else
-    {
-        this->setFixedHeight(kCollapsedPanelHeight);
-    }
-    if (onCollapsed) onCollapsed();
 }
 
 void Panel::onChildrenClicked(bool)
