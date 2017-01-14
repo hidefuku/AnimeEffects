@@ -14,6 +14,9 @@ Panel::Panel(const QString& aTitle, QWidget* aParent)
     : QGroupBox(aParent)
     , mLayout(new QVBoxLayout())
 {
+    mLayout->setSpacing(0);
+    mLayout->setContentsMargins(0, 0, 0, 0);
+
     this->setObjectName("propertyPanel");
     this->setTitle(aTitle);
     this->setCheckable(true);

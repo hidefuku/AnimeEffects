@@ -21,7 +21,9 @@ private slots:
 private:
     QFormLayout* mLayout;
     int mLabelWidth;
+    QVector<QWidget*> mLabels;
     QVector<ItemBase*> mItems;
+    bool mChecked;
 };
 
 } // namespace prop

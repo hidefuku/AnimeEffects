@@ -13,6 +13,7 @@ public:
     virtual QWidget* itemWidget() { return nullptr; }
     virtual QLayout* itemLayout() { return nullptr; }
     virtual void setItemEnabled(bool aEnable) = 0;
+    virtual void setItemVisible(bool aVisible) = 0;
 };
 
 } // namespace prop

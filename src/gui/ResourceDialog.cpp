@@ -28,6 +28,7 @@ ResourceDialog::ResourceDialog(ViaPoint& aViaPoint, bool aModal, QWidget* aParen
         auto addResource = new QAction(tr("Add Resource"), fileMenu);
         connect(addResource, &QAction::triggered, this, &ResourceDialog::onAddResourceTriggered);
         fileMenu->addAction(addResource);
+        menuBar->setNativeMenuBar(false);
         menuBar->addMenu(fileMenu);
         menuBar->show();
         this->setMenuBar(menuBar);

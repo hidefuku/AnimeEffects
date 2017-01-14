@@ -23,7 +23,7 @@ MoveKeyGroup::MoveKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidt
     , mKeyExists(false)
 {
     mKnocker = new KeyKnocker(tr("Move"));
-    mKnocker->set([=](){ this->mAccessor.knockNewMove(); });
+    mKnocker->set([=](){ this->mAccessor.knockNewMove(); this->makeSureExpand(); });
     aPanel.addGroup(mKnocker);
 
     {
@@ -107,7 +107,7 @@ RotateKeyGroup::RotateKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabel
     , mKeyExists(false)
 {
     mKnocker = new KeyKnocker(tr("Rotate"));
-    mKnocker->set([=](){ this->mAccessor.knockNewRotate(); });
+    mKnocker->set([=](){ this->mAccessor.knockNewRotate(); this->makeSureExpand(); });
     aPanel.addGroup(mKnocker);
 
     {
@@ -170,7 +170,7 @@ ScaleKeyGroup::ScaleKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWi
     , mKeyExists(false)
 {
     mKnocker = new KeyKnocker(tr("Scale"));
-    mKnocker->set([=](){ this->mAccessor.knockNewScale(); });
+    mKnocker->set([=](){ this->mAccessor.knockNewScale(); this->makeSureExpand(); });
     aPanel.addGroup(mKnocker);
 
     {
@@ -233,7 +233,7 @@ DepthKeyGroup::DepthKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWi
     , mKeyExists(false)
 {
     mKnocker = new KeyKnocker(tr("Depth"));
-    mKnocker->set([=](){ this->mAccessor.knockNewDepth(); });
+    mKnocker->set([=](){ this->mAccessor.knockNewDepth(); this->makeSureExpand(); });
     aPanel.addGroup(mKnocker);
 
     {
@@ -296,7 +296,7 @@ OpaKeyGroup::OpaKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
     , mKeyExists(false)
 {
     mKnocker = new KeyKnocker(tr("Opacity"));
-    mKnocker->set([=](){ this->mAccessor.knockNewOpacity(); });
+    mKnocker->set([=](){ this->mAccessor.knockNewOpacity(); this->makeSureExpand(); });
     aPanel.addGroup(mKnocker);
 
     {
@@ -359,7 +359,7 @@ PoseKeyGroup::PoseKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidt
     , mKeyExists(false)
 {
     mKnocker = new KeyKnocker(tr("Pose"));
-    mKnocker->set([=](){ this->mAccessor.knockNewPose(); });
+    mKnocker->set([=](){ this->mAccessor.knockNewPose(); this->makeSureExpand(); });
     aPanel.addGroup(mKnocker);
 
     {
@@ -411,7 +411,7 @@ FFDKeyGroup::FFDKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabelWidth)
     , mKeyExists(false)
 {
     mKnocker = new KeyKnocker(tr("FFD"));
-    mKnocker->set([=](){ this->mAccessor.knockNewFFD(); });
+    mKnocker->set([=](){ this->mAccessor.knockNewFFD(); this->makeSureExpand(); });
     aPanel.addGroup(mKnocker);
 
     {
@@ -467,7 +467,7 @@ ImageKeyGroup::ImageKeyGroup(Panel& aPanel, KeyAccessor& aAccessor,
     , mViaPoint(aViaPoint)
 {
     mKnocker = new KeyKnocker(tr("Image"));
-    mKnocker->set([=]() { this->knockNewKey(); });
+    mKnocker->set([=]() { this->knockNewKey(); this->makeSureExpand(); });
     aPanel.addGroup(mKnocker);
 
     {

@@ -2,4 +2,4 @@ font_family_win = Segoe UI
 font_family_mac = San Francisco
 font_size = 8pt
 font_size_win = 8pt
-font_size_mac = 12pt
+font_size_mac = 11pt

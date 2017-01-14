@@ -133,6 +133,7 @@ QFormLayout* KeyBindingDialog::createTab(const QString& aTitle)
     scroll->setWidget(frame);
 
     auto form = new QFormLayout();
+    form->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
     form->setLabelAlignment(Qt::AlignRight);
     frame->setLayout(form);
 

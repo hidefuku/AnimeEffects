@@ -16,15 +16,19 @@ public:
     KeyGroup(const QString& aTitle, int aLabelWidth);
     virtual ~KeyGroup();
     void addItem(const QString& aLabel, ItemBase* aItem);
+    void makeSureExpand();
 
 private slots:
     void onClicked(bool aChecked);
 
 private:
+    void setExpansion(bool aChecked);
+
     QVector<QWidget*> mLabels;
     QVector<ItemBase*> mItems;
     QFormLayout* mLayout;
     int mLabelWidth;
+    bool mChecked;
 };
 
 } // namespace prop

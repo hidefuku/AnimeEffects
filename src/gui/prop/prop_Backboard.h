@@ -26,6 +26,8 @@ public:
     void updateFrame();
 
 private:
+    void resetLayout();
+
     ViaPoint& mViaPoint;
     core::Project* mProject;
     QVBoxLayout* mLayout;

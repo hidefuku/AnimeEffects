@@ -7,12 +7,21 @@ Backboard::Backboard(ViaPoint& aViaPoint, QWidget* aParent)
     : QWidget(aParent)
     , mViaPoint(aViaPoint)
     , mProject()
-    , mLayout(new QVBoxLayout())
+    , mLayout()
     , mConstantPanel()
     , mDefaultKeyPanel()
     , mCurrentKeyPanel()
 {
+    resetLayout();
+}
+
+void Backboard::resetLayout()
+{
+    if (mLayout) delete mLayout;
+    mLayout = new QVBoxLayout();
     mLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    mLayout->setSpacing(0);
+    mLayout->setContentsMargins(2, 2, 2, 2);
     this->setLayout(mLayout);
 }
 
@@ -22,13 +31,7 @@ void Backboard::setProject(core::Project* aProject)
     mDefaultKeyPanel.reset();
     mCurrentKeyPanel.reset();
 
-    // reset layout
-    {
-        delete mLayout;
-        mLayout = new QVBoxLayout();
-        mLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-        this->setLayout(mLayout);
-    }
+    resetLayout();
 
     mProject = aProject;
 

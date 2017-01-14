@@ -47,6 +47,11 @@ void CheckItem::setItemEnabled(bool aEnable)
     }
 }
 
+void CheckItem::setItemVisible(bool aVisible)
+{
+    mBox->setVisible(aVisible);
+}
+
 void CheckItem::setValue(bool aValue, bool aSignal)
 {
     mSignal = aSignal;
@@ -86,6 +91,11 @@ void ComboItem::onEditingFinished()
 void ComboItem::setItemEnabled(bool aEnable)
 {
     mBox->setEnabled(aEnable);
+}
+
+void ComboItem::setItemVisible(bool aVisible)
+{
+    mBox->setVisible(aVisible);
 }
 
 void ComboItem::setValue(int aValue, bool aSignal)
@@ -136,6 +146,14 @@ void Combo2DItem::setItemEnabled(bool aEnable)
     for (int i = 0; i < 2; ++i)
     {
         mBox[i]->setEnabled(aEnable);
+    }
+}
+
+void Combo2DItem::setItemVisible(bool aVisible)
+{
+    for (int i = 0; i < 2; ++i)
+    {
+        mBox[i]->setVisible(aVisible);
     }
 }
 
@@ -211,6 +229,15 @@ void EasingItem::setItemEnabled(bool aEnable)
     mDBox->setEnabled(aEnable);
 }
 
+void EasingItem::setItemVisible(bool aVisible)
+{
+    for (int i = 0; i < 2; ++i)
+    {
+        mBox[i]->setVisible(aVisible);
+    }
+    mDBox->setVisible(aVisible);
+}
+
 util::Easing::Param EasingItem::value() const
 {
     util::Easing::Param param;
@@ -271,6 +298,11 @@ void IntegerItem::setItemEnabled(bool aEnable)
     mSignal = true;
 }
 
+void IntegerItem::setItemVisible(bool aVisible)
+{
+    mBox->setVisible(aVisible);
+}
+
 //-------------------------------------------------------------------------------------------------
 DecimalItem::DecimalItem(QWidget* aParent)
     : mBox()
@@ -311,6 +343,11 @@ void DecimalItem::setItemEnabled(bool aEnable)
     mSignal = false;
     mBox->setEnabled(aEnable);
     mSignal = true;
+}
+
+void DecimalItem::setItemVisible(bool aVisible)
+{
+    mBox->setVisible(aVisible);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -381,6 +418,14 @@ void Vector2DItem::setItemEnabled(bool aEnable)
     mSignal = true;
 }
 
+void Vector2DItem::setItemVisible(bool aVisible)
+{
+    for (int i = 0; i < 2; ++i)
+    {
+        mBox[i]->setVisible(aVisible);
+    }
+}
+
 //-------------------------------------------------------------------------------------------------
 BrowseItem::BrowseItem(QWidget* aParent)
     : mLayout()
@@ -411,6 +456,12 @@ void BrowseItem::setItemEnabled(bool aEnable)
 {
     mLine->setEnabled(aEnable);
     mButton->setEnabled(aEnable);
+}
+
+void BrowseItem::setItemVisible(bool aVisible)
+{
+    mLine->setVisible(aVisible);
+    mButton->setVisible(aVisible);
 }
 
 } // namespace prop

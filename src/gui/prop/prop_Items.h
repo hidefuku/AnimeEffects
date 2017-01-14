@@ -35,6 +35,7 @@ public:
 
     virtual QWidget* itemWidget() { return mBox; }
     virtual void setItemEnabled(bool aEnable);
+    virtual void setItemVisible(bool aVisible);
 
     UpdateType onValueUpdated;
 
@@ -64,6 +65,7 @@ public:
 
     virtual QWidget* itemWidget() { return mBox; }
     virtual void setItemEnabled(bool aEnable);
+    virtual void setItemVisible(bool aVisible);
 
     UpdateType onValueUpdated;
 
@@ -92,6 +94,7 @@ public:
 
     virtual QLayout* itemLayout() { return mLayout; }
     virtual void setItemEnabled(bool aEnable);
+    virtual void setItemVisible(bool aVisible);
 
     UpdateType onValueUpdated;
 
@@ -121,6 +124,7 @@ public:
 
     virtual QLayout* itemLayout() { return mLayout; }
     virtual void setItemEnabled(bool aEnable);
+    virtual void setItemVisible(bool aVisible);
 
     UpdateType onValueUpdated;
 
@@ -152,6 +156,7 @@ public:
 
     virtual QWidget* itemWidget() { return mBox; }
     virtual void setItemEnabled(bool aEnable);
+    virtual void setItemVisible(bool aVisible);
 
     UpdateType onValueUpdated;
 
@@ -181,6 +186,7 @@ public:
 
     virtual QWidget* itemWidget() { return mBox; }
     virtual void setItemEnabled(bool aEnable);
+    virtual void setItemVisible(bool aVisible);
 
     UpdateType onValueUpdated;
 
@@ -207,6 +213,7 @@ public:
 
     virtual QLayout* itemLayout() { return mLayout; }
     virtual void setItemEnabled(bool aEnable);
+    virtual void setItemVisible(bool aVisible);
 
     UpdateType onValueUpdated;
 
@@ -233,6 +240,7 @@ public:
 
     virtual QLayout* itemLayout() { return mLayout; }
     virtual void setItemEnabled(bool aEnable);
+    virtual void setItemVisible(bool aVisible);
 
     UpdateType onButtonPushed;
 
