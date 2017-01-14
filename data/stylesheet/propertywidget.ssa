@@ -65,7 +65,7 @@ background-color: #f8f8f8;
 border:0px solid transparent;
 border-radius:4px;
 margin: 2px;
-padding-top: 7px;
+padding-top: 2ex;
 padding-bottom: 4px;
 }
 
@@ -73,7 +73,7 @@ QGroupBox#keyGroup::title {
 subcontrol-origin: margin;
 subcontrol-position:top left;
 padding-left: 8px;
-padding-top: 2px;
+padding-top: 3px;
 }
 
 QGroupBox#keyGroup::indicator {
@@ -95,7 +95,7 @@ background-color: #f8f8f8;
 border:0px solid transparent;
 border-radius:4px;
 margin: 2px;
-padding-top: 7px;
+padding-top: 2ex;
 padding-bottom: 4px;
 }
 
@@ -103,7 +103,7 @@ QGroupBox#attrGroup::title {
 subcontrol-origin: margin;
 subcontrol-position:top left;
 padding-left: 8px;
-padding-top: 2px;
+padding-top: 3px;
 }
 
 QGroupBox#attrGroup::indicator {
@@ -125,16 +125,17 @@ background-color: #f8f8f8;
 border:0px solid transparent;
 border-radius:4px;
 margin: 2px;
-padding-left: 6px;
-padding-right: 6px;
-padding-top: 2px;
-padding-bottom: 2px;
+padding-left: 8px;
+padding-right: 8px;
+padding-top: 1px;
+padding-bottom: 1px;
 }
 
 QGroupBox#keyKnocker::title {
 subcontrol-origin: margin;
 subcontrol-position:top left;
-padding: 0px;
+padding-left: 8px;
+padding-top: 2px;
 }
 
 QPushButton#keyKnocker {
