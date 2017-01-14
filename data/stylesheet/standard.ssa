@@ -1,7 +1,3 @@
-QWidget {
-font-size: 8pt;
-}
-
 QMenuBar {
 color: #000000;
 background-color: qlineargradient(

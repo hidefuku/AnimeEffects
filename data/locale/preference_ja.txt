@@ -1,1 +1,5 @@
 font_family_win = Meiryo UI
+font_family_mac = Hiragino Kaku Gothic Pro
+font_size = 8pt
+font_size_win = 8pt
+font_size_mac = 12pt

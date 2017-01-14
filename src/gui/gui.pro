@@ -179,7 +179,8 @@ HEADERS += \
     MSVCBackTracer.h \
     LocaleDecider.h \
     GeneralSettingDialog.h \
-    ResourceTreeWidget.h
+    ResourceTreeWidget.h \
+    LocaleParam.h
 
 FORMS +=
 

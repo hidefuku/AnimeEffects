@@ -36,7 +36,7 @@ public:
 namespace gui
 {
 
-MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const QString& aPreferFont)
+MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const LocaleParam& aLocaleParam)
     : QMainWindow(nullptr)
     , mSystem(aSystem)
     , mGUIResources(aResources)
@@ -74,9 +74,13 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const QS
         if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             QString fontOption;
-            if (!aPreferFont.isEmpty())
             {
-                fontOption = "QWidget { font-family: " + aPreferFont + "; }\n";
+                auto hasFamily = !aLocaleParam.fontFamily.isEmpty();
+                auto hasSize = !aLocaleParam.fontSize.isEmpty();
+                fontOption = "QWidget {" +
+                        (hasFamily ? ("font-family: " + aLocaleParam.fontFamily + ";") : "") +
+                        (hasSize ? ("font-size: " + aLocaleParam.fontSize + ";") : "") +
+                        " }\n";
             }
 
             this->setStyleSheet(fontOption + QTextStream(&stylesheet).readAll());

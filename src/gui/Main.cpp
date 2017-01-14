@@ -127,7 +127,7 @@ int entryPoint(int argc, char *argv[])
     QCoreApplication::setApplicationName("AnimeEffects");
 
     // language
-    QScopedPointer<LocaleDecider> locale(new LocaleDecider());
+    QScopedPointer<gui::LocaleDecider> locale(new gui::LocaleDecider());
     if (locale->translator())
     {
         app.installTranslator(locale->translator());
@@ -144,7 +144,7 @@ int entryPoint(int argc, char *argv[])
 
         // create main window
         QScopedPointer<gui::MainWindow> mainWindow(
-                    new gui::MainWindow(*system, *resources, locale->preferFont()));
+                    new gui::MainWindow(*system, *resources, locale->localeParam()));
 
         qDebug() << "show main window";
         // show main window

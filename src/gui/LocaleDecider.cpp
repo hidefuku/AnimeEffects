@@ -3,8 +3,11 @@
 #include <QSettings>
 #include "gui/LocaleDecider.h"
 
+namespace gui
+{
+
 LocaleDecider::LocaleDecider()
-    : mPreferFont()
+    : mLocaleParam()
     , mTranslator()
     , mHasTranslator()
 {
@@ -65,10 +68,15 @@ LocaleDecider::LocaleDecider()
 
                 if (key == "font_family" + opt)
                 {
-                    mPreferFont = value;
+                    mLocaleParam.fontFamily = value;
+                }
+                else if (key == "font_size" + opt)
+                {
+                    mLocaleParam.fontSize = value;
                 }
             }
         }
     }
-
 }
+
+} // namespace gui

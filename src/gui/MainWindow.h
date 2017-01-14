@@ -20,6 +20,7 @@
 #include "gui/KeyCommandMap.h"
 #include "gui/KeyCommandInvoker.h"
 #include "gui/ResourceDialog.h"
+#include "gui/LocaleParam.h"
 
 namespace gui
 {
@@ -31,7 +32,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(ctrl::System& aSystem,
                GUIResources& aResources,
-               const QString& aPreferFont);
+               const LocaleParam& aLocaleParam);
     ~MainWindow();
 
     void showWithSettings();
