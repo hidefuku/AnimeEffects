@@ -546,7 +546,7 @@ void ResourceUpdater::createImageReloaderRecursive(
         }
     }
 
-    XC_ASSERT(aCurItem.childCount() == aCurNode.children().size());
+    XC_ASSERT(aCurItem.childCount() == (int)aCurNode.children().size());
 
     // each child
     for (auto child : aNewNode.children())
@@ -611,7 +611,7 @@ void ResourceUpdater::createAbandonedImageRemoverRecursive(
         return;
     }
 
-    XC_ASSERT(aItem.childCount() == aNode.children().size());
+    XC_ASSERT(aItem.childCount() == (int)aNode.children().size());
     int childIndex = 0;
     for (auto child : aNode.children())
     {
