@@ -50,13 +50,13 @@ KeyCommandMap::KeyCommandMap(QWidget& aParent)
               ctrl::KeyBinding(Qt::Key_S, Qt::ControlModifier));
 
     addNewKey("MoveCanvas", view, tr("Move canvas"),
-              ctrl::KeyBinding(Qt::Key_Space, Qt::ControlModifier));
+              ctrl::KeyBinding(Qt::Key_Space, Qt::NoModifier));
 
     addNewKey("RotateCanvas", view, tr("Rotate canvas"),
-              ctrl::KeyBinding(Qt::Key_Space, Qt::ControlModifier | Qt::ShiftModifier));
+              ctrl::KeyBinding(Qt::Key_Space, Qt::ShiftModifier));
 
     addNewKey("ResetCanvasAngle", view, tr("Reset canvas angle"),
-              ctrl::KeyBinding(Qt::Key_Space, Qt::ControlModifier | Qt::ShiftModifier, Qt::Key_F1));
+              ctrl::KeyBinding(Qt::Key_Space, Qt::NoModifier, Qt::Key_F1));
 
     addNewKey("SelectCursor", tools, tr("Select cursor tool"),
               ctrl::KeyBinding());

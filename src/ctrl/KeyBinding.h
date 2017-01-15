@@ -26,6 +26,7 @@ public:
     bool hasControlModifier() const;
     bool hasShiftModifier() const;
     bool hasAltModifier() const;
+    bool hasMetaModifier() const;
     bool hasAnyModifiers() const;
     QString text() const;
     bool conflictsWith(const KeyBinding& aRhs) const;

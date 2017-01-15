@@ -42,7 +42,7 @@ KeyBinding::KeyBinding(int aKeyCode, Qt::KeyboardModifiers aModifiers, int aSubK
     , mSubKeyCode(aSubKeyCode)
     , mModifiers()
 {
-    mModifiers = aModifiers & (Qt::ControlModifier | Qt::ShiftModifier | Qt::AltModifier);
+    mModifiers = aModifiers & (Qt::ControlModifier | Qt::ShiftModifier | Qt::AltModifier | Qt::MetaModifier);
 }
 
 void KeyBinding::setSubKeyCode(int aSubKeyCode)
@@ -71,6 +71,11 @@ bool KeyBinding::hasAltModifier() const
     return mModifiers & Qt::AltModifier;
 }
 
+bool KeyBinding::hasMetaModifier() const
+{
+    return mModifiers & Qt::MetaModifier;
+}
+
 bool KeyBinding::hasAnyModifiers() const
 {
     return mModifiers != Qt::NoModifier;
@@ -79,7 +84,16 @@ bool KeyBinding::hasAnyModifiers() const
 QString KeyBinding::text() const
 {
     QString t;
+#if defined (Q_OS_MAC)
+    if (hasControlModifier()) t += "Cmnd + ";
+    if (hasMetaModifier()) t += "Ctrl + ";
+#elif defined(Q_OS_WIN)
     if (hasControlModifier()) t += "Ctrl + ";
+    if (hasMetaModifier()) t += "Meta + ";
+#else
+    if (hasControlModifier()) t += "Ctrl + ";
+    if (hasMetaModifier()) t += "Meta + ";
+#endif
     if (hasShiftModifier()) t += "Shift + ";
     if (hasAltModifier()) t += "Alt + ";
 
@@ -134,6 +148,7 @@ void KeyBinding::setSerialValue(const QString& aValue)
     if (mod & 0x01) mModifiers |= Qt::ControlModifier;
     if (mod & 0x02) mModifiers |= Qt::ShiftModifier;
     if (mod & 0x04) mModifiers |= Qt::AltModifier;
+    if (mod & 0x08) mModifiers |= Qt::MetaModifier;
 
     if (!isValidBinding())
     {
@@ -149,6 +164,7 @@ QString KeyBinding::serialValue() const
     mod |= mModifiers.testFlag(Qt::ControlModifier) ? 0x01 : 0x00;
     mod |= mModifiers.testFlag(Qt::ShiftModifier) ? 0x02 : 0x00;
     mod |= mModifiers.testFlag(Qt::AltModifier) ? 0x04 : 0x00;
+    mod |= mModifiers.testFlag(Qt::MetaModifier) ? 0x08 : 0x00;
     return QString::number(mKeyCode) + "," + QString::number(mod) + "," + QString::number(mSubKeyCode);
 }
 
