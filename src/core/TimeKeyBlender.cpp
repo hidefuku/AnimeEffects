@@ -89,7 +89,7 @@ QMatrix4x4 TimeKeyBlender::getLocalSRMatrix(
 }
 
 //-------------------------------------------------------------------------------------------------
-QMatrix4x4 TimeKeyBlender::getWorldMatrix(
+QMatrix4x4 TimeKeyBlender::getWorldCSRTMatrix(
         ObjectNode& aNode, const TimeInfo& aTime)
 {
     XC_ASSERT(aTime.frame.get() != TimeLine::kDefaultKeyIndex);
@@ -98,7 +98,7 @@ QMatrix4x4 TimeKeyBlender::getWorldMatrix(
         ObjectTreeSeeker seeker(true);
         TimeKeyBlender blender(seeker, seeker.position(&aNode));
         blender.blendSRTKeys(seeker.position(&aNode), aTime);
-        return aNode.timeLine()->working().srt().worldMatrix();
+        return aNode.timeLine()->working().srt().worldCSRTMatrix();
     }
     return QMatrix4x4();
 }
@@ -121,7 +121,7 @@ QMatrix4x4 TimeKeyBlender::getRelativeMatrix(
             auto currLine = curr->timeLine();
             if (currLine)
             {
-                result = currLine->working().srt().localParentMatrix() * result;
+                result = currLine->working().srt().localCSRTMatrix() * result;
             }
         }
     }
@@ -366,23 +366,6 @@ void TimeKeyBlender::clearCaches(ObjectNode* aRootNode)
     }
 }
 
-#if 0
-QMatrix4x4 TimeKeyBlender::getParentMatrix(PositionType aPos, int aCacheFrame)
-{
-    PositionType parent = mSeeker->parent(aPos);
-    while (parent)
-    {
-        auto seekData = mSeeker->data(parent);
-        if (seekData.expans)
-        {
-            return seekData.expans->srt().worldMatrix();
-        }
-        parent = mSeeker->parent(parent);
-    }
-    return QMatrix4x4();
-}
-#endif
-
 template<class tKey>
 float getEasingRateFromTwoKeys(const TimeKeyGatherer& aGatherer)
 {
@@ -539,7 +522,7 @@ void TimeKeyBlender::blendSRTKeys(PositionType aPos, const TimeInfo& aTime)
     getScaleExpans(expans.srt(), node, aTime);
 
     // update matrix
-    expans.srt().setParentMatrix(QMatrix4x4(), QVector2D());
+    expans.srt().setParentMatrix(QMatrix4x4());
     {
         auto ppos = mSeeker->parent(aPos);
         while (ppos)
@@ -560,9 +543,7 @@ void TimeKeyBlender::blendSRTKeys(PositionType aPos, const TimeInfo& aTime)
                 blendSRTKeys(ppos, aTime);
             }
 
-            expans.srt().setParentMatrix(
-                        pdata.expans->srt().worldMatrix(),
-                        pdata.expans->srt().centroid());
+            expans.srt().setParentMatrix(pdata.expans->srt().worldCSRTMatrix());
             break;
         }
     }
@@ -982,7 +963,6 @@ void TimeKeyBlender::setBoneInfluenceMaps(
         BoneInfluenceMap* influence = nullptr;
         QMatrix4x4 outerMtx;
         QMatrix4x4 innerMtx;
-        QVector2D centroid = expans.srt().centroid();
 
         // check bone validity
         if (key)
@@ -1011,7 +991,6 @@ void TimeKeyBlender::setBoneInfluenceMaps(
 
                 influence = &cache->influence();
                 innerMtx = cache->innerMatrix();
-                centroid = cache->centroid();
             }
 
             auto cacheOwner = key->cacheOwner();
@@ -1020,7 +999,7 @@ void TimeKeyBlender::setBoneInfluenceMaps(
                 auto ownerExpans = mSeeker->data(cacheOwner).expans;
                 if (ownerExpans)
                 {
-                    outerMtx = ownerExpans->srt().worldMatrix();
+                    outerMtx = ownerExpans->srt().worldCSRTMatrix();
                 }
             }
         }
@@ -1028,7 +1007,6 @@ void TimeKeyBlender::setBoneInfluenceMaps(
         expans.bone().setInfluenceMap(influence);
         expans.bone().setOuterMatrix(outerMtx);
         expans.bone().setInnerMatrix(innerMtx);
-        expans.srt().setCentroid(centroid);
     }
 
     for (auto child : aNode.children())
@@ -1103,7 +1081,7 @@ void TimeKeyBlender::setBindingMatrices(
         {
             if (aAffectedByBinding)
             {
-                aBindingMtx = aBindingMtx * expans.srt().localParentMatrix();
+                aBindingMtx = aBindingMtx * expans.srt().localCSRTMatrix();
                 expans.bone().setOuterMatrix(aBindingMtx);
                 QMatrix4x4 innerMtx;
                 expans.bone().setInnerMatrix(innerMtx);

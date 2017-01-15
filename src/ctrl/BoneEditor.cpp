@@ -136,7 +136,7 @@ void BoneEditor::resetCurrentTarget(QString* aMessage)
         XC_PTR_ASSERT(mTarget->timeLine());
 
         bool success = false;
-        mTarget.mtx = mTarget->timeLine()->current().srt().worldMatrix();
+        mTarget.mtx = mTarget->timeLine()->current().srt().worldCSRTMatrix();
         mTarget.invMtx = mTarget.mtx.inverted(&success);
         if (!success)
         {

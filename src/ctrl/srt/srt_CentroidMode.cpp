@@ -42,15 +42,15 @@ void CentroidMode::updateParam(const SRTParam& aParam)
 
 bool CentroidMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCursor)
 {
-    auto parentMtx = mKeyOwner.mtx;
-    auto worldSRMtx = mKeyOwner.mtx * mKeyOwner.locSRMtx;
+    auto parentMtx = mKeyOwner.parentMtx;
+    auto worldSRMtx = mKeyOwner.parentMtx * mKeyOwner.locSRMtx;
     bool hasParentInv = false;
     bool hasWorldInv = false;
     auto parentInvMtx = parentMtx.inverted(&hasParentInv);
     auto worldSRInvMtx = worldSRMtx.inverted(&hasWorldInv);
 
     auto curPos = aCursor.worldPos();
-    auto center = getWorldCentroidPos();
+    auto center = getWorldSymbolPos();
     const bool prevFocus = mFocusing;
     mFocusing = aCamera.toScreenLength((center - curPos).length()) <= kCrossRadius;
     bool mod = (prevFocus != mFocusing);
@@ -93,7 +93,7 @@ void CentroidMode::renderQt(const core::RenderInfo& aInfo, QPainter& aPainter)
     const QColor idleColor(100, 100, 255, 255);
     const QColor focusColor(255, 255, 255, 255);
     const QBrush brush((mFocusing || mMoving) ? focusColor : idleColor);
-    const QPointF c = aInfo.camera.toScreenPos(getWorldCentroidPos().toPointF());
+    const QPointF c = aInfo.camera.toScreenPos(getWorldSymbolPos().toPointF());
     const QPointF h(kCrossRadius, 0.0f);
     const QPointF v(0.0f, kCrossRadius);
     const QPointF hs(kCrossSub, 0.0f);
@@ -155,9 +155,9 @@ void CentroidMode::moveCentroid(const QVector2D& aNewCentroid, const QVector2D& 
     }
 }
 
-QVector2D CentroidMode::getWorldCentroidPos() const
+QVector2D CentroidMode::getWorldSymbolPos() const
 {
-    return (mKeyOwner.mtx * mKeyOwner.locMtx * QVector3D()).toVector2D();
+    return (mKeyOwner.parentMtx * mKeyOwner.locSRTMtx * QVector3D()).toVector2D();
 }
 
 } // namespace srt

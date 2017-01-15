@@ -29,7 +29,7 @@ public:
     static QMatrix4x4 getLocalSRMatrix(
             const ObjectNode& aNode, const TimeInfo& aTime);
 
-    static QMatrix4x4 getWorldMatrix(
+    static QMatrix4x4 getWorldCSRTMatrix(
             ObjectNode& aNode, const TimeInfo& aTime);
     static QMatrix4x4 getRelativeMatrix(
             ObjectNode& aNode, const TimeInfo& aTime,

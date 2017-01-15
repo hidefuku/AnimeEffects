@@ -22,7 +22,7 @@ public:
     void setInnerMatrix(const QMatrix4x4& aMtx) { mInnerMtx = aMtx; }
     const QMatrix4x4& outerMatrix() const { return mOuterMtx; }
     const QMatrix4x4& innerMatrix() const { return mInnerMtx; }
-    QMatrix4x4 worldMatrix() const { return mOuterMtx * mInnerMtx; }
+    QMatrix4x4 worldCSRTMatrix() const { return mOuterMtx * mInnerMtx; }
 
     void setTargetMesh(const LayerMesh* aMesh) { mTargetMesh = aMesh; }
     const LayerMesh* targetMesh() const { return mTargetMesh; }

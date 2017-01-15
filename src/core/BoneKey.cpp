@@ -86,7 +86,6 @@ BoneKey::Cache::Cache()
     : mInfluence()
     , mNode()
     , mInnerMtx()
-    , mCentroid()
     , mFrameSign()
 {
     static const int kMaxBoneCount = 32;
@@ -145,12 +144,11 @@ void BoneKey::updateCaches(Project& aProject, const QList<Cache*>& aTargets)
 
             // set world matrix
             cache->setInnerMatrix(TimeKeyBlender::getRelativeMatrix(node, time, owner));
-            cache->setCentroid(TimeKeyBlender::getCentroid(node, time));
             auto originOffset = TimeKeyBlender::getOriginOffset(node, time);
 
             // influence map matrix
             auto mapMtx = cache->innerMatrix();
-            mapMtx.translate(cache->centroid() + originOffset);
+            mapMtx.translate(originOffset);
 
             BoneInfluenceMap& map = cache->influence();
             // allocate if necessary
@@ -391,7 +389,7 @@ bool BoneKey::serialize(Serializer& aOut) const
     {
         aOut.writeID(cache->node());
         aOut.write(cache->innerMatrix());
-        aOut.write(cache->centroid());
+        aOut.write(QVector2D()); // obsolete: origin offset
         aOut.write(cache->frameSign());
 
         if (!cache->influence().serialize(aOut))
@@ -508,8 +506,8 @@ bool BoneKey::deserialize(Deserializer& aIn)
         // inner matrix
         cache->setInnerMatrix(aIn.getRead<QMatrix4x4>());
 
-        // centroid
-        cache->setCentroid(aIn.getRead<QVector2D>());
+        // obsolete: origin offset
+        aIn.getRead<QVector2D>();
 
         // frame sign
         cache->setFrameSign(aIn.getRead<Frame>());

@@ -10,7 +10,6 @@ SRTExpans::SRTExpans()
     , mCentroid()
     , mSpline()
     , mParentMatrix()
-    , mParentCentroid()
     , mSplineCache()
 {
 }
@@ -29,7 +28,14 @@ bool SRTExpans::hasSplineCache(Frame aFrame) const
     }
 }
 
-QMatrix4x4 SRTExpans::localMatrix() const
+QMatrix4x4 SRTExpans::localCSRTMatrix() const
+{
+    QMatrix4x4 mtx = localSRTMatrix();
+    mtx.translate(mCentroid);
+    return mtx;
+}
+
+QMatrix4x4 SRTExpans::localSRTMatrix() const
 {
     QMatrix4x4 mtx;
     mtx.translate(QVector3D(mPos));
@@ -54,11 +60,9 @@ QMatrix4x4 SRTExpans::getLocalSRMatrix(float aRotate, const QVector2D& aScale)
     return mtx;
 }
 
-void SRTExpans::setParentMatrix(const QMatrix4x4& aWorldMtx, const QVector2D& aCentroid)
+void SRTExpans::setParentMatrix(const QMatrix4x4& aWorldCSRTMtx)
 {
-    mParentMatrix = aWorldMtx;
-    mParentMatrix.translate(aCentroid);
-    mParentCentroid = aCentroid;
+    mParentMatrix = aWorldCSRTMtx;
 }
 
 const QMatrix4x4& SRTExpans::parentMatrix() const
@@ -66,16 +70,14 @@ const QMatrix4x4& SRTExpans::parentMatrix() const
     return mParentMatrix;
 }
 
-QMatrix4x4 SRTExpans::localParentMatrix() const
+QMatrix4x4 SRTExpans::worldCSRTMatrix() const
 {
-    auto mtx = localMatrix();
-    mtx.translate(mParentCentroid);
-    return mtx;
+    return mParentMatrix * localCSRTMatrix();
 }
 
-QMatrix4x4 SRTExpans::worldMatrix() const
+QMatrix4x4 SRTExpans::worldSRTMatrix() const
 {
-    return mParentMatrix * localMatrix();
+    return mParentMatrix * localSRTMatrix();
 }
 
 } // namespace core

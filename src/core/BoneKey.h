@@ -38,7 +38,6 @@ public:
         BoneInfluenceMap mInfluence;
         util::LinkPointer<ObjectNode> mNode;
         QMatrix4x4 mInnerMtx;
-        QVector2D mCentroid;
         Frame mFrameSign; // for debug that the cache updating be forgotten
     public:
         Cache();
@@ -49,8 +48,6 @@ public:
         const BoneInfluenceMap& influence() const { return mInfluence; }
         void setInnerMatrix(const QMatrix4x4& aMtx) { mInnerMtx = aMtx; }
         const QMatrix4x4& innerMatrix() const { return mInnerMtx; }
-        void setCentroid(const QVector2D& aCentroid) { mCentroid = aCentroid; }
-        const QVector2D& centroid() const { return mCentroid; }
         void setFrameSign(const Frame& aFrame) { mFrameSign = aFrame; }
         const Frame& frameSign() const { return mFrameSign; }
     };

@@ -98,11 +98,11 @@ void PoseEditor::resetCurrentTarget(QString* aMessage)
 
         if (current.bone().isAffectedByBinding())
         {
-            mTarget.mtx = current.bone().worldMatrix();
+            mTarget.mtx = current.bone().worldCSRTMatrix();
         }
         else
         {
-            mTarget.mtx = current.srt().worldMatrix();
+            mTarget.mtx = current.srt().worldCSRTMatrix();
         }
 
         mTarget.invMtx = mTarget.mtx.inverted(&success);

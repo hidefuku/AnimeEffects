@@ -112,7 +112,7 @@ void MeshEditor::resetTarget(ObjectNode* aPrev, ObjectNode* aNext, QString* aMes
         XC_PTR_ASSERT(mTarget->timeLine());
 
         bool success = false;
-        mTarget.mtx = mTarget->timeLine()->current().srt().worldMatrix();
+        mTarget.mtx = mTarget->timeLine()->current().srt().worldCSRTMatrix();
         //mTarget.mtx.translate(mTarget->timeLine()->current().imageOffset());
 
         mTarget.invMtx = mTarget.mtx.inverted(&success);

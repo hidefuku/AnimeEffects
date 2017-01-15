@@ -15,11 +15,12 @@ KeyOwner::KeyOwner()
     , ownsMoveKey()
     , ownsRotateKey()
     , ownsScaleKey()
-    , mtx()
-    , invMtx()
-    , invSRMtx()
-    , locMtx()
+    , parentMtx()
+    , invParentMtx()
+    , invParentSRMtx()
     , locSRMtx()
+    , locSRTMtx()
+    , locCSRTMtx()
     , hasInv()
 {
 }
@@ -94,25 +95,25 @@ bool KeyOwner::updatePosture(const TimeKeyExpans& aExpans)
         scaleKey->setScale(aExpans.srt().scale());
     }
 
-    mtx = aExpans.srt().parentMatrix();
-    invMtx = mtx.inverted(&hasInv);
+    parentMtx = aExpans.srt().parentMatrix();
+    invParentMtx = parentMtx.inverted(&hasInv);
 
     if (!hasInv)
     {
         return false;
     }
 
-    invSRMtx = invMtx;
-    invSRMtx.setColumn(3, QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
+    invParentSRMtx = invParentMtx;
+    invParentSRMtx.setColumn(3, QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
 
-    locMtx = aExpans.srt().localMatrix();
-    locSRMtx = locMtx;
-    locSRMtx.setColumn(3, QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
+    locSRMtx = aExpans.srt().localSRMatrix();
+    locSRTMtx = aExpans.srt().localSRTMatrix();
+    locCSRTMtx = aExpans.srt().localCSRTMatrix();
 
     return true;
 }
 
-QMatrix4x4 KeyOwner::getLocalMatrixFromKeys() const
+QMatrix4x4 KeyOwner::getLocalSRTMatrixFromKeys() const
 {
     if (!(bool)(*this)) return QMatrix4x4();
 
@@ -120,7 +121,7 @@ QMatrix4x4 KeyOwner::getLocalMatrixFromKeys() const
     expans.setPos(moveKey->pos());
     expans.setRotate(rotateKey->rotate());
     expans.setScale(scaleKey->scale());
-    return expans.localMatrix();
+    return expans.localSRTMatrix();
 }
 
 QMatrix4x4 KeyOwner::getLocalSRMatrixFromKeys() const

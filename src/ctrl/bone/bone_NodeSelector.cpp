@@ -175,7 +175,7 @@ bool NodeSelector::updateIntersection(Tag& aTag, const QPointF& aPos)
 QRectF NodeSelector::getNodeRectF(ObjectNode& aNode) const
 {
     XC_PTR_ASSERT(aNode.timeLine());
-    auto mtx = aNode.timeLine()->current().srt().worldMatrix();
+    auto mtx = aNode.timeLine()->current().srt().worldSRTMatrix();
     auto pos = mtx.column(3).toVector3D();
 
     const QRect bb = mGraphicStyle.boundingRect(aNode.name());

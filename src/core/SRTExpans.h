@@ -38,14 +38,15 @@ public:
     SplineType& spline() { return mSpline; }
     const SplineType& spline() const { return mSpline; }
 
-    QMatrix4x4 localMatrix() const;
+    QMatrix4x4 localCSRTMatrix() const;
+    QMatrix4x4 localSRTMatrix() const;
     QMatrix4x4 localSRMatrix() const;
 
-    void setParentMatrix(const QMatrix4x4& aWorldMtx, const QVector2D& aParentCentroid);
+    void setParentMatrix(const QMatrix4x4& aWorldCSRTMtx);
     const QMatrix4x4& parentMatrix() const;
-    QMatrix4x4 localParentMatrix() const;
 
-    QMatrix4x4 worldMatrix() const;
+    QMatrix4x4 worldCSRTMatrix() const;
+    QMatrix4x4 worldSRTMatrix() const;
 
 private:
     QVector2D mPos;
@@ -54,7 +55,6 @@ private:
     QVector2D mCentroid;
     SplineType mSpline;
     QMatrix4x4 mParentMatrix;
-    QVector2D mParentCentroid;
     util::Range mSplineCache;
 };
 

@@ -21,7 +21,7 @@ public:
 
 private:
     void moveCentroid(const QVector2D& aNewCentroid, const QVector2D& aNewPosition);
-    QVector2D getWorldCentroidPos() const;
+    QVector2D getWorldSymbolPos() const;
     core::Project& mProject;
     core::ObjectNode& mTarget;
     KeyOwner& mKeyOwner;

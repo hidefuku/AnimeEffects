@@ -35,13 +35,13 @@ void MoveMode::updateParam(const SRTParam& aParam)
 
 bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCursor)
 {
-    auto keyLocalMtx = mKeyOwner.getLocalMatrixFromKeys();
-    auto& keyWorldMtx = mKeyOwner.mtx;
+    auto keyLocalMtx = mKeyOwner.getLocalSRTMatrixFromKeys();
+    auto& keyParentMtx = mKeyOwner.parentMtx;
 
     bool mod = false;
 
     // update symbol
-    mSymbol.build(keyLocalMtx, keyWorldMtx, aCamera);
+    mSymbol.build(keyLocalMtx, keyParentMtx, aCamera);
 
     if (aCursor.emitsLeftPressedEvent())
     {
@@ -58,7 +58,7 @@ bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCu
                 mFocus.first == FocusType_ScaleX ||
                 mFocus.first == FocusType_ScaleY)
             {
-                auto keyWorldPos = keyWorldMtx * QVector3D(mKeyOwner.moveKey->pos());
+                auto keyWorldPos = keyParentMtx * QVector3D(mKeyOwner.moveKey->pos());
                 mBaseVec = mKeyOwner.scaleKey->scale();
 
                 const QVector3D pos = QVector3D(aCursor.worldPos());
@@ -68,7 +68,7 @@ bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCu
             }
             else if (mFocus.first == srt::FocusType_Rotate)
             {
-                mBaseVec = (mKeyOwner.invSRMtx * QVector3D(focusVector)).toVector2D();
+                mBaseVec = (mKeyOwner.invParentSRMtx * QVector3D(focusVector)).toVector2D();
             }
             mod = true;
         }
@@ -78,20 +78,20 @@ bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCu
         auto focusVector = aCamera.toWorldVector(mFocus.second);
 
         auto keyPos = mKeyOwner.moveKey->pos();
-        auto keyWorldPos = keyWorldMtx * QVector3D(keyPos);
+        auto keyWorldPos = keyParentMtx * QVector3D(keyPos);
         auto cursorWorldPos = QVector3D(aCursor.worldPos());
         auto cursorWorldVel = QVector3D(aCursor.worldVel());
 
         if (mFocus.first == srt::FocusType_Trans)
         {
             auto moveData = mKeyOwner.moveKey->data();
-            moveData.addPos((mKeyOwner.invSRMtx * cursorWorldVel).toVector2D());
+            moveData.addPos((mKeyOwner.invParentSRMtx * cursorWorldVel).toVector2D());
             assignMoveKey(moveData);
         }
         else if (mFocus.first == srt::FocusType_Rotate)
         {
             auto rotData = mKeyOwner.rotateKey->data();
-            auto vec = (mKeyOwner.invMtx * cursorWorldPos).toVector2D() - keyPos;
+            auto vec = (mKeyOwner.invParentMtx * cursorWorldPos).toVector2D() - keyPos;
             const float length = vec.length();
             if (length > 1.0f)
             {
@@ -149,7 +149,7 @@ bool MoveMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCu
 
 void MoveMode::renderQt(const core::RenderInfo& aInfo, QPainter& aPainter)
 {
-    mSymbol.build(mKeyOwner.getLocalMatrixFromKeys(), mKeyOwner.mtx, aInfo.camera);
+    mSymbol.build(mKeyOwner.getLocalSRTMatrixFromKeys(), mKeyOwner.parentMtx, aInfo.camera);
     mSymbol.draw(aInfo, aPainter, mFocus.first);
 }
 
