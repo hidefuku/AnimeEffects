@@ -30,7 +30,7 @@ bool fBuildShader(gl::EasyShaderProgram& aProgram, const char* aVertex, const ch
 }
 
 bool fMakeLinePolygon(const QPointF& aFrom, const QPointF& aTo, float aWidth,
-                      gl::Vector2* aPositions, gl::Vector2* aStyleCoords)
+                      gl::Vector2* aPositions, gl::Vector2* aStyleCoords, float* aStyleBegin = nullptr)
 {
     const QVector2D dir(aTo - aFrom);
     const float length = dir.length();
@@ -42,10 +42,17 @@ bool fMakeLinePolygon(const QPointF& aFrom, const QPointF& aTo, float aWidth,
     aPositions[2].set(aTo.x() - rside.x(), aTo.y() - rside.y());
     aPositions[3].set(aTo.x() + rside.x(), aTo.y() + rside.y());
 
-    aStyleCoords[0].set(0.0f, 0.0f);
-    aStyleCoords[1].set(0.0f, 0.0f);
-    aStyleCoords[2].set(length, 0.0f);
-    aStyleCoords[3].set(length, 0.0f);
+    float sb = 0.0f;
+    if (aStyleBegin)
+    {
+        sb = *aStyleBegin;
+        *aStyleBegin += length;
+    }
+
+    aStyleCoords[0].set(sb, 0.0f);
+    aStyleCoords[1].set(sb, 0.0f);
+    aStyleCoords[2].set(sb + length, 0.0f);
+    aStyleCoords[3].set(sb + length, 0.0f);
 
     return true;
 }
@@ -413,6 +420,7 @@ void PrimitiveDrawer::drawOutline(const std::function<QPointF(int)>& aGetPos, in
     gl::Vector2* stylePtr = mSubBuffer.data();
     int bufferingVtxCount = 0;
     auto prevPos = aGetPos(aPosCount - 1);
+    float styleBegin = 0.0f;
 
     for (int i = 0; i < aPosCount; ++i)
     {
@@ -420,7 +428,8 @@ void PrimitiveDrawer::drawOutline(const std::function<QPointF(int)>& aGetPos, in
 
         if (!fMakeLinePolygon(prevPos, currPos, width,
                               posPtr + bufferingVtxCount,
-                              stylePtr + bufferingVtxCount))
+                              stylePtr + bufferingVtxCount,
+                              &styleBegin))
         {
             continue;
         }
@@ -810,7 +819,6 @@ void PrimitiveDrawer::flushCommands()
             break;
         case Type_Texture:
             mAppliedState.set(command);
-            //unbindCurrentShader();
             bindAppositeShader(index);
             ggl.glActiveTexture(GL_TEXTURE0);
             ggl.glBindTexture(GL_TEXTURE_2D, mAppliedState.texture);
@@ -839,7 +847,7 @@ void PrimitiveDrawer::bindAppositeShader(int aSlotIndex)
 {
     Global::Functions& ggl = Global::functions();
 
-    auto prevType = mCurrentShader;
+    //auto prevType = mCurrentShader;
     auto nextType = ShaderType_Plane;
 
     if (mAppliedState.texture != 0)
@@ -851,7 +859,7 @@ void PrimitiveDrawer::bindAppositeShader(int aSlotIndex)
         nextType = ShaderType_Stipple;
     }
 
-    if (prevType == nextType) return;
+    //if (prevType == nextType) return;
 
     // unbind previous shader
     unbindCurrentShader();
@@ -880,7 +888,7 @@ void PrimitiveDrawer::bindAppositeShader(int aSlotIndex)
         mStippleShader.program.setUniformValue(mStippleShader.locScreenSize, scrHalfSize);
         mStippleShader.program.setUniformValue(mStippleShader.locWave,
                                                (mAppliedState.penStyle == PenStyle_Dash) ?
-                                                   QVector2D(0.15f, 0.9f) : QVector2D(0.3f, 0.2f));
+                                                   QVector2D(0.3f, 1.0f) : QVector2D(0.5f, 0.75f));
         mCurrentShader = ShaderType_Stipple;
     }
     else
