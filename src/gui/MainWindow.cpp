@@ -766,7 +766,7 @@ void MainWindow::onExportPngSeqTriggered()
     // execute
     if (!exporter.execute(cparam, pparam))
     {
-        progress.dialog().cancel();
+        progress.cancel();
 
         if (!exporter.isCanceled())
         {
@@ -842,10 +842,11 @@ void MainWindow::onExportVideoTriggered(const QString& aSuffix, QString aCodec)
     auto overwriteConfirmer = [=](const QString&)->bool { return true; };
 #endif
 
-    menu::ProgressReporter progress(true, this);
+    menu::LoggableProgressReporter progress(true, this);
     ctrl::Exporter exporter(*mCurrent);
     exporter.setOverwriteConfirmer(overwriteConfirmer);
     exporter.setProgressReporter(progress);
+    exporter.setUILogger(progress);
 
     // execute
     bool success = isGif ?
@@ -854,7 +855,7 @@ void MainWindow::onExportVideoTriggered(const QString& aSuffix, QString aCodec)
 
     if (!success)
     {
-        progress.dialog().cancel();
+        progress.cancel();
 
         if (!exporter.isCanceled())
         {

@@ -35,6 +35,16 @@ void EasyDialog::setMainWidget(QWidget* aWidget, bool aAlignLeft)
     mLayout->addSpacing(16);
 }
 
+void EasyDialog::setMainLayout(QLayout* aLayout, bool aAlignLeft)
+{
+    mLayout->addLayout(aLayout);
+    if (aAlignLeft)
+    {
+        mLayout->setAlignment(aLayout, Qt::AlignLeft | Qt::AlignTop);
+    }
+    mLayout->addSpacing(16);
+}
+
 void EasyDialog::setOkCancel(const std::function<bool(int)>& aFunction)
 {
     auto buttonBox = new QHBoxLayout();
@@ -75,6 +85,28 @@ void EasyDialog::setOkEnable(bool aIsEnable)
 {
     XC_PTR_ASSERT(mOk);
     mOk->setEnabled(aIsEnable);
+}
+
+void EasyDialog::setCancel(const std::function<bool(int)>& aFunction)
+{
+    auto buttonBox = new QHBoxLayout();
+    auto cc = new QPushButton("Cancel");
+
+    cc->setObjectName("standardButton");
+    cc->setDefault(false);
+    cc->setAutoDefault(false);
+
+    connect(cc, &QPushButton::clicked, [=](bool)
+    {
+        if (aFunction(1))
+        {
+            this->reject();
+        }
+    });
+    buttonBox->addWidget(cc);
+
+    mLayout->addLayout(buttonBox);
+    mLayout->setAlignment(buttonBox, Qt::AlignBottom | Qt::AlignRight);
 }
 
 void EasyDialog::fixSize()

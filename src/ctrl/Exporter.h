@@ -11,6 +11,7 @@
 #include <QOpenGLFramebufferObject>
 #include "util/Range.h"
 #include "util/IProgressReporter.h"
+#include "ctrl/UILogger.h"
 #include "gl/EasyTextureDrawer.h"
 #include "core/Project.h"
 #include "core/TimeInfo.h"
@@ -61,6 +62,7 @@ public:
 
     void setOverwriteConfirmer(const OverwriteConfirmer& aConfirmer);
     void setProgressReporter(util::IProgressReporter& aReporter);
+    void setUILogger(ctrl::UILogger& aLogger);
 
     bool execute(const CommonParam& aCommon, const PngParam& aPng);
     bool execute(const CommonParam& aCommon, const GifParam& aGif);
@@ -79,14 +81,18 @@ private:
         FFMpeg();
         bool start(const QString& aArgments);
         void write(const QByteArray& aBytes);
-        bool finish();
-        bool execute(const QString& aArgments);
+        bool finish(const std::function<bool()>& aWaiter);
+        bool execute(const QString& aArgments,
+                     const std::function<bool()>& aWaiter);
         bool errorOccurred() const { return mErrorOccurred; }
         QString errorString() const { return mErrorString; }
+        QString popLog();
     private:
         QScopedPointer<QProcess> mProcess;
+        bool mFinished;
         bool mErrorOccurred;
         QString mErrorString;
+        QStringList mLogs;
     };
 
     bool execute();
@@ -111,6 +117,7 @@ private:
     OverwriteConfirmer mOverwriteConfirmer;
     bool mOverwriteConfirmation;
     util::IProgressReporter* mProgressReporter;
+    ctrl::UILogger* mUILogger;
 
     CommonParam mCommonParam;
     QString mPngName;

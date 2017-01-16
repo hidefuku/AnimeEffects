@@ -1,5 +1,6 @@
 #include <QFileInfo>
 #include <QBuffer>
+#include "util/SelectArgs.h"
 #include "gl/Global.h"
 #include "gl/Util.h"
 #include "ctrl/Exporter.h"
@@ -59,8 +60,10 @@ Exporter::VideoParam::VideoParam()
 //-------------------------------------------------------------------------------------------------
 Exporter::FFMpeg::FFMpeg()
     : mProcess()
+    , mFinished()
     , mErrorOccurred()
     , mErrorString()
+    , mLogs()
 {
 }
 
@@ -76,6 +79,7 @@ bool Exporter::FFMpeg::start(const QString& aArgments)
     const QString program = hasLocalEncoder ? QString("./tools/ffmpeg") : QString("ffmpeg");
 #endif
 
+    mFinished = false;
     mErrorOccurred = false;
     mErrorString.clear();
     mProcess.reset(new QProcess(nullptr));
@@ -84,12 +88,23 @@ bool Exporter::FFMpeg::start(const QString& aArgments)
     auto process = mProcess.data();
     mProcess->connect(process, &QProcess::readyRead, [=]()
     {
-        qDebug() << QString(process->readAll().data());
+        if (this->mProcess)
+        {
+            this->mLogs.push_back(QString(this->mProcess->readAll().data()));
+            //qDebug() << QString(process->readAll().data());
+        }
     });
     mProcess->connect(process, &QProcess::errorOccurred, [=](QProcess::ProcessError)
     {
         this->mErrorOccurred = true;
-        this->mErrorString = this->mProcess->errorString();
+        if (this->mProcess)
+        {
+            this->mErrorString = this->mProcess->errorString();
+        }
+    });
+    mProcess->connect(process, util::SelectArgs<int, QProcess::ExitStatus>::from(&QProcess::finished), [=](int, QProcess::ExitStatus)
+    {
+        this->mFinished = true;
     });
 
     mProcess->start(program + " " + aArgments, QIODevice::ReadWrite);
@@ -103,12 +118,18 @@ void Exporter::FFMpeg::write(const QByteArray& aBytes)
     mProcess->write(aBytes);
 }
 
-bool Exporter::FFMpeg::finish()
+bool Exporter::FFMpeg::finish(const std::function<bool()>& aWaiter)
 {
+    static const int kMSec = 100;
     XC_ASSERT(mProcess);
 
     mProcess->closeWriteChannel();
-    mProcess->waitForFinished();
+
+    while (!mProcess->waitForFinished(kMSec))
+    {
+        if (!aWaiter() || mFinished) break;
+    }
+
     auto exitStatus = mProcess->exitStatus();
     //qDebug() << "exit status" << exitStatus;
     //qDebug() << "exit code" << mFFMpeg->exitCode();
@@ -117,11 +138,19 @@ bool Exporter::FFMpeg::finish()
     return (exitStatus == QProcess::NormalExit);
 }
 
-bool Exporter::FFMpeg::execute(const QString& aArgments)
+bool Exporter::FFMpeg::execute(const QString& aArgments,
+                               const std::function<bool()>& aWaiter)
 {
     if (!start(aArgments)) return false;
-    if (!finish()) return false;
+    if (!finish(aWaiter)) return false;
     return true;
+}
+
+QString Exporter::FFMpeg::popLog()
+{
+    QString log = mLogs.join("");
+    mLogs.clear();
+    return log;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -135,6 +164,7 @@ Exporter::Exporter(core::Project& aProject)
     , mOverwriteConfirmer()
     , mOverwriteConfirmation()
     , mProgressReporter()
+    , mUILogger()
     , mCommonParam()
     , mPngName()
     , mVideoExporting()
@@ -165,6 +195,11 @@ void Exporter::setOverwriteConfirmer(const OverwriteConfirmer& aConfirmer)
 void Exporter::setProgressReporter(util::IProgressReporter& aReporter)
 {
     mProgressReporter = &aReporter;
+}
+
+void Exporter::setUILogger(UILogger& aLogger)
+{
+    mUILogger = &aLogger;
 }
 
 bool Exporter::execute(const CommonParam& aCommon, const PngParam& aPng)
@@ -222,9 +257,10 @@ bool Exporter::execute(const CommonParam& aCommon, const GifParam& aGif)
     if (aGif.optimizePalette)
     {
 
-        if (mFFMpeg.execute(" -i " + workFile + " -vf palettegen -y " + palette))
+        auto waiter = [=]()->bool { return true; };
+        if (mFFMpeg.execute(" -i " + workFile + " -vf palettegen -y " + palette, waiter))
         {
-            mFFMpeg.execute(" -i " + workFile + " -i " + palette + " -lavfi paletteuse -y " + outFile);
+            mFFMpeg.execute(" -i " + workFile + " -i " + palette + " -lavfi paletteuse -y " + outFile, waiter);
         }
 
         QFile::remove(workFile);
@@ -306,6 +342,17 @@ bool Exporter::execute()
     while (1)
     {
         if (!update()) break;
+
+#if 0
+        if (mUILogger && mVideoExporting)
+        {
+            auto log = mFFMpeg.popLog();
+            if (!log.isEmpty())
+            {
+                mUILogger->pushLog(log, ctrl::UILogType_Info);
+            }
+        }
+#endif
 
         if (mProgressReporter)
         {
@@ -466,17 +513,32 @@ bool Exporter::update()
         }
     }
 
-    // flush
-    ggl.glFlush();
+    {
+        // create image
+        auto outImage = mFramebuffers.back()->toImage();
 
-    // export
-    exportImage(mFramebuffers.back()->toImage(), currentIndex);
+        // flush
+        ggl.glFlush();
+
+        // export
+        exportImage(outImage, currentIndex);
+    }
 
     return true;
 }
 
 bool Exporter::exportImage(const QImage& aFboImage, int aIndex)
 {
+    // update log
+    if (mUILogger && mVideoExporting)
+    {
+        auto log = mFFMpeg.popLog();
+        if (!log.isEmpty())
+        {
+            mUILogger->pushLog(log, ctrl::UILogType_Info);
+        }
+    }
+
     // decide file path
     QFileInfo filePath;
     if (!decidePngPath(aIndex, filePath))
@@ -518,7 +580,18 @@ bool Exporter::finish()
     {
         if (mVideoExporting)
         {
-            result = mFFMpeg.finish();
+            result = mFFMpeg.finish([=]()->bool
+            {
+                if (mUILogger)
+                {
+                    auto log = mFFMpeg.popLog();
+                    if (!log.isEmpty())
+                    {
+                        mUILogger->pushLog(log, ctrl::UILogType_Info);
+                    }
+                }
+                return true;
+            });
             if (!result)
             {
                 mLog = "FFmpeg error occurred.\n" + mFFMpeg.errorString();

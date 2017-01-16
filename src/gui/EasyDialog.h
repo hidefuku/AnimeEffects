@@ -17,9 +17,11 @@ public:
 
     void setMenuBar(QMenuBar* aMenuBar);
     void setMainWidget(QWidget* aWidget, bool aAlignLeft = true);
+    void setMainLayout(QLayout* aLayout, bool aAlignLeft = true);
     void setOkCancel(const std::function<bool(int)>& aFunction);
     void setOkCancel() { setOkCancel([=](int)->bool { return true; }); }
     void setOkEnable(bool aIsEnable);
+    void setCancel(const std::function<bool(int)>& aFunction);
     void fixSize();
 
 private:
