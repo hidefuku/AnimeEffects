@@ -27,6 +27,26 @@ class Exporter
 public:
     typedef std::function<bool(const QString&)> OverwriteConfirmer;
 
+    enum ResultCode
+    {
+        ResultCode_Success,
+        ResultCode_Canceled,
+        ResultCode_InvalidOperation,
+        ResultCode_FFMpegFailedToStart,
+        ResultCode_FFMpegError,
+        ResultCode_UnclassfiedError,
+        ResultCode_TERM
+    };
+
+    struct Result
+    {
+        Result();
+        Result(ResultCode aCode, const QString& aMessage);
+        explicit operator bool() const { return code == ResultCode_Success; }
+        ResultCode code;
+        QString message;
+    };
+
     struct CommonParam
     {
         CommonParam();
@@ -64,9 +84,9 @@ public:
     void setProgressReporter(util::IProgressReporter& aReporter);
     void setUILogger(ctrl::UILogger& aLogger);
 
-    bool execute(const CommonParam& aCommon, const PngParam& aPng);
-    bool execute(const CommonParam& aCommon, const GifParam& aGif);
-    bool execute(const CommonParam& aCommon, const VideoParam& aVideo);
+    Result execute(const CommonParam& aCommon, const PngParam& aPng);
+    Result execute(const CommonParam& aCommon, const GifParam& aGif);
+    Result execute(const CommonParam& aCommon, const VideoParam& aVideo);
 
     const QString& log() const { return mLog; }
     bool isCanceled() const { return mIsCanceled; }
@@ -86,19 +106,21 @@ private:
                      const std::function<bool()>& aWaiter);
         bool errorOccurred() const { return mErrorOccurred; }
         QString errorString() const { return mErrorString; }
+        QProcess::ProcessError errorCode() const { return mErrorCode; }
         QString popLog();
     private:
         QScopedPointer<QProcess> mProcess;
         bool mFinished;
         bool mErrorOccurred;
         QString mErrorString;
+        QProcess::ProcessError mErrorCode;
         QStringList mLogs;
     };
 
-    bool execute();
-    bool start();
+    Result execute();
+    Result start();
     bool update();
-    bool finish();
+    Result finish();
     bool updateTime(core::TimeInfo& aDst);
     bool exportImage(const QImage& aFboImage, int aIndex);
     void destroyFramebuffers();
@@ -107,6 +129,7 @@ private:
     static int getDigitCount(const util::Range& aRange, int aFps, int aFpsOrigin);
     bool decidePngPath(int aIndex, QFileInfo& aPath);
     bool checkOverwriting(const QFileInfo& aPath);
+    void updateLog();
 
     core::Project& mProject;
     FramebufferList mFramebuffers;

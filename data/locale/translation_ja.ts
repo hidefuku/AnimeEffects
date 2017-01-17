@@ -682,104 +682,119 @@
 <context>
     <name>gui::MainWindow</name>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="136"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="140"/>
         <source>Target Dock</source>
         <translation>ターゲットドック</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="148"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="152"/>
         <source>Property Dock</source>
         <translation>プロパティドック</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="190"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="194"/>
         <source>Tool Dock</source>
         <translation>ツールドック</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="504"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="508"/>
         <source> has been modified. Save changes?</source>
         <translation>は変更が加えられてます。変更を保存しますか？</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="508"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="512"/>
         <source>Some projects have been modified. Save changes?</source>
         <translation>いくつかのプロジェクトは変更が加えられてます。変更を保存しますか？</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="511"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="515"/>
         <source>Save Changes</source>
         <translation>変更を保存する</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="512"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="516"/>
         <source>Discard Changes</source>
         <translation>変更を破棄する</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="513"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="517"/>
         <source>Cancel Closing</source>
         <translation>閉じるのをやめる</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="535"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="539"/>
         <source>Undone : </source>
         <translation>元に戻す : </translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="549"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="553"/>
         <source>Redone : </source>
         <translation>やり直す : </translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="599"/>
-        <location filename="../../src/gui/MainWindow.cpp" line="636"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="603"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="640"/>
         <source>Loading Error</source>
         <translation>読み込みエラー</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="614"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="618"/>
         <source>Open File</source>
         <translation>ファイルを開く</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="653"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="657"/>
         <source>Save File</source>
         <translation>ファイルを保存する</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="725"/>
-        <source>Exporting Folder</source>
+        <location filename="../../src/gui/MainWindow.cpp" line="729"/>
+        <source>Export Folder</source>
         <translation>出力フォルダ</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="749"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="773"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="879"/>
+        <source>Export Error</source>
+        <translation>出力エラー</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/MainWindow.cpp" line="867"/>
+        <source>FFmpeg was not found.</source>
+        <translation>FFmpegが見つかりませんでした。</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/MainWindow.cpp" line="869"/>
+        <source>Video export requires FFmpeg.</source>
+        <translation>動画出力にはFFmpegが必要です。</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/MainWindow.cpp" line="870"/>
+        <source>Install FFmpeg on the system, or place a FFmpeg executable under /tools of the folder you expanded AnimeEffects.</source>
+        <translation>FFmpegをシステムにインストールするか、FFmpegの実行ファイルをAnimeEffectsを展開したフォルダの/tools以下に配置してください。</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/MainWindow.cpp" line="753"/>
         <source>File already exists.</source>
         <translation>同名のファイルがすでに存在します</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="750"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="754"/>
         <source>Do you want to overwrite the existing file?</source>
         <translation>既存のファイルに上書きしますか？</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="769"/>
-        <location filename="../../src/gui/MainWindow.cpp" line="857"/>
-        <source>Exporting Error</source>
-        <translation>出力エラー</translation>
-    </message>
-    <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="786"/>
-        <source>Exporting File</source>
+        <location filename="../../src/gui/MainWindow.cpp" line="790"/>
+        <source>Export File</source>
         <translation>出力ファイル</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="801"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="805"/>
         <source>Operation Error</source>
         <translation>操作エラー</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainWindow.cpp" line="802"/>
+        <location filename="../../src/gui/MainWindow.cpp" line="806"/>
         <source>Invalid suffix specification.</source>
         <translation>無効な拡張子が指定されています</translation>
     </message>
@@ -987,7 +1002,7 @@
         <translation>リソースを追加する</translation>
     </message>
     <message>
-        <location filename="../../src/gui/ResourceDialog.cpp" line="103"/>
+        <location filename="../../src/gui/ResourceDialog.cpp" line="104"/>
         <source>Open File</source>
         <translation>ファイルを開く</translation>
     </message>

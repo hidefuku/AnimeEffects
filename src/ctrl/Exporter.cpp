@@ -7,6 +7,17 @@
 
 namespace ctrl
 {
+//-------------------------------------------------------------------------------------------------
+Exporter::Result::Result()
+    : code(ResultCode_TERM)
+{
+}
+
+Exporter::Result::Result(ResultCode aCode, const QString& aMessage)
+    : code(aCode)
+    , message(aMessage)
+{
+}
 
 //-------------------------------------------------------------------------------------------------
 Exporter::CommonParam::CommonParam()
@@ -63,6 +74,7 @@ Exporter::FFMpeg::FFMpeg()
     , mFinished()
     , mErrorOccurred()
     , mErrorString()
+    , mErrorCode()
     , mLogs()
 {
 }
@@ -94,9 +106,10 @@ bool Exporter::FFMpeg::start(const QString& aArgments)
             //qDebug() << QString(process->readAll().data());
         }
     });
-    mProcess->connect(process, &QProcess::errorOccurred, [=](QProcess::ProcessError)
+    mProcess->connect(process, &QProcess::errorOccurred, [=](QProcess::ProcessError aCode)
     {
         this->mErrorOccurred = true;
+        this->mErrorCode = aCode;
         if (this->mProcess)
         {
             this->mErrorString = this->mProcess->errorString();
@@ -202,13 +215,13 @@ void Exporter::setUILogger(UILogger& aLogger)
     mUILogger = &aLogger;
 }
 
-bool Exporter::execute(const CommonParam& aCommon, const PngParam& aPng)
+Exporter::Result Exporter::execute(const CommonParam& aCommon, const PngParam& aPng)
 {
     // check param
     if (!aCommon.isValid())
     {
         mLog = "Invalid common parameters.";
-        return false;
+        return Result(ResultCode_InvalidOperation, mLog);
     }
 
     // check directory
@@ -216,7 +229,7 @@ bool Exporter::execute(const CommonParam& aCommon, const PngParam& aPng)
     if (!path.exists() || !path.isDir())
     {
         mLog = "Invalid directory path.";
-        return false;
+        return Result(ResultCode_InvalidOperation, mLog);
     }
 
     mCommonParam = aCommon;
@@ -230,7 +243,7 @@ bool Exporter::execute(const CommonParam& aCommon, const PngParam& aPng)
     return execute();
 }
 
-bool Exporter::execute(const CommonParam& aCommon, const GifParam& aGif)
+Exporter::Result Exporter::execute(const CommonParam& aCommon, const GifParam& aGif)
 {
     const QString outFile = QFileInfo(aCommon.path).absoluteFilePath();
     const QString workFile = outFile + "videocache.mp4";
@@ -249,9 +262,9 @@ bool Exporter::execute(const CommonParam& aCommon, const GifParam& aGif)
         videoParam.bps = 0;
     }
 
-    if (!execute(commonParam, videoParam))
     {
-        return false;
+        auto result = execute(commonParam, videoParam);
+        if (!result) return result;
     }
 
     if (aGif.optimizePalette)
@@ -269,19 +282,19 @@ bool Exporter::execute(const CommonParam& aCommon, const GifParam& aGif)
         if (mFFMpeg.errorOccurred())
         {
             mLog = "FFmpeg error occurred.\n" + mFFMpeg.errorString();
-            return false;
+            return Result(ResultCode_FFMpegError, mLog);
         }
     }
-    return true;
+    return Result(ResultCode_Success, "Success.");
 }
 
-bool Exporter::execute(const CommonParam& aCommon, const VideoParam& aVideo)
+Exporter::Result Exporter::execute(const CommonParam& aCommon, const VideoParam& aVideo)
 {
     // check param
     if (!aCommon.isValid())
     {
         mLog = "Invalid common parameters.";
-        return false;
+        return Result(ResultCode_InvalidOperation, mLog);
     }
 
     // check file overwriting
@@ -291,7 +304,7 @@ bool Exporter::execute(const CommonParam& aCommon, const VideoParam& aVideo)
     {
         mLog = "Exporting was canceled.";
         mIsCanceled = true;
-        return false;
+        return Result(ResultCode_Canceled, mLog);
     }
 
     mCommonParam = aCommon;
@@ -319,14 +332,16 @@ bool Exporter::execute(const CommonParam& aCommon, const VideoParam& aVideo)
         if (!mFFMpeg.start(argments))
         {
             mLog = "FFmpeg error occurred.\n" + mFFMpeg.errorString();
-            return false;
+            return mFFMpeg.errorCode() == QProcess::FailedToStart ?
+                        Result(ResultCode_FFMpegFailedToStart, mLog) :
+                        Result(ResultCode_FFMpegError, mLog);
         }
     }
 
     return execute();
 }
 
-bool Exporter::execute()
+Exporter::Result Exporter::execute()
 {
     if (mProgressReporter)
     {
@@ -334,25 +349,15 @@ bool Exporter::execute()
         mProgressReporter->setMaximum(100);
     }
 
-    if (!start())
+    // start
     {
-        return false;
+        auto result = start();
+        if (!result) return result;
     }
 
     while (1)
     {
         if (!update()) break;
-
-#if 0
-        if (mUILogger && mVideoExporting)
-        {
-            auto log = mFFMpeg.popLog();
-            if (!log.isEmpty())
-            {
-                mUILogger->pushLog(log, ctrl::UILogType_Info);
-            }
-        }
-#endif
 
         if (mProgressReporter)
         {
@@ -361,9 +366,9 @@ bool Exporter::execute()
             if (mProgressReporter->wasCanceled())
             {
                 finish();
-                mLog = "Exporting was canceled.";
+                mLog = "Export was canceled.";
                 mIsCanceled = true;
-                return false;
+                return Result(ResultCode_Canceled, mLog);
             }
         }
     }
@@ -371,7 +376,7 @@ bool Exporter::execute()
     return finish();
 }
 
-bool Exporter::start()
+Exporter::Result Exporter::start()
 {
     // reset value
     mIndex = 0;
@@ -389,7 +394,7 @@ bool Exporter::start()
         if (!mTextureDrawer.init())
         {
             mLog = "Failed to initialize TextureDrawer";
-            return false;
+            Result(ResultCode_UnclassfiedError, mLog);
         }
 
         // framebuffers
@@ -405,7 +410,7 @@ bool Exporter::start()
     }
 
     mExporting = true;
-    return true;
+    return Result(ResultCode_Success, "Success.");
 }
 
 bool Exporter::updateTime(core::TimeInfo& aDst)
@@ -416,7 +421,7 @@ bool Exporter::updateTime(core::TimeInfo& aDst)
     const double current = (mIndex * mOriginTimeInfo.fps) / (double)mCommonParam.fps;
     const double frame = mCommonParam.frame.min() + current;
 
-    // end of exporting
+    // end of export
     if (0 < mIndex && mCommonParam.frame.max() < frame)
     {
         return false;
@@ -520,6 +525,9 @@ bool Exporter::update()
         // flush
         ggl.glFlush();
 
+        // update log if necessary
+        updateLog();
+
         // export
         exportImage(outImage, currentIndex);
     }
@@ -529,16 +537,6 @@ bool Exporter::update()
 
 bool Exporter::exportImage(const QImage& aFboImage, int aIndex)
 {
-    // update log
-    if (mUILogger && mVideoExporting)
-    {
-        auto log = mFFMpeg.popLog();
-        if (!log.isEmpty())
-        {
-            mUILogger->pushLog(log, ctrl::UILogType_Info);
-        }
-    }
-
     // decide file path
     QFileInfo filePath;
     if (!decidePngPath(aIndex, filePath))
@@ -572,34 +570,25 @@ bool Exporter::exportImage(const QImage& aFboImage, int aIndex)
     return true;
 }
 
-bool Exporter::finish()
+Exporter::Result Exporter::finish()
 {
-    bool result = false;
+    Result result(ResultCode_Success, "Success.");
 
     if (mExporting)
     {
         if (mVideoExporting)
         {
-            result = mFFMpeg.finish([=]()->bool
+            auto success = mFFMpeg.finish([=]()->bool
             {
-                if (mUILogger)
-                {
-                    auto log = mFFMpeg.popLog();
-                    if (!log.isEmpty())
-                    {
-                        mUILogger->pushLog(log, ctrl::UILogType_Info);
-                    }
-                }
+                // update log if necessary
+                this->updateLog();
                 return true;
             });
-            if (!result)
+            if (!success)
             {
                 mLog = "FFmpeg error occurred.\n" + mFFMpeg.errorString();
+                result = Result(ResultCode_FFMpegError, mLog);
             }
-        }
-        else
-        {
-            result = true;
         }
 
         mExporting = false;
@@ -707,6 +696,18 @@ int Exporter::getDigitCount(const util::Range& aRange, int aFps, int aFpsOrigin)
     double count = (aFps * (aRange.diff() + 1)) / (double)aFpsOrigin;
     for (; count >= 10.0; count *= 0.1) ++digitCount;
     return std::max(digitCount, 4);
+}
+
+void Exporter::updateLog()
+{
+    if (mUILogger && mVideoExporting)
+    {
+        auto log = mFFMpeg.popLog();
+        if (!log.isEmpty())
+        {
+            mUILogger->pushLog(log, ctrl::UILogType_Info);
+        }
+    }
 }
 
 } // namespace ctrl

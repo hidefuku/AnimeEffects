@@ -725,8 +725,8 @@ void MainWindow::onExportPngSeqTriggered()
     // stop animation and main display rendering
     EventSuspender suspender(*mMainDisplay, *mTarget);
 
-    // exporting directory
-    QString dirName = QFileDialog::getExistingDirectory(this, tr("Exporting Folder"));
+    // export directory
+    QString dirName = QFileDialog::getExistingDirectory(this, tr("Export Folder"));
 
     // make sure existing
     if (dirName.isEmpty()) return;
@@ -770,7 +770,7 @@ void MainWindow::onExportPngSeqTriggered()
 
         if (!exporter.isCanceled())
         {
-            QMessageBox::warning(nullptr, tr("Exporting Error"), exporter.log());
+            QMessageBox::warning(nullptr, tr("Export Error"), exporter.log());
         }
         return;
     }
@@ -787,7 +787,7 @@ void MainWindow::onExportVideoTriggered(const QString& aSuffix, QString aCodec)
     // get export file name
     QString fileName = QFileDialog::getSaveFileName(
                 this,
-                tr("Exporting File"),
+                tr("Export File"),
                 QString(), // dir
                 targetVideos);
     const QFileInfo fileInfo(fileName);
@@ -849,19 +849,35 @@ void MainWindow::onExportVideoTriggered(const QString& aSuffix, QString aCodec)
     exporter.setUILogger(progress);
 
     // execute
-    bool success = isGif ?
+    auto result = isGif ?
                 exporter.execute(cparam, gparam) :
                 exporter.execute(cparam, vparam);
 
-    if (!success)
+    if (!result)
     {
         progress.cancel();
 
-        if (!exporter.isCanceled())
+        if (result.code == ctrl::Exporter::ResultCode_Canceled)
         {
-            QMessageBox::warning(nullptr, tr("Exporting Error"), exporter.log());
         }
-        return;
+        else if (result.code == ctrl::Exporter::ResultCode_FFMpegFailedToStart)
+        {
+            QMessageBox message;
+            message.setIcon(QMessageBox::Warning);
+            message.setText(tr("FFmpeg was not found."));
+            auto infoText =
+                    tr("Video export requires FFmpeg.") + "\n" +
+                    tr("Install FFmpeg on the system, or place a FFmpeg executable "
+                       "under /tools of the folder you expanded AnimeEffects.");
+            message.setInformativeText(infoText);
+            message.setStandardButtons(QMessageBox::Ok);
+            message.setDefaultButton(QMessageBox::Ok);
+            message.exec();
+        }
+        else
+        {
+            QMessageBox::warning(nullptr, tr("Export Error"), exporter.log());
+        }
     }
 }
 
