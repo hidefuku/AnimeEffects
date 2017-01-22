@@ -165,7 +165,7 @@ void TimeLineInnerWidget::updateLinesRecursive(QTreeWidgetItem* aItem)
 
     const bool isClosedFolder = !aItem->isExpanded() && aItem->childCount() > 0;
     obj::Item* objItem = obj::Item::cast(aItem);
-    if (objItem)
+    if (objItem && !objItem->isTopNode())
     {
         int screenTop = mCamera ? -mCamera->leftTopPos().y() : 0;
 

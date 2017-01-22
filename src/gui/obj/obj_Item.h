@@ -18,6 +18,8 @@ public:
     core::ObjectNode& node() { return mNode; }
     const core::ObjectNode& node() const { return mNode; }
 
+    bool isTopNode() const;
+
     QRect visualRect() const;
 
 private:

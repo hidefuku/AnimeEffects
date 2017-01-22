@@ -32,6 +32,11 @@ Item::Item(const QTreeWidget& aTree, core::ObjectNode& aNode)
     this->setWhatsThis(kItemColumn, "ObjectItem");
 }
 
+bool Item::isTopNode() const
+{
+    return !mNode.parent();
+}
+
 QRect Item::visualRect() const
 {
     return mTree.visualItemRect(this);

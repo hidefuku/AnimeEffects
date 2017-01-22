@@ -175,7 +175,7 @@ core::ObjectNode* ObjectTreeWidget::findSelectingRepresentNode()
     for (auto item : items)
     {
         obj::Item* objItem = obj::Item::cast(item);
-        if (objItem)
+        if (objItem && !objItem->isTopNode())
         {
             if (node) return nullptr;
             node = &objItem->node();
@@ -206,7 +206,7 @@ void ObjectTreeWidget::createTree(core::ObjectTree* aTree)
         core::ObjectNode* node = aTree->topNode();
         if (node)
         {
-            QTreeWidgetItem* item = new QTreeWidgetItem(QStringList(node->name()));
+            obj::Item* item = new obj::Item(*this, *node);
             item->setSizeHint(kItemColumn, QSize(kTopItemSize, kTopItemSize));
             this->addTopLevelItem(item);
             addItemRecursive(item, node);
@@ -281,7 +281,7 @@ void ObjectTreeWidget::storeInsertion(
         }
         // record target
         auto objItem = obj::Item::cast(aItem);
-        if (objItem)
+        if (objItem && !objItem->isTopNode())
         {
             core::ObjectNode& node = objItem->node();
             mObjTreeNotifier->event().pushTarget(node.parent(), node);
@@ -386,16 +386,16 @@ bool ObjectTreeWidget::updateItemHeights(QTreeWidgetItem* aItem)
     if (!aItem) return false;
 
     // cast to a objectnode's item
-    obj::Item* item = obj::Item::cast(aItem);
+    obj::Item* objItem = obj::Item::cast(aItem);
     bool changed = false;
 
-    if (item)
+    if (objItem && !objItem->isTopNode())
     {
-        const int height = itemHeight(item->node());
+        const int height = itemHeight(objItem->node());
         // update
-        if (item->sizeHint(kItemColumn).height() != height)
+        if (objItem->sizeHint(kItemColumn).height() != height)
         {
-            item->setSizeHint(kItemColumn, QSize(kItemSize, height));
+            objItem->setSizeHint(kItemColumn, QSize(kItemSize, height));
             changed = true;
         }
     }
@@ -445,13 +445,13 @@ void ObjectTreeWidget::onItemClicked(QTreeWidgetItem* aItem, int aColumn)
 {
     endRenameEditor();
 
-    obj::Item* item = obj::Item::cast(aItem);
-    if (aColumn == kItemColumn && item)
+    obj::Item* objItem = obj::Item::cast(aItem);
+    if (aColumn == kItemColumn && objItem && !objItem->isTopNode())
     {
         if (mProject)
         {
-            const bool isVisible = item->checkState(kItemColumn) == Qt::Checked;
-            item->node().setVisibility(isVisible);
+            const bool isVisible = objItem->checkState(kItemColumn) == Qt::Checked;
+            objItem->node().setVisibility(isVisible);
             onVisibilityUpdated();
         }
     }
@@ -489,7 +489,7 @@ void ObjectTreeWidget::onContextMenuRequested(const QPoint& aPos)
         obj::Item* objItem = obj::Item::cast(mActionItem);
         QMenu menu(this);
 
-        if (objItem)
+        if (objItem && !objItem->isTopNode())
         {
             mSlimAction->setText(
                         objItem->node().isSlimmedDown() ?
@@ -519,7 +519,7 @@ void ObjectTreeWidget::onSlimActionTriggered(bool)
     if (mActionItem)
     {
         obj::Item* objItem = obj::Item::cast(mActionItem);
-        if (objItem)
+        if (objItem && !objItem->isTopNode())
         {
             objItem->node().setSlimDown(!objItem->node().isSlimmedDown());
 
@@ -535,8 +535,11 @@ void ObjectTreeWidget::onRenameActionTriggered(bool)
 {
     if (mActionItem)
     {
-        this->openPersistentEditor(mActionItem, kItemColumn);
-        this->editItem(mActionItem, kItemColumn);
+        if (obj::Item::cast(mActionItem))
+        {
+            this->openPersistentEditor(mActionItem, kItemColumn);
+            this->editItem(mActionItem, kItemColumn);
+        }
     }
 }
 
@@ -554,7 +557,7 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
         int itemIndex = -1;
 
         // top node
-        if (!objItem || !objItem->node().parent())
+        if (!objItem || objItem->isTopNode())
         {
             parent = mProject->objectTree().topNode();
             XC_PTR_ASSERT(parent);
@@ -648,7 +651,7 @@ void ObjectTreeWidget::onFolderActionTriggered(bool)
         int itemIndex = -1;
 
         // top node
-        if (!objItem || !objItem->node().parent())
+        if (!objItem || objItem->isTopNode())
         {
             parent = mProject->objectTree().topNode();
             XC_PTR_ASSERT(parent);
@@ -717,7 +720,7 @@ void ObjectTreeWidget::onDeleteActionTriggered(bool)
     if (mActionItem)
     {
         obj::Item* objItem = obj::Item::cast(mActionItem);
-        if (!objItem) return;
+        if (!objItem || objItem->isTopNode()) return;
 
         core::ObjectNode& node = objItem->node();
 
