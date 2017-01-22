@@ -8,6 +8,7 @@
 namespace
 {
 static const float kFocusRadius = 5.0f;
+static const float kMinFocusRadius = 1.0f;
 }
 
 using namespace core;
@@ -40,7 +41,11 @@ bool DragMode::updateCursor(const core::CameraInfo& aCamera, const core::Abstrac
     auto prevFocus = mFocusing;
     auto prevFocusPos = mFocusPos;
 
-    mParam.radius = aCamera.toWorldLength(kFocusRadius);
+    {
+        auto rawRadius = aCamera.toWorldLength(kFocusRadius);
+        auto addRadius = std::max(0.0f, 0.2f * (kFocusRadius - rawRadius));
+        mParam.focusRadius = std::max(kMinFocusRadius, rawRadius) + addRadius;
+    }
 
     if (mState == State_Idle)
     {

@@ -24,6 +24,7 @@ public:
         , eraseHardness(1)
         , eraseRadius(100)
         , erasePressure(0.1f)
+        , focusRadius(1.0f)
     {}
     Type type;
 
@@ -37,6 +38,9 @@ public:
     int eraseHardness; // 0, 1, 2
     int eraseRadius; // 5~1000
     float erasePressure;
+
+    // focuser
+    float focusRadius;
 };
 
 } // namespace ctrl

@@ -193,7 +193,7 @@ void Task::onRequested()
             program.setAttributeBuffer("inWorldPosition", mMeshTransformer.positions(), GL_FLOAT, 3);
 
             program.setUniformValue("uBrushCenter", mBrushCenter);
-            program.setUniformValue("uBrushRadius", (float)mParam.radius);
+            program.setUniformValue("uBrushRadius", mParam.focusRadius);
 
             ggl.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, mOutMesh.id());
             ggl.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, mOutWeight.id());
