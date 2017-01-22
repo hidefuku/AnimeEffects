@@ -302,6 +302,10 @@ void LayerNode::transformShape(
     if (aInfo.originMesh) // ignore mesh deforming
     {
         useInfluence = false;
+        if (expans.areaImageKey())
+        {
+            mesh = &(expans.areaImageKey()->data().gridMesh());
+        }
         positions = util::ArrayBlock<const gl::Vector3>(
                     mesh->positions(), mesh->vertexCount());
     }
