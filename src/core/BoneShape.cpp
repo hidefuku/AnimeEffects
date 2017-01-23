@@ -356,6 +356,7 @@ bool BoneShape::serialize(Serializer& aOut) const
     aOut.write(mIsValid);
     aOut.write(mSegment);
     aOut.write(mVUnit);
+    aOut.write(mVDirAngle);
     aOut.write(mLength);
     aOut.write(mRadius[0]);
     aOut.write(mRadius[1]);
@@ -374,6 +375,7 @@ bool BoneShape::deserialize(Deserializer& aIn)
     aIn.read(mIsValid);
     aIn.read(mSegment);
     aIn.read(mVUnit);
+    aIn.read(mVDirAngle);
     aIn.read(mLength);
     aIn.read(mRadius[0]);
     aIn.read(mRadius[1]);
