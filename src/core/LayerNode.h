@@ -67,7 +67,6 @@ public:
     virtual void render(const RenderInfo&, const TimeCacheAccessor&);
     virtual void renderClipper(
             const RenderInfo&, const TimeCacheAccessor&, uint8 aClipperId);
-    virtual float renderDepth() const;
     virtual void setClipped(bool aIsClipped);
     virtual bool isClipped() const { return mIsClipped; }
     virtual bool hasBlendMode() const { return true; }
@@ -90,7 +89,7 @@ private:
 
     MeshTransformer mMeshTransformer;
     LayerMesh* mCurrentMesh;
-    std::vector<Renderer*> mClippees; // a cache for performance
+    std::vector<Renderer::SortUnit> mClippees; // a cache for performance
 };
 
 } // namespace core

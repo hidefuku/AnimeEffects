@@ -14,6 +14,13 @@ namespace core
 class Renderer
 {
 public:
+    struct SortUnit
+    {
+        SortUnit() : renderer(), depth() {}
+        Renderer* renderer;
+        float depth;
+    };
+
     virtual ~Renderer() {}
 
     virtual void prerender(const RenderInfo& aInfo,
@@ -25,8 +32,6 @@ public:
     virtual void renderClipper(const RenderInfo& aInfo,
                                const TimeCacheAccessor&,
                                uint8 aClipperId) = 0;
-
-    virtual float renderDepth() const = 0;
 
     virtual void setClipped(bool aIsClipped) = 0;
     virtual bool isClipped() const = 0;

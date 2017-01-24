@@ -116,11 +116,6 @@ float LayerNode::initialDepth() const
     return key ? key->depth() : 0.0f;
 }
 
-float LayerNode::renderDepth() const
-{
-    return mTimeLine.current().worldDepth();
-}
-
 void LayerNode::setClipped(bool aIsClipped)
 {
     mIsClipped = aIsClipped;
@@ -185,7 +180,7 @@ void LayerNode::renderClippees(
     if (!aInfo.clippingFrame || !isClipper()) return;
 
     // reset clippees
-    ObjectNodeUtil::collectRenderClippees(*this, mClippees);
+    ObjectNodeUtil::collectRenderClippees(*this, mClippees, aAccessor);
 
     // clipping frame
     auto& frame = *aInfo.clippingFrame;
@@ -199,7 +194,7 @@ void LayerNode::renderClippees(
 
     for (auto clippee : mClippees)
     {
-        XC_PTR_ASSERT(clippee);
+        XC_PTR_ASSERT(clippee.renderer);
 
         // write clipper as necessary
         if (stamp != frame.renderStamp())
@@ -209,7 +204,7 @@ void LayerNode::renderClippees(
         }
 
         // render child
-        clippee->render(childInfo, aAccessor);
+        clippee.renderer->render(childInfo, aAccessor);
     }
 }
 

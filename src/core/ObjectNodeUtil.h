@@ -8,6 +8,7 @@
 #include "core/ObjectNode.h"
 #include "core/FolderNode.h"
 #include "core/SRTExpans.h"
+#include "core/TimeCacheAccessor.h"
 
 namespace core
 {
@@ -18,7 +19,9 @@ float getInitialWorldDepth(ObjectNode& aNode);
 
 bool thereAreSomeKeysExceedingFrame(const ObjectNode* aRootNode, int aMaxFrame);
 
-void collectRenderClippees(ObjectNode& aNode, std::vector<Renderer*>& aDest);
+void collectRenderClippees(ObjectNode& aNode,
+                           std::vector<Renderer::SortUnit>& aDest,
+                           const TimeCacheAccessor& aAccessor);
 
 class AttributeNotifier : public cmnd::Listener
 {

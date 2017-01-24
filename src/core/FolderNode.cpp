@@ -117,7 +117,7 @@ void FolderNode::renderClippees(
     if (!aInfo.clippingFrame || !isClipper()) return;
 
     // reset clippees
-    ObjectNodeUtil::collectRenderClippees(*this, mClippees);
+    ObjectNodeUtil::collectRenderClippees(*this, mClippees, aAccessor);
 
     // clipping frame
     auto& frame = *aInfo.clippingFrame;
@@ -131,7 +131,7 @@ void FolderNode::renderClippees(
 
     for (auto clippee : mClippees)
     {
-        XC_PTR_ASSERT(clippee);
+        XC_PTR_ASSERT(clippee.renderer);
 
         // write clipper as necessary
         if (stamp != frame.renderStamp())
@@ -141,7 +141,7 @@ void FolderNode::renderClippees(
         }
 
         // render child
-        clippee->render(childInfo, aAccessor);
+        clippee.renderer->render(childInfo, aAccessor);
     }
 }
 
@@ -161,11 +161,6 @@ float FolderNode::initialDepth() const
 {
     auto key = (DepthKey*)mTimeLine.defaultKey(TimeKeyType_Depth);
     return key ? key->depth() : 0.0f;
-}
-
-float FolderNode::renderDepth() const
-{
-    return mTimeLine.current().worldDepth();
 }
 
 void FolderNode::setClipped(bool aIsClipped)

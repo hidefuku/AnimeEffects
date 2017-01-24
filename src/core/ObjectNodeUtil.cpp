@@ -16,21 +16,27 @@ QRectF fGetContainedRect(const QRectF& aLhs, const QRectF& aRhs)
 }
 #endif
 
-bool fCompareRenderDepth(core::Renderer* a, core::Renderer* b)
+bool fCompareRenderDepth(core::Renderer::SortUnit a, core::Renderer::SortUnit b)
 {
-    return a->renderDepth() < b->renderDepth();
+    return a.depth < b.depth;
 }
 
-void fPushRenderClippeeRecursive(core::ObjectNode& aNode, std::vector<core::Renderer*>& aDest)
+void fPushRenderClippeeRecursive(
+        core::ObjectNode& aNode,
+        std::vector<core::Renderer::SortUnit>& aDest,
+        const core::TimeCacheAccessor& aAccessor)
 {
-    aDest.push_back(aNode.renderer());
+    core::Renderer::SortUnit unit;
+    unit.renderer = aNode.renderer();
+    unit.depth = aAccessor.get(aNode).worldDepth();
+    aDest.push_back(unit);
 
     for (auto child : aNode.children())
     {
         XC_PTR_ASSERT(child);
         if (child->isVisible() && child->renderer() && !child->renderer()->isClipped())
         {
-            fPushRenderClippeeRecursive(*child, aDest);
+            fPushRenderClippeeRecursive(*child, aDest, aAccessor);
         }
     }
 }
@@ -80,7 +86,9 @@ bool thereAreSomeKeysExceedingFrame(const ObjectNode* aRootNode, int aMaxFrame)
     return false;
 }
 
-void collectRenderClippees(ObjectNode& aNode, std::vector<Renderer*>& aDest)
+void collectRenderClippees(ObjectNode& aNode,
+                           std::vector<Renderer::SortUnit>& aDest,
+                           const TimeCacheAccessor& aAccessor)
 {
     aDest.clear();
 
@@ -88,7 +96,7 @@ void collectRenderClippees(ObjectNode& aNode, std::vector<Renderer*>& aDest)
 
     while (p && p->isVisible() && p->renderer() && p->renderer()->isClipped())
     {
-        fPushRenderClippeeRecursive(*p, aDest);
+        fPushRenderClippeeRecursive(*p, aDest, aAccessor);
         p = p->prevSib();
     }
     if (!aDest.empty())

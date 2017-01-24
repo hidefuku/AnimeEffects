@@ -19,9 +19,9 @@ namespace core
 //-------------------------------------------------------------------------------------------------
 class SortAndRenderCall
 {
-    static bool compareDepth(Renderer* a, Renderer* b)
+    static bool compareDepth(Renderer::SortUnit a, Renderer::SortUnit b)
     {
-        return a->renderDepth() < b->renderDepth();
+        return a.depth < b.depth;
     }
 
     void pushNodeRecursive(ObjectNode* aNode, bool aPush)
@@ -35,7 +35,10 @@ class SortAndRenderCall
             {
                 if (!renderer->isClipped())
                 {
-                    mArray.push_back(renderer);
+                    Renderer::SortUnit unit;
+                    unit.renderer = renderer;
+                    unit.depth = mAccessor->get(*aNode).worldDepth();
+                    mArray.push_back(unit);
                 }
                 else
                 {
@@ -51,12 +54,14 @@ class SortAndRenderCall
         }
     }
 
-    std::vector<Renderer*> mArray;
+    std::vector<Renderer::SortUnit> mArray;
+    const TimeCacheAccessor* mAccessor;
 
 public:
 
     SortAndRenderCall()
         : mArray()
+        , mAccessor()
     {
     }
 
@@ -64,6 +69,8 @@ public:
                 const RenderInfo& aInfo,
                 const TimeCacheAccessor& aAccessor)
     {
+        mAccessor = &aAccessor;
+
         // prerender
         {
             ObjectNode::Iterator itr(aTopNode);
@@ -85,7 +92,7 @@ public:
         // render
         for (auto data : mArray)
         {
-            data->render(aInfo, aAccessor);
+            data.renderer->render(aInfo, aAccessor);
         }
     }
 };
