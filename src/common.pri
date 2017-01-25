@@ -23,9 +23,12 @@ DEFINES += "AE_PROJECT_FORMAT_OLDEST_MAJOR_VERSION=0"
 DEFINES += "AE_PROJECT_FORMAT_OLDEST_MINOR_VERSION=4"
 
 # OpenGL CoreProfile Option
-unix|macx {
+unix {
 DEFINES += USE_GL_CORE_PROFILE
 }
-unix {
+unix:!macx {
 QMAKE_RPATHDIR += ./
+}
+macx {
+QMAKE_RPATHDIR += ../Frameworks
 }

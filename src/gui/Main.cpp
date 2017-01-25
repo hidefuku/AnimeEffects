@@ -101,22 +101,21 @@ int entryPoint(int argc, char *argv[])
 
     // create qt application
     QApplication app(argc, argv);
-
-    // unicode argments
-    const QStringList uniArgs = app.arguments();
+    XC_DEBUG_REPORT() << "exe path =" << app.applicationFilePath();
 
     // application path
-    const QString exeFilePath(uniArgs.at(0));
 #if defined(Q_OS_MAC)
-    const QString appDir = QDir(app.applicationDirPath() + "/../../../").absolutePath();
+    const QString appDir = QDir(app.applicationDirPath() + "/../../").absolutePath();
+    app.addLibraryPath(app.applicationDirPath() + "/../PlugIns/");
 #else
-    const QString appDir(QFileInfo(exeFilePath).dir().path());
+    const QString appDir = app.applicationDirPath();
 #endif
-    QDir::setCurrent(appDir);
     const QString resourceDir(appDir + "/data");
     const QString stdCacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
     const QString cacheDir = !stdCacheDir.isEmpty() ? stdCacheDir : (appDir + "/cache");
-    XC_DEBUG_REPORT() << "exe path =" << exeFilePath;
+
+    // initialize current
+    QDir::setCurrent(appDir);
 
     // set fatal error handler
     static AEErrorHandler aeErrorHandler;

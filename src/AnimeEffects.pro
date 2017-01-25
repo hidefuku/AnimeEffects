@@ -21,9 +21,18 @@ export(copydata.commands)
 export(copytools.commands)
 QMAKE_EXTRA_TARGETS += first copydata copytools
 }
-unix|macx {
+unix:!macx {
 copydata.commands = rsync -ru $$shell_path($$PWD/../data) $$shell_path($$OUT_PWD)
 copytools.commands = rsync -ru $$shell_path($$PWD/../tools) $$shell_path($$OUT_PWD)
+first.depends = $(first) copydata copytools
+export(first.depends)
+export(copydata.commands)
+export(copytools.commands)
+QMAKE_EXTRA_TARGETS += first copydata copytools
+}
+macx {
+copydata.commands = rsync -ru $$shell_path($$PWD/../data) $$shell_path($$OUT_PWD/AnimeEffects.app)
+copytools.commands = rsync -ru $$shell_path($$PWD/../tools) $$shell_path($$OUT_PWD/AnimeEffects.app)
 first.depends = $(first) copydata copytools
 export(first.depends)
 export(copydata.commands)
