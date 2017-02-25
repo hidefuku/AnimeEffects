@@ -45,6 +45,7 @@ public:
     void onNewProjectTriggered();
     void onOpenProjectTriggered();
     void onSaveProjectTriggered();
+    void onSaveProjectAsTriggered();
     void onCloseProjectTriggered();
     void onExportPngSeqTriggered();
     void onExportVideoTriggered(const QString& aSuffix, QString aCodec = QString());
@@ -57,7 +58,7 @@ private:
     virtual void closeEvent(QCloseEvent* aEvent);
 
     void resetProjectRefs(core::Project* aProject);
-    bool processProjectSaving(core::Project& aProject);
+    bool processProjectSaving(core::Project& aProject, bool aRename = false);
     int confirmProjectClosing(bool aCurrentOnly);
     void onProjectTabChanged(core::Project&);
 

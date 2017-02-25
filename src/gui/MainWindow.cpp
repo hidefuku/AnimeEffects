@@ -646,12 +646,12 @@ void MainWindow::onOpenProjectTriggered()
     }
 }
 
-bool MainWindow::processProjectSaving(core::Project& aProject)
+bool MainWindow::processProjectSaving(core::Project& aProject, bool aRename)
 {
     // stop animation and main display rendering
     EventSuspender suspender(*mMainDisplay, *mTarget);
 
-    if (aProject.isNameless())
+    if (aProject.isNameless() || aRename)
     {
         QString fileName = QFileDialog::getSaveFileName(
                     this, tr("Save File"), "", "ProjectFile (*.anie)");
@@ -686,6 +686,14 @@ void MainWindow::onSaveProjectTriggered()
     if (mCurrent)
     {
         processProjectSaving(*mCurrent);
+    }
+}
+
+void MainWindow::onSaveProjectAsTriggered()
+{
+    if (mCurrent)
+    {
+        processProjectSaving(*mCurrent, true);
     }
 }
 

@@ -26,10 +26,11 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
 
     QMenu* fileMenu = new QMenu(tr("File"), this);
     {
-        QAction* newProject   = new QAction(tr("New Project..."), this);
-        QAction* openProject  = new QAction(tr("Open Project..."), this);
-        QAction* saveProject  = new QAction(tr("Save Project"), this);
-        QAction* closeProject = new QAction(tr("Close Project"), this);
+        QAction* newProject     = new QAction(tr("New Project..."), this);
+        QAction* openProject    = new QAction(tr("Open Project..."), this);
+        QAction* saveProject    = new QAction(tr("Save Project"), this);
+        QAction* saveProjectAs  = new QAction(tr("Save Project As..."), this);
+        QAction* closeProject   = new QAction(tr("Close Project"), this);
 
         QMenu* exportAs = new QMenu(tr("Export As"), this);
         {
@@ -54,18 +55,21 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
         }
 
         mProjectActions.push_back(saveProject);
+        mProjectActions.push_back(saveProjectAs);
         mProjectActions.push_back(closeProject);
         mProjectActions.push_back(exportAs->menuAction());
 
         connect(newProject, &QAction::triggered, mainWindow, &MainWindow::onNewProjectTriggered);
         connect(openProject, &QAction::triggered, mainWindow, &MainWindow::onOpenProjectTriggered);
         connect(saveProject, &QAction::triggered, mainWindow, &MainWindow::onSaveProjectTriggered);
+        connect(saveProjectAs, &QAction::triggered, mainWindow, &MainWindow::onSaveProjectAsTriggered);
         connect(closeProject, &QAction::triggered, mainWindow, &MainWindow::onCloseProjectTriggered);
 
         fileMenu->addAction(newProject);
         fileMenu->addAction(openProject);
         fileMenu->addSeparator();
         fileMenu->addAction(saveProject);
+        fileMenu->addAction(saveProjectAs);
         fileMenu->addAction(exportAs->menuAction());
         fileMenu->addSeparator();
         fileMenu->addAction(closeProject);
