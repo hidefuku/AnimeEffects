@@ -64,6 +64,7 @@ private:
     TimeLineInnerWidget* mInner;
     core::CameraInfo mCameraInfo;
     core::AbstractCursor mAbstractCursor;
+    int mVerticalScrollValue;
 
     // for animation
     QTimer mTimer;

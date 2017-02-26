@@ -12,6 +12,7 @@ TimeLineWidget::TimeLineWidget(QWidget* aParent, core::Animator& aAnimator)
     , mInner()
     , mCameraInfo()
     , mAbstractCursor()
+    , mVerticalScrollValue(0)
     , mTimer()
     , mElapsed()
     , mBeginFrame()
@@ -85,13 +86,17 @@ double TimeLineWidget::getOneFrameTime() const
 
 QPoint TimeLineWidget::viewportTransform() const
 {
-    return QPoint(-this->horizontalScrollBar()->value(), -this->verticalScrollBar()->value());
+    // @note bug? Sometimes, the value of vertical scroll bar is different from the set value.
+
+    //return QPoint(-this->horizontalScrollBar()->value(), -this->verticalScrollBar()->value());
+    return QPoint(-this->horizontalScrollBar()->value(), -mVerticalScrollValue);
 }
 
 void TimeLineWidget::setScrollBarValue(const QPoint& aViewportTransform)
 {
     this->horizontalScrollBar()->setValue(-aViewportTransform.x());
     this->verticalScrollBar()->setValue(-aViewportTransform.y());
+    mVerticalScrollValue = -aViewportTransform.y();
 }
 
 void TimeLineWidget::updateCamera()
@@ -100,7 +105,6 @@ void TimeLineWidget::updateCamera()
     mCameraInfo.setScreenHeight(this->rect().height());
     mCameraInfo.setLeftTopPos(QVector2D(viewportTransform()));
     mCameraInfo.setScale(1.0f);
-
     mInner->updateCamera(mCameraInfo);
 }
 
@@ -121,6 +125,7 @@ void TimeLineWidget::onTreeViewUpdated(QTreeWidgetItem* aTopNode)
 void TimeLineWidget::onScrollUpdated(int aValue)
 {
     this->verticalScrollBar()->setValue(aValue);
+    mVerticalScrollValue = aValue;
     updateCamera();
 }
 
