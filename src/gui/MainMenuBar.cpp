@@ -1,6 +1,8 @@
+#include <QFile>
 #include <QMenu>
 #include <QAction>
 #include <QMessageBox>
+#include <QDomDocument>
 #include "cmnd/BasicCommands.h"
 #include "cmnd/ScopedMacro.h"
 #include "core/ObjectNodeUtil.h"
@@ -14,14 +16,46 @@
 
 namespace gui
 {
+//-------------------------------------------------------------------------------------------------
+QDomDocument getVideoExportDocument()
+{
+    QFile file("./data/encode/VideoEncode.txt");
 
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        qDebug() << file.errorString();
+        return QDomDocument();
+    }
+
+    QDomDocument prop;
+    QString errorMessage;
+    int errorLine = 0;
+    int errorColumn = 0;
+    if (!prop.setContent(&file, false, &errorMessage, &errorLine, &errorColumn))
+    {
+        qDebug() << "invalid xml file. "
+                 << file.fileName()
+                 << errorMessage << ", line = " << errorLine
+                 << ", column = " << errorColumn;
+        return QDomDocument();
+    }
+    file.close();
+
+    return prop;
+}
+
+//-------------------------------------------------------------------------------------------------
 MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* aParent)
     : QMenuBar(aParent)
     , mViaPoint(aViaPoint)
     , mProject()
     , mProjectActions()
     , mShowResourceWindow()
+    , mVideoFormats()
 {
+    // load the list of video formats from a setting file.
+    loadVideoFormats();
+
     MainWindow* mainWindow = &aMainWindow;
 
     QMenu* fileMenu = new QMenu(tr("File"), this);
@@ -34,24 +68,27 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
 
         QMenu* exportAs = new QMenu(tr("Export As"), this);
         {
+            ctrl::VideoFormat gifFormat;
+            gifFormat.name = "gif";
+            gifFormat.label = "GIF";
+            gifFormat.icodec = "ppm";
+
+            QAction* jpgs = new QAction(tr("JPEG Sequence..."), this);
             QAction* pngs = new QAction(tr("PNG Sequence..."), this);
             QAction* gif  = new QAction(tr("GIF Animation..."), this);
-            QAction* mp4  = new QAction(tr("MPEG-4 Video..."), this);
-            QAction* webm = new QAction(tr("WebM Video..."), this);
-            QAction* ogv  = new QAction(tr("Ogg Video..."), this);
-            QAction* avil = new QAction(tr("Lossless AVI Video..."), this);
-            connect(pngs, &QAction::triggered, mainWindow, &MainWindow::onExportPngSeqTriggered);
-            connect(gif,  &QAction::triggered, [=](){ mainWindow->onExportVideoTriggered("gif"); });
-            connect(mp4,  &QAction::triggered, [=](){ mainWindow->onExportVideoTriggered("mp4"); });
-            connect(webm, &QAction::triggered, [=](){ mainWindow->onExportVideoTriggered("webm"); });
-            connect(ogv,  &QAction::triggered, [=](){ mainWindow->onExportVideoTriggered("ogv"); });
-            connect(avil, &QAction::triggered, [=](){ mainWindow->onExportVideoTriggered("avi", "huffyuv"); });
+            connect(jpgs, &QAction::triggered, [=](){ mainWindow->onExportImageSeqTriggered("jpg"); });
+            connect(pngs, &QAction::triggered, [=](){ mainWindow->onExportImageSeqTriggered("png"); });
+            connect(gif,  &QAction::triggered, [=](){ mainWindow->onExportVideoTriggered(gifFormat); });
+            exportAs->addAction(jpgs);
             exportAs->addAction(pngs);
             exportAs->addAction(gif);
-            exportAs->addAction(mp4);
-            exportAs->addAction(webm);
-            exportAs->addAction(ogv);
-            exportAs->addAction(avil);
+
+            for (auto format : mVideoFormats)
+            {
+                QAction* video = new QAction(format.label + " " + tr("Video") + "...", this);
+                connect(video,  &QAction::triggered, [=](){ mainWindow->onExportVideoTriggered(format); });
+                exportAs->addAction(video);
+            }
         }
 
         mProjectActions.push_back(saveProject);
@@ -216,6 +253,54 @@ void MainMenuBar::setProject(core::Project* aProject)
 void MainMenuBar::setShowResourceWindow(bool aShow)
 {
     mShowResourceWindow->setChecked(aShow);
+}
+
+void MainMenuBar::loadVideoFormats()
+{
+    QDomDocument doc = getVideoExportDocument();
+    QDomElement domRoot = doc.firstChildElement("video_encode");
+
+    // for each format
+    QDomElement domFormat = domRoot.firstChildElement("format");
+    while (!domFormat.isNull())
+    {
+        ctrl::VideoFormat format;
+        // neccessary attribute
+        format.name = domFormat.attribute("name");
+        if (format.name.isEmpty()) continue;
+        // optional attributes
+        format.label = domFormat.attribute("label");
+        format.icodec = domFormat.attribute("icodec");
+        format.command = domFormat.attribute("command");
+        if (format.label.isEmpty()) format.label = format.name;
+        if (format.icodec.isEmpty()) format.icodec = "png";
+        // add one format
+        mVideoFormats.push_back(format);
+
+        // for each codec
+        QDomElement domCodec = domFormat.firstChildElement("codec");
+        while (!domCodec.isNull())
+        {
+            ctrl::VideoCodec codec;
+            // neccessary attribute
+            codec.name = domCodec.attribute("name");
+            if (codec.name.isEmpty()) continue;
+            // optional attributes
+            codec.label = domCodec.attribute("label");
+            codec.icodec = domCodec.attribute("icodec");
+            codec.command = domCodec.attribute("command");
+            if (codec.label.isEmpty()) codec.label = codec.name;
+            if (codec.icodec.isEmpty()) codec.icodec = format.icodec;
+            if (codec.command.isEmpty()) codec.command = format.command;
+            // add one codec
+            mVideoFormats.back().codecs.push_back(codec);
+
+            // to next sibling
+            domCodec = domCodec.nextSiblingElement("codec");
+        }
+        // to next sibling
+        domFormat = domFormat.nextSiblingElement("format");
+    }
 }
 
 //-------------------------------------------------------------------------------------------------

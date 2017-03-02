@@ -726,7 +726,7 @@ void MainWindow::onCloseProjectTriggered()
     }
 }
 
-void MainWindow::onExportPngSeqTriggered()
+void MainWindow::onExportImageSeqTriggered(const QString& aSuffix)
 {
     if (!mCurrent) return;
 
@@ -742,16 +742,16 @@ void MainWindow::onExportPngSeqTriggered()
 
     // export param
     ctrl::Exporter::CommonParam cparam;
-    ctrl::Exporter::PngParam pparam;
+    ctrl::Exporter::ImageParam iparam;
     {
-        QScopedPointer<ExportDialog> dialog(
-                    new ExportDialog(*mCurrent, dirName, ExportDialog::Type_Png, this));
+        QScopedPointer<ImageExportDialog> dialog(
+                    new ImageExportDialog(*mCurrent, dirName, aSuffix, this));
 
         dialog->exec();
         if (dialog->result() != QDialog::Accepted) return;
 
         cparam = dialog->commonParam();
-        pparam = dialog->pngParam();
+        iparam = dialog->imageParam();
     }
 
     // gui for confirm overwrite
@@ -772,7 +772,7 @@ void MainWindow::onExportPngSeqTriggered()
     exporter.setProgressReporter(progress);
 
     // execute
-    if (!exporter.execute(cparam, pparam))
+    if (!exporter.execute(cparam, iparam))
     {
         progress.cancel();
 
@@ -783,14 +783,16 @@ void MainWindow::onExportPngSeqTriggered()
         return;
     }
 }
-void MainWindow::onExportVideoTriggered(const QString& aSuffix, QString aCodec)
+void MainWindow::onExportVideoTriggered(const ctrl::VideoFormat& aFormat)
 {
     if (!mCurrent) return;
 
     // stop animation and main display rendering
     EventSuspender suspender(*mMainDisplay, *mTarget);
 
-    const QString targetVideos = "Videos (*." + aSuffix + ")";
+    const QString suffix = aFormat.name;
+    const QString targetVideos = "Videos (*." + suffix + ")";
+    const bool isGif = (suffix == "gif");
 
     // get export file name
     QString fileName = QFileDialog::getSaveFileName(
@@ -806,9 +808,9 @@ void MainWindow::onExportVideoTriggered(const QString& aSuffix, QString aCodec)
 
     if (fileInfo.suffix().isEmpty())
     {
-        fileName += "." + aSuffix; // makesure suffix
+        fileName += "." + suffix; // makesure suffix
     }
-    else if (fileInfo.suffix() != aSuffix)
+    else if (fileInfo.suffix() != suffix)
     {
         QMessageBox::warning(nullptr, tr("Operation Error"),
                              tr("Invalid suffix specification."));
@@ -819,40 +821,32 @@ void MainWindow::onExportVideoTriggered(const QString& aSuffix, QString aCodec)
     ctrl::Exporter::CommonParam cparam;
     ctrl::Exporter::VideoParam vparam;
     ctrl::Exporter::GifParam gparam;
-    auto isGif = (aSuffix == "gif");
+    if (isGif)
     {
-        auto type = isGif ? ExportDialog::Type_Gif : ExportDialog::Type_Video;
-        QScopedPointer<ExportDialog> dialog(
-                    new ExportDialog(*mCurrent, fileName, type, this));
+        QScopedPointer<GifExportDialog> dialog(
+                    new GifExportDialog(*mCurrent, fileName, this));
+        dialog->exec();
+        if (dialog->result() != QDialog::Accepted) return;
 
+        cparam = dialog->commonParam();
+        gparam = dialog->gifParam();
+    }
+    else
+    {
+        QScopedPointer<VideoExportDialog> dialog(
+                    new VideoExportDialog(
+                        *mCurrent, fileName, aFormat, this));
         dialog->exec();
         if (dialog->result() != QDialog::Accepted) return;
 
         cparam = dialog->commonParam();
         vparam = dialog->videoParam();
-        gparam = dialog->gifParam();
     }
-    vparam.codec = aCodec;
-
-#if 0
-    // gui for confirm overwrite
-    auto overwriteConfirmer = [=](const QString&) -> bool
-    {
-        QMessageBox msgBox;
-        msgBox.setText("File already exists.");
-        msgBox.setInformativeText("Do you want to overwrite the existing file?");
-        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Ok);
-        int ret = msgBox.exec();
-        return (ret == QMessageBox::Ok);
-    };
-#else
-    auto overwriteConfirmer = [=](const QString&)->bool { return true; };
-#endif
+    //vparam.codec = codec;
 
     menu::LoggableProgressReporter progress(true, this);
     ctrl::Exporter exporter(*mCurrent);
-    exporter.setOverwriteConfirmer(overwriteConfirmer);
+    exporter.setOverwriteConfirmer([=](const QString&)->bool { return true; });
     exporter.setProgressReporter(progress);
     exporter.setUILogger(progress);
 

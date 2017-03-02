@@ -47,8 +47,8 @@ public:
     void onSaveProjectTriggered();
     void onSaveProjectAsTriggered();
     void onCloseProjectTriggered();
-    void onExportPngSeqTriggered();
-    void onExportVideoTriggered(const QString& aSuffix, QString aCodec = QString());
+    void onExportImageSeqTriggered(const QString& aSuffix);
+    void onExportVideoTriggered(const ctrl::VideoFormat& aFormat);
     void onUndoTriggered();
     void onRedoTriggered();
 

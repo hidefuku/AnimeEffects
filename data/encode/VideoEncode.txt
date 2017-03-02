@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<video_encode>
+    <format name="mp4" label="MPEG-4" icodec="ppm" command="-y -f image2pipe -framerate $ifps -vcodec $icodec -i - -b:v $obps -r $ofps $opath">
+    </format>
+    <format name="webm" label="WebM" icodec="png" command="-y -f image2pipe -framerate $ifps -vcodec $icodec -i - -b:v $obps -r $ofps $opath">
+    </format>
+    <format name="ogv" label="Ogg" icodec="ppm" command="-y -f image2pipe -framerate $ifps -vcodec $icodec -i - -b:v $obps -r $ofps $opath">
+    </format>
+    <format name="avi" label="AVI" icodec="ppm" command="-y -f image2pipe -framerate $ifps -vcodec $icodec -i - -b:v $obps -r $ofps $opath">
+        <codec name="huffyuv" label="Huffyuv" command="-y -f image2pipe -framerate $ifps -vcodec ppm -i - -b:v $obps -r $ofps -vcodec $ocodec $opath" />
+    </format>
+    <format name="mov" label="MOV" icodec="ppm" command="-y -f image2pipe -framerate $ifps -vcodec $icodec -i - -b:v $obps -r $ofps $opath">
+    </format>
+</video_encode>

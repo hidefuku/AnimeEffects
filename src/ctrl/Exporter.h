@@ -18,6 +18,7 @@
 #include "core/TimeKeyBlender.h"
 #include "core/ClippingFrame.h"
 #include "core/DestinationTexturizer.h"
+#include "ctrl/VideoFormat.h"
 
 namespace ctrl
 {
@@ -60,7 +61,8 @@ public:
     struct VideoParam
     {
         VideoParam();
-        QString codec;
+        VideoFormat format;
+        int codecIndex;
         int bps;
     };
 
@@ -71,10 +73,12 @@ public:
         int intermediateBps;
     };
 
-    struct PngParam
+    struct ImageParam
     {
-        PngParam();
+        ImageParam();
         QString name;
+        QString suffix;
+        int quality;
     };
 
     Exporter(core::Project& aProject);
@@ -84,7 +88,7 @@ public:
     void setProgressReporter(util::IProgressReporter& aReporter);
     void setUILogger(ctrl::UILogger& aLogger);
 
-    Result execute(const CommonParam& aCommon, const PngParam& aPng);
+    Result execute(const CommonParam& aCommon, const ImageParam& aImage);
     Result execute(const CommonParam& aCommon, const GifParam& aGif);
     Result execute(const CommonParam& aCommon, const VideoParam& aVideo);
 
@@ -127,7 +131,7 @@ private:
     void createFramebuffers(const QSize& aOriginSize, const QSize& aExportSize);
     void setTextureParam(QOpenGLFramebufferObject& aFbo);
     static int getDigitCount(const util::Range& aRange, int aFps, int aFpsOrigin);
-    bool decidePngPath(int aIndex, QFileInfo& aPath);
+    bool decideImagePath(int aIndex, QFileInfo& aPath);
     bool checkOverwriting(const QFileInfo& aPath);
     void updateLog();
 
@@ -143,7 +147,9 @@ private:
     ctrl::UILogger* mUILogger;
 
     CommonParam mCommonParam;
-    QString mPngName;
+    ImageParam mImageParam;
+    QByteArray mVideoInCodec;
+    int mVideoInCodecQuality;
     bool mVideoExporting;
 
     FFMpeg mFFMpeg;

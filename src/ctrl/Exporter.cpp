@@ -49,8 +49,10 @@ bool Exporter::CommonParam::isValid() const
 }
 
 //-------------------------------------------------------------------------------------------------
-Exporter::PngParam::PngParam()
+Exporter::ImageParam::ImageParam()
     : name()
+    , suffix("png")
+    , quality(-1)
 {
 }
 
@@ -63,7 +65,8 @@ Exporter::GifParam::GifParam()
 
 //-------------------------------------------------------------------------------------------------
 Exporter::VideoParam::VideoParam()
-    : codec()
+    : format()
+    , codecIndex(-1)
     , bps()
 {
 }
@@ -179,7 +182,9 @@ Exporter::Exporter(core::Project& aProject)
     , mProgressReporter()
     , mUILogger()
     , mCommonParam()
-    , mPngName()
+    , mImageParam()
+    , mVideoInCodec()
+    , mVideoInCodecQuality()
     , mVideoExporting()
     , mFFMpeg()
     , mExporting(false)
@@ -215,7 +220,7 @@ void Exporter::setUILogger(UILogger& aLogger)
     mUILogger = &aLogger;
 }
 
-Exporter::Result Exporter::execute(const CommonParam& aCommon, const PngParam& aPng)
+Exporter::Result Exporter::execute(const CommonParam& aCommon, const ImageParam& aImage)
 {
     // check param
     if (!aCommon.isValid())
@@ -233,7 +238,7 @@ Exporter::Result Exporter::execute(const CommonParam& aCommon, const PngParam& a
     }
 
     mCommonParam = aCommon;
-    mPngName = aPng.name;
+    mImageParam = aImage;
     mVideoExporting = false;
     mOriginTimeInfo = mProject.currentTimeInfo();
     mOverwriteConfirmation = false;
@@ -313,10 +318,15 @@ Exporter::Result Exporter::execute(const CommonParam& aCommon, const VideoParam&
     mLog.clear();
     mIsCanceled = false;
 
+#if 0
     {
         const QString out = " \"" + filePath.absoluteFilePath() + "\"";
-        const QString ifps = " -r " + QString::number(mCommonParam.fps);
-        const QString ofps = ifps;
+        //const QString ifps = " -r " + QString::number(mCommonParam.fps);
+        //const QString ofps = ifps;
+        const QString ifps = " -framerate " + QString::number(mCommonParam.fps);
+        const QString ofps = " -r " + QString::number(mCommonParam.fps);
+        const QString icodec = " -vcodec png";
+        //const QString icodec = " -vcodec ppm";
         const QString ocodec =
                 !aVideo.codec.isEmpty() ? " -vcodec " + aVideo.codec : "";
         const QString obps =
@@ -326,7 +336,7 @@ Exporter::Result Exporter::execute(const CommonParam& aCommon, const VideoParam&
         QString argments =
                 QString(" -y") + /// overwrite files without asking
                 " -f image2pipe" +
-                ifps + " -vcodec png" + " -i -" +
+                ifps + icodec + " -i -" +
                 obps + ofps + ocodec + thrs + out;
 
         if (!mFFMpeg.start(argments))
@@ -337,6 +347,71 @@ Exporter::Result Exporter::execute(const CommonParam& aCommon, const VideoParam&
                         Result(ResultCode_FFMpegError, mLog);
         }
     }
+#else
+    {
+        const QString outPath = "\"" + filePath.absoluteFilePath() + "\"";
+
+        VideoCodec videoCodec;
+        if (aVideo.codecIndex != -1)
+        {
+            videoCodec = aVideo.format.codecs.at(aVideo.codecIndex);
+        }
+        else
+        {
+            videoCodec.icodec = aVideo.format.icodec;
+        }
+
+        mVideoInCodecQuality = -1;
+        if (videoCodec.icodec == "png")
+        {
+            mVideoInCodec = QString("PNG").toLatin1();
+            mVideoInCodecQuality = 90;
+        }
+        else if (videoCodec.icodec == "ppm")
+        {
+            mVideoInCodec = QString("PPM").toLatin1();
+        }
+        else if (videoCodec.icodec == "jpg")
+        {
+            mVideoInCodec = QString("JPG").toLatin1();
+        }
+        else if (videoCodec.icodec == "jpeg")
+        {
+            mVideoInCodec = QString("JPEG").toLatin1();
+        }
+        else if (videoCodec.icodec == "bmp")
+        {
+            mVideoInCodec = QString("BMP").toLatin1();
+        }
+        else
+        {
+            videoCodec.icodec = "png";
+            mVideoInCodec = QString("PNG").toLatin1();
+            mVideoInCodecQuality = 90;
+        }
+
+        if (videoCodec.command.isEmpty())
+        {
+            videoCodec.command = "-y -f image2pipe -framerate $ifps -vcodec $icodec -i - -b:v $obps -r $ofps $opath";
+        }
+        videoCodec.command.replace(QRegExp("\\$ifps(\\W|$)"), QString::number(mCommonParam.fps) + "\\1");
+        videoCodec.command.replace(QRegExp("\\$icodec(\\W|$)"), videoCodec.icodec + "\\1");
+        videoCodec.command.replace(QRegExp("\\$obps(\\W|$)"), QString::number(aVideo.bps) + "\\1");
+        videoCodec.command.replace(QRegExp("\\$ofps(\\W|$)"), QString::number(mCommonParam.fps) + "\\1");
+        videoCodec.command.replace(QRegExp("\\$ocodec(\\W|$)"), videoCodec.name + "\\1");
+        videoCodec.command.replace(QRegExp("\\$opath(\\W|$)"), outPath + "\\1");
+
+        //qDebug() << videoCodec.command;
+
+        if (!mFFMpeg.start(videoCodec.command))
+        {
+            mLog = "FFmpeg error occurred.\n" + mFFMpeg.errorString();
+            return mFFMpeg.errorCode() == QProcess::FailedToStart ?
+                        Result(ResultCode_FFMpegFailedToStart, mLog) :
+                        Result(ResultCode_FFMpegError, mLog);
+        }
+    }
+#endif
 
     return execute();
 }
@@ -539,7 +614,7 @@ bool Exporter::exportImage(const QImage& aFboImage, int aIndex)
 {
     // decide file path
     QFileInfo filePath;
-    if (!decidePngPath(aIndex, filePath))
+    if (!decideImagePath(aIndex, filePath))
     {
         return false;
     }
@@ -549,7 +624,8 @@ bool Exporter::exportImage(const QImage& aFboImage, int aIndex)
         QByteArray byteArray;
         QBuffer buffer(&byteArray);
         buffer.open(QIODevice::ReadWrite);
-        aFboImage.save(&buffer, "PNG", 90);
+        aFboImage.save(&buffer, mVideoInCodec.data(), mVideoInCodecQuality);
+        //aFboImage.save(&buffer, "PPM");
         buffer.close();
         mFFMpeg.write(byteArray);
 
@@ -564,7 +640,7 @@ bool Exporter::exportImage(const QImage& aFboImage, int aIndex)
         //QImage image(aFboImage.constBits(), aFboImage.width(),
         //             aFboImage.height(), QImage::Format_ARGB32);
         //image.save(aFilePath);
-        aFboImage.save(filePath.filePath());
+        aFboImage.save(filePath.filePath(), Q_NULLPTR, mImageParam.quality);
     }
 
     return true;
@@ -658,11 +734,11 @@ void Exporter::setTextureParam(QOpenGLFramebufferObject& aFbo)
     ggl.glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-
-bool Exporter::decidePngPath(int aIndex, QFileInfo& aPath)
+bool Exporter::decideImagePath(int aIndex, QFileInfo& aPath)
 {
     const QString number = QString("%1").arg(aIndex, mDigitCount, 10, QChar('0'));
-    QFileInfo filePath(mCommonParam.path + "/" + mPngName + number + ".png");
+    QFileInfo filePath(mCommonParam.path + "/" + mImageParam.name +
+                       number + "." + mImageParam.suffix);
 
     // check overwrite
     if (!checkOverwriting(filePath))

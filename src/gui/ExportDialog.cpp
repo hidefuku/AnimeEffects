@@ -29,49 +29,18 @@ void setMinMaxOptionWidth(tEdit* aEdit)
 
 namespace gui
 {
-
-ExportDialog::ExportDialog(
-        core::Project& aProject, const QString& aPath, Type aType, QWidget* aParent)
+//-------------------------------------------------------------------------------------------------
+ExportDialog::ExportDialog(core::Project& aProject, const QString& aPath, QWidget* aParent)
     : EasyDialog(tr("Export Dialog"), aParent)
     , mProject(aProject)
     , mCommonParam()
-    , mVideoParam()
-    , mGifParam()
-    , mPngParam()
-    , mType(aType)
     , mSize()
     , mFrameMax()
     , mFixAspect(true)
     , mSizeUpdating(false)
 {
-    initializeParameter(aPath);
+    mCommonParam.path = aPath;
 
-    mSize = mProject.attribute().imageSize();
-    mFrameMax = mProject.currentTimeInfo().frameMax;
-
-    // option
-    auto group = new QGroupBox(tr("Parameters"));
-    if (mType == Type_Video)
-    {
-        group->setLayout(createVideoOption());
-    }
-    else if (mType == Type_Gif)
-    {
-        group->setLayout(createGifOption());
-    }
-    else
-    {
-        group->setLayout(createPngOption());
-    }
-    this->setMainWidget(group);
-
-    // button box
-    this->setOkCancel();
-    this->fixSize();
-}
-
-void ExportDialog::initializeParameter(const QString& aPath)
-{
     mCommonParam.size = mProject.attribute().imageSize();
     XC_ASSERT(mCommonParam.size.width() > 0);
     XC_ASSERT(mCommonParam.size.height() > 0);
@@ -80,124 +49,8 @@ void ExportDialog::initializeParameter(const QString& aPath)
     mCommonParam.frame = util::Range(0, std::min(60, time.frameMax));
     mCommonParam.fps = time.fps;
 
-    if (mType == Type_Video)
-    {
-        mCommonParam.path = aPath;
-        mVideoParam.codec = "";
-        mVideoParam.bps = 1 * 1000 * 1000;
-    }
-    else if (mType == Type_Gif)
-    {
-        mCommonParam.path = aPath;
-        mCommonParam.fps = std::min(mCommonParam.fps, 30);
-        mGifParam.optimizePalette = false;
-        mGifParam.intermediateBps = 5 * 1000 * 1000;
-    }
-    else
-    {
-        QString baseName = QFileInfo(mProject.fileName()).baseName();
-        if (baseName.isEmpty()) baseName = "nameless";
-        mCommonParam.path = aPath;
-        mPngParam.name = baseName + "_export";
-    }
-}
-
-QLayout* ExportDialog::createVideoOption()
-{
-    auto form = new QFormLayout();
-    form->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
-    form->setLabelAlignment(Qt::AlignRight);
-
-    pushSizeBox(*form);
-    pushFrameBox(*form);
-    pushFpsBox(*form);
-
-    // bit rate
-    {
-        auto kbps = new QSpinBox();
-        setMinMaxOptionWidth(kbps);
-        kbps->setRange(1, 100 * 1000);
-        kbps->setValue(mVideoParam.bps / 1000);
-
-        this->connect(kbps, &QSpinBox::editingFinished, [=]()
-        {
-            this->mVideoParam.bps = kbps->value() * 1000;
-        });
-
-        form->addRow(tr("bit rate (Kbps) :"), kbps);
-    }
-
-    return form;
-}
-
-QLayout* ExportDialog::createGifOption()
-{
-    auto form = new QFormLayout();
-    form->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
-    form->setLabelAlignment(Qt::AlignRight);
-
-    pushSizeBox(*form);
-    pushFrameBox(*form);
-    pushFpsBox(*form);
-
-    // bit rate
-    auto kbps = new QSpinBox();
-    {
-        setMinMaxOptionWidth(kbps);
-        kbps->setRange(1, 100 * 1000);
-        kbps->setValue(mGifParam.intermediateBps / 1000);
-
-        this->connect(kbps, &QSpinBox::editingFinished, [=]()
-        {
-            this->mGifParam.intermediateBps = kbps->value() * 1000;
-        });
-    }
-
-    // optimize palette
-    {
-        auto opti = new QCheckBox();
-        opti->setChecked(mGifParam.optimizePalette);
-        kbps->setEnabled(mGifParam.optimizePalette);
-
-        this->connect(opti, &QCheckBox::clicked, [=](bool aCheck)
-        {
-            this->mGifParam.optimizePalette = aCheck;
-            kbps->setEnabled(aCheck);
-        });
-
-        form->addRow(tr("optimize palette :"), opti);
-        form->addRow(tr("relay bit rate (Kbps) :"), kbps);
-    }
-
-    return form;
-}
-
-QLayout* ExportDialog::createPngOption()
-{
-    auto form = new QFormLayout();
-    //form->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
-    form->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
-    form->setLabelAlignment(Qt::AlignRight);
-
-    // prefix name
-    {
-        auto name = new QLineEdit();
-        setMinMaxOptionWidth(name);
-        name->setText(mPngParam.name);
-
-        this->connect(name, &QLineEdit::editingFinished, [=]()
-        {
-            this->mPngParam.name = name->text();
-        });
-
-        form->addRow(tr("prefix name :"), name);
-    }
-
-    pushSizeBox(*form);
-    pushFrameBox(*form);
-    pushFpsBox(*form);
-
-    return form;
+    mSize = mProject.attribute().imageSize();
+    mFrameMax = mProject.currentTimeInfo().frameMax;
 }
 
 void ExportDialog::pushSizeBox(QFormLayout& aLayout)
@@ -307,6 +160,210 @@ void ExportDialog::pushFpsBox(QFormLayout& aLayout)
     });
 
     aLayout.addRow(tr("fps :"), fps);
+}
+
+//-------------------------------------------------------------------------------------------------
+ImageExportDialog::ImageExportDialog(
+        core::Project& aProject, const QString& aDirPath,
+        const QString& aSuffix, QWidget* aParent)
+    : ExportDialog(aProject, aDirPath, aParent)
+    , mImageParam()
+{
+    {
+        QString baseName = QFileInfo(aProject.fileName()).baseName();
+        if (baseName.isEmpty()) baseName = "nameless";
+        mImageParam.name = baseName + "_export";
+        mImageParam.suffix = aSuffix;
+    }
+
+    // option
+    auto group = new QGroupBox(tr("Parameters"));
+    group->setLayout(createImageOption());
+    this->setMainWidget(group);
+
+    // button box
+    this->setOkCancel();
+    this->fixSize();
+}
+
+QLayout* ImageExportDialog::createImageOption()
+{
+    auto form = new QFormLayout();
+    //form->setFieldGrowthPolicy(QFormLayout::FieldsStayAtSizeHint);
+    form->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
+    form->setLabelAlignment(Qt::AlignRight);
+
+    // prefix name
+    {
+        auto name = new QLineEdit();
+        setMinMaxOptionWidth(name);
+        name->setText(mImageParam.name);
+
+        this->connect(name, &QLineEdit::editingFinished, [=]()
+        {
+            this->mImageParam.name = name->text();
+        });
+
+        form->addRow(tr("prefix name :"), name);
+    }
+
+    // quality
+    if (mImageParam.suffix == "jpg")
+    {
+        auto quality = new QSpinBox();
+        setMinMaxOptionWidth(quality);
+        quality->setMinimum(-1);
+        quality->setMaximum(100);
+        quality->setValue(mImageParam.quality);
+
+        this->connect(quality, &QSpinBox::editingFinished, [=]()
+        {
+            this->mImageParam.quality = quality->value();
+        });
+
+        form->addRow(tr("quality :"), quality);
+    }
+
+    this->pushSizeBox(*form);
+    this->pushFrameBox(*form);
+    this->pushFpsBox(*form);
+
+    return form;
+}
+
+//-------------------------------------------------------------------------------------------------
+GifExportDialog::GifExportDialog(
+        core::Project& aProject, const QString& aFilePath, QWidget* aParent)
+    : ExportDialog(aProject, aFilePath, aParent)
+    , mGifParam()
+{
+    {
+        this->commonParam().fps = std::min(this->commonParam().fps, 30);
+        mGifParam.optimizePalette = false;
+        mGifParam.intermediateBps = 5 * 1000 * 1000;
+    }
+
+    // option
+    auto group = new QGroupBox(tr("Parameters"));
+    group->setLayout(createGifOption());
+    this->setMainWidget(group);
+
+    // button box
+    this->setOkCancel();
+    this->fixSize();
+}
+
+QLayout* GifExportDialog::createGifOption()
+{
+    auto form = new QFormLayout();
+    form->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
+    form->setLabelAlignment(Qt::AlignRight);
+
+    this->pushSizeBox(*form);
+    this->pushFrameBox(*form);
+    this->pushFpsBox(*form);
+
+    // bit rate
+    auto kbps = new QSpinBox();
+    {
+        setMinMaxOptionWidth(kbps);
+        kbps->setRange(1, 100 * 1000);
+        kbps->setValue(mGifParam.intermediateBps / 1000);
+
+        this->connect(kbps, &QSpinBox::editingFinished, [=]()
+        {
+            this->mGifParam.intermediateBps = kbps->value() * 1000;
+        });
+    }
+
+    // optimize palette
+    {
+        auto opti = new QCheckBox();
+        opti->setChecked(mGifParam.optimizePalette);
+        kbps->setEnabled(mGifParam.optimizePalette);
+
+        this->connect(opti, &QCheckBox::clicked, [=](bool aCheck)
+        {
+            this->mGifParam.optimizePalette = aCheck;
+            kbps->setEnabled(aCheck);
+        });
+
+        form->addRow(tr("optimize palette :"), opti);
+        form->addRow(tr("relay bit rate (Kbps) :"), kbps);
+    }
+
+    return form;
+}
+
+//-------------------------------------------------------------------------------------------------
+VideoExportDialog::VideoExportDialog(
+        core::Project& aProject, const QString& aFilePath,
+        const ctrl::VideoFormat& aFormat, QWidget* aParent)
+    : ExportDialog(aProject, aFilePath, aParent)
+    , mVideoParam()
+{
+    {
+        mVideoParam.format = aFormat;
+        mVideoParam.codecIndex = -1;
+        mVideoParam.bps = 1 * 1000 * 1000;
+    }
+
+    // option
+    auto group = new QGroupBox(tr("Parameters"));
+    group->setLayout(createVideoOption());
+    this->setMainWidget(group);
+
+    // button box
+    this->setOkCancel();
+    this->fixSize();
+}
+
+QLayout* VideoExportDialog::createVideoOption()
+{
+    auto form = new QFormLayout();
+    form->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
+    form->setLabelAlignment(Qt::AlignRight);
+
+    // codec
+    if (!mVideoParam.format.codecs.isEmpty())
+    {
+        auto codecBox = new QComboBox();
+        setMinMaxOptionWidth(codecBox);
+
+        codecBox->addItem(tr("Default"));
+        for (auto codec : mVideoParam.format.codecs)
+        {
+            codecBox->addItem(codec.label);
+        }
+
+        this->connect(codecBox, util::SelectArgs<int>::from(&QComboBox::currentIndexChanged), [=]()
+        {
+            this->mVideoParam.codecIndex = codecBox->currentIndex() - 1;
+        });
+
+        form->addRow(tr("codec :"), codecBox);
+    }
+
+    this->pushSizeBox(*form);
+    this->pushFrameBox(*form);
+    this->pushFpsBox(*form);
+
+    // bit rate
+    {
+        auto kbps = new QSpinBox();
+        setMinMaxOptionWidth(kbps);
+        kbps->setRange(1, 100 * 1000);
+        kbps->setValue(mVideoParam.bps / 1000);
+
+        this->connect(kbps, &QSpinBox::editingFinished, [=]()
+        {
+            this->mVideoParam.bps = kbps->value() * 1000;
+        });
+
+        form->addRow(tr("bit rate (Kbps) :"), kbps);
+    }
+
+    return form;
 }
 
 } // namespace gui

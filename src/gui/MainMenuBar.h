@@ -6,6 +6,7 @@
 #include <QCheckBox>
 #include <QSpinBox>
 #include "core/Project.h"
+#include "ctrl/VideoFormat.h"
 #include "gui/EasyDialog.h"
 namespace gui { class MainWindow; }
 namespace gui { class ViaPoint; }
@@ -27,6 +28,7 @@ public:
     util::Signaler<void()> onProjectAttributeUpdated;
 
 private:
+    void loadVideoFormats();
     void onCanvasSizeTriggered();
     void onMaxFrameTriggered();
     void onLoopTriggered();
@@ -36,6 +38,7 @@ private:
     core::Project* mProject;
     QVector<QAction*> mProjectActions;
     QAction* mShowResourceWindow;
+    QList<ctrl::VideoFormat> mVideoFormats;
 };
 
 //-------------------------------------------------------------------------------------------------

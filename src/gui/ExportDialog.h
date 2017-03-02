@@ -6,49 +6,81 @@
 #include <QFormLayout>
 #include "core/Project.h"
 #include "ctrl/Exporter.h"
+#include "ctrl/VideoFormat.h"
 #include "gui/EasyDialog.h"
 
 namespace gui
 {
 
+//-------------------------------------------------------------------------------------------------
 class ExportDialog : public EasyDialog
 {
     Q_OBJECT
 public:
-    enum Type
-    {
-        Type_Png,
-        Type_Gif,
-        Type_Video
-    };
-
-    ExportDialog(
-            core::Project& aProject, const QString& aPath,
-            Type aType, QWidget* aParent);
+    ExportDialog(core::Project& aProject, const QString& aPath, QWidget* aParent);
     const ctrl::Exporter::CommonParam& commonParam() const { return mCommonParam; }
-    const ctrl::Exporter::VideoParam& videoParam() const { return mVideoParam; }
-    const ctrl::Exporter::GifParam& gifParam() const { return mGifParam; }
-    const ctrl::Exporter::PngParam& pngParam() const { return mPngParam; }
+    ctrl::Exporter::CommonParam& commonParam() { return mCommonParam; }
 
-private:
-    void initializeParameter(const QString& aPath);
-    QLayout* createVideoOption();
-    QLayout* createGifOption();
-    QLayout* createPngOption();
+protected:
     void pushSizeBox(QFormLayout& aLayout);
     void pushFrameBox(QFormLayout& aLayout);
     void pushFpsBox(QFormLayout& aLayout);
 
+private:
     core::Project& mProject;
     ctrl::Exporter::CommonParam mCommonParam;
-    ctrl::Exporter::VideoParam mVideoParam;
-    ctrl::Exporter::GifParam mGifParam;
-    ctrl::Exporter::PngParam mPngParam;
-    Type mType;
     QSize mSize;
     int mFrameMax;
     bool mFixAspect;
     bool mSizeUpdating;
+};
+
+//-------------------------------------------------------------------------------------------------
+class ImageExportDialog : public ExportDialog
+{
+    Q_OBJECT
+public:
+    ImageExportDialog(
+            core::Project& aProject, const QString& aDirPath,
+            const QString& aSuffix, QWidget* aParent);
+    const ctrl::Exporter::ImageParam& imageParam() const { return mImageParam; }
+
+private:
+    QLayout* createImageOption();
+
+    ctrl::Exporter::ImageParam mImageParam;
+};
+
+//-------------------------------------------------------------------------------------------------
+class GifExportDialog : public ExportDialog
+{
+    Q_OBJECT
+public:
+    GifExportDialog(
+            core::Project& aProject, const QString& aFilePath,
+            QWidget* aParent);
+    const ctrl::Exporter::GifParam& gifParam() const { return mGifParam; }
+
+private:
+    QLayout* createGifOption();
+
+    ctrl::Exporter::GifParam mGifParam;
+};
+
+//-------------------------------------------------------------------------------------------------
+class VideoExportDialog : public ExportDialog
+{
+    Q_OBJECT
+public:
+    VideoExportDialog(
+            core::Project& aProject, const QString& aFilePath,
+            const ctrl::VideoFormat& aFormat, QWidget* aParent);
+    const ctrl::Exporter::VideoParam& videoParam() const { return mVideoParam; }
+
+private:
+    QLayout* createVideoOption();
+
+    ctrl::Exporter::VideoParam mVideoParam;
 };
 
 } // namespace gui

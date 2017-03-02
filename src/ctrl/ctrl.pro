@@ -191,4 +191,5 @@ HEADERS += \
     CmndName.h \
     UILogger.h \
     UILogType.h \
-    UILog.h
+    UILog.h \
+    VideoFormat.h
