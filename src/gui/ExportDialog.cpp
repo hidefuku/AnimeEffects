@@ -304,8 +304,7 @@ VideoExportDialog::VideoExportDialog(
 {
     {
         mVideoParam.format = aFormat;
-        mVideoParam.codecIndex = -1;
-        mVideoParam.bps = 1 * 1000 * 1000;
+        mVideoParam.bps = 5 * 1000 * 1000;
     }
 
     // option
@@ -327,18 +326,33 @@ QLayout* VideoExportDialog::createVideoOption()
     // codec
     if (!mVideoParam.format.codecs.isEmpty())
     {
-        auto codecBox = new QComboBox();
-        setMinMaxOptionWidth(codecBox);
+        mVideoParam.codecIndex = 0;
 
-        codecBox->addItem(tr("Default"));
+        auto codecBox = new QComboBox();
+        //setMinMaxOptionWidth(codecBox);
+
         for (auto codec : mVideoParam.format.codecs)
         {
-            codecBox->addItem(codec.label);
+            QString hints;
+            if (codec.lossless || codec.transparent)
+            {
+                if (codec.lossless)
+                {
+                    hints += tr("lossless");
+                }
+                if (codec.transparent)
+                {
+                    if (!hints.isEmpty()) hints += QString(", ");
+                    hints += tr("transparent");
+                }
+                hints = QString(" (") + hints + ")";
+            }
+            codecBox->addItem(codec.label + hints);
         }
 
         this->connect(codecBox, util::SelectArgs<int>::from(&QComboBox::currentIndexChanged), [=]()
         {
-            this->mVideoParam.codecIndex = codecBox->currentIndex() - 1;
+            this->mVideoParam.codecIndex = codecBox->currentIndex();
         });
 
         form->addRow(tr("codec :"), codecBox);

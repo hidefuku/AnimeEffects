@@ -10,19 +10,19 @@ namespace ctrl
 class VideoCodec
 {
 public:
-    VideoCodec()
-        : name(), label(), icodec(), command() {}
+    VideoCodec();
     QString name;
     QString label;
     QString icodec;
     QString command;
+    bool lossless;
+    bool transparent;
 };
 
 class VideoFormat
 {
 public:
-    VideoFormat()
-        : name(), label(), icodec(), command(), codecs() {}
+    VideoFormat();
     QString name;
     QString label;
     QString icodec;

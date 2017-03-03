@@ -292,6 +292,15 @@ void MainMenuBar::loadVideoFormats()
             if (codec.label.isEmpty()) codec.label = codec.name;
             if (codec.icodec.isEmpty()) codec.icodec = format.icodec;
             if (codec.command.isEmpty()) codec.command = format.command;
+            {
+                auto hints = domCodec.attribute("hint").split(',');
+                for (QString hint : hints)
+                {
+                    hint = hint.trimmed();
+                    if (hint == "lossless") codec.lossless = true;
+                    else if (hint == "transparent") codec.transparent = true;
+                }
+            }
             // add one codec
             mVideoFormats.back().codecs.push_back(codec);
 

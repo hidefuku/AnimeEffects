@@ -105,7 +105,8 @@ SOURCES += \
     ffd/ffd_Target.cpp \
     ffd/ffd_DragMode.cpp \
     ffd/ffd_BrushMode.cpp \
-    CmndName.cpp
+    CmndName.cpp \
+    VideoFormat.cpp
 
 HEADERS += \
     Driver.h \
