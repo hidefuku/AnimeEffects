@@ -6,20 +6,21 @@
         <codec name="mpeg4" label="MPEG-4" icodec="ppm" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -vf colormatrix=bt601:bt709 $opath" />
     </format>
     <format name="webm" label="WebM">
-        <codec name="libvpx-vp9" label="VP9" icodec="ppm" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -vf colormatrix=bt601:bt709 $opath" />
-        <codec name="libvpx-vp9" label="VP9" hint="transparent" icodec="png" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec $opath" />
-        <codec name="libvpx" label="VP8" icodec="ppm" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -vf colormatrix=bt601:bt709 $opath" />
+        <codec name="libvpx-vp9" label="VP9" icodec="ppm" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -vf colormatrix=bt601:bt709 -colorspace bt709 $opath" />
+        <codec name="libvpx-vp9" label="VP9" hint="transparent" icodec="png" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -colorspace smpte170m $opath" />
+        <codec name="libvpx" label="VP8" icodec="ppm" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -vf colormatrix=bt601:bt709 -colorspace bt709 $opath" />
     </format>
     <format name="avi" label="AVI">
         <codec name="mpeg4" label="MPEG-4" icodec="ppm" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -vf colormatrix=bt601:bt709 $opath" />
         <codec name="huffyuv" label="Huffyuv" icodec="ppm" hint="lossless" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -vf colormatrix=bt601:bt709 $opath" />
-        <codec name="utvideo" label="Ut video" icodec="png" hint="transparent" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -pix_fmt rgba $opath" />
+        <codec name="utvideo" label="Ut video" icodec="png" hint="lossless,transparent" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -pix_fmt rgba $opath" />
     </format>
     <format name="mov" label="MOV">
         <codec name="libx264" label="H.264" icodec="ppm" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -vf colormatrix=bt601:bt709 -x264-params colormatrix=bt709 $opath" />
-        <codec name="prores_ks" label="ProRes" icodec="png" hint="lossless,transparent" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -profile:v 4444 -c:v prores_ks $opath" />
-        <codec name="utvideo" label="Ut video" icodec="png" hint="transparent" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -pix_fmt rgba $opath" />
+        <codec name="prores_ks" label="ProRes" icodec="png" hint="transparent" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -profile:v 4444 -c:v $ocodec $opath" />
+        <codec name="utvideo" label="Ut video" icodec="png" hint="lossless,transparent" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -pix_fmt rgba $opath" />
     </format>
-    <format name="ogv" label="Ogg" icodec="ppm" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -vf colormatrix=bt601:bt709 $opath">
+    <format name="ogv" label="Ogg">
+        <codec name="theora" label="Theora" icodec="ppm" command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -vf colormatrix=bt601:bt709 -colorspace bt709 $opath" />
     </format>
 </video_encode>
