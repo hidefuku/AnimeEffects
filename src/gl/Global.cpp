@@ -8,6 +8,7 @@ gl::Global::Functions* gGLGlobalFunctions = nullptr;
 //QSurface* gGlobalSurface = nullptr;
 QOpenGLWidget* gGLGlobalWidget = nullptr;
 }
+QGLFormat::OpenGLVersionFlag gl::Global::kVersionFlag = QGLFormat::OpenGL_Version_4_0;
 
 namespace gl
 {

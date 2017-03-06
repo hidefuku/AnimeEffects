@@ -178,12 +178,20 @@ void MainDisplayWidget::updateRender()
 }
 
 void MainDisplayWidget::initializeGL()
-{    
+{
     if (!this->context()->isValid())
     {
         XC_FATAL_ERROR("OpenGL Error", "Invalid opengl context.", "");
     }
-
+    // check version
+    {
+        auto flags = QGLFormat::openGLVersionFlags();
+        if (!flags.testFlag(gl::Global::kVersionFlag))
+        {
+            auto version = QString::number(gl::Global::kMajorVersion) + "." + QString::number(gl::Global::kMinorVersion);
+            XC_FATAL_ERROR("OpenGL Error", QString("The OpenGL version lower than ") + version + ".", "");
+        }
+    }
     // initialize opengl functions
     auto functions = this->context()->versionFunctions<gl::Global::Functions>();
     if (!functions)

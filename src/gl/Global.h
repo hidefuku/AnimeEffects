@@ -5,6 +5,7 @@
 //#include <QOpenGLFunctions_3_2_Core>
 #include <QOpenGLContext>
 #include <QOpenGLWidget>
+#include <QGLFormat>
 
 namespace gl
 {
@@ -16,6 +17,7 @@ public:
     //typedef QOpenGLFunctions_3_2_Core Functions;
     enum { kMajorVersion = 4 };
     enum { kMinorVersion = 0 };
+    static QGLFormat::OpenGLVersionFlag kVersionFlag;
 
     static void setFunctions(Functions& aFunctions);
     static void clearFunctions();
