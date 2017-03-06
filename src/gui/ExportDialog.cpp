@@ -317,11 +317,56 @@ VideoExportDialog::VideoExportDialog(
     this->fixSize();
 }
 
+void setColorspaceValidity(QComboBox* aBox, bool aIsValid)
+{
+    if (aBox)
+    {
+        aBox->setEnabled(aIsValid);
+        if (aIsValid)
+        {
+            aBox->setItemText(0, "BT.709");
+            aBox->setItemText(1, "BT.601");
+        }
+        else
+        {
+            aBox->setItemText(0, "");
+            aBox->setItemText(1, "");
+        }
+    }
+}
+
 QLayout* VideoExportDialog::createVideoOption()
 {
     auto form = new QFormLayout();
     form->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
     form->setLabelAlignment(Qt::AlignRight);
+
+    // colorspace
+    QComboBox* colorBox = nullptr;
+    for (auto codec : mVideoParam.format.codecs)
+    {
+        if (codec.colorspace)
+        {
+            colorBox = new QComboBox();
+            break;
+        }
+    }
+    if (colorBox)
+    {
+        colorBox->addItems(QStringList() << "" << "");
+
+        this->connect(colorBox, util::SelectArgs<int>::from(&QComboBox::currentIndexChanged), [=]()
+        {
+            this->mVideoParam.colorIndex = colorBox->currentIndex();
+        });
+
+        // initialize enabled
+        if (!mVideoParam.format.codecs.isEmpty())
+        {
+            auto valid = mVideoParam.format.codecs.at(0).colorspace;
+            setColorspaceValidity(colorBox, valid);
+        }
+    }
 
     // codec
     if (!mVideoParam.format.codecs.isEmpty())
@@ -329,7 +374,6 @@ QLayout* VideoExportDialog::createVideoOption()
         mVideoParam.codecIndex = 0;
 
         auto codecBox = new QComboBox();
-        //setMinMaxOptionWidth(codecBox);
 
         for (auto codec : mVideoParam.format.codecs)
         {
@@ -352,11 +396,21 @@ QLayout* VideoExportDialog::createVideoOption()
 
         this->connect(codecBox, util::SelectArgs<int>::from(&QComboBox::currentIndexChanged), [=]()
         {
-            this->mVideoParam.codecIndex = codecBox->currentIndex();
+            auto index = codecBox->currentIndex();
+            this->mVideoParam.codecIndex = index;
+
+            if (colorBox)
+            {
+                auto valid = mVideoParam.format.codecs.at(index).colorspace;
+                setColorspaceValidity(colorBox, valid);
+            }
         });
 
         form->addRow(tr("codec :"), codecBox);
     }
+
+    // colorspace
+    form->addRow(tr("colorspace :"), colorBox);
 
     this->pushSizeBox(*form);
     this->pushFrameBox(*form);

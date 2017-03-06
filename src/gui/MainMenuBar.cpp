@@ -299,6 +299,7 @@ void MainMenuBar::loadVideoFormats()
                     hint = hint.trimmed();
                     if (hint == "lossless") codec.lossless = true;
                     else if (hint == "transparent") codec.transparent = true;
+                    else if (hint == "colorspace") codec.colorspace = true;
                 }
             }
             // add one codec

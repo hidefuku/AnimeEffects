@@ -17,6 +17,7 @@ public:
     QString command;
     bool lossless;
     bool transparent;
+    bool colorspace;
 };
 
 class VideoFormat

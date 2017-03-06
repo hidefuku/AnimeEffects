@@ -10,6 +10,7 @@ VideoCodec::VideoCodec()
     , command()
     , lossless()
     , transparent()
+    , colorspace()
 {
 }
 

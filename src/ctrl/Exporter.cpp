@@ -67,6 +67,7 @@ Exporter::GifParam::GifParam()
 Exporter::VideoParam::VideoParam()
     : format()
     , codecIndex(-1)
+    , colorIndex()
     , bps()
 {
 }
@@ -360,6 +361,7 @@ Exporter::Result Exporter::execute(const CommonParam& aCommon, const VideoParam&
         {
             videoCodec.icodec = aVideo.format.icodec;
         }
+        auto colorIndex = videoCodec.colorspace ? aVideo.colorIndex : 0;
 
         mVideoInCodecQuality = -1;
         if (videoCodec.icodec == "png")
@@ -394,14 +396,16 @@ Exporter::Result Exporter::execute(const CommonParam& aCommon, const VideoParam&
         {
             videoCodec.command = "-y -f image2pipe -framerate $ifps -vcodec $icodec -i - -b:v $obps -r $ofps $opath";
         }
-        videoCodec.command.replace(QRegExp("\\$ifps(\\W|$)"), QString::number(mCommonParam.fps) + "\\1");
-        videoCodec.command.replace(QRegExp("\\$icodec(\\W|$)"), videoCodec.icodec + "\\1");
-        videoCodec.command.replace(QRegExp("\\$obps(\\W|$)"), QString::number(aVideo.bps) + "\\1");
-        videoCodec.command.replace(QRegExp("\\$ofps(\\W|$)"), QString::number(mCommonParam.fps) + "\\1");
-        videoCodec.command.replace(QRegExp("\\$ocodec(\\W|$)"), videoCodec.name + "\\1");
-        videoCodec.command.replace(QRegExp("\\$opath(\\W|$)"), outPath + "\\1");
+        videoCodec.command.replace(QRegExp("\\$ifps(\\s|$)"), QString::number(mCommonParam.fps) + "\\1");
+        videoCodec.command.replace(QRegExp("\\$icodec(\\s|$)"), videoCodec.icodec + "\\1");
+        videoCodec.command.replace(QRegExp("\\$obps(\\s|$)"), QString::number(aVideo.bps) + "\\1");
+        videoCodec.command.replace(QRegExp("\\$ofps(\\s|$)"), QString::number(mCommonParam.fps) + "\\1");
+        videoCodec.command.replace(QRegExp("\\$ocodec(\\s|$)"), videoCodec.name + "\\1");
+        videoCodec.command.replace(QRegExp("\\$opath(\\s|$)"), outPath + "\\1");
+        videoCodec.command.replace(QRegExp("\\$arg_colorfilter(\\s|$)"), (colorIndex == 0 ? QString("-vf colormatrix=bt601:bt709") : QString("")) + "\\1");
+        videoCodec.command.replace(QRegExp("\\$arg_colorspace(\\s|$)"), QString("-colorspace ") + (colorIndex == 0 ? QString("bt709") : QString("smpte170m")) + "\\1");
 
-        //qDebug() << videoCodec.command;
+        qDebug() << videoCodec.command;
 
         if (!mFFMpeg.start(videoCodec.command))
         {

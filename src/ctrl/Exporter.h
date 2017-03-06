@@ -63,6 +63,7 @@ public:
         VideoParam();
         VideoFormat format;
         int codecIndex;
+        int colorIndex;
         int bps;
     };
 
