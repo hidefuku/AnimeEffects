@@ -248,17 +248,17 @@
         <translation>移動キーを更新</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainMenuBar.cpp" line="379"/>
+        <location filename="../../src/gui/MainMenuBar.cpp" line="380"/>
         <source>change the canvas size</source>
         <translation>キャンバスサイズを変更</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainMenuBar.cpp" line="481"/>
+        <location filename="../../src/gui/MainMenuBar.cpp" line="482"/>
         <source>change the max frame</source>
         <translation>最大フレームを変更</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainMenuBar.cpp" line="552"/>
+        <location filename="../../src/gui/MainMenuBar.cpp" line="553"/>
         <source>change the animation loop setting</source>
         <translation>ループ設定を変更</translation>
     </message>
@@ -924,17 +924,17 @@
 <context>
     <name>gui::ProjectCanvasSizeSettingDialog</name>
     <message>
-        <location filename="../../src/gui/MainMenuBar.cpp" line="318"/>
+        <location filename="../../src/gui/MainMenuBar.cpp" line="319"/>
         <source>Set Canvas Size</source>
         <translation>キャンバスサイズの設定</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainMenuBar.cpp" line="347"/>
+        <location filename="../../src/gui/MainMenuBar.cpp" line="348"/>
         <source>size :</source>
         <translation>キャンバスサイズ :</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainMenuBar.cpp" line="349"/>
+        <location filename="../../src/gui/MainMenuBar.cpp" line="350"/>
         <source>Parameters</source>
         <translation>パラメーター</translation>
     </message>
@@ -942,17 +942,17 @@
 <context>
     <name>gui::ProjectLoopSettingDialog</name>
     <message>
-        <location filename="../../src/gui/MainMenuBar.cpp" line="506"/>
+        <location filename="../../src/gui/MainMenuBar.cpp" line="507"/>
         <source>Set Animation Loop</source>
         <translation>ループ設定</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainMenuBar.cpp" line="521"/>
+        <location filename="../../src/gui/MainMenuBar.cpp" line="522"/>
         <source>loop animation :</source>
         <translation>アニメーションをループさせる :</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainMenuBar.cpp" line="523"/>
+        <location filename="../../src/gui/MainMenuBar.cpp" line="524"/>
         <source>Parameters</source>
         <translation>パラメーター</translation>
     </message>
@@ -960,32 +960,32 @@
 <context>
     <name>gui::ProjectMaxFrameSettingDialog</name>
     <message>
-        <location filename="../../src/gui/MainMenuBar.cpp" line="404"/>
+        <location filename="../../src/gui/MainMenuBar.cpp" line="405"/>
         <source>Set Max Frame</source>
         <translation>最大フレームの設定</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainMenuBar.cpp" line="422"/>
+        <location filename="../../src/gui/MainMenuBar.cpp" line="423"/>
         <source>max frame :</source>
         <translation>最大フレーム :</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainMenuBar.cpp" line="424"/>
+        <location filename="../../src/gui/MainMenuBar.cpp" line="425"/>
         <source>Parameters</source>
         <translation>パラメーター</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainMenuBar.cpp" line="453"/>
+        <location filename="../../src/gui/MainMenuBar.cpp" line="454"/>
         <source>Can not set the specified frame.</source>
         <translation>フレーム値を設定できません</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainMenuBar.cpp" line="454"/>
+        <location filename="../../src/gui/MainMenuBar.cpp" line="455"/>
         <source>There are some keys that exeeding the specified frame.</source>
         <translation>指定したフレーム値を超過するキーが存在します</translation>
     </message>
     <message>
-        <location filename="../../src/gui/MainMenuBar.cpp" line="455"/>
+        <location filename="../../src/gui/MainMenuBar.cpp" line="456"/>
         <source>Operation Error</source>
         <translation>操作エラー</translation>
     </message>
@@ -1110,22 +1110,27 @@
         <translation>パラメーター</translation>
     </message>
     <message>
-        <location filename="../../src/gui/ExportDialog.cpp" line="341"/>
+        <location filename="../../src/gui/ExportDialog.cpp" line="385"/>
         <source>lossless</source>
         <translation>無劣化</translation>
     </message>
     <message>
-        <location filename="../../src/gui/ExportDialog.cpp" line="346"/>
+        <location filename="../../src/gui/ExportDialog.cpp" line="390"/>
         <source>transparent</source>
         <translation>透過</translation>
     </message>
     <message>
-        <location filename="../../src/gui/ExportDialog.cpp" line="358"/>
+        <location filename="../../src/gui/ExportDialog.cpp" line="409"/>
         <source>codec :</source>
         <translation>コーデック :</translation>
     </message>
     <message>
-        <location filename="../../src/gui/ExportDialog.cpp" line="377"/>
+        <location filename="../../src/gui/ExportDialog.cpp" line="413"/>
+        <source>color standard :</source>
+        <translation>色規格 :</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/ExportDialog.cpp" line="431"/>
         <source>bit rate (Kbps) :</source>
         <translation>ビットレート(Kbps) :</translation>
     </message>

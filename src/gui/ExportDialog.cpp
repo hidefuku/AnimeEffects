@@ -410,7 +410,7 @@ QLayout* VideoExportDialog::createVideoOption()
     }
 
     // colorspace
-    form->addRow(tr("colorspace :"), colorBox);
+    form->addRow(tr("color standard :"), colorBox);
 
     this->pushSizeBox(*form);
     this->pushFrameBox(*form);
