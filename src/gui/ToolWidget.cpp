@@ -18,6 +18,7 @@ ToolWidget::ToolWidget(ViaPoint& aViaPoint, GUIResources& aResources,
     , mSRTPanel()
     , mFFDPanel()
     , mBonePanel()
+    , mPosePanel()
     , mMeshPanel()
 {
     createViewPanel();
@@ -36,6 +37,10 @@ ToolWidget::ToolWidget(ViaPoint& aViaPoint, GUIResources& aResources,
     mBonePanel = new tool::BonePanel(this, mResources);
     mBonePanel->onParamUpdated.connect(this, &ToolWidget::onParamUpdated);
     mBonePanel->hide();
+
+    mPosePanel = new tool::PosePanel(this, mResources);
+    mPosePanel->onParamUpdated.connect(this, &ToolWidget::onParamUpdated);
+    mPosePanel->hide();
 
     mMeshPanel = new tool::MeshPanel(this, mResources);
     mMeshPanel->onParamUpdated.connect(this, &ToolWidget::onParamUpdated);
@@ -180,6 +185,7 @@ void ToolWidget::onModePanelPushed(ctrl::ToolType aType, bool aChecked)
         mSRTPanel->hide();
         mFFDPanel->hide();
         mBonePanel->hide();
+        mPosePanel->hide();
         mMeshPanel->hide();
 
         if (mToolType == ctrl::ToolType_SRT)
@@ -189,6 +195,10 @@ void ToolWidget::onModePanelPushed(ctrl::ToolType aType, bool aChecked)
         else if (mToolType == ctrl::ToolType_Bone)
         {
             mBonePanel->show();
+        }
+        else if (mToolType == ctrl::ToolType_Pose)
+        {
+            mPosePanel->show();
         }
         else if (mToolType == ctrl::ToolType_FFD)
         {
@@ -223,6 +233,11 @@ void ToolWidget::onParamUpdated(bool aLayoutChanged)
             mDriver->updateParam(mBonePanel->param());
             onVisualUpdated();
         }
+        else if (mToolType == ctrl::ToolType_Pose)
+        {
+            mDriver->updateParam(mPosePanel->param());
+            onVisualUpdated();
+        }
         else if (mToolType == ctrl::ToolType_FFD)
         {
             mDriver->updateParam(mFFDPanel->param());
@@ -253,6 +268,7 @@ void ToolWidget::updateGeometry()
 
     mSRTPanel->updateGeometry(QPoint(3, height), width);
     mBonePanel->updateGeometry(QPoint(3, height), width);
+    mPosePanel->updateGeometry(QPoint(3, height), width);
     mFFDPanel->updateGeometry(QPoint(3, height), width);
     mMeshPanel->updateGeometry(QPoint(3, height), width);
 }

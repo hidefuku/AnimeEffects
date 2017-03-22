@@ -106,7 +106,8 @@ SOURCES += \
     ffd/ffd_DragMode.cpp \
     ffd/ffd_BrushMode.cpp \
     CmndName.cpp \
-    VideoFormat.cpp
+    VideoFormat.cpp \
+    PoseParam.cpp
 
 HEADERS += \
     Driver.h \
@@ -193,4 +194,6 @@ HEADERS += \
     UILogger.h \
     UILogType.h \
     UILog.h \
-    VideoFormat.h
+    VideoFormat.h \
+    PoseParam.h \
+    PoseEditMode.h

@@ -12,6 +12,7 @@ namespace ctrl
 PoseEditor::PoseEditor(Project& aProject, UILogger& aUILogger)
     : mProject(aProject)
     , mUILogger(aUILogger)
+    , mParam()
     , mTarget()
     , mKeyOwner()
     , mCurrent()
@@ -41,7 +42,6 @@ bool PoseEditor::setTarget(core::ObjectNode* aTarget)
     return mTarget && mKeyOwner;
 }
 
-#if 0
 void PoseEditor::updateParam(const PoseParam& aParam)
 {
     const PoseParam prev = mParam;
@@ -52,7 +52,6 @@ void PoseEditor::updateParam(const PoseParam& aParam)
         resetCurrentTarget();
     }
 }
-#endif
 
 bool PoseEditor::updateCursor(const core::CameraInfo& aCamera, const core::AbstractCursor& aCursor)
 {

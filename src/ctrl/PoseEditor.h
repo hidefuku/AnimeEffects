@@ -7,6 +7,7 @@
 #include "core/AbstractCursor.h"
 #include "ctrl/IEditor.h"
 #include "ctrl/UILogger.h"
+#include "ctrl/PoseParam.h"
 #include "ctrl/pose/pose_KeyOwner.h"
 #include "ctrl/pose/pose_Target.h"
 namespace ctrl { namespace pose { class TransBoneMode; } }
@@ -22,7 +23,7 @@ public:
 
     virtual bool setTarget(core::ObjectNode* aTarget);
 
-    //void updateParam(const PoseParam& aParam);
+    void updateParam(const PoseParam& aParam);
     virtual bool updateCursor(
             const core::CameraInfo& aCamera,
             const core::AbstractCursor& aCursor);
@@ -37,6 +38,7 @@ private:
 
     core::Project& mProject;
     UILogger& mUILogger;
+    PoseParam mParam;
     pose::Target mTarget;
     pose::KeyOwner mKeyOwner;
     QScopedPointer<pose::TransBoneMode> mCurrent;

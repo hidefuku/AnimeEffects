@@ -338,6 +338,14 @@ void Driver::updateParam(const BoneParam& aParam)
     ((BoneEditor*)mEditor.data())->updateParam(aParam);
 }
 
+void Driver::updateParam(const PoseParam& aParam)
+{
+    XC_ASSERT(mToolType == ToolType_Pose);
+    if (mToolType != ToolType_Pose) return;
+
+    ((PoseEditor*)mEditor.data())->updateParam(aParam);
+}
+
 void Driver::updateParam(const MeshParam& aParam)
 {
     XC_ASSERT(mToolType == ToolType_Mesh);

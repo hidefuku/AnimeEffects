@@ -338,7 +338,7 @@
     <message>
         <location filename="../../src/ctrl/BoneEditor.cpp" line="146"/>
         <location filename="../../src/ctrl/MeshEditor.cpp" line="124"/>
-        <location filename="../../src/ctrl/PoseEditor.cpp" line="114"/>
+        <location filename="../../src/ctrl/PoseEditor.cpp" line="113"/>
         <location filename="../../src/ctrl/SRTEditor.cpp" line="83"/>
         <source>The object which has an invalid posture was given.</source>
         <translation>無効な姿勢を持つオブジェクトが与えられました</translation>
@@ -364,12 +364,12 @@
         <translation>現在のオブジェクトはメッシュを持つことが出来ません</translation>
     </message>
     <message>
-        <location filename="../../src/ctrl/PoseEditor.cpp" line="38"/>
+        <location filename="../../src/ctrl/PoseEditor.cpp" line="39"/>
         <source>PoseEditor : </source>
         <translation>ポーズエディタ : </translation>
     </message>
     <message>
-        <location filename="../../src/ctrl/PoseEditor.cpp" line="129"/>
+        <location filename="../../src/ctrl/PoseEditor.cpp" line="128"/>
         <source>There is no bone key which can be a parent.</source>
         <translation>親となるボーンキーがありません</translation>
     </message>
@@ -1072,32 +1072,32 @@
 <context>
     <name>gui::ToolWidget</name>
     <message>
-        <location filename="../../src/gui/ToolWidget.cpp" line="94"/>
+        <location filename="../../src/gui/ToolWidget.cpp" line="99"/>
         <source>ViewSettings</source>
         <translation>表示設定</translation>
     </message>
     <message>
-        <location filename="../../src/gui/ToolWidget.cpp" line="96"/>
+        <location filename="../../src/gui/ToolWidget.cpp" line="101"/>
         <source>Show Polygon Wireframe</source>
         <translation>ポリゴンのワイヤーフレームを表示する</translation>
     </message>
     <message>
-        <location filename="../../src/gui/ToolWidget.cpp" line="101"/>
+        <location filename="../../src/gui/ToolWidget.cpp" line="106"/>
         <source>Cut Images by the Frame</source>
         <translation>額縁外の描画をしない</translation>
     </message>
     <message>
-        <location filename="../../src/gui/ToolWidget.cpp" line="106"/>
+        <location filename="../../src/gui/ToolWidget.cpp" line="111"/>
         <source>Rotate the View Anticlockwise</source>
         <translation>反時計回りに回転する</translation>
     </message>
     <message>
-        <location filename="../../src/gui/ToolWidget.cpp" line="112"/>
+        <location filename="../../src/gui/ToolWidget.cpp" line="117"/>
         <source>Reset Rotation of the View</source>
         <translation>回転を初期化する</translation>
     </message>
     <message>
-        <location filename="../../src/gui/ToolWidget.cpp" line="118"/>
+        <location filename="../../src/gui/ToolWidget.cpp" line="123"/>
         <source>Rotate the View Clockwise</source>
         <translation>時計回りに回転する</translation>
     </message>
@@ -1617,6 +1617,41 @@
         <location filename="../../src/gui/tool/tool_ModePanel.cpp" line="25"/>
         <source>Free Form Deform</source>
         <translation>自由な形状に変形させる</translation>
+    </message>
+</context>
+<context>
+    <name>gui::tool::PosePanel</name>
+    <message>
+        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="23"/>
+        <source>Bone Posing</source>
+        <translation>ボーンのポージング</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="34"/>
+        <source>Move Bones</source>
+        <translation>ボーンを移動する</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="35"/>
+        <source>Draw Bones</source>
+        <translation>ボーンを引っ張る</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="36"/>
+        <source>Erase Poses</source>
+        <translation>ポーズを消す</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="52"/>
+        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="69"/>
+        <source>radius</source>
+        <translation>半径</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="61"/>
+        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="78"/>
+        <source>pressure</source>
+        <translation>圧力</translation>
     </message>
 </context>
 <context>

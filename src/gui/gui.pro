@@ -113,7 +113,8 @@ SOURCES += \
     MSVCBackTracer.cpp \
     LocaleDecider.cpp \
     GeneralSettingDialog.cpp \
-    ResourceTreeWidget.cpp
+    ResourceTreeWidget.cpp \
+    tool/tool_PosePanel.cpp
 
 HEADERS += \
     MainDisplayMode.h \
@@ -179,7 +180,8 @@ HEADERS += \
     LocaleDecider.h \
     GeneralSettingDialog.h \
     ResourceTreeWidget.h \
-    LocaleParam.h
+    LocaleParam.h \
+    tool/tool_PosePanel.h
 
 FORMS +=
 

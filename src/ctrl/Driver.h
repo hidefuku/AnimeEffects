@@ -43,6 +43,7 @@ public:
     void updateParam(const SRTParam& aParam);
     void updateParam(const FFDParam& aParam);
     void updateParam(const BoneParam& aParam);
+    void updateParam(const PoseParam& aParam);
     void updateParam(const MeshParam& aParam);
 
 private:

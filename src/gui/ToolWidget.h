@@ -15,6 +15,7 @@
 #include "gui/tool/tool_SRTPanel.h"
 #include "gui/tool/tool_FFDPanel.h"
 #include "gui/tool/tool_BonePanel.h"
+#include "gui/tool/tool_PosePanel.h"
 #include "gui/tool/tool_MeshPanel.h"
 
 namespace gui
@@ -59,6 +60,7 @@ private:
     tool::SRTPanel* mSRTPanel;
     tool::FFDPanel* mFFDPanel;
     tool::BonePanel* mBonePanel;
+    tool::PosePanel* mPosePanel;
     tool::MeshPanel* mMeshPanel;
 };
 
