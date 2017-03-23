@@ -3,6 +3,8 @@
 #include "ctrl/PoseEditor.h"
 #include "ctrl/bone/bone_Renderer.h"
 #include "ctrl/pose/pose_TransBoneMode.h"
+#include "ctrl/pose/pose_DrawBoneMode.h"
+#include "ctrl/pose/pose_ErasePoseMode.h"
 
 using namespace core;
 
@@ -50,6 +52,11 @@ void PoseEditor::updateParam(const PoseParam& aParam)
     if (prev.mode != mParam.mode)
     {
         resetCurrentTarget();
+    }
+
+    if (mCurrent)
+    {
+        mCurrent->updateParam(mParam);
     }
 }
 
@@ -119,7 +126,23 @@ void PoseEditor::resetCurrentTarget(QString* aMessage)
     {
         if (initializeKey(*mTarget->timeLine()))
         {
-            mCurrent.reset(new pose::TransBoneMode(mProject, mTarget, mKeyOwner));
+            switch (mParam.mode)
+            {
+            case PoseEditMode_Move:
+                mCurrent.reset(new pose::TransBoneMode(mProject, mTarget, mKeyOwner));
+                break;
+
+            case PoseEditMode_Draw:
+                mCurrent.reset(new pose::DrawBoneMode(mProject, mTarget, mKeyOwner));
+                break;
+
+            case PoseEditMode_Erase:
+                mCurrent.reset(new pose::ErasePoseMode(mProject, mTarget, mKeyOwner));
+                break;
+
+            default:
+                break;
+            }
         }
         else
         {

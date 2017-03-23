@@ -8,6 +8,7 @@
 #include "ctrl/IEditor.h"
 #include "ctrl/UILogger.h"
 #include "ctrl/PoseParam.h"
+#include "ctrl/pose/pose_IMode.h"
 #include "ctrl/pose/pose_KeyOwner.h"
 #include "ctrl/pose/pose_Target.h"
 namespace ctrl { namespace pose { class TransBoneMode; } }
@@ -41,7 +42,7 @@ private:
     PoseParam mParam;
     pose::Target mTarget;
     pose::KeyOwner mKeyOwner;
-    QScopedPointer<pose::TransBoneMode> mCurrent;
+    QScopedPointer<pose::IMode> mCurrent;
 };
 
 } // namespace ctrl

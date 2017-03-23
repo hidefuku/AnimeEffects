@@ -1,5 +1,5 @@
-#ifndef CTRL_POSE_TRANSBONEMODE_H
-#define CTRL_POSE_TRANSBONEMODE_H
+#ifndef CTRL_POSE_ERASEPOSEMODE_H
+#define CTRL_POSE_ERASEPOSEMODE_H
 
 #include <QMatrix4x4>
 #include "core/Project.h"
@@ -15,10 +15,10 @@
 namespace ctrl {
 namespace pose {
 
-class TransBoneMode : public IMode
+class ErasePoseMode : public IMode
 {
 public:
-    TransBoneMode(core::Project& aProject, const Target& aTarget, KeyOwner& aKey);
+    ErasePoseMode(core::Project& aProject, const Target& aTarget, KeyOwner& aKey);
     virtual bool updateCursor(const core::CameraInfo&, const core::AbstractCursor&);
     virtual void renderQt(const core::RenderInfo& aInfo, QPainter& aPainter);
 
@@ -38,4 +38,4 @@ private:
 } // namespace pose
 } // namespace ctrl
 
-#endif // CTRL_POSE_TRANSBONEMODE_H
+#endif // CTRL_POSE_ERASEPOSEMODE_H

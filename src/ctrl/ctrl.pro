@@ -107,7 +107,9 @@ SOURCES += \
     ffd/ffd_BrushMode.cpp \
     CmndName.cpp \
     VideoFormat.cpp \
-    PoseParam.cpp
+    PoseParam.cpp \
+    pose/pose_DrawBoneMode.cpp \
+    pose/pose_ErasePoseMode.cpp
 
 HEADERS += \
     Driver.h \
@@ -196,4 +198,7 @@ HEADERS += \
     UILog.h \
     VideoFormat.h \
     PoseParam.h \
-    PoseEditMode.h
+    PoseEditMode.h \
+    pose/pose_DrawBoneMode.h \
+    pose/pose_ErasePoseMode.h \
+    pose/pose_IMode.h
