@@ -57,9 +57,6 @@ private:
     void adjustParentBones(RigidBone& aTarget);
     void adjustChildBonesRecursive(RigidBone& aTarget);
     void deleteAll();
-    void updateMotions();
-    void reconnectBones();
-    void reconnectBonesRecursive(RigidBone& aCurrent, const QVector2D& aRootPull);
 
     const core::Bone2& mTopBone;
     RigidBone* mRigidTopBone;
