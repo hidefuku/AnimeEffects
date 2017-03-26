@@ -32,7 +32,7 @@ void PosePanel::createMode()
     mTypeGroup->setChoice(mParam.mode);
     mTypeGroup->setToolTips(QStringList() <<
                             tr("Move Bones") <<
-                            tr("Draw Bones") <<
+                            tr("Pull Bones") <<
                             tr("Erase Poses"));
     mTypeGroup->setIcons(QVector<QIcon>() <<
                          mResources.icon("move") <<

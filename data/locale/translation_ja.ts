@@ -238,6 +238,7 @@
         <translation>メッシュキーの三角形を切る</translation>
     </message>
     <message>
+        <location filename="../../src/ctrl/pose/pose_ErasePoseMode.cpp" line="120"/>
         <location filename="../../src/ctrl/pose/pose_TransBoneMode.cpp" line="120"/>
         <source>rotate a bone of a posing key</source>
         <translation>ポーズキーのボーンを回転する</translation>
@@ -327,6 +328,11 @@
         <source>update centroid of a moving key</source>
         <translation>移動キーの重心を更新</translation>
     </message>
+    <message>
+        <location filename="../../src/ctrl/pose/pose_DrawBoneMode.cpp" line="415"/>
+        <source>pull bones of a posing key</source>
+        <translation>ポーズキーのボーンを引っ張る</translation>
+    </message>
 </context>
 <context>
     <name>ctrl::UILog</name>
@@ -338,7 +344,7 @@
     <message>
         <location filename="../../src/ctrl/BoneEditor.cpp" line="146"/>
         <location filename="../../src/ctrl/MeshEditor.cpp" line="124"/>
-        <location filename="../../src/ctrl/PoseEditor.cpp" line="113"/>
+        <location filename="../../src/ctrl/PoseEditor.cpp" line="120"/>
         <location filename="../../src/ctrl/SRTEditor.cpp" line="83"/>
         <source>The object which has an invalid posture was given.</source>
         <translation>無効な姿勢を持つオブジェクトが与えられました</translation>
@@ -364,12 +370,12 @@
         <translation>現在のオブジェクトはメッシュを持つことが出来ません</translation>
     </message>
     <message>
-        <location filename="../../src/ctrl/PoseEditor.cpp" line="39"/>
+        <location filename="../../src/ctrl/PoseEditor.cpp" line="41"/>
         <source>PoseEditor : </source>
         <translation>ポーズエディタ : </translation>
     </message>
     <message>
-        <location filename="../../src/ctrl/PoseEditor.cpp" line="128"/>
+        <location filename="../../src/ctrl/PoseEditor.cpp" line="151"/>
         <source>There is no bone key which can be a parent.</source>
         <translation>親となるボーンキーがありません</translation>
     </message>
@@ -1633,7 +1639,7 @@
     </message>
     <message>
         <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="35"/>
-        <source>Draw Bones</source>
+        <source>Pull Bones</source>
         <translation>ボーンを引っ張る</translation>
     </message>
     <message>
