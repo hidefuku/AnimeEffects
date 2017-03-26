@@ -15,8 +15,7 @@ PosePanel::PosePanel(QWidget* aParent, GUIResources& aResources)
     , mResources(aResources)
     , mParam()
     , mTypeGroup()
-    , mDIRadius()
-    , mDIPressure()
+    , mDIWeight()
     , mEIRadius()
     , mEIPressure()
 {
@@ -48,26 +47,17 @@ void PosePanel::createMode()
 
     static const int kScale = 100;
 
-    // drawing radius
-    mDIRadius.reset(new SliderItem(tr("radius"), this->palette(), this));
-    mDIRadius->setAttribute(util::Range(5, 1000), mParam.diRadius, 50);
-    mDIRadius->connectOnChanged([=](int aValue)
-    {
-        this->mParam.diRadius = aValue;
-        this->onParamUpdated(false);
-    });
-
     // drawing pressure
-    mDIPressure.reset(new SliderItem(tr("pressure"), this->palette(), this));
-    mDIPressure->setAttribute(util::Range(0, kScale), mParam.diPressure * kScale, kScale / 10);
-    mDIPressure->connectOnMoved([=](int aValue)
+    mDIWeight.reset(new SliderItem(tr("weight"), this->palette(), this));
+    mDIWeight->setAttribute(util::Range(0, kScale), mParam.diWeight * kScale, kScale / 10);
+    mDIWeight->connectOnMoved([=](int aValue)
     {
-        this->mParam.diPressure = (float)aValue / kScale;
+        this->mParam.diWeight = (float)aValue / kScale;
         this->onParamUpdated(false);
     });
     // eraser radius
     mEIRadius.reset(new SliderItem(tr("radius"), this->palette(), this));
-    mEIRadius->setAttribute(util::Range(5, 1000), mParam.diRadius, 50);
+    mEIRadius->setAttribute(util::Range(5, 1000), mParam.eiRadius, 50);
     mEIRadius->connectOnChanged([=](int aValue)
     {
         this->mParam.eiRadius = aValue;
@@ -88,8 +78,7 @@ void PosePanel::updateTypeParam(ctrl::PoseEditMode aType)
 {
     const bool isDraw = aType == ctrl::PoseEditMode_Draw;
     const bool isErase = aType == ctrl::PoseEditMode_Erase;
-    mDIRadius->setVisible(isDraw);
-    mDIPressure->setVisible(isDraw);
+    mDIWeight->setVisible(isDraw);
     mEIRadius->setVisible(isErase);
     mEIPressure->setVisible(isErase);
 }
@@ -107,10 +96,8 @@ int PosePanel::updateGeometry(const QPoint& aPos, int aWidth)
 
     if (mParam.mode == ctrl::PoseEditMode_Draw)
     {
-        // radius
-        curPos.setY(mDIRadius->updateGeometry(curPos, itemWidth) + curPos.y() + 5);
-        // pressure
-        curPos.setY(mDIPressure->updateGeometry(curPos, itemWidth) + curPos.y() + 5);
+        // weight
+        curPos.setY(mDIWeight->updateGeometry(curPos, itemWidth) + curPos.y() + 5);
     }
     else if (mParam.mode == ctrl::PoseEditMode_Erase)
     {

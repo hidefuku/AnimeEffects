@@ -14,8 +14,7 @@ public:
     PoseEditMode mode;
 
     // for drawing mode
-    float diRadius;
-    float diPressure;
+    float diWeight;
     // for eraser mode
     float eiRadius;
     float eiPressure;

@@ -329,7 +329,7 @@
         <translation>移動キーの重心を更新</translation>
     </message>
     <message>
-        <location filename="../../src/ctrl/pose/pose_DrawBoneMode.cpp" line="415"/>
+        <location filename="../../src/ctrl/pose/pose_DrawBoneMode.cpp" line="162"/>
         <source>pull bones of a posing key</source>
         <translation>ポーズキーのボーンを引っ張る</translation>
     </message>
@@ -1628,34 +1628,37 @@
 <context>
     <name>gui::tool::PosePanel</name>
     <message>
-        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="23"/>
+        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="22"/>
         <source>Bone Posing</source>
         <translation>ボーンのポージング</translation>
     </message>
     <message>
-        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="34"/>
+        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="33"/>
         <source>Move Bones</source>
         <translation>ボーンを移動する</translation>
     </message>
     <message>
-        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="35"/>
+        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="34"/>
         <source>Pull Bones</source>
         <translation>ボーンを引っ張る</translation>
     </message>
     <message>
-        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="36"/>
+        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="35"/>
         <source>Erase Poses</source>
         <translation>ポーズを消す</translation>
     </message>
     <message>
-        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="52"/>
-        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="69"/>
+        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="51"/>
+        <source>weight</source>
+        <translation>重さ</translation>
+    </message>
+    <message>
+        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="59"/>
         <source>radius</source>
         <translation>半径</translation>
     </message>
     <message>
-        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="61"/>
-        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="78"/>
+        <location filename="../../src/gui/tool/tool_PosePanel.cpp" line="68"/>
         <source>pressure</source>
         <translation>圧力</translation>
     </message>

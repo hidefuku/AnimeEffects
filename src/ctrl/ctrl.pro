@@ -110,7 +110,9 @@ SOURCES += \
     PoseParam.cpp \
     pose/pose_DrawBoneMode.cpp \
     pose/pose_ErasePoseMode.cpp \
-    pose/pose_RotateBones.cpp
+    pose/pose_RotateBones.cpp \
+    pose/pose_RigidBone.cpp \
+    pose/pose_BoneDynamics.cpp
 
 HEADERS += \
     Driver.h \
@@ -203,4 +205,6 @@ HEADERS += \
     pose/pose_DrawBoneMode.h \
     pose/pose_ErasePoseMode.h \
     pose/pose_IMode.h \
-    pose/pose_RotateBones.h
+    pose/pose_RotateBones.h \
+    pose/pose_RigidBone.h \
+    pose/pose_BoneDynamics.h

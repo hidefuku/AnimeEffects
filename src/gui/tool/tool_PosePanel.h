@@ -32,8 +32,7 @@ private:
     GUIResources& mResources;
     ctrl::PoseParam mParam;
     QScopedPointer<SingleOutItem> mTypeGroup;
-    QScopedPointer<SliderItem> mDIRadius;
-    QScopedPointer<SliderItem> mDIPressure;
+    QScopedPointer<SliderItem> mDIWeight;
     QScopedPointer<SliderItem> mEIRadius;
     QScopedPointer<SliderItem> mEIPressure;
 };

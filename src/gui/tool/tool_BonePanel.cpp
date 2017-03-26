@@ -75,7 +75,7 @@ void BonePanel::createMode()
     });
     // erase influence radius
     mEIRadius.reset(new SliderItem(tr("radius"), this->palette(), this));
-    mEIRadius->setAttribute(util::Range(5, 1000), mParam.piRadius, 50);
+    mEIRadius->setAttribute(util::Range(5, 1000), mParam.eiRadius, 50);
     mEIRadius->connectOnChanged([=](int aValue)
     {
         this->mParam.eiRadius = aValue;

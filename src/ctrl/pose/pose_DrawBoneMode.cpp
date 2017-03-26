@@ -1,278 +1,18 @@
-#include <cmath>
 #include "util/CollDetect.h"
 #include "util/MathUtil.h"
+#include "util/TreeUtil.h"
 #include "cmnd/ScopedMacro.h"
 #include "core/Constant.h"
 #include "ctrl/TimeLineUtil.h"
 #include "ctrl/CmndName.h"
 #include "ctrl/pose/pose_DrawBoneMode.h"
+#include "ctrl/pose/pose_BoneDynamics.h"
 #include "ctrl/bone/bone_Renderer.h"
-
-#include "util/TreeUtil.h"
 
 using namespace core;
 
 namespace ctrl {
 namespace pose {
-
-RigidBone::RigidBone(const core::Bone2& aOrigin)
-    : TreeNodeBase(this)
-    , ptr(&aOrigin)
-    , rootPos()
-    , angle()
-    , length()
-    , force()
-    , torque()
-{
-    rootPos = aOrigin.parent() ? aOrigin.parent()->worldPos() : aOrigin.worldPos();
-    length = (aOrigin.worldPos() - rootPos).length();
-    angle = aOrigin.worldAngle();
-}
-
-QVector2D RigidBone::tailPos() const
-{
-    return rootPos + util::MathUtil::getVectorFromPolarCoord(length, angle);
-}
-
-QVector2D RigidBone::dir() const
-{
-    return util::MathUtil::getVectorFromPolarCoord(length, angle);
-}
-
-void RigidBone::updateMotion(int aCentroid)
-{
-    rootPos += force;
-    if (aCentroid == -1)
-    {
-        angle += torque;
-    }
-    else if (aCentroid == 0)
-    {
-        auto rotate = torque;
-        auto center = rootPos + 0.5f * dir();
-        rootPos = center + util::MathUtil::getRotateVectorRad(rootPos - center, rotate);
-        angle += rotate;
-    }
-    else if (aCentroid == 1)
-    {
-        auto rotate = torque;
-        auto center = tailPos();
-        rootPos = center + util::MathUtil::getRotateVectorRad(rootPos - center, rotate);
-        angle += rotate;
-    }
-
-    force = QVector2D();
-    torque = 0.0f;
-}
-
-QVector2D pullBoneTail(RigidBone& aTarget, const QVector2D& aPull, float aConduction)
-{
-    QVector2D nextPull;
-    if (aTarget.length >= core::Constant::normalizable())
-    {
-        auto normDir = aTarget.dir().normalized();
-        auto trans = normDir * QVector2D::dotProduct(normDir, aPull);
-        aTarget.force = aConduction * trans;
-        nextPull = aTarget.force;
-
-        auto rotate = aPull - trans;
-        auto torque = (rotate.length() / aTarget.length) *
-                (util::CollDetect::getCross(normDir, rotate) > 0.0f ? 1.0f : -1.0f);
-        aTarget.torque = torque;
-    }
-    else
-    {
-        aTarget.force = aConduction * aPull;
-        nextPull = aTarget.force;
-    }
-    aTarget.updateMotion(-1);
-    return nextPull;
-}
-
-QVector2D pullBoneRoot(RigidBone& aTarget, const QVector2D& aPull, float aConduction)
-{
-    QVector2D nextPull;
-    if (aTarget.length >= core::Constant::normalizable())
-    {
-        auto normDir = aTarget.dir().normalized();
-        auto trans = normDir * QVector2D::dotProduct(normDir, aPull);
-        aTarget.force = aConduction * trans;
-        nextPull = aTarget.force;
-
-        auto rotate = aPull - trans;
-        auto torque = (rotate.length() / aTarget.length) *
-                (util::CollDetect::getCross(normDir, rotate) < 0.0f ? 1.0f : -1.0f);
-        aTarget.torque = torque;
-    }
-    else
-    {
-        aTarget.force = aConduction * aPull;
-        nextPull = aTarget.force;
-    }
-    aTarget.updateMotion(1);
-    return nextPull;
-}
-
-BoneDynamics::BoneDynamics(const core::Bone2& aTopBone)
-    : mTopBone(aTopBone)
-    , mRigidTopBone()
-    , mConduction(1.0f)
-{
-    mRigidTopBone = util::TreeUtil::createShadow<Bone2, RigidBone>(&mTopBone);
-}
-
-BoneDynamics::~BoneDynamics()
-{
-    deleteAll();
-}
-
-QVector<float> BoneDynamics::rotationDifferences() const
-{
-    using util::MathUtil;
-    QVector<float> differences;
-
-    RigidBone::ConstIterator itr(mRigidTopBone);
-    while (itr.hasNext())
-    {
-        auto rigidBone = itr.next();
-        float diff = 0.0f;
-        if (rigidBone->parent())
-        {
-            auto rotate = rigidBone->angle - rigidBone->parent()->angle - rigidBone->ptr->localAngle();
-            diff = MathUtil::getAngleDifferenceRad(
-                        MathUtil::normalizeAngleRad(rigidBone->ptr->rotate()),
-                        MathUtil::normalizeAngleRad(rotate));
-        }
-        differences.push_back(diff);
-    }
-    return differences;
-}
-
-void BoneDynamics::pullBone(RigidBone& aTarget, const QVector2D& aPull, float aPullPos)
-{
-    auto preRoot = aTarget.rootPos;
-    auto preTail = aTarget.tailPos();
-    if (aTarget.length >= core::Constant::normalizable())
-    {
-#if 1
-        auto rotateRateLinear = std::abs(2.0f * (aPullPos - 0.5f));
-        auto rotateRate = 1.0 - (1.0f - rotateRateLinear) * (1.0f - rotateRateLinear);
-        rotateRate = mConduction * rotateRate + (1.0f - mConduction);
-
-        auto normDir = aTarget.dir().normalized();
-        auto vertical = normDir * QVector2D::dotProduct(normDir, aPull);
-        auto horizontal = aPull - vertical;
-        aTarget.force = mConduction * (vertical + (1.0f - rotateRate) * horizontal);
-
-        auto rotate = horizontal * rotateRate;
-        auto torque = (rotate.length() / aTarget.length) *
-                (aPullPos >= 0.5f ? 1.0f : -1.0f) *
-                (util::CollDetect::getCross(normDir, rotate) > 0.0f ? 1.0f : -1.0f);
-        aTarget.torque = torque;
-        aTarget.updateMotion(aPullPos >= 0.5f ? -1 : 1);
-#else
-        auto rotateRate = aPullPos;
-        auto normDir = aTarget.dir().normalized();
-        auto vertical = normDir * QVector2D::dotProduct(normDir, aPull);
-        auto horizontal = aPull - vertical;
-        aTarget.force = (vertical + (1.0f - rotateRate) * horizontal);
-
-        auto rotate = horizontal * rotateRate;
-        auto torque = (rotate.length() / aTarget.length) *
-                (util::CollDetect::getCross(normDir, rotate) > 0.0f ? 1.0f : -1.0f);
-        aTarget.torque = torque;
-        aTarget.updateMotion(-1);
-#endif
-    }
-    else
-    {
-        aTarget.force = aPull;
-        aTarget.updateMotion();
-    }
-    // update parents
-    pullParentBones(aTarget, aTarget.rootPos - preRoot);
-    adjustByOriginConstraint(aTarget);
-
-    // update children
-    pullChildBonesRecursive(aTarget, aTarget.tailPos() - preTail);
-
-    // adjustment
-    for (int i = 0; i < 2; ++i)
-    {
-        adjustParentBones(aTarget);
-        adjustChildBonesRecursive(aTarget);
-    }
-    // twig adjustment
-    for (int i = 0; i < 2; ++i)
-    {
-        adjustChildBonesRecursive(*mRigidTopBone);
-    }
-}
-
-QVector2D BoneDynamics::adjustByOriginConstraint(RigidBone& aTarget)
-{
-    QVector2D pull;
-    if (aTarget.parent())
-    {
-        pull = adjustByOriginConstraint(*aTarget.parent());
-    }
-    else
-    {
-        auto originPos = mTopBone.worldPos();
-        pull = originPos - aTarget.rootPos;
-    }
-
-    pull = pullBoneRoot(aTarget, pull, 1.0f);
-    return pull;
-}
-
-void BoneDynamics::pullParentBones(RigidBone& aTarget, const QVector2D& aPull)
-{
-    auto pull = aPull;
-    for (auto parent = aTarget.parent(); parent; parent = parent->parent())
-    {
-        pull = pullBoneTail(*parent, pull, mConduction);
-    }
-}
-
-void BoneDynamics::pullChildBonesRecursive(RigidBone& aTarget, const QVector2D& aPull)
-{
-    for (auto child : aTarget.children())
-    {
-        auto nextPull = pullBoneRoot(*child, aPull, mConduction);
-        pullChildBonesRecursive(*child, nextPull);
-    }
-}
-
-void BoneDynamics::adjustParentBones(RigidBone& aTarget)
-{
-    auto prev = &aTarget;
-    for (auto parent = aTarget.parent(); parent; parent = parent->parent())
-    {
-        auto pull = prev->rootPos - parent->tailPos();
-        pullBoneTail(*parent, pull, 1.0f);
-        prev = parent;
-    }
-}
-
-void BoneDynamics::adjustChildBonesRecursive(RigidBone& aTarget)
-{
-    for (auto child : aTarget.children())
-    {
-        auto pull = aTarget.tailPos() - child->rootPos;
-        pullBoneRoot(*child, pull, 1.0f);
-        adjustChildBonesRecursive(*child);
-    }
-}
-
-void BoneDynamics::deleteAll()
-{
-    if (mRigidTopBone)
-    {
-        util::TreeUtil::deleteAll(mRigidTopBone);
-        mRigidTopBone = nullptr;
-    }
-}
 
 DrawBoneMode::DrawBoneMode(Project& aProject, const Target& aTarget, KeyOwner& aKey)
     : mProject(aProject)
@@ -285,11 +25,17 @@ DrawBoneMode::DrawBoneMode(Project& aProject, const Target& aTarget, KeyOwner& a
     , mPullPos()
     , mPullOffset()
     , mPullPosRate()
+    , mPullWeight(0.0f)
 {
     XC_PTR_ASSERT(mKeyOwner.key);
     mFocuser.setTopBones(mKeyOwner.key->data().topBones());
     mFocuser.setFocusConnector(true);
     mFocuser.setTargetMatrix(mTargetMtx);
+}
+
+void DrawBoneMode::updateParam(const PoseParam& aParam)
+{
+    mPullWeight = aParam.diWeight;
 }
 
 bool DrawBoneMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCursor)
@@ -359,6 +105,7 @@ void DrawBoneMode::pullBone(Bone2& aTarget, const QVector2D& aPull, float aPullP
 {
     auto& targetRoot = util::TreeUtil::getTreeRoot<Bone2>(aTarget);
     BoneDynamics dynamics(targetRoot);
+    dynamics.setConduction(1.0f - mPullWeight);
     {
         RigidBone* rigidTarget = nullptr;
         RigidBone::Iterator itr(&dynamics.rigidTopBone());
