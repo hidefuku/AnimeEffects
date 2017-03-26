@@ -143,6 +143,10 @@ void PoseEditor::resetCurrentTarget(QString* aMessage)
             default:
                 break;
             }
+            if (mCurrent)
+            {
+                mCurrent->updateParam(mParam);
+            }
         }
         else
         {

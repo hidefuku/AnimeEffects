@@ -3,6 +3,7 @@
 namespace ctrl {
 namespace pose {
 
+//-------------------------------------------------------------------------------------------------
 RotateBones::RotateBones(core::Bone2* aRootTarget, const QVector<float>& aNexts)
     : mRootTarget(aRootTarget)
     , mPrevs()
@@ -48,6 +49,68 @@ void RotateBones::redo()
         itr.next()->setRotate(rotate);
     }
     mRootTarget->updateWorldTransform();
+    mDone = true;
+}
+
+//-------------------------------------------------------------------------------------------------
+RotateAllBones::RotateAllBones(QList<core::Bone2*>& aTopBones, const QVector<float>& aNexts)
+    : mTopBones(aTopBones)
+    , mPrevs()
+    , mNexts(aNexts)
+    , mDone(false)
+{
+}
+
+void RotateAllBones::modifyValue(const QVector<float>& aNexts)
+{
+    mNexts = aNexts;
+    if (mDone) redo();
+}
+
+void RotateAllBones::exec()
+{
+    for (auto topBone : mTopBones)
+    {
+        core::Bone2::Iterator itr(topBone);
+        while (itr.hasNext())
+        {
+            mPrevs.push_back(itr.next()->rotate());
+        }
+    }
+    redo();
+}
+
+void RotateAllBones::undo()
+{
+    auto prev = mPrevs.begin();
+    for (auto topBone : mTopBones)
+    {
+        core::Bone2::Iterator itr(topBone);
+        while (itr.hasNext())
+        {
+            if (prev == mPrevs.end()) break;
+            itr.next()->setRotate(*prev);
+            ++prev;
+        }
+        topBone->updateWorldTransform();
+    }
+    mDone = false;
+}
+
+void RotateAllBones::redo()
+{
+    auto next = mNexts.begin();
+    for (auto topBone : mTopBones)
+    {
+        core::Bone2::Iterator itr(topBone);
+        while (itr.hasNext())
+        {
+            if (next == mNexts.end()) break;
+            itr.next()->setRotate(*next);
+            ++next;
+        }
+        topBone->updateWorldTransform();
+    }
     mDone = true;
 }
 

@@ -238,7 +238,6 @@
         <translation>メッシュキーの三角形を切る</translation>
     </message>
     <message>
-        <location filename="../../src/ctrl/pose/pose_ErasePoseMode.cpp" line="120"/>
         <location filename="../../src/ctrl/pose/pose_TransBoneMode.cpp" line="120"/>
         <source>rotate a bone of a posing key</source>
         <translation>ポーズキーのボーンを回転する</translation>
@@ -333,6 +332,11 @@
         <source>pull bones of a posing key</source>
         <translation>ポーズキーのボーンを引っ張る</translation>
     </message>
+    <message>
+        <location filename="../../src/ctrl/pose/pose_ErasePoseMode.cpp" line="100"/>
+        <source>erase a pose</source>
+        <translation>ポーズを消す</translation>
+    </message>
 </context>
 <context>
     <name>ctrl::UILog</name>
@@ -375,7 +379,7 @@
         <translation>ポーズエディタ : </translation>
     </message>
     <message>
-        <location filename="../../src/ctrl/PoseEditor.cpp" line="151"/>
+        <location filename="../../src/ctrl/PoseEditor.cpp" line="155"/>
         <source>There is no bone key which can be a parent.</source>
         <translation>親となるボーンキーがありません</translation>
     </message>

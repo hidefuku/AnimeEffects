@@ -22,6 +22,21 @@ public:
     virtual void redo();
 };
 
+class RotateAllBones : public cmnd::Stable
+{
+    QList<core::Bone2*>& mTopBones;
+    QVector<float> mPrevs;
+    QVector<float> mNexts;
+    bool mDone;
+
+public:
+    RotateAllBones(QList<core::Bone2*>& aTopBones, const QVector<float>& aNexts);
+    void modifyValue(const QVector<float>& aNexts);
+    virtual void exec();
+    virtual void undo();
+    virtual void redo();
+};
+
 } // namespace pose
 } // namespace ctrl
 

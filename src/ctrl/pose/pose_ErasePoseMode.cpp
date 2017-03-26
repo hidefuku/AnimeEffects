@@ -18,96 +18,77 @@ ErasePoseMode::ErasePoseMode(Project& aProject, const Target& aTarget, KeyOwner&
     , mTargetMtx(aTarget.mtx)
     , mTargetInvMtx(aTarget.invMtx)
     , mKeyOwner(aKey)
-    , mFocuser()
     , mCommandRef()
-    , mMoveOffset()
+    , mBrush()
+    , mBrushPressure()
+    , mIsBrushDrawing()
 {
     XC_PTR_ASSERT(mKeyOwner.key);
-    mFocuser.setTopBones(mKeyOwner.key->data().topBones());
-    mFocuser.setFocusConnector(true);
-    mFocuser.setTargetMatrix(mTargetMtx);
 }
 
-bool ErasePoseMode::updateCursor(const CameraInfo& aCamera, const AbstractCursor& aCursor)
+void ErasePoseMode::updateParam(const PoseParam& aParam)
 {
-    auto focus = mFocuser.update(aCamera, aCursor.screenPos());
-    bool updated = mFocuser.focusChanged();
+    mBrush.setRadius(aParam.eiRadius);
+    mBrushPressure = aParam.eiPressure;
+}
+
+bool ErasePoseMode::updateCursor(const CameraInfo&, const AbstractCursor& aCursor)
+{
+    mBrush.setCenter(aCursor.worldPos());
 
     if (aCursor.emitsLeftPressedEvent())
     {
+        mIsBrushDrawing = true;
         mCommandRef = nullptr;
-        mFocuser.clearSelection();
-        if (focus && focus->parent())
-        {
-            mFocuser.select(*focus);
-            const QVector2D center = focus->parent()->worldPos();
-            const QVector2D tail = focus->worldPos();
-            const util::Segment2D seg(center, tail - center);
-
-            const QVector2D cursorPos =
-                    (mTargetInvMtx * QVector3D(aCursor.worldPos())).toVector2D();
-            mMoveOffset =
-                    cursorPos - util::CollDetect::getPosOnLine(seg, cursorPos);
-        }
-        updated = true;
+        updatePaint();
     }
     else if (aCursor.emitsLeftDraggedEvent())
     {
-        Bone2* selected = mFocuser.selectingBone();
-
-        if (selected && selected->parent())
-        {
-            const QVector2D cursorPos =
-                    (mTargetInvMtx * QVector3D(aCursor.worldPos())).toVector2D();
-
-            const QVector2D center = selected->parent()->worldPos();
-            const QVector2D prev = selected->worldPos() - center;
-            const QVector2D next = cursorPos - center - mMoveOffset;
-
-            if (std::min(prev.length(), next.length()) >= Constant::dividable())
-            {
-                const float rotate = util::MathUtil::getAngleDifferenceRad(prev, next);
-                rotateBone(*selected, rotate);
-            }
-        }
-        updated = true;
+        updatePaint();
     }
     else if (aCursor.emitsLeftReleasedEvent())
     {
+        mIsBrushDrawing = false;
         mCommandRef = nullptr;
-        mFocuser.clearSelection();
-        updated = true;
     }
 
-    return updated;
+    return true;
 }
 
-void ErasePoseMode::renderQt(const RenderInfo& aInfo, QPainter& aPainter)
-{
-    bone::Renderer renderer(aPainter, aInfo);
-    renderer.setAntialiasing(true);
-    renderer.setFocusConnector(true);
-    renderer.setTargetMatrix(mTargetMtx);
-
-    for (auto bone : mKeyOwner.key->data().topBones())
-    {
-        renderer.renderBones(bone);
-    }
-}
-
-void ErasePoseMode::rotateBone(Bone2& aTarget, float aRotate)
+void ErasePoseMode::updatePaint()
 {
     cmnd::Stack& stack = mProject.commandStack();
     TimeLine& timeLine = *mTarget.timeLine();
     const int frame = mProject.animator().currentFrame().get();
+    auto& topBones = mKeyOwner.key->data().topBones();
 
-    const float nextRot = aTarget.rotate() + aRotate;
+    QVector<float> nextRots;
+    {
+        auto eraseRate = 1.0f - mBrushPressure;
+
+        for (auto topBone : topBones)
+        {
+            Bone2::ConstIterator itr(topBone);
+            while (itr.hasNext())
+            {
+                auto ptr = itr.next();
+                auto worldPos = mTargetMtx * QVector3D(ptr->worldPos());
+                if (mBrush.isInside(worldPos.toVector2D()))
+                {
+                    nextRots.push_back(ptr->rotate() * eraseRate);
+                }
+                else
+                {
+                    nextRots.push_back(ptr->rotate());
+                }
+            }
+        }
+    }
 
     // modify
     if (mCommandRef && stack.isModifiable(mCommandRef))
     {
-        mCommandRef->modifyValue(nextRot);
-        aTarget.updateWorldTransform();
+        mCommandRef->modifyValue(nextRots);
 
         // notify
         TimeLineEvent event;
@@ -117,7 +98,7 @@ void ErasePoseMode::rotateBone(Bone2& aTarget, float aRotate)
     }
     else
     {
-        cmnd::ScopedMacro macro(stack, CmndName::tr("rotate a bone of a posing key"));
+        cmnd::ScopedMacro macro(stack, CmndName::tr("erase a pose"));
 
         // set notifier
         {
@@ -136,10 +117,24 @@ void ErasePoseMode::rotateBone(Bone2& aTarget, float aRotate)
         }
 
         // push command
-        mCommandRef = new RotateBone(&aTarget, nextRot);
+        mCommandRef = new RotateAllBones(topBones, nextRots);
         stack.push(mCommandRef);
     }
+}
 
+void ErasePoseMode::renderQt(const RenderInfo& aInfo, QPainter& aPainter)
+{
+    bone::Renderer renderer(aPainter, aInfo);
+    renderer.setAntialiasing(true);
+    //renderer.setFocusConnector(true);
+    renderer.setTargetMatrix(mTargetMtx);
+
+    for (auto bone : mKeyOwner.key->data().topBones())
+    {
+        renderer.renderBones(bone);
+    }
+
+    renderer.renderBrush(mBrush, mIsBrushDrawing);
 }
 
 } // namespace pose
