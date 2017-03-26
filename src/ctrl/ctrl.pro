@@ -109,7 +109,8 @@ SOURCES += \
     VideoFormat.cpp \
     PoseParam.cpp \
     pose/pose_DrawBoneMode.cpp \
-    pose/pose_ErasePoseMode.cpp
+    pose/pose_ErasePoseMode.cpp \
+    pose/pose_RotateBones.cpp
 
 HEADERS += \
     Driver.h \
@@ -201,4 +202,5 @@ HEADERS += \
     PoseEditMode.h \
     pose/pose_DrawBoneMode.h \
     pose/pose_ErasePoseMode.h \
-    pose/pose_IMode.h
+    pose/pose_IMode.h \
+    pose/pose_RotateBones.h
