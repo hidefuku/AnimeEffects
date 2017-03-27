@@ -6,7 +6,7 @@ namespace ctrl
 PoseParam::PoseParam()
     : mode(PoseEditMode_Move)
     , diWeight(0.0f)
-    , eiRadius(50.0f)
+    , eiRadius(200.0f)
     , eiPressure(1.0f)
 {
 }
