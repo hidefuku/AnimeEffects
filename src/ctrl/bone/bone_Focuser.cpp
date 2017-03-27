@@ -113,6 +113,7 @@ Bone2* Focuser::updateImpl(const CameraInfo& aCamera, const QVector2D& aPos)
                     mFocusRate = xc_clamp(distance / length, 0.0f, 1.0f);
                 }
 
+                qDebug() << "bone1" << bone;
                 return bone;
             }
         }
@@ -130,8 +131,8 @@ Bone2* Focuser::updateImpl(const CameraInfo& aCamera, const QVector2D& aPos)
 
             if (!parent) continue;
 
-            const QVector2D ppos = parent->worldPos();
-            const QVector2D cpos = bone->worldPos();
+            const QVector2D ppos = (mTargetMtx * QVector3D(parent->worldPos())).toVector2D();
+            const QVector2D cpos = (mTargetMtx * QVector3D(bone->worldPos())).toVector2D();
             const QVector2D dir(ppos - cpos);
             const float length = dir.length();
 
@@ -155,6 +156,7 @@ Bone2* Focuser::updateImpl(const CameraInfo& aCamera, const QVector2D& aPos)
 
                 mFocusRate = xc_clamp(distance / length, 0.0f, 1.0f);
 
+                qDebug() << "bone2" << bone;
                 return bone;
             }
         }
