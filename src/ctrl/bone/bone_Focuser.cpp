@@ -113,7 +113,6 @@ Bone2* Focuser::updateImpl(const CameraInfo& aCamera, const QVector2D& aPos)
                     mFocusRate = xc_clamp(distance / length, 0.0f, 1.0f);
                 }
 
-                qDebug() << "bone1" << bone;
                 return bone;
             }
         }
@@ -156,7 +155,6 @@ Bone2* Focuser::updateImpl(const CameraInfo& aCamera, const QVector2D& aPos)
 
                 mFocusRate = xc_clamp(distance / length, 0.0f, 1.0f);
 
-                qDebug() << "bone2" << bone;
                 return bone;
             }
         }
