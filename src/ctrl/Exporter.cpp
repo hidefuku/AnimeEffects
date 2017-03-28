@@ -144,12 +144,12 @@ bool Exporter::FFMpeg::finish(const std::function<bool()>& aWaiter)
 
     while (!mProcess->waitForFinished(kMSec))
     {
-        if (!aWaiter() || mFinished) break;
+        if (!aWaiter() || mFinished || mErrorOccurred) break;
     }
 
     auto exitStatus = mProcess->exitStatus();
     //qDebug() << "exit status" << exitStatus;
-    //qDebug() << "exit code" << mFFMpeg->exitCode();
+    //qDebug() << "exit code" << mProcess->exitCode();
 
     mProcess.reset();
     return (exitStatus == QProcess::NormalExit);
@@ -452,6 +452,14 @@ Exporter::Result Exporter::execute()
         }
     }
 
+    if (mFFMpeg.errorOccurred())
+    {
+        mLog = "FFmpeg error occurred.\n" + mFFMpeg.errorString();
+        return mFFMpeg.errorCode() == QProcess::FailedToStart ?
+                    Result(ResultCode_FFMpegFailedToStart, mLog) :
+                    Result(ResultCode_FFMpegError, mLog);
+    }
+
     return finish();
 }
 
@@ -521,7 +529,10 @@ bool Exporter::updateTime(core::TimeInfo& aDst)
 
 bool Exporter::update()
 {
-    if (!mExporting) return false;
+    if (!mExporting)
+    {
+        return false;
+    }
 
     const int currentIndex = mIndex;
 
@@ -608,7 +619,10 @@ bool Exporter::update()
         updateLog();
 
         // export
-        exportImage(outImage, currentIndex);
+        if (!exportImage(outImage, currentIndex))
+        {
+            return false;
+        }
     }
 
     return true;
