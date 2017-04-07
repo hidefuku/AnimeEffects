@@ -52,8 +52,7 @@ void KeyOwner::createKey(
         XC_ASSERT(vtxCount > 0);
         key = new FFDKey();
         ownsKey = true;
-        key->data().alloc(vtxCount);
-        key->data().write(aLine.current().ffd().positions(), vtxCount);
+        key->data().allocAndWrite(aLine.current().ffd().positions(), vtxCount);
         parentKey = aAreaKey;
     }
 }

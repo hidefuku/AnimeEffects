@@ -840,19 +840,19 @@ void TimeKeyBlender::blendFFDKey(PositionType aPos, const TimeInfo& aTime)
     // no key is exists
     if (blend.isEmpty())
     {
-        expans.ffd().write(areaMesh->positions(), areaMesh->vertexCount());
+        expans.ffd().allocAndWrite(areaMesh->positions(), areaMesh->vertexCount());
     }
     else if (blend.hasSameFrame())
     {
         // a key is exists
         XC_ASSERT(blend.point(0).key->parent() == areaKey);
-        expans.ffd().write(((const FFDKey*)(blend.point(0).key))->data().positions(), areaMesh->vertexCount());
+        expans.ffd().allocAndWrite(((const FFDKey*)(blend.point(0).key))->data().positions(), areaMesh->vertexCount());
     }
     else if (blend.isSingle())
     {
         // perfect following
         XC_ASSERT(blend.singlePoint().key->parent() == areaKey);
-        expans.ffd().write(((const FFDKey*)(blend.singlePoint().key))->data().positions(), areaMesh->vertexCount());
+        expans.ffd().allocAndWrite(((const FFDKey*)(blend.singlePoint().key))->data().positions(), areaMesh->vertexCount());
     }
     else
     {

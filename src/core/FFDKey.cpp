@@ -24,10 +24,18 @@ void FFDKey::Data::alloc(int aVtxCount)
 
 void FFDKey::Data::write(const gl::Vector3* aSrc, int aVtxCount)
 {
-    XC_ASSERT(aVtxCount > 0);
-    const size_t newSize = sizeof(gl::Vector3) * aVtxCount;
+    XC_ASSERT(aVtxCount <= mVtxCount);
+    auto writeCount = aVtxCount <= mVtxCount ? aVtxCount : mVtxCount; // fail safe code
+    if (writeCount > 0)
+    {
+        memcpy(mBuffer.data(), aSrc, sizeof(gl::Vector3) * writeCount);
+    }
+}
+
+void FFDKey::Data::allocAndWrite(const gl::Vector3* aSrc, int aVtxCount)
+{
     alloc(aVtxCount);
-    memcpy(mBuffer.data(), aSrc, newSize);
+    write(aSrc, aVtxCount);
 }
 
 void FFDKey::Data::clear()
@@ -45,15 +53,11 @@ void FFDKey::Data::swap(QVector<gl::Vector3>& aRhs)
 
 gl::Vector3* FFDKey::Data::positions()
 {
-    XC_ASSERT(mVtxCount > 0);
-    XC_PTR_ASSERT(mBuffer.data());
     return mBuffer.data();
 }
 
 const gl::Vector3* FFDKey::Data::positions() const
 {
-    XC_ASSERT(mVtxCount > 0);
-    XC_PTR_ASSERT(mBuffer.data());
     return mBuffer.data();
 }
 
@@ -110,16 +114,16 @@ TimeKey* FFDKey::createClone()
 
 bool FFDKey::serialize(Serializer& aOut) const
 {
-    XC_PTR_ASSERT(mData.positions());
-    XC_ASSERT(mData.count() >= 0);
-
     // easing
     aOut.write(mData.easing());
 
     // vertex count
     aOut.write(mData.count());
     // positions
-    aOut.writeGL(mData.positions(), mData.count());
+    if (mData.count() > 0)
+    {
+        aOut.writeGL(mData.positions(), mData.count());
+    }
 
     return aOut.checkStream();
 }
@@ -137,11 +141,17 @@ bool FFDKey::deserialize(Deserializer& aIn)
     int count = 0;
     aIn.read(count);
 
-    // allocate
-    mData.alloc(count);
-
-    // positions
-    aIn.readGL(mData.positions(), mData.count());
+    if (count > 0)
+    {
+        // allocate
+        mData.alloc(count);
+        // positions
+        aIn.readGL(mData.positions(), mData.count());
+    }
+    else
+    {
+        mData.clear();
+    }
 
     aIn.popLogScope();
     return aIn.checkStream();

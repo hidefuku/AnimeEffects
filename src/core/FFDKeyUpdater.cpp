@@ -43,18 +43,29 @@ public:
                 continue;
             }
 
-            // calculate new ffd data
-            util::ArrayBlock<const gl::Vector3> posArray(
-                        ffdKey->data().positions(), ffdKey->data().count());
-            auto newFFD = transUnit->mesh->createFFD(posArray, transUnit->trans);
-            QScopedArrayPointer<gl::Vector3> newFFDScope(newFFD.array());
+            if (transUnit->mesh->vertexCount() > 0)
+            {
+                // calculate new ffd data
+                util::ArrayBlock<const gl::Vector3> posArray(
+                            ffdKey->data().positions(), ffdKey->data().count());
+                auto newFFD = transUnit->mesh->createFFD(posArray, transUnit->trans);
+                QScopedArrayPointer<gl::Vector3> newFFDScope(newFFD.array());
 
-            // append new ffd data to targets
-            mTargets.push_back(Target(ffdKey));
-            auto& target = mTargets.back();
-            target.pos.resize(newFFD.count());
-            memcpy(target.pos.data(), newFFD.array(),
-                   sizeof(gl::Vector3) * newFFD.count());
+                // append new ffd data to targets
+                mTargets.push_back(Target(ffdKey));
+                auto& target = mTargets.back();
+                target.pos.resize(newFFD.count());
+                if (newFFD.count() > 0)
+                {
+                    memcpy(target.pos.data(), newFFD.array(),
+                           sizeof(gl::Vector3) * newFFD.count());
+                }
+            }
+            else
+            {
+                // empty ffd
+                mTargets.push_back(Target(ffdKey));
+            }
         }
         mWorkspace.reset(); // finish using of workspace
 

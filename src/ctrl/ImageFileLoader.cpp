@@ -25,22 +25,13 @@ img::ResourceNode* createLayerResource(
         const img::PSDFormat::Layer& aLayer,
         const QString& aName, QRect& aInOutRect)
 {
-    using img::PSDFormat;
-    using img::PSDUtil;
-
-    const PSDUtil::ColorFormat colorFormat = PSDUtil::ColorFormat_RGBA8;
-
-    // get image
-    auto image = PSDUtil::makeInterleavedImage(aHeader, aLayer, colorFormat);
-
-    // modulate color bit
-    image = img::Util::recreateForBiLinearSampling(image, aInOutRect.size());
-    aInOutRect.moveTopLeft(aInOutRect.topLeft() + QPoint(-1, -1));
-    aInOutRect.setSize(aInOutRect.size() + QSize(2, 2));
+    // create texture image
+    auto imagePair = img::Util::createTextureImage(aHeader, aLayer);
+    aInOutRect = imagePair.second;
 
     // create resource
     auto resNode = new img::ResourceNode(aName);
-    resNode->data().grabImage(image, aInOutRect.size(), img::Format_RGBA8);
+    resNode->data().grabImage(imagePair.first, aInOutRect.size(), img::Format_RGBA8);
     resNode->data().setPos(aInOutRect.topLeft());
     resNode->data().setIsLayer(true);
     resNode->data().setBlendMode(img::getBlendModeFromPSD(aLayer.blendMode));

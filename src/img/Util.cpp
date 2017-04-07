@@ -224,6 +224,16 @@ std::pair<XCMemBlock, QRect> Util::createTextureImage(
         const PSDFormat::Header& aHeader,
         const PSDFormat::Layer& aLayer)
 {
+    // empty image
+    if (aLayer.rect.width() <= 0 || aLayer.rect.height() <= 0)
+    {
+        XCMemBlock block(new uint8[4], 4);
+        for (int i = 0; i < 4; ++i) block.data[i] = 0;
+
+        return std::pair<XCMemBlock, QRect>(
+                    block, QRect(aLayer.rect.left(), aLayer.rect.top(), 1, 1));
+    }
+
     // get image
     auto image = PSDUtil::makeInterleavedImage(
                 aHeader, aLayer, PSDUtil::ColorFormat_RGBA8);
@@ -242,6 +252,15 @@ std::pair<XCMemBlock, QRect> Util::createTextureImage(
 
 std::pair<XCMemBlock, QRect> Util::createTextureImage(const QImage& aImage)
 {
+    // empty image
+    if (aImage.width() <= 0 || aImage.height() <= 0)
+    {
+        XCMemBlock block(new uint8[4], 4);
+        for (int i = 0; i < 4; ++i) block.data[i] = 0;
+
+        return std::pair<XCMemBlock, QRect>(block, QRect(0, 0, 1, 1));
+    }
+
     const size_t length = (size_t)aImage.byteCount();
 
     XCMemBlock workImage;

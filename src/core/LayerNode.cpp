@@ -212,8 +212,8 @@ void LayerNode::renderClipper(
         const RenderInfo& aInfo, const TimeCacheAccessor& aAccessor, uint8 aClipperId)
 {
     if (!mIsVisible || !aInfo.clippingFrame) return;
+    if (!mCurrentMesh) return;
 
-    XC_PTR_ASSERT(mCurrentMesh);
     gl::Global::Functions& ggl = gl::Global::functions();
     auto& shader = mShaderHolder.clipperShader(aInfo.clippingId != 0);
     auto& expans = aAccessor.get(mTimeLine);
@@ -288,7 +288,7 @@ void LayerNode::transformShape(
 
     // current mesh
     LayerMesh* mesh = expans.ffdMesh();
-    if (mesh->vertexCount() <= 0) return;
+    if (!mesh || mesh->vertexCount() <= 0) return;
 
     // positions
     util::ArrayBlock<const gl::Vector3> positions;
@@ -300,6 +300,7 @@ void LayerNode::transformShape(
         if (expans.areaImageKey())
         {
             mesh = &(expans.areaImageKey()->data().gridMesh());
+            if (!mesh || mesh->vertexCount() <= 0) return;
         }
         positions = util::ArrayBlock<const gl::Vector3>(
                     mesh->positions(), mesh->vertexCount());

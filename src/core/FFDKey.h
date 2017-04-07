@@ -21,6 +21,7 @@ public:
         Data();
         void alloc(int aVtxCount);
         void write(const gl::Vector3* aSrc, int aVtxCount);
+        void allocAndWrite(const gl::Vector3* aSrc, int aVtxCount);
         void clear();
         void swap(QVector<gl::Vector3>& aRhs);
         util::Easing::Param& easing() { return mEasing; }

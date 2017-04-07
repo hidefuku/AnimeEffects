@@ -163,8 +163,6 @@ void GridMesh::initializeVertexBuffers(int aVertexCount)
 
 void GridMesh::createFromImage(const void* aImagePtr, const QSize& aSize, int aCellPx)
 {
-    XC_PTR_ASSERT(aImagePtr);
-    XC_ASSERT(aSize.width() > 0 && aSize.height() > 0);
     XC_ASSERT(aCellPx > 0);
 
     // free old buffers
@@ -173,7 +171,13 @@ void GridMesh::createFromImage(const void* aImagePtr, const QSize& aSize, int aC
     mSize = aSize;
     mCellPx = aCellPx;
 
-    if (aCellPx < aSize.width() - 2 || aCellPx < aSize.height() - 2)
+    if (!aImagePtr || aSize.isEmpty() || (aSize == QSize(1, 1) && *((uint32*)aImagePtr) == 0))
+    {
+        mVertexRect = QRect(QPoint(), QSize());
+        mVertexCount = 0;
+        mIndexCount = 0;
+    }
+    else if (aCellPx < aSize.width() - 2 || aCellPx < aSize.height() - 2)
     {
         createGridMesh(aImagePtr);
     }
@@ -334,6 +338,12 @@ util::ArrayBlock<gl::Vector3> GridMesh::createFFD(
 {
     XC_ASSERT(aTrans.data.count() > 0);
     XC_ASSERT(aTrans.data.count() == mVertexCount);
+
+    if (mVertexCount == 0 || aTrans.data.count() == 0)
+    {
+        return util::ArrayBlock<gl::Vector3>(nullptr, 0); // fail safe code
+    }
+
     auto count = aTrans.data.count();
     auto prev = aPrevFFD.array();
     auto prevCount = aPrevFFD.count();
@@ -623,16 +633,27 @@ GridMesh::TransitionCreater::TransitionCreater(const GridMesh& aPrev, const QPoi
     , mTopLeft(aTopLeft)
 {
     XC_ASSERT(aPrev.primitiveMode() == GL_TRIANGLES);
+    if (mIndexCount > 0)
+    {
+        mIndices.reset(new GLuint[mIndexCount]);
+        memcpy(mIndices.data(), aPrev.indices(), sizeof(GLuint) * mIndexCount);
+    }
     const int vertexCount = aPrev.vertexCount();
-    mIndices.reset(new GLuint[mIndexCount]);
-    mPositions.reset(new gl::Vector3[vertexCount]);
-    memcpy(mIndices.data(), aPrev.indices(), sizeof(GLuint) * mIndexCount);
-    memcpy(mPositions.data(), aPrev.positions(), sizeof(gl::Vector3) * vertexCount);
+    if (vertexCount > 0)
+    {
+        mPositions.reset(new gl::Vector3[vertexCount]);
+        memcpy(mPositions.data(), aPrev.positions(), sizeof(gl::Vector3) * vertexCount);
+    }
 }
 
 GridMesh::Transitions GridMesh::TransitionCreater::create(
         const gl::Vector3* aNext, int aCount, const QPoint& aTopLeft)
 {
+    if (mIndexCount == 0 || mPositions.isNull() || !aNext || aCount == 0)
+    {
+        return Transitions();
+    }
+
     XC_ASSERT(mIndices);
 
     const QRectF space(mRect);

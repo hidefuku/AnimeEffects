@@ -114,7 +114,10 @@ void Buffer::alloc(Format aFormat, const QSize& aSize)
     mHeight = aSize.height();
 
     mBlock.size = mChannelNum * mWidth * mHeight;
-    mBlock.data = new uint8[mBlock.size];
+    if (mBlock.size > 0)
+    {
+        mBlock.data = new uint8[mBlock.size];
+    }
 }
 
 void Buffer::free()
