@@ -339,10 +339,16 @@ void KeyAccessor::knockNewPose()
 {
     ASSERT_AND_RETURN_INVALID_TARGET();
     auto newKey = new core::PoseKey();
-    newKey->data() = currline().current().pose();
     core::BoneKey* parentKey = currline().current().bone().areaKey();
     XC_PTR_ASSERT(parentKey);
-    newKey->data().createBonesBy(*parentKey);
+    if (parentKey == (core::BoneKey*)currline().current().poseParent())
+    {
+        newKey->data() = currline().current().pose();
+    }
+    else
+    {
+        newKey->data().createBonesBy(*parentKey);
+    }
 
     ctrl::TimeLineUtil::pushNewPoseKey(*mProject, *mTarget, getFrame(), newKey, parentKey);
 }
