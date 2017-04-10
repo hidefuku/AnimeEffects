@@ -63,6 +63,7 @@ private:
     virtual void rowsInserted(const QModelIndex& aParent, int aStart, int aEnd);
     virtual void scrollContentsBy(int aDx, int aDy);
     virtual void resizeEvent(QResizeEvent* aEvent);
+    virtual void scrollTo(const QModelIndex& aIndex, ScrollHint aHint);
 
     void createTree(core::ObjectTree* aTree);
     void addItemRecursive(QTreeWidgetItem* aItem, core::ObjectNode* aNode);

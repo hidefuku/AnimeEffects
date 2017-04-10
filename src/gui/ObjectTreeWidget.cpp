@@ -913,4 +913,19 @@ void ObjectTreeWidget::resizeEvent(QResizeEvent* aEvent)
     onScrollUpdated(scrollHeight());
 }
 
+void ObjectTreeWidget::scrollTo(const QModelIndex& aIndex, ScrollHint aHint)
+{
+    // Avoided qt bug that QTreeView scroll incorrectly (in scrollTo, EnsureVisible).
+    if (aHint == ScrollHint::EnsureVisible)
+    {
+        auto view = this->viewport()->rect();
+        auto rect = this->visualRect(aIndex);
+        if (view.top() <= rect.top() && rect.bottom() <= view.bottom())
+        {
+            return; // nothing to do
+        }
+    }
+    QTreeWidget::scrollTo(aIndex, aHint);
+}
+
 } // namespace gui
