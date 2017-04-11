@@ -73,6 +73,7 @@ private:
     virtual void tabletEvent(QTabletEvent* event);
 
     void updateCursor();
+    QSize deviceSize() const { return this->size() * mDevicePixelRatio; }
 
     ViaPoint& mViaPoint;
     gl::DeviceInfo mGLDeviceInfo;
@@ -95,6 +96,7 @@ private:
     CanvasMover mCanvasMover;
     bool mMovingCanvasByTool;
     bool mMovingCanvasByKey;
+    double mDevicePixelRatio;
 };
 
 } // namespace gui

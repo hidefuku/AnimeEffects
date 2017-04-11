@@ -1,6 +1,7 @@
 #include <functional>
 #include <QMouseEvent>
 #include <QOpenGLFunctions>
+#include <QGuiApplication>
 #include "XC.h"
 #include "util/Finally.h"
 #include "gl/Util.h"
@@ -40,6 +41,7 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mCanvasMover()
     , mMovingCanvasByTool(false)
     , mMovingCanvasByKey(false)
+    , mDevicePixelRatio(1.0)
 {
 #ifdef USE_GL_CORE_PROFILE
     // setup opengl format
@@ -134,6 +136,7 @@ void MainDisplayWidget::setProject(core::Project* aProject)
     {
         mProject = aProject->pointee();
         mRenderInfo = &(static_cast<ProjectHook*>(mProject->hook())->renderInfo());
+        mRenderInfo->camera.setDevicePixelRatio(this->devicePixelRatioF());
         mRenderInfo->camera.setScreenSize(this->size());
         mRenderInfo->camera.setImageSize(mProject->attribute().imageSize());
         mCanvasMover.setCamera(&(mRenderInfo->camera));
@@ -221,16 +224,18 @@ void MainDisplayWidget::initializeGL()
     mDefaultVAO->bind(); // keep binding
 #endif
 
+    mDevicePixelRatio = this->devicePixelRatioF();
+
     // create framebuffer for display
-    mFramebuffer.reset(new QOpenGLFramebufferObject(this->size()));
+    mFramebuffer.reset(new QOpenGLFramebufferObject(deviceSize()));
 
     // create clipping buffer
     mClippingFrame.reset(new core::ClippingFrame());
-    mClippingFrame->resize(this->size());
+    mClippingFrame->resize(deviceSize());
 
     // create texturizer for destination colors of the framebuffer
     mDestinationTexturizer.reset(new core::DestinationTexturizer());
-    mDestinationTexturizer->resize(this->size());
+    mDestinationTexturizer->resize(deviceSize());
 
     // create texture drawer for copying framebuffer to display
     mTextureDrawer.reset(new gl::EasyTextureDrawer());
@@ -262,7 +267,7 @@ void MainDisplayWidget::paintGL()
     }
 
     // setup
-    gl::Util::setViewportAsActualPixels(this->size());
+    gl::Util::setViewportAsActualPixels(deviceSize());
     gl::Util::clearColorBuffer(0.25f, 0.25f, 0.25f, 1.0f);
     gl::Util::resetRenderState();
     GL_CHECK_ERROR();
@@ -342,25 +347,29 @@ void MainDisplayWidget::paintEvent(QPaintEvent* aEvent)
 
 void MainDisplayWidget::resizeGL(int w, int h)
 {
-    const QSize newSize(w, h);
+    // currrent device pixel ratio (Attention that it is variable.)
+    mDevicePixelRatio = this->devicePixelRatioF();
+    const QSize devSize(mDevicePixelRatio * w, mDevicePixelRatio * h); // device pixel size
+    const QSize absSize(w, h); // abstract pixel size
 
     if (mRenderInfo)
     {
-        mRenderInfo->camera.setScreenSize(newSize);
+        mRenderInfo->camera.setDevicePixelRatio(mDevicePixelRatio);
+        mRenderInfo->camera.setScreenSize(absSize);
         mCanvasMover.onScreenResized();
     }
     mFramebuffer.reset();
-    mFramebuffer.reset(new QOpenGLFramebufferObject(w, h));
+    mFramebuffer.reset(new QOpenGLFramebufferObject(devSize.width(), devSize.height()));
 
     mClippingFrame.reset();
     mClippingFrame.reset(new core::ClippingFrame());
-    mClippingFrame->resize(newSize);
+    mClippingFrame->resize(devSize);
 
-    mDestinationTexturizer->resize(newSize);
+    mDestinationTexturizer->resize(devSize);
 
     if (mProjectTabBar)
     {
-        mProjectTabBar->updateTabPosition(newSize);
+        mProjectTabBar->updateTabPosition(absSize);
     }
     GL_CHECK_ERROR();
 }

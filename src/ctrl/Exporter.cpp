@@ -568,7 +568,7 @@ bool Exporter::update()
 
     // render
     core::RenderInfo renderInfo;
-    renderInfo.camera.reset(originSize, originSize, QPoint());
+    renderInfo.camera.reset(originSize, 1.0, originSize, QPoint());
     renderInfo.time = timeInfo;
     renderInfo.framebuffer = mFramebuffers.front()->handle();
     renderInfo.dest = mFramebuffers.front()->texture();

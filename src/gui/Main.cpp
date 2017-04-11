@@ -102,6 +102,7 @@ int entryPoint(int argc, char *argv[])
     // create qt application
     QApplication app(argc, argv);
     XC_DEBUG_REPORT() << "exe path =" << app.applicationFilePath();
+    app.setAttribute(Qt::AA_UseHighDpiPixmaps);
 
     // application path
 #if defined(Q_OS_MAC)

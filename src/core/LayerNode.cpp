@@ -248,7 +248,7 @@ void LayerNode::renderClipper(
         shader.setAttributeArray("inTexCoord", mCurrentMesh->texCoords(), mCurrentMesh->vertexCount());
 
         shader.setUniformValue("uViewMatrix", viewMatrix);
-        shader.setUniformValue("uScreenSize", QSizeF(aInfo.camera.screenSize()));
+        shader.setUniformValue("uScreenSize", QSizeF(aInfo.camera.deviceScreenSize()));
         shader.setUniformValue("uImageSize", QSizeF(textureSize));
         shader.setUniformValue("uTexCoordOffset", texCoordOffset);
         shader.setUniformValue("uColor", color);
@@ -388,7 +388,7 @@ void LayerNode::renderShape(
         shader.setAttributeArray("inTexCoord", mCurrentMesh->texCoords(), mCurrentMesh->vertexCount());
 
         shader.setUniformValue("uViewMatrix", viewMatrix);
-        shader.setUniformValue("uScreenSize", QSizeF(aInfo.camera.screenSize()));
+        shader.setUniformValue("uScreenSize", QSizeF(aInfo.camera.deviceScreenSize()));
         shader.setUniformValue("uImageSize", QSizeF(textureSize));
         shader.setUniformValue("uTexCoordOffset", texCoordOffset);
         shader.setUniformValue("uColor", color);
