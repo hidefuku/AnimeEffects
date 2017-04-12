@@ -149,7 +149,7 @@ private:
 
     CommonParam mCommonParam;
     ImageParam mImageParam;
-    QByteArray mVideoInCodec;
+    const char* mVideoInCodec;
     int mVideoInCodecQuality;
     bool mVideoExporting;
 

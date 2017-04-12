@@ -366,29 +366,29 @@ Exporter::Result Exporter::execute(const CommonParam& aCommon, const VideoParam&
         mVideoInCodecQuality = -1;
         if (videoCodec.icodec == "png")
         {
-            mVideoInCodec = QString("PNG").toLatin1();
+            mVideoInCodec = "PNG";
             mVideoInCodecQuality = 90;
         }
         else if (videoCodec.icodec == "ppm")
         {
-            mVideoInCodec = QString("PPM").toLatin1();
+            mVideoInCodec = "PPM";
         }
         else if (videoCodec.icodec == "jpg")
         {
-            mVideoInCodec = QString("JPG").toLatin1();
+            mVideoInCodec = "JPG";
         }
         else if (videoCodec.icodec == "jpeg")
         {
-            mVideoInCodec = QString("JPEG").toLatin1();
+            mVideoInCodec = "JPEG";
         }
         else if (videoCodec.icodec == "bmp")
         {
-            mVideoInCodec = QString("BMP").toLatin1();
+            mVideoInCodec = "BMP";
         }
         else
         {
             videoCodec.icodec = "png";
-            mVideoInCodec = QString("PNG").toLatin1();
+            mVideoInCodec = "PNG";
             mVideoInCodecQuality = 90;
         }
 
@@ -642,7 +642,7 @@ bool Exporter::exportImage(const QImage& aFboImage, int aIndex)
         QByteArray byteArray;
         QBuffer buffer(&byteArray);
         buffer.open(QIODevice::ReadWrite);
-        aFboImage.save(&buffer, mVideoInCodec.data(), mVideoInCodecQuality);
+        aFboImage.save(&buffer, mVideoInCodec, mVideoInCodecQuality);
         //aFboImage.save(&buffer, "PPM");
         buffer.close();
         mFFMpeg.write(byteArray);
