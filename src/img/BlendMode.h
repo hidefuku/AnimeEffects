@@ -38,6 +38,8 @@ enum BlendMode
 
 BlendMode getBlendModeFromPSD(const std::string& aPSDMode);
 
+QString getBlendFuncNameFromBlendMode(BlendMode aMode);
+
 QString getBlendNameFromBlendMode(BlendMode aMode);
 
 QString getQuadIdFromBlendMode(BlendMode aMode);
