@@ -13,5 +13,6 @@ Note: For the present, there may be incompatible changes without notice in advan
 
 ## Runtime Requirements
 * OpenGL4.0 CoreProfile or later
+  * On linux, you can check whether your graphics card supports OpenGL4.0 CoreProfile or not, run `glxinfo | grep "OpenGL core profile version"` on your terminal
 * FFmpeg (Please install ffmpeg on your own for video exporting, you can also place a ffmpeg executable in /tools.)
 
