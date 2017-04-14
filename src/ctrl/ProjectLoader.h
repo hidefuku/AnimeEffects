@@ -2,6 +2,7 @@
 #define CTRL_PROJECTLOADER_H
 
 #include <QStringList>
+#include <QVersionNumber>
 #include "util/StreamReader.h"
 #include "util/IProgressReporter.h"
 #include "gl/DeviceInfo.h"
@@ -26,6 +27,7 @@ private:
     bool readHeader(util::LEStreamReader& aReader);
     bool readGlobalBlock(util::LEStreamReader& aReader, core::Project& aProject);
     QStringList mLog;
+    QVersionNumber mVersion;
 };
 
 } // namespace ctrl

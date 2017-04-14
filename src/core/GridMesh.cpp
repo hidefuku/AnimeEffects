@@ -547,6 +547,9 @@ bool GridMesh::serialize(Serializer& aOut) const
         aOut.write(XCMemBlock((uint8*)mHexaConnections.data(), connectSize));
     }
 
+    // vertex rect
+    aOut.write(mVertexRect);
+
     aOut.endBlock(pos);
 
     return !aOut.failure();
@@ -611,6 +614,28 @@ bool GridMesh::deserialize(Deserializer& aIn)
             return aIn.errored("failed to read connections");
         }
     }
+
+    // vertex rect
+    if (aIn.version() >= QVersionNumber(0, 5))
+    {
+        aIn.read(mVertexRect);
+    }
+    else
+    {
+        // note: the bug on version 0.4 or lower. mVertexRect doesn't be serialized.
+        auto positions = mPositions.data();
+        float l, t, r, b = 0.0f;
+        for (int i = 0; i < mVertexCount; ++i)
+        {
+            auto pos = positions[i];
+            l = std::min(l, pos.x - 1);
+            t = std::min(t, pos.y - 1);
+            r = std::max(r, pos.x + 1);
+            b = std::max(b, pos.y + 1);
+        }
+        mVertexRect = QRect(l, t, r - l, b - t);
+    }
+
     // initialize mesh buffer
     getMeshBuffer();
 

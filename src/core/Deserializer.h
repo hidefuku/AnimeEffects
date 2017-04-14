@@ -12,6 +12,7 @@
 #include <QMatrix4x4>
 #include <QPolygonF>
 #include <QGL>
+#include <QVersionNumber>
 #include "XC.h"
 #include "util/Segment2D.h"
 #include "util/Easing.h"
@@ -37,9 +38,12 @@ public:
             util::LEStreamReader& aIn,
             IDSolverType& aSolver,
             size_t aMaxFileSize,
+            QVersionNumber aVersion,
             const gl::DeviceInfo& aGLDeviceInfo,
             util::IProgressReporter& aRepoter,
             int aRShiftCount);
+
+    QVersionNumber version() const { return mVersion; }
 
     void read(bool& aValue);
     void read(int& aValue);
@@ -124,6 +128,7 @@ private:
     QStringList mLog;
     QString mValue;
     size_t mMaxFileSize;
+    QVersionNumber mVersion;
     gl::DeviceInfo mGLDeviceInfo;
     util::IProgressReporter& mReporter;
     int mRShiftCount;

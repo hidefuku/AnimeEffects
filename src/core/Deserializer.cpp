@@ -9,6 +9,7 @@ Deserializer::Deserializer(
         util::LEStreamReader& aIn,
         IDSolverType& aSolver,
         size_t aMaxFileSize,
+        QVersionNumber aVersion,
         const gl::DeviceInfo& aGLDeviceInfo,
         util::IProgressReporter& aReporter,
         int aRShiftCount)
@@ -19,6 +20,7 @@ Deserializer::Deserializer(
     , mLog()
     , mValue()
     , mMaxFileSize(aMaxFileSize)
+    , mVersion(aVersion)
     , mGLDeviceInfo(aGLDeviceInfo)
     , mReporter(aReporter)
     , mRShiftCount(aRShiftCount)

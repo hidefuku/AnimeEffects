@@ -8,6 +8,7 @@ namespace ctrl
 
 ProjectLoader::ProjectLoader()
     : mLog()
+    , mVersion()
 {
 }
 
@@ -60,8 +61,8 @@ bool ProjectLoader::load(
 
     core::Deserializer::IDSolverType idSolver;
     core::Deserializer deserializer(
-                in, idSolver, maxFileSize, aGLDeviceInfo,
-                aReporter, rShiftCount);
+                in, idSolver, maxFileSize, mVersion,
+                aGLDeviceInfo, aReporter, rShiftCount);
     deserializer.reportCurrent();
 
     // resources block
@@ -143,6 +144,8 @@ bool ProjectLoader::readHeader(util::LEStreamReader& aIn)
         mLog.push_back("The file has a version defined later than this executable.");
         return false;
     }
+
+    mVersion = QVersionNumber(majorVersion, minorVersion);
 
     // reserved
     if (!aIn.skipZeroArea(16)) return false;
