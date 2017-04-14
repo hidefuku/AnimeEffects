@@ -1,5 +1,6 @@
 #include <QtMath>
 #include "util/Easing.h"
+#include "util/EasingName.h"
 
 namespace util
 {
@@ -24,29 +25,29 @@ QString Easing::getTypeName(Type aType)
     switch (aType)
     {
     case Type_None:
-        return "None";
+        return EasingName::tr("None");
     case Type_Linear:
-        return "Linear";
+        return EasingName::tr("Linear");
     case Type_Sine:
-        return "Sine";
+        return EasingName::tr("Sine");
     case Type_Quad:
-        return "Quad";
+        return EasingName::tr("Quad");
     case Type_Cubic:
-        return "Cubic";
+        return EasingName::tr("Cubic");
     case Type_Quart:
-        return "Quart";
+        return EasingName::tr("Quart");
     case Type_Quint:
-        return "Quint";
+        return EasingName::tr("Quint");
     case Type_Expo:
-        return "Expo";
+        return EasingName::tr("Expo");
     case Type_Circ:
-        return "Circ";
+        return EasingName::tr("Circ");
     case Type_Back:
-        return "Back";
+        return EasingName::tr("Back");
     case Type_Elastic:
-        return "Elastic";
+        return EasingName::tr("Elastic");
     case Type_Bounce:
-        return "Bounce";
+        return EasingName::tr("Bounce");
     default:
         return "";
     }

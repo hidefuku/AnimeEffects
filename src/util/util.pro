@@ -27,7 +27,8 @@ SOURCES += \
     Dir4.cpp \
     Easing.cpp \
     TriangleRasterizer.cpp \
-    ByteBuffer.cpp
+    ByteBuffer.cpp \
+    EasingName.cpp
 
 HEADERS += \
     Signaler.h \
@@ -69,4 +70,5 @@ HEADERS += \
     TriangleRasterizer.h \
     DealtList.h \
     ByteBuffer.h \
-    ArrayBuffer.h
+    ArrayBuffer.h \
+    EasingName.h

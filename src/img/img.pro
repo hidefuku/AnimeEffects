@@ -33,7 +33,8 @@ SOURCES += \
     BlendMode.cpp \
     GridMeshCreator.cpp \
     ResourceData.cpp \
-    ResourceHandle.cpp
+    ResourceHandle.cpp \
+    BlendModeName.cpp
 
 HEADERS += \
     Buffer.h \
@@ -50,4 +51,5 @@ HEADERS += \
     ColorRGBA.h \
     BlendMode.h \
     GridMeshCreator.h \
-    ResourceData.h
+    ResourceData.h \
+    BlendModeName.h

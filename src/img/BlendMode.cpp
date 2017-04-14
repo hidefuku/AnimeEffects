@@ -1,4 +1,5 @@
 #include "img/BlendMode.h"
+#include "img/BlendModeName.h"
 
 namespace img
 {
@@ -29,7 +30,7 @@ BlendMode getBlendModeFromPSD(const std::string& aMode)
     return BlendMode_TERM;
 }
 
-QString getBlendNameFromBlendMode(BlendMode aMode)
+QString getBlendFuncNameFromBlendMode(BlendMode aMode)
 {
     switch (aMode)
     {
@@ -54,6 +55,34 @@ QString getBlendNameFromBlendMode(BlendMode aMode)
     case BlendMode_Subtract:    return "Subtract";
     case BlendMode_Divide:      return "Divide";
     default:                    return "Normal";
+    }
+}
+
+QString getBlendNameFromBlendMode(BlendMode aMode)
+{
+    switch (aMode)
+    {
+    case BlendMode_Normal:      return BlendModeName::tr("Normal");
+    case BlendMode_Darken:      return BlendModeName::tr("Darken");
+    case BlendMode_Multiply:    return BlendModeName::tr("Multiply");
+    case BlendMode_ColorBurn:   return BlendModeName::tr("ColorBurn");
+    case BlendMode_LinearBurn:  return BlendModeName::tr("LinearBurn");
+    case BlendMode_Lighten:     return BlendModeName::tr("Lighten");
+    case BlendMode_Screen:      return BlendModeName::tr("Screen");
+    case BlendMode_ColorDodge:  return BlendModeName::tr("ColorDodge");
+    case BlendMode_LinearDodge: return BlendModeName::tr("LinearDodge");
+    case BlendMode_Overlay:     return BlendModeName::tr("Overlay");
+    case BlendMode_SoftLight:   return BlendModeName::tr("SoftLight");
+    case BlendMode_HardLight:   return BlendModeName::tr("HardLight");
+    case BlendMode_VividLight:  return BlendModeName::tr("VividLight");
+    case BlendMode_LinearLight: return BlendModeName::tr("LinearLight");
+    case BlendMode_PinLight:    return BlendModeName::tr("PinLight");
+    case BlendMode_HardMix:     return BlendModeName::tr("HardMix");
+    case BlendMode_Difference:  return BlendModeName::tr("Difference");
+    case BlendMode_Exclusion:   return BlendModeName::tr("Exclusion");
+    case BlendMode_Subtract:    return BlendModeName::tr("Subtract");
+    case BlendMode_Divide:      return BlendModeName::tr("Divide");
+    default:                    return BlendModeName::tr("Normal");
     }
 }
 

@@ -46,7 +46,7 @@ gl::EasyShaderProgram& ShaderHolder::reserveShader(img::BlendMode aBlendMode, bo
                            source.log());
         }
 
-        auto blendFunc = QString("Blend") + img::getBlendNameFromBlendMode(aBlendMode);
+        auto blendFunc = QString("Blend") + img::getBlendFuncNameFromBlendMode(aBlendMode);
         source.setVariationValue("BLEND_FUNC", blendFunc);
 
         source.setVariationValue("IS_CLIPPEE", aIsClippee ? "1" : "0");
