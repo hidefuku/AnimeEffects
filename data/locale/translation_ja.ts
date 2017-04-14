@@ -443,6 +443,69 @@
     </message>
 </context>
 <context>
+    <name>EasingName</name>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="28"/>
+        <source>None</source>
+        <translation>なし</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="30"/>
+        <source>Linear</source>
+        <translation>リニア</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="32"/>
+        <source>Sine</source>
+        <translation>正弦曲線</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="34"/>
+        <source>Quad</source>
+        <translation>二次式</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="36"/>
+        <source>Cubic</source>
+        <translation>三次式</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="38"/>
+        <source>Quart</source>
+        <translation>四次式</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="40"/>
+        <source>Quint</source>
+        <translation>五次式</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="42"/>
+        <source>Expo</source>
+        <translation>指数</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="44"/>
+        <source>Circ</source>
+        <translation>円形</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="46"/>
+        <source>Back</source>
+        <translation>後</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="48"/>
+        <source>Elastic</source>
+        <translation>ゴム状</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="50"/>
+        <source>Bounce</source>
+        <translation>バウンス</translation>
+    </message>
+</context>
+<context>
     <name>ctrl::UILog</name>
     <message>
         <location filename="../../src/ctrl/BoneEditor.cpp" line="45"/>
