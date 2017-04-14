@@ -194,7 +194,7 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
         {
             QMessageBox msgBox;
             msgBox.setIcon(QMessageBox::Information);
-            auto versionString = QString::number(AE_MAJOR_VERSION) + "." + QString::number(AE_MINOR_VERSION);
+            auto versionString = QString::number(AE_MAJOR_VERSION) + "." + QString::number(AE_MINOR_VERSION) + "." + QString::number(AE_MICRO_VERSION);
             auto formatVersionString = QString::number(AE_PROJECT_FORMAT_MAJOR_VERSION) + "." + QString::number(AE_PROJECT_FORMAT_MINOR_VERSION);
             auto platform = QSysInfo::productType();
             msgBox.setText(QString("AnimeEffects for ") + platform + " version " + versionString);
