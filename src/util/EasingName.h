@@ -1,7 +1,10 @@
-#ifndef EASINGNAME_H
-#define EASINGNAME_H
+#ifndef UTIL_EASINGNAME_H
+#define UTIL_EASINGNAME_H
 
 #include <QObject>
+
+namespace util
+{
 
 class EasingName : public QObject
 {
@@ -10,4 +13,6 @@ public:
     EasingName();
 };
 
-#endif // EASINGNAME_H
+} // namespace util
+
+#endif // UTIL_EASINGNAME_H

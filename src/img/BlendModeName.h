@@ -1,7 +1,10 @@
-#ifndef BLENDMODENAME_H
-#define BLENDMODENAME_H
+#ifndef IMG_BLENDMODENAME_H
+#define IMG_BLENDMODENAME_H
 
 #include <QObject>
+
+namespace img
+{
 
 class BlendModeName : public QObject
 {
@@ -10,4 +13,6 @@ public:
     BlendModeName();
 };
 
-#endif // BLENDMODENAME_H
+} // namespace img
+
+#endif // IMG_BLENDMODENAME_H

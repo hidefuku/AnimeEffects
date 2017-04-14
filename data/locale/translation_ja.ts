@@ -2,110 +2,6 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ja_JP">
 <context>
-    <name>BlendModeName</name>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="65"/>
-        <location filename="../../src/img/BlendMode.cpp" line="85"/>
-        <source>Normal</source>
-        <translation>ミックス</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="66"/>
-        <source>Darken</source>
-        <translation>比較（暗）</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="67"/>
-        <source>Multiply</source>
-        <translation>乗算</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="68"/>
-        <source>ColorBurn</source>
-        <translation>焼き込みカラー</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="69"/>
-        <source>LinearBurn</source>
-        <translation>焼き込み（リニア）</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="70"/>
-        <source>Lighten</source>
-        <translation>比較（明）</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="71"/>
-        <source>Screen</source>
-        <translation>スクリーン</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="72"/>
-        <source>ColorDodge</source>
-        <translation>覆い焼きカラー</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="73"/>
-        <source>LinearDodge</source>
-        <translation>覆い焼き（リニア）</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="74"/>
-        <source>Overlay</source>
-        <translation>オーバーレイ</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="75"/>
-        <source>SoftLight</source>
-        <translation>ソフトライト</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="76"/>
-        <source>HardLight</source>
-        <translation>ハードライト</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="77"/>
-        <source>VividLight</source>
-        <translation>ビビッドライト</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="78"/>
-        <source>LinearLight</source>
-        <translation>リニアライト</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="79"/>
-        <source>PinLight</source>
-        <translation>ピンライト</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="80"/>
-        <source>HardMix</source>
-        <translation>ハードミックス</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="81"/>
-        <source>Difference</source>
-        <translation>差の絶対値</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="82"/>
-        <source>Exclusion</source>
-        <translation>除外</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="83"/>
-        <source>Subtract</source>
-        <translation>減算</translation>
-    </message>
-    <message>
-        <location filename="../../src/img/BlendMode.cpp" line="84"/>
-        <source>Divide</source>
-        <translation>除算</translation>
-    </message>
-</context>
-<context>
     <name>CmndName</name>
     <message>
         <location filename="../../src/ctrl/TimeLineUtil.cpp" line="223"/>
@@ -440,69 +336,6 @@
         <location filename="../../src/ctrl/pose/pose_ErasePoseMode.cpp" line="101"/>
         <source>erase a pose</source>
         <translation>ポーズを消す</translation>
-    </message>
-</context>
-<context>
-    <name>EasingName</name>
-    <message>
-        <location filename="../../src/util/Easing.cpp" line="28"/>
-        <source>None</source>
-        <translation>なし</translation>
-    </message>
-    <message>
-        <location filename="../../src/util/Easing.cpp" line="30"/>
-        <source>Linear</source>
-        <translation>リニア</translation>
-    </message>
-    <message>
-        <location filename="../../src/util/Easing.cpp" line="32"/>
-        <source>Sine</source>
-        <translation>正弦曲線</translation>
-    </message>
-    <message>
-        <location filename="../../src/util/Easing.cpp" line="34"/>
-        <source>Quad</source>
-        <translation>二次式</translation>
-    </message>
-    <message>
-        <location filename="../../src/util/Easing.cpp" line="36"/>
-        <source>Cubic</source>
-        <translation>三次式</translation>
-    </message>
-    <message>
-        <location filename="../../src/util/Easing.cpp" line="38"/>
-        <source>Quart</source>
-        <translation>四次式</translation>
-    </message>
-    <message>
-        <location filename="../../src/util/Easing.cpp" line="40"/>
-        <source>Quint</source>
-        <translation>五次式</translation>
-    </message>
-    <message>
-        <location filename="../../src/util/Easing.cpp" line="42"/>
-        <source>Expo</source>
-        <translation>指数</translation>
-    </message>
-    <message>
-        <location filename="../../src/util/Easing.cpp" line="44"/>
-        <source>Circ</source>
-        <translation>円形</translation>
-    </message>
-    <message>
-        <location filename="../../src/util/Easing.cpp" line="46"/>
-        <source>Back</source>
-        <translation>後</translation>
-    </message>
-    <message>
-        <location filename="../../src/util/Easing.cpp" line="48"/>
-        <source>Elastic</source>
-        <translation>ゴム状</translation>
-    </message>
-    <message>
-        <location filename="../../src/util/Easing.cpp" line="50"/>
-        <source>Bounce</source>
-        <translation>バウンス</translation>
     </message>
 </context>
 <context>
@@ -1890,6 +1723,173 @@
         <location filename="../../src/gui/tool/tool_SRTPanel.cpp" line="67"/>
         <source>Adjust position value so as not to change current posture.</source>
         <translation>現在の姿勢を変えないよう位置の値を調整する</translation>
+    </message>
+</context>
+<context>
+    <name>img::BlendModeName</name>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="65"/>
+        <location filename="../../src/img/BlendMode.cpp" line="85"/>
+        <source>Normal</source>
+        <translation>通常</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="66"/>
+        <source>Darken</source>
+        <translation>比較（暗）</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="67"/>
+        <source>Multiply</source>
+        <translation>乗算</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="68"/>
+        <source>ColorBurn</source>
+        <translation>焼き込みカラー</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="69"/>
+        <source>LinearBurn</source>
+        <translation>焼き込み（リニア）</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="70"/>
+        <source>Lighten</source>
+        <translation>比較（明）</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="71"/>
+        <source>Screen</source>
+        <translation>スクリーン</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="72"/>
+        <source>ColorDodge</source>
+        <translation>覆い焼きカラー</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="73"/>
+        <source>LinearDodge</source>
+        <translation>覆い焼き（リニア）</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="74"/>
+        <source>Overlay</source>
+        <translation>オーバーレイ</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="75"/>
+        <source>SoftLight</source>
+        <translation>ソフトライト</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="76"/>
+        <source>HardLight</source>
+        <translation>ハードライト</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="77"/>
+        <source>VividLight</source>
+        <translation>ビビッドライト</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="78"/>
+        <source>LinearLight</source>
+        <translation>リニアライト</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="79"/>
+        <source>PinLight</source>
+        <translation>ピンライト</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="80"/>
+        <source>HardMix</source>
+        <translation>ハードミックス</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="81"/>
+        <source>Difference</source>
+        <translation>差の絶対値</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="82"/>
+        <source>Exclusion</source>
+        <translation>除外</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="83"/>
+        <source>Subtract</source>
+        <translation>減算</translation>
+    </message>
+    <message>
+        <location filename="../../src/img/BlendMode.cpp" line="84"/>
+        <source>Divide</source>
+        <translation>除算</translation>
+    </message>
+</context>
+<context>
+    <name>util::EasingName</name>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="28"/>
+        <source>None</source>
+        <translation>なし</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="30"/>
+        <source>Linear</source>
+        <translation>リニア</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="32"/>
+        <source>Sine</source>
+        <translation>正弦曲線</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="34"/>
+        <source>Quad</source>
+        <translation>二次式</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="36"/>
+        <source>Cubic</source>
+        <translation>三次式</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="38"/>
+        <source>Quart</source>
+        <translation>四次式</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="40"/>
+        <source>Quint</source>
+        <translation>五次式</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="42"/>
+        <source>Expo</source>
+        <translation>指数</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="44"/>
+        <source>Circ</source>
+        <translation>円形</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="46"/>
+        <source>Back</source>
+        <translation>バック</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="48"/>
+        <source>Elastic</source>
+        <translation>ゴム状</translation>
+    </message>
+    <message>
+        <location filename="../../src/util/Easing.cpp" line="50"/>
+        <source>Bounce</source>
+        <translation>バウンス</translation>
     </message>
 </context>
 </TS>
