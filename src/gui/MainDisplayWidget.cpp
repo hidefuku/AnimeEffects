@@ -428,7 +428,26 @@ void MainDisplayWidget::wheelEvent(QWheelEvent* aEvent)
 
 void MainDisplayWidget::tabletEvent(QTabletEvent* aEvent)
 {
+    /// Tablet behavior is difference between mac and windows. It's Qt's bug?
+    /// In windows, Duplicate mouse events occur while operating a tablet.
+#ifdef Q_OS_MAC
+    if (mRenderInfo)
+    {
+        if (mAbstractCursor.setTabledEvent(aEvent, mRenderInfo->camera))
+        {
+            updateCursor();
+        }
+    }
+    if (mCanvasMover.updateByMove(mAbstractCursor.screenPos(),
+                                  mAbstractCursor.screenVel(),
+                                  mAbstractCursor.isPressedLeft(),
+                                  mAbstractCursor.isPressedRight()))
+    {
+        updateRender();
+    }
+#else
     mAbstractCursor.setTabletPressure(aEvent);
+#endif
     aEvent->accept();
 }
 

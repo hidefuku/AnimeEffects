@@ -40,7 +40,13 @@ public:
     /// @}
 
     /// tablet event
+    /// Tablet behavior is difference between mac and windows. It's Qt's bug?
+    /// In windows, Duplicate mouse events occur while operating a tablet.
+#ifdef Q_OS_MAC
+    bool setTabledEvent(QTabletEvent* aEvent, const CameraInfo& aCameraInfo);
+#else
     void setTabletPressure(QTabletEvent* aEvent);
+#endif
 
     void suspendEvent(const std::function<void()>& aEventReflector);
     void resumeEvent();
@@ -69,6 +75,10 @@ public:
     bool emitsPressedEvent() const;
 
 private:
+    bool setMousePressImpl(Qt::MouseButton aButton, QPoint aPos, const CameraInfo& aCameraInfo);
+    bool setMouseMoveImpl(Qt::MouseButton aButton, QPoint aPos, const CameraInfo& aCameraInfo);
+    bool setMouseReleaseImpl(Qt::MouseButton aButton, QPoint aPos, const CameraInfo& aCameraInfo);
+
     Event mEventType;
     Button mEventButton;
     std::array<bool, Button_TERM> mIsPressed;
