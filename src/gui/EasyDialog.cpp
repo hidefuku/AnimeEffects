@@ -8,7 +8,7 @@ namespace gui
 {
 
 EasyDialog::EasyDialog(const QString& aTitle, QWidget* aParent, bool aIsModal)
-    : QDialog(aParent)
+    : QDialog(aParent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint)
     , mLayout()
     , mOk()
 {
