@@ -1004,8 +1004,8 @@
     <name>gui::ResourceDialog</name>
     <message>
         <location filename="../../src/gui/ResourceDialog.cpp" line="18"/>
-        <source>Resource Dialog</source>
-        <translation>リソースダイアログ</translation>
+        <source>Resource Window</source>
+        <translation>リソースウィンドウ</translation>
     </message>
     <message>
         <location filename="../../src/gui/ResourceDialog.cpp" line="27"/>
@@ -1479,7 +1479,7 @@
     </message>
     <message>
         <location filename="../../src/gui/tool/tool_BonePanel.cpp" line="37"/>
-        <source>Bind Nodes</source>
+        <source>Bind Objects</source>
         <translation>オブジェクトを結びつける</translation>
     </message>
     <message>

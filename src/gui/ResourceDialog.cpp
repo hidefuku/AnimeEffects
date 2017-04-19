@@ -15,7 +15,7 @@ namespace gui
 {
 
 ResourceDialog::ResourceDialog(ViaPoint& aViaPoint, bool aModal, QWidget* aParent)
-    : EasyDialog(tr("Resource Dialog"), aParent, aModal)
+    : EasyDialog(tr("Resource Window"), aParent, aModal)
     , mViaPoint(aViaPoint)
     , mProject()
     , mTree()

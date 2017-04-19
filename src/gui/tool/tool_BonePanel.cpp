@@ -34,7 +34,7 @@ void BonePanel::createMode()
                             tr("Add Bones") <<
                             tr("Remove Bones") <<
                             tr("Move Joints") <<
-                            tr("Bind Nodes") <<
+                            tr("Bind Objects") <<
                             tr("Adjust Influence") <<
                             tr("Paint Influence") <<
                             tr("Erase Influence"));
