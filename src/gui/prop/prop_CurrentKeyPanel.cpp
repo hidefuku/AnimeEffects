@@ -106,6 +106,7 @@ RotateKeyGroup::RotateKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabel
     , mRotate()
     , mKeyExists(false)
 {
+    using util::MathUtil;
     mKnocker = new KeyKnocker(tr("Rotate"));
     mKnocker->set([=](){ this->mAccessor.knockNewRotate(); this->makeSureExpand(); });
     aPanel.addGroup(mKnocker);
@@ -123,10 +124,11 @@ RotateKeyGroup::RotateKeyGroup(Panel& aPanel, KeyAccessor& aAccessor, int aLabel
 
         // rotate
         mRotate = new DecimalItem(this);
-        mRotate->setRange(core::Constant::rotateMin(), core::Constant::rotateMax());
+        mRotate->setRange(MathUtil::getDegreeFromRadian(core::Constant::rotateMin()),
+                          MathUtil::getDegreeFromRadian(core::Constant::rotateMax()));
         mRotate->onValueUpdated = [=](double, double aNext)
         {
-            this->mAccessor.assignRotateAngle(aNext);
+            this->mAccessor.assignRotateAngle(MathUtil::getRadianFromDegree(aNext));
         };
         this->addItem(tr("angle :"), mRotate);
     }
@@ -152,7 +154,7 @@ void RotateKeyGroup::setKeyValue(const core::TimeKey* aKey)
     TIMEKEY_PTR_TYPE_ASSERT(aKey, Rotate);
     const core::RotateKey::Data data = ((const core::RotateKey*)aKey)->data();
     mEasing->setValue(data.easing(), false);
-    mRotate->setValue(data.rotate());
+    mRotate->setValue(util::MathUtil::getDegreeFromRadian(data.rotate()));
 }
 
 bool RotateKeyGroup::keyExists() const
