@@ -304,10 +304,11 @@ bool TimeLineEditor::modifyMoveKeys(const QPoint& aWorldPos)
         TimeLineEvent modEvent;
 
         mOnUpdatingKey = true;
-        if (mMoveRef->modifyMove(modEvent, addFrame, util::Range(0, mTimeMax)))
+        int clampedAdd = addFrame;
+        if (mMoveRef->modifyMove(modEvent, addFrame, util::Range(0, mTimeMax), &clampedAdd))
         {
             mMoveFrame = newFrame;
-            mFocus.moveBoundingRect(addFrame);
+            mFocus.moveBoundingRect(clampedAdd);
             mProject->onTimeLineModified(modEvent, false);
         }
         mOnUpdatingKey = false;

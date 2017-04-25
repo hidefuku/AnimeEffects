@@ -17,69 +17,125 @@ namespace TimeLineUtil
 {
 
 //---------------------------------------------------------------------------------------
-MoveFrameOfKey::MoveFrameOfKey(TimeLineEvent& aCommandEvent)
-    : mEvent(aCommandEvent)
+MoveFrameOfKey::MoveFrameOfKey(const TimeLineEvent& aCommandEvent)
+    : mSortedTargets()
     , mCurrent(0)
+    , mMove(0)
 {
+    for (const TimeLineEvent::Target& target : aCommandEvent.targets())
+    {
+        // check validity of initial values
+        XC_ASSERT(target.pos.index() == target.subIndex);
+
+        mSortedTargets.push_back(target);
+    }
+    // sort targets for the purpose of the move with no conflict.
+    qSort(mSortedTargets.begin(), mSortedTargets.end(), lessThan);
 }
 
-bool MoveFrameOfKey::modifyMove(TimeLineEvent& aModEvent, int aAdd, const util::Range& aFrame)
+bool MoveFrameOfKey::lessThan(const TimeLineEvent::Target& aLhs, const TimeLineEvent::Target& aRhs)
 {
-    aModEvent.setType(TimeLineEvent::Type_MoveKey);
+    return aLhs.pos.index() < aRhs.pos.index();
+}
 
-    // empty
-    if (aAdd == 0)
-    {
-        return true;
-    }
-
-    // if next frames has a invalid value, nothing to do
-    for (const TimeLineEvent::Target& target : mEvent.targets())
-    {
-        XC_ASSERT(!target.pos.isNull());
-
-        int current = 0;
-        int next = 0;
-
-        if (mCurrent == 0)
-        {
-            current = target.pos.index();
-            next = target.subIndex + aAdd;
-        }
-        else
-        {
-            current = target.subIndex;
-            next = target.subIndex + aAdd;
-        }
-
-        if (next < aFrame.min() || aFrame.max() < next) return false;
-
-        if (!target.pos.map().contains(current)) return false;
-
-        if (target.pos.map().contains(next)) return false;
-    }
-
+bool MoveFrameOfKey::contains(const core::TimeLine::MapType& aMap, int aIndex)
+{
     if (mCurrent == 0)
     {
-        // this command is not executed
-        for (TimeLineEvent::Target& target : mEvent.targets())
+        for (const TimeLineEvent::Target& target : mSortedTargets)
         {
-            target.subIndex += aAdd;
+            if (&target.pos.map() == &aMap && target.pos.index() == aIndex) return true;
         }
     }
     else
     {
-        // this command was already executed
-        for (TimeLineEvent::Target& target : mEvent.targets())
+        for (const TimeLineEvent::Target& target : mSortedTargets)
         {
-            const int curr = target.subIndex;
-            const int next = target.subIndex + aAdd;
+            if (&target.pos.map() == &aMap && target.subIndex == aIndex) return true;
+        }
+    }
+    return false;
+}
 
-            target.subIndex = next;
-            aModEvent.pushTarget(*target.node, target.pos.type(), curr, next);
+bool MoveFrameOfKey::modifyMove(TimeLineEvent& aModEvent, int aAdd,
+                                const util::Range& aFrame, int* aClampedAdd)
+{
+    aModEvent.setType(TimeLineEvent::Type_MoveKey);
 
-            // move target
-            target.pos.line()->move(target.pos.type(), curr, next);
+    if (aClampedAdd) *aClampedAdd = aAdd;
+    if (aAdd == 0) return true; // empty
+
+    // clamp aAdd value by the frame range
+    for (const TimeLineEvent::Target& target : mSortedTargets)
+    {
+        XC_ASSERT(!target.pos.isNull());
+        const int next = target.subIndex + aAdd;
+        aAdd += xc_clamp(next, aFrame.min(), aFrame.max()) - next;
+    }
+    if (aClampedAdd) *aClampedAdd = aAdd;
+    if (aAdd == 0) return true;
+
+    // if next frames has a invalid value, nothing to do
+    for (const TimeLineEvent::Target& target : mSortedTargets)
+    {
+        XC_ASSERT(!target.pos.isNull());
+
+        const int current = (mCurrent == 0) ? target.pos.index() : target.subIndex;
+        const int next = target.subIndex + aAdd;
+
+        // check out of range (fail safe code)
+        if (next < aFrame.min() || aFrame.max() < next) return false;
+
+        // key isn't exist
+        if (!target.pos.map().contains(current)) return false;
+
+        // conflict with other key
+        if (target.pos.map().contains(next))
+        {
+            if (!contains(target.pos.map(), next)) return false;
+        }
+    }
+
+    // update move
+    mMove += aAdd;
+
+    if (mCurrent == 0) // this command is not executed
+    {
+        for (TimeLineEvent::Target& target : mSortedTargets)
+        {
+            target.subIndex += aAdd;
+        }
+    }
+    else // this command was already executed
+    {
+        // setup mod event
+        for (TimeLineEvent::Target& target : mSortedTargets)
+        {
+            aModEvent.pushTarget(*target.node, target.pos.type(),
+                                 target.subIndex, target.subIndex + aAdd);
+        }
+
+        // move all (we have to avoid conflict)
+        if (aAdd < 0)
+        {
+            for (TimeLineEvent::Target& target : mSortedTargets)
+            {
+                auto success = target.pos.line()->move(
+                            target.pos.type(), target.subIndex, target.subIndex + aAdd);
+                XC_ASSERT(success); (void)success;
+                target.subIndex += aAdd;
+            }
+        }
+        else if (aAdd > 0)
+        {
+            for (auto itr = mSortedTargets.rbegin(); itr != mSortedTargets.rend(); ++itr)
+            {
+                auto& target = *itr;
+                auto success = target.pos.line()->move(
+                            target.pos.type(), target.subIndex, target.subIndex + aAdd);
+                XC_ASSERT(success); (void)success;
+                target.subIndex += aAdd;
+            }
         }
     }
     return true;
@@ -87,15 +143,24 @@ bool MoveFrameOfKey::modifyMove(TimeLineEvent& aModEvent, int aAdd, const util::
 
 void MoveFrameOfKey::undo()
 {
-    for (TimeLineEvent::Target& target : mEvent.targets())
+    if (mMove < 0)
     {
-        if (target.pos.index() == target.subIndex) continue;
-
-        // move
-        const int curr = target.subIndex;
-        const int next = target.pos.index();
-        const bool success = target.pos.line()->move(target.pos.type(), curr, next);
-        XC_ASSERT(success); (void)success;
+        for (auto itr = mSortedTargets.rbegin(); itr != mSortedTargets.rend(); ++itr)
+        {
+            auto& target = *itr;
+            auto success = target.pos.line()->move(
+                        target.pos.type(), target.subIndex, target.pos.index());
+            XC_ASSERT(success); (void)success;
+        }
+    }
+    else if (mMove > 0)
+    {
+        for (TimeLineEvent::Target& target : mSortedTargets)
+        {
+            auto success = target.pos.line()->move(
+                        target.pos.type(), target.subIndex, target.pos.index());
+            XC_ASSERT(success); (void)success;
+        }
     }
 
     mCurrent = 0;
@@ -103,15 +168,24 @@ void MoveFrameOfKey::undo()
 
 void MoveFrameOfKey::redo()
 {
-    for (TimeLineEvent::Target& target : mEvent.targets())
+    if (mMove < 0)
     {
-        if (target.pos.index() == target.subIndex) continue;
-
-        // move
-        const int curr = target.pos.index();
-        const int next = target.subIndex;
-        bool success = target.pos.line()->move(target.pos.type(), curr, next);
-        XC_ASSERT(success); (void)success;
+        for (TimeLineEvent::Target& target : mSortedTargets)
+        {
+            auto success = target.pos.line()->move(
+                        target.pos.type(), target.pos.index(), target.subIndex);
+            XC_ASSERT(success); (void)success;
+        }
+    }
+    else if (mMove > 0)
+    {
+        for (auto itr = mSortedTargets.rbegin(); itr != mSortedTargets.rend(); ++itr)
+        {
+            auto& target = *itr;
+            auto success = target.pos.line()->move(
+                        target.pos.type(), target.pos.index(), target.subIndex);
+            XC_ASSERT(success); (void)success;
+        }
     }
 
     mCurrent = 1;

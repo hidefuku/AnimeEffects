@@ -28,18 +28,22 @@ namespace TimeLineUtil
 //-------------------------------------------------------------------------------------------------
 class MoveFrameOfKey : public cmnd::Stable
 {
-    core::TimeLineEvent& mEvent;
-    int mCurrent;
-
 public:
-    MoveFrameOfKey(core::TimeLineEvent& aCommandEvent);
-    bool modifyMove(core::TimeLineEvent& aModEvent, int aAdd, const util::Range& aFrame);
-
-    core::TimeLineEvent& event() { return mEvent; }
-    const core::TimeLineEvent& event() const { return mEvent; }
+    MoveFrameOfKey(const core::TimeLineEvent& aCommandEvent);
+    bool modifyMove(core::TimeLineEvent& aModEvent, int aAdd,
+                    const util::Range& aFrame, int* aClampedAdd);
 
     virtual void undo();
     virtual void redo();
+
+private:
+    static bool lessThan(const core::TimeLineEvent::Target& aLhs,
+                         const core::TimeLineEvent::Target& aRhs);
+    bool contains(const core::TimeLine::MapType& aMap, int aIndex);
+
+    QVector<core::TimeLineEvent::Target> mSortedTargets;
+    int mCurrent;
+    int mMove;
 };
 
 //-------------------------------------------------------------------------------------------------
