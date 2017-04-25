@@ -5,7 +5,7 @@ namespace gui
 {
 
 //-------------------------------------------------------------------------------------------------
-TimeLineWidget::TimeLineWidget(QWidget* aParent, core::Animator& aAnimator)
+TimeLineWidget::TimeLineWidget(ViaPoint& aViaPoint, core::Animator& aAnimator, QWidget* aParent)
     : QScrollArea(aParent)
     , mProject()
     , mAnimator(aAnimator)
@@ -19,7 +19,7 @@ TimeLineWidget::TimeLineWidget(QWidget* aParent, core::Animator& aAnimator)
     , mLastFrame()
     , mDoesLoop(false)
 {
-    mInner = new TimeLineInnerWidget(this);
+    mInner = new TimeLineInnerWidget(aViaPoint, this);
 
     this->setWidget(mInner);
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);

@@ -14,6 +14,7 @@
 #include "core/TimeLineEvent.h"
 #include "ctrl/TimeLineEditor.h"
 #include "gui/TimeLineInnerWidget.h"
+#include "gui/ViaPoint.h"
 
 namespace gui
 {
@@ -24,7 +25,7 @@ class TimeLineWidget : public QScrollArea
 public:
     //typedef std::function<void(const core::TimeInfo&)> PlayBackFunc;
 
-    TimeLineWidget(QWidget* aParent, core::Animator& aAnimator);
+    TimeLineWidget(ViaPoint& aViaPoint, core::Animator& aAnimator, QWidget* aParent);
 
     void setProject(core::Project* aProject);
     void updateLines(QTreeWidgetItem* aTopNode);

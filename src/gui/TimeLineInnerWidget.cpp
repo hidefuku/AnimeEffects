@@ -1,6 +1,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include "gui/TimeLineInnerWidget.h"
+#include "gui/MouseSetting.h"
 #include "gui/obj/obj_Item.h"
 
 namespace gui
@@ -42,8 +43,9 @@ void TimeLineInnerWidget::TimeCursor::paintEvent(QPaintEvent* aEvent)
 }
 
 //-------------------------------------------------------------------------------------------------
-TimeLineInnerWidget::TimeLineInnerWidget(QWidget* aParent)
+TimeLineInnerWidget::TimeLineInnerWidget(ViaPoint& aViaPoint, QWidget* aParent)
     : QWidget(aParent)
+    , mViaPoint(aViaPoint)
     , mProject()
     , mTimeLineSlot()
     , mTreeRestructSlot()
@@ -204,7 +206,7 @@ bool TimeLineInnerWidget::updateCursor(const core::AbstractCursor& aCursor)
 
 void TimeLineInnerWidget::updateWheel(QWheelEvent* aEvent)
 {
-    mEditor->updateWheel(aEvent->delta());
+    mEditor->updateWheel(aEvent->delta(), mViaPoint.mouseSetting().invertTimeLineScaling);
     updateSize();
 }
 

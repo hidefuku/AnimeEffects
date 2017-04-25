@@ -43,6 +43,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
     , mViaPoint(this)
     , mKeyCommandMap()
     , mKeyCommandInvoker()
+    , mMouseSetting()
     , mMainMenuBar()
     , mMainViewSetting()
     , mMainDisplayStyle()
@@ -97,6 +98,9 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
     // initialize via point
     {
         mViaPoint.setMainViewSetting(mMainViewSetting);
+
+        mMouseSetting.load();
+        mViaPoint.setMouseSetting(mMouseSetting);
     }
 
     // key binding

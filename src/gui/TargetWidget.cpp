@@ -12,7 +12,7 @@ TargetWidget::TargetWidget(ViaPoint& aViaPoint, GUIResources& aResources, QWidge
     , mSuspendCount(0)
 {
     mObjTree = new ObjectTreeWidget(aViaPoint, aResources, this);
-    mTimeLine = new TimeLineWidget(this, *this);
+    mTimeLine = new TimeLineWidget(aViaPoint, *this, this);
     mPlayBack = new PlayBackWidget(aResources, this);
 
     this->addWidget(mObjTree);

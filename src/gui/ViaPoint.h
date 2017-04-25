@@ -14,6 +14,7 @@ namespace gui { class MainMenuBar; }
 namespace gui { class KeyCommandMap; }
 namespace gui { class KeyCommandInvoker; }
 namespace gui { class MainViewSetting; }
+namespace gui { class MouseSetting; }
 
 namespace gui
 {
@@ -54,6 +55,10 @@ public:
     MainViewSetting& mainViewSetting();
     const MainViewSetting& mainViewSetting() const;
 
+    void setMouseSetting(MouseSetting& aSetting);
+    MouseSetting& mouseSetting();
+    const MouseSetting& mouseSetting() const;
+
     util::Signaler<void()> onVisualUpdated;
 
 private:
@@ -66,6 +71,7 @@ private:
     KeyCommandMap* mKeyCommandMap;
     KeyCommandInvoker* mKeyCommandInvoker;
     MainViewSetting* mMainViewSetting;
+    MouseSetting* mMouseSetting;
 };
 
 } // namespace gui

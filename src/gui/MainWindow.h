@@ -21,6 +21,7 @@
 #include "gui/KeyCommandInvoker.h"
 #include "gui/ResourceDialog.h"
 #include "gui/LocaleParam.h"
+#include "gui/MouseSetting.h"
 
 namespace gui
 {
@@ -67,6 +68,7 @@ private:
     ViaPoint mViaPoint;
     QScopedPointer<KeyCommandMap> mKeyCommandMap;
     QScopedPointer<KeyCommandInvoker> mKeyCommandInvoker;
+    MouseSetting mMouseSetting;
     MainMenuBar* mMainMenuBar;
     MainViewSetting mMainViewSetting;
     QScopedPointer<MainDisplayStyle> mMainDisplayStyle;

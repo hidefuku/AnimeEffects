@@ -5,14 +5,15 @@
 #include "XC.h"
 #include "util/Finally.h"
 #include "gl/Util.h"
+#include "gl/Framebuffer.h"
+#include "gl/Texture.h"
+#include "core/ClippingFrame.h"
 #include "gui/MainDisplayWidget.h"
 #include "gui/ProjectHook.h"
 #include "gui/ViaPoint.h"
 #include "gui/ProjectTabBar.h"
 #include "gui/KeyCommandMap.h"
-#include "gl/Framebuffer.h"
-#include "gl/Texture.h"
-#include "core/ClippingFrame.h"
+#include "gui/MouseSetting.h"
 
 namespace gui
 {
@@ -420,7 +421,8 @@ void MainDisplayWidget::mouseReleaseEvent(QMouseEvent* aEvent)
 
 void MainDisplayWidget::wheelEvent(QWheelEvent* aEvent)
 {
-    if (mCanvasMover.updateByWheel(QVector2D(aEvent->pos()), aEvent->delta()))
+    if (mCanvasMover.updateByWheel(QVector2D(aEvent->pos()), aEvent->delta(),
+                                   mViaPoint.mouseSetting().invertMainViewScaling))
     {
         updateRender();
     }

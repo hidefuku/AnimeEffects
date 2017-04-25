@@ -14,6 +14,7 @@ ViaPoint::ViaPoint(QWidget* aParent)
     , mKeyCommandMap()
     , mKeyCommandInvoker()
     , mMainViewSetting()
+    , mMouseSetting()
 {
 }
 
@@ -127,6 +128,23 @@ const MainViewSetting& ViaPoint::mainViewSetting() const
 {
     XC_PTR_ASSERT(mMainViewSetting);
     return *mMainViewSetting;
+}
+
+void ViaPoint::setMouseSetting(MouseSetting& aSetting)
+{
+    mMouseSetting = &aSetting;
+}
+
+MouseSetting& ViaPoint::mouseSetting()
+{
+    XC_PTR_ASSERT(mMouseSetting);
+    return *mMouseSetting;
+}
+
+const MouseSetting& ViaPoint::mouseSetting() const
+{
+    XC_PTR_ASSERT(mMouseSetting);
+    return *mMouseSetting;
 }
 
 } // namespace gui

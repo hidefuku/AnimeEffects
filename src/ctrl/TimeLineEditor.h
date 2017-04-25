@@ -39,7 +39,7 @@ public:
     void setFrame(core::Frame aFrame);
 
     UpdateFlags updateCursor(const core::AbstractCursor& aCursor);
-    void updateWheel(int aDelta);
+    void updateWheel(int aDelta, bool aInvertScaling);
     void updateKey();
     void updateProjectAttribute();
 

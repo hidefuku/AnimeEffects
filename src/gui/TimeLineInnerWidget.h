@@ -6,6 +6,7 @@
 #include <QTreeWidgetItem>
 #include "core/TimeLineEvent.h"
 #include "ctrl/TimeLineEditor.h"
+#include "gui/ViaPoint.h"
 
 namespace gui
 {
@@ -14,7 +15,7 @@ class TimeLineInnerWidget : public QWidget
 {
     Q_OBJECT
 public:
-    TimeLineInnerWidget(QWidget* aParent);
+    TimeLineInnerWidget(ViaPoint& aViaPoint, QWidget* aParent);
 
     void setProject(core::Project* aProject);
     void setFrame(core::Frame aFrame);
@@ -50,6 +51,7 @@ private:
     void onPasteKeyTriggered(bool);
     void onDeleteKeyTriggered(bool);
 
+    ViaPoint& mViaPoint;
     util::LinkPointer<core::Project> mProject;
     util::SlotId mTimeLineSlot;
     util::SlotId mTreeRestructSlot;

@@ -13,6 +13,7 @@
 #include "gui/EasyDialog.h"
 #include "gui/KeyBindingDialog.h"
 #include "gui/GeneralSettingDialog.h"
+#include "gui/MouseSettingDialog.h"
 
 namespace gui
 {
@@ -166,12 +167,20 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
     QMenu* optionMenu = new QMenu(tr("Option"), this);
     {
         QAction* general = new QAction(tr("General Settings..."), this);
+        QAction* mouse   = new QAction(tr("Mouse Settings..."), this);
         QAction* keyBind = new QAction(tr("Key Bindings..."), this);
 
         connect(general, &QAction::triggered, [&](bool)
         {
             QScopedPointer<GeneralSettingDialog> dialog(
                         new GeneralSettingDialog(this));
+            dialog->exec();
+        });
+
+        connect(mouse, &QAction::triggered, [&](bool)
+        {
+            QScopedPointer<MouseSettingDialog> dialog(
+                        new MouseSettingDialog(aViaPoint, this));
             dialog->exec();
         });
 
@@ -184,6 +193,7 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
         });
 
         optionMenu->addAction(general);
+        optionMenu->addAction(mouse);
         optionMenu->addAction(keyBind);
     }
 

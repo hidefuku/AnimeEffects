@@ -129,15 +129,16 @@ bool CanvasMover::updateByMove(const QVector2D& aCursorPos, const QVector2D& aMo
     return false;
 }
 
-bool CanvasMover::updateByWheel(const QVector2D& aCursorPos, int aDelta)
+bool CanvasMover::updateByWheel(const QVector2D& aCursorPos, int aDelta, bool aInvertScaling)
 {
     if (mCamera)
     {
         auto center = mCamera->center();
         auto preScale = std::max(mCamera->scale(), kMinScale);
         auto scale = preScale;
+        auto delta = aInvertScaling ? -aDelta : aDelta;
 
-        mScaleIndex = xc_clamp(mScaleIndex - aDelta, kMinScaleIndex, kMaxScaleIndex);
+        mScaleIndex = xc_clamp(mScaleIndex - delta, kMinScaleIndex, kMaxScaleIndex);
 
         if (mScaleIndex > 0)
         {

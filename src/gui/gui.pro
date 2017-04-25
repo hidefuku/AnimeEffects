@@ -114,7 +114,9 @@ SOURCES += \
     LocaleDecider.cpp \
     GeneralSettingDialog.cpp \
     ResourceTreeWidget.cpp \
-    tool/tool_PosePanel.cpp
+    tool/tool_PosePanel.cpp \
+    MouseSettingDialog.cpp \
+    MouseSetting.cpp
 
 HEADERS += \
     MainDisplayMode.h \
@@ -181,7 +183,9 @@ HEADERS += \
     GeneralSettingDialog.h \
     ResourceTreeWidget.h \
     LocaleParam.h \
-    tool/tool_PosePanel.h
+    tool/tool_PosePanel.h \
+    MouseSettingDialog.h \
+    MouseSetting.h
 
 FORMS +=
 

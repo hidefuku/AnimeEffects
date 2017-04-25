@@ -450,9 +450,9 @@ void TimeLineEditor::deleteCheckedKeys(core::TimeLineEvent& aEvent)
     clearState();
 }
 
-void TimeLineEditor::updateWheel(int aDelta)
+void TimeLineEditor::updateWheel(int aDelta, bool aInvertScaling)
 {
-    mTimeScale.update(aDelta);
+    mTimeScale.update(aInvertScaling ? -aDelta : aDelta);
     mTimeCurrent.update(mTimeScale);
 
     const int lineWidth = mTimeScale.maxPixelWidth();
