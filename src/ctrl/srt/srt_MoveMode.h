@@ -33,7 +33,7 @@ private:
     void assignScaleKey(core::ScaleKey::Data& aNewData);
 
     void setAssignNotifier(cmnd::ScopedMacro& aMacro,
-                           core::TimeKeyType aKeyType, bool aOwnsKey);
+                           core::TimeKeyType aKeyType, bool aPushKey);
     void notifyAssignModification(core::TimeKeyType aKeyType);
 
     core::Project& mProject;

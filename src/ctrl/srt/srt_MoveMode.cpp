@@ -163,9 +163,9 @@ void MoveMode::clearState()
 }
 
 void MoveMode::setAssignNotifier(
-        cmnd::ScopedMacro& aMacro, TimeKeyType aKeyType, bool aOwnsKey)
+        cmnd::ScopedMacro& aMacro, TimeKeyType aKeyType, bool aPushKey)
 {
-    auto notifyType = aOwnsKey ?
+    auto notifyType = aPushKey ?
                 TimeLineEvent::Type_PushKey :
                 TimeLineEvent::Type_ChangeKeyValue;
     const int frame = mProject.animator().currentFrame().get();
@@ -207,7 +207,7 @@ void MoveMode::assignMoveKey(MoveKey::Data& aNewData)
     else
     {
         cmnd::ScopedMacro macro(stack, CmndName::tr("update a moving key"));
-        setAssignNotifier(macro, TimeKeyType_Move, mKeyOwner.ownsMoveKey);
+        setAssignNotifier(macro, TimeKeyType_Move, mKeyOwner.ownsMoveKey || appendKeys);
         // push commands
         mKeyOwner.pushOwningMoveKey(stack, timeLine, frame);
 
@@ -245,7 +245,7 @@ void MoveMode::assignRotateKey(RotateKey::Data& aNewData)
     else
     {
         cmnd::ScopedMacro macro(stack, CmndName::tr("update a rotation key"));
-        setAssignNotifier(macro, TimeKeyType_Rotate, mKeyOwner.ownsRotateKey);
+        setAssignNotifier(macro, TimeKeyType_Rotate, mKeyOwner.ownsRotateKey || appendKeys);
         // push commands
         mKeyOwner.pushOwningRotateKey(stack, timeLine, frame);
 
@@ -283,7 +283,7 @@ void MoveMode::assignScaleKey(ScaleKey::Data& aNewData)
     else
     {
         cmnd::ScopedMacro macro(stack, CmndName::tr("update a scaling key"));
-        setAssignNotifier(macro, TimeKeyType_Scale, mKeyOwner.ownsScaleKey);
+        setAssignNotifier(macro, TimeKeyType_Scale, mKeyOwner.ownsScaleKey || appendKeys);
         // push commands
         mKeyOwner.pushOwningScaleKey(stack, timeLine, frame);
 
