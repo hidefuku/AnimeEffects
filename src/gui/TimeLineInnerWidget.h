@@ -66,6 +66,7 @@ private:
     core::TimeLineEvent mTargets;
     core::TimeLineEvent mCopyTargets;
     QPoint mPastePos;
+    bool mOnPasting;
 };
 
 } // namespace gui

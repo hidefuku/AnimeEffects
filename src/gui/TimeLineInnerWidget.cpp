@@ -59,6 +59,7 @@ TimeLineInnerWidget::TimeLineInnerWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mTargets()
     , mCopyTargets()
     , mPastePos()
+    , mOnPasting()
 {
     mTimeCursor.show();
 
@@ -246,7 +247,10 @@ void TimeLineInnerWidget::paintEvent(QPaintEvent* aEvent)
 
 void TimeLineInnerWidget::onTimeLineModified(core::TimeLineEvent&, bool)
 {
-    mCopyTargets = core::TimeLineEvent();
+    if (!mOnPasting)
+    {
+        mCopyTargets = core::TimeLineEvent();
+    }
     mEditor->updateKey();
     this->update();
 }
@@ -289,10 +293,12 @@ void TimeLineInnerWidget::onCopyKeyTriggered(bool)
 
 void TimeLineInnerWidget::onPasteKeyTriggered(bool)
 {
+    mOnPasting = true;
     if (!mEditor->pasteCopiedKeys(mCopyTargets, mPastePos))
     {
         QMessageBox::warning(nullptr, tr("Operation Error"), tr("Failed to paste keys."));
     }
+    mOnPasting = false;
 }
 
 void TimeLineInnerWidget::onDeleteKeyTriggered(bool)
