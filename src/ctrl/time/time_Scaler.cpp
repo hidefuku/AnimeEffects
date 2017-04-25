@@ -31,6 +31,9 @@ void Scaler::setFrameList(const std::array<int, 3>& aFrameList)
 
 void Scaler::update(int aWheelDelta)
 {
+#if defined(Q_OS_WIN)
+    aWheelDelta = aWheelDelta * -1;
+#endif
     mWheel = std::max(kMinScaleRaw, std::min(kMaxScaleRaw, mWheel - aWheelDelta));
     mIndex = mWheel / kWheelValue;
 }

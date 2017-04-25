@@ -136,6 +136,9 @@ bool CanvasMover::updateByWheel(const QVector2D& aCursorPos, int aDelta)
         auto center = mCamera->center();
         auto preScale = std::max(mCamera->scale(), kMinScale);
         auto scale = preScale;
+#if defined(Q_OS_WIN)
+        aDelta = aDelta * -1;
+#endif
 
         mScaleIndex = xc_clamp(mScaleIndex - aDelta, kMinScaleIndex, kMaxScaleIndex);
 
