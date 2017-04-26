@@ -3,6 +3,7 @@
 
 #include <QTextCodec>
 #include <QTextDecoder>
+#include <QStringList>
 
 namespace util
 {
@@ -23,6 +24,8 @@ public:
     };
 
     static float getShiftJisScore(const char* aStr, size_t aSize);
+
+    static QStringList splitAndTrim(const QString& aText, QChar aSplit);
 
 private:
     TextUtil() {}

@@ -4,6 +4,7 @@
 namespace util
 {
 
+//-------------------------------------------------------------------------------------------------
 TextUtil::ShiftJisDecoder::ShiftJisDecoder()
 {
     mCodec = QTextCodec::codecForName("Shift-JIS");
@@ -20,6 +21,7 @@ QString TextUtil::ShiftJisDecoder::decode(const char* aText) const
     return mDecoder->toUnicode(aText);
 }
 
+//-------------------------------------------------------------------------------------------------
 float TextUtil::getShiftJisScore(const char* aStr, size_t aSize)
 {
     static const float kFailureScore = -1.0f;
@@ -129,6 +131,22 @@ float TextUtil::getShiftJisScore(const char* aStr, size_t aSize)
         }
     }
     return std::min(1.0f, 0.01f + 0.01f * (float)(scoreSum / count));
+}
+
+//-------------------------------------------------------------------------------------------------
+QStringList TextUtil::splitAndTrim(const QString& aText, QChar aSplit)
+{
+    if (aText.trimmed().isEmpty())
+    {
+        return QStringList();
+    }
+
+    QStringList texts = aText.split(aSplit);
+    for (QString& text : texts)
+    {
+        text = text.trimmed();
+    }
+    return texts;
 }
 
 } // namespace util

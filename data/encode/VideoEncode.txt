@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <video_encode>
     <format name="mp4" label="MP4">
-        <codec name="libx265" label="H.265" icodec="ppm" hint="colorspace"
-        command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -pix_fmt yuv444p $arg_colorfilter $arg_colorspace $opath" />
+        <codec name="libx265" label="H.265" icodec="ppm" hint="colorspace" pixfmt="yuv420p, yuv444p"
+        command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -pix_fmt $pixfmt $arg_colorfilter $arg_colorspace $opath" />
 
-        <codec name="libx264" label="H.264" icodec="ppm" hint="colorspace"
-        command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -pix_fmt yuv444p $arg_colorfilter $arg_colorspace $opath" />
+        <codec name="libx264" label="H.264" icodec="ppm" hint="colorspace" pixfmt="yuv420p, yuv444p"
+        command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -pix_fmt $pixfmt $arg_colorfilter $arg_colorspace $opath" />
 
         <codec name="mpeg4" label="MPEG-4" icodec="ppm" hint="colorspace"
         command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec $arg_colorfilter $arg_colorspace $opath" />
 
-        <codec name="h264_nvenc" label="H.264(NVENC)" icodec="ppm" hint="colorspace"
-        command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -preset llhq -rc ll_2pass_quality -subq 7 -pix_fmt yuv444p $arg_colorfilter $arg_colorspace $opath" />
+        <codec name="h264_nvenc" label="H.264[NVENC]" icodec="ppm" hint="colorspace,gpuenc" pixfmt="yuv420p, yuv444p"
+        command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -preset llhq -rc ll_2pass_quality -subq 7 -pix_fmt $pixfmt $arg_colorfilter $arg_colorspace $opath" />
 
-        <codec name="h264_qsv" label="H.264(QSV)" icodec="ppm" hint="colorspace"
-        command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -preset slower -subq 7 -pix_fmt yuv444p $arg_colorfilter $arg_colorspace -look_ahead 0 $opath" />
+        <codec name="h264_qsv" label="H.264[QSV]" icodec="ppm" hint="colorspace,gpuenc" pixfmt="yuv420p, yuv444p"
+        command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -preset slower -subq 7 -pix_fmt $pixfmt $arg_colorfilter $arg_colorspace -look_ahead 0 $opath" />
 
     </format>
     <format name="webm" label="WebM">
-        <codec name="libvpx-vp9" label="VP9" icodec="ppm" hint="colorspace"
-        command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -pix_fmt yuv444p $arg_colorfilter $arg_colorspace $opath" />
+        <codec name="libvpx-vp9" label="VP9" icodec="ppm" hint="colorspace" pixfmt="yuv420p, yuv444p"
+        command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -pix_fmt $pixfmt $arg_colorfilter $arg_colorspace $opath" />
 
         <codec name="libvpx-vp9" label="VP9" icodec="png" hint="transparent"
         command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -colorspace smpte170m $opath" />
@@ -40,14 +40,14 @@
 
     </format>
     <format name="mov" label="MOV">
-        <codec name="libx264" label="H.264" icodec="ppm" hint="colorspace"
-        command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -pix_fmt yuv444p $arg_colorfilter $arg_colorspace $opath" />
+        <codec name="libx264" label="H.264" icodec="ppm" hint="colorspace" pixfmt="yuv420p, yuv444p"
+        command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -pix_fmt $pixfmt $arg_colorfilter $arg_colorspace $opath" />
 
-        <codec name="h264_nvenc" label="H.264(NVENC)" icodec="ppm" hint="colorspace"
-        command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -preset llhq -rc ll_2pass_quality -subq 7 -pix_fmt yuv444p $arg_colorfilter $arg_colorspace $opath" />
+        <codec name="h264_nvenc" label="H.264[NVENC]" icodec="ppm" hint="colorspace,gpuenc" pixfmt="yuv420p, yuv444p"
+        command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -preset llhq -rc ll_2pass_quality -subq 7 -pix_fmt $pixfmt $arg_colorfilter $arg_colorspace $opath" />
 
-        <codec name="h264_qsv" label="H.264(QSV)" icodec="ppm" hint="colorspace"
-        command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -preset slower -subq 7 -pix_fmt yuv444p $arg_colorfilter $arg_colorspace -look_ahead 0 $opath" />
+        <codec name="h264_qsv" label="H.264[QSV]" icodec="ppm" hint="colorspace,gpuenc" pixfmt="yuv420p, yuv444p"
+        command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -c:v $ocodec -preset slower -subq 7 -pix_fmt $pixfmt $arg_colorfilter $arg_colorspace -look_ahead 0 $opath" />
 
         <codec name="prores_ks" label="ProRes" icodec="png" hint="transparent"
         command="-y -f image2pipe -framerate $ifps -c:v $icodec -i - -b:v $obps -r $ofps -profile:v 4444 -c:v $ocodec $opath" />

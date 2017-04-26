@@ -15,9 +15,11 @@ public:
     QString label;
     QString icodec;
     QString command;
+    QStringList pixfmts;
     bool lossless;
     bool transparent;
     bool colorspace;
+    bool gpuenc;
 };
 
 class VideoFormat

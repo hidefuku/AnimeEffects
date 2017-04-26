@@ -65,6 +65,7 @@ public:
         int codecIndex;
         int colorIndex;
         int bps;
+        QString pixfmt;
     };
 
     struct GifParam

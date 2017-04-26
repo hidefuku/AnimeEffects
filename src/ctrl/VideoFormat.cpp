@@ -8,9 +8,11 @@ VideoCodec::VideoCodec()
     , label()
     , icodec()
     , command()
+    , pixfmts()
     , lossless()
     , transparent()
     , colorspace()
+    , gpuenc()
 {
 }
 

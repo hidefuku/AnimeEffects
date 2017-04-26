@@ -124,6 +124,14 @@ QGroupBox::indicator:checked {
 image: url(data/icon/branchopen.png);
 }
 
+QGroupBox#note {
+background-color: #f8f8f8;
+border: 1px solid #c0c0c0;
+border-radius: 2px;
+margin-top: 0px;
+padding-top: 0px;
+}
+
 QDockWidget {
 color: #303030;
 border-radius: 2px;

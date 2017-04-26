@@ -11,6 +11,8 @@
 #include <QSpinBox>
 #include <QCheckBox>
 #include <QFileInfo>
+#include <QPlainTextEdit>
+#include <QFontMetrics>
 #include "util/SelectArgs.h"
 #include "gui/ExportDialog.h"
 
@@ -317,21 +319,52 @@ VideoExportDialog::VideoExportDialog(
     this->fixSize();
 }
 
-void setColorspaceValidity(QComboBox* aBox, bool aIsValid)
+void VideoExportDialog::setColorspaceValidity(QComboBox* aBox, bool aIsValid)
 {
-    if (aBox)
+    if (!aBox) return;
+
+    aBox->setEnabled(aIsValid);
+    if (aIsValid)
     {
-        aBox->setEnabled(aIsValid);
-        if (aIsValid)
-        {
-            aBox->setItemText(0, "BT.709");
-            aBox->setItemText(1, "BT.601");
-        }
-        else
-        {
-            aBox->setItemText(0, "");
-            aBox->setItemText(1, "");
-        }
+        aBox->setItemText(0, "BT.709");
+        aBox->setItemText(1, "BT.601");
+    }
+    else
+    {
+        aBox->setItemText(0, "");
+        aBox->setItemText(1, "");
+    }
+}
+
+void VideoExportDialog::updatePixelFormat(QComboBox* aBox, const QStringList& aPixfmts)
+{
+    mVideoParam.pixfmt.clear();
+
+    if (!aBox) return;
+
+    auto valid = !aPixfmts.isEmpty();
+    aBox->clear();
+
+    if (valid)
+    {
+        aBox->addItems(aPixfmts);
+        mVideoParam.pixfmt = aPixfmts.at(0);
+    }
+
+    aBox->setEnabled(valid);
+}
+
+void VideoExportDialog::updateCommentLabel(QLabel* aLabel, bool aGPUEnc)
+{
+    if (!aLabel) return;
+
+    if (aGPUEnc)
+    {
+        aLabel->setText(tr("The codec requires a special GPU."));
+    }
+    else
+    {
+        aLabel->clear();
     }
 }
 
@@ -340,6 +373,10 @@ QLayout* VideoExportDialog::createVideoOption()
     auto form = new QFormLayout();
     form->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
     form->setLabelAlignment(Qt::AlignRight);
+
+    // comment
+    QLabel* comment = new QLabel();
+    updateCommentLabel(comment, mVideoParam.format.codecs.at(0).gpuenc);
 
     // colorspace
     QComboBox* colorBox = nullptr;
@@ -366,6 +403,19 @@ QLayout* VideoExportDialog::createVideoOption()
             auto valid = mVideoParam.format.codecs.at(0).colorspace;
             setColorspaceValidity(colorBox, valid);
         }
+    }
+
+    // pixel format
+    QComboBox* pixfmtBox = new QComboBox();
+    // connect
+    this->connect(pixfmtBox, util::SelectArgs<int>::from(&QComboBox::currentIndexChanged), [=]()
+    {
+        this->mVideoParam.pixfmt = pixfmtBox->currentText();
+    });
+    // initialize enabled
+    if (!mVideoParam.format.codecs.isEmpty())
+    {
+        updatePixelFormat(pixfmtBox, mVideoParam.format.codecs.at(0).pixfmts);
     }
 
     // codec
@@ -398,19 +448,18 @@ QLayout* VideoExportDialog::createVideoOption()
         {
             auto index = codecBox->currentIndex();
             this->mVideoParam.codecIndex = index;
-
-            if (colorBox)
-            {
-                auto valid = mVideoParam.format.codecs.at(index).colorspace;
-                setColorspaceValidity(colorBox, valid);
-            }
+            this->setColorspaceValidity(colorBox, mVideoParam.format.codecs.at(index).colorspace);
+            this->updatePixelFormat(pixfmtBox, mVideoParam.format.codecs.at(index).pixfmts);
+            this->updateCommentLabel(comment, mVideoParam.format.codecs.at(index).gpuenc);
         });
 
         form->addRow(tr("codec :"), codecBox);
     }
 
-    // colorspace
+    // push colorspace
     form->addRow(tr("color standard :"), colorBox);
+    // push pixel format
+    form->addRow(tr("pixel format :"), pixfmtBox);
 
     this->pushSizeBox(*form);
     this->pushFrameBox(*form);
@@ -429,6 +478,18 @@ QLayout* VideoExportDialog::createVideoOption()
         });
 
         form->addRow(tr("bit rate (Kbps) :"), kbps);
+    }
+
+    // push comment
+    {
+        auto noteGroup = new QGroupBox("");
+        noteGroup->setObjectName("note");
+
+        auto subform = new QVBoxLayout();
+        noteGroup->setLayout(subform);
+        subform->addWidget(comment);
+
+        form->addRow(noteGroup);
     }
 
     return form;

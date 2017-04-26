@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QFormLayout>
+#include <QComboBox>
+#include <QLabel>
 #include "core/Project.h"
 #include "ctrl/Exporter.h"
 #include "ctrl/VideoFormat.h"
@@ -79,6 +81,9 @@ public:
 
 private:
     QLayout* createVideoOption();
+    void setColorspaceValidity(QComboBox* aBox, bool aIsValid);
+    void updatePixelFormat(QComboBox* aBox, const QStringList& aPixfmts);
+    void updateCommentLabel(QLabel* aLabel, bool aGPUEnc);
 
     ctrl::Exporter::VideoParam mVideoParam;
 };

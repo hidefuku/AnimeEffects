@@ -69,6 +69,7 @@ Exporter::VideoParam::VideoParam()
     , codecIndex(-1)
     , colorIndex()
     , bps()
+    , pixfmt()
 {
 }
 
@@ -402,6 +403,7 @@ Exporter::Result Exporter::execute(const CommonParam& aCommon, const VideoParam&
         videoCodec.command.replace(QRegExp("\\$ofps(\\s|$)"), QString::number(mCommonParam.fps) + "\\1");
         videoCodec.command.replace(QRegExp("\\$ocodec(\\s|$)"), videoCodec.name + "\\1");
         videoCodec.command.replace(QRegExp("\\$opath(\\s|$)"), outPath + "\\1");
+        videoCodec.command.replace(QRegExp("\\$pixfmt(\\s|$)"), aVideo.pixfmt + "\\1");
         videoCodec.command.replace(QRegExp("\\$arg_colorfilter(\\s|$)"), (colorIndex == 0 ? QString("-vf colormatrix=bt601:bt709") : QString("")) + "\\1");
         videoCodec.command.replace(QRegExp("\\$arg_colorspace(\\s|$)"), QString("-colorspace ") + (colorIndex == 0 ? QString("bt709") : QString("smpte170m")) + "\\1");
 

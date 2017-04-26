@@ -3,6 +3,7 @@
 #include <QAction>
 #include <QMessageBox>
 #include <QDomDocument>
+#include "util/TextUtil.h"
 #include "cmnd/BasicCommands.h"
 #include "cmnd/ScopedMacro.h"
 #include "core/ObjectNodeUtil.h"
@@ -267,6 +268,8 @@ void MainMenuBar::setShowResourceWindow(bool aShow)
 
 void MainMenuBar::loadVideoFormats()
 {
+    using util::TextUtil;
+
     QDomDocument doc = getVideoExportDocument();
     QDomElement domRoot = doc.firstChildElement("video_encode");
 
@@ -303,15 +306,17 @@ void MainMenuBar::loadVideoFormats()
             if (codec.icodec.isEmpty()) codec.icodec = format.icodec;
             if (codec.command.isEmpty()) codec.command = format.command;
             {
-                auto hints = domCodec.attribute("hint").split(',');
-                for (QString hint : hints)
+                auto hints = TextUtil::splitAndTrim(domCodec.attribute("hint"), ',');
+                for (auto hint : hints)
                 {
-                    hint = hint.trimmed();
-                    if (hint == "lossless") codec.lossless = true;
+                    if      (hint == "lossless"   ) codec.lossless    = true;
                     else if (hint == "transparent") codec.transparent = true;
-                    else if (hint == "colorspace") codec.colorspace = true;
+                    else if (hint == "colorspace" ) codec.colorspace  = true;
+                    else if (hint == "gpuenc"     ) codec.gpuenc      = true;
                 }
             }
+            codec.pixfmts = TextUtil::splitAndTrim(domCodec.attribute("pixfmt"), ',');
+
             // add one codec
             mVideoFormats.back().codecs.push_back(codec);
 
