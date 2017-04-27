@@ -1,7 +1,8 @@
 #ifndef GUI_MAINDISPLAYSTYLE
 #define GUI_MAINDISPLAYSTYLE
 
-#include <QWidget>
+#include <QFont>
+#include <QFontMetrics>
 #include "util/NonCopyable.h"
 #include "ctrl/GraphicStyle.h"
 #include "gui/GUIResources.h"
@@ -14,20 +15,21 @@ class MainDisplayStyle
         , private util::NonCopyable
 {
 public:
-    MainDisplayStyle(QWidget& aWidget, GUIResources& aResources)
-        : mWidget(aWidget)
+    MainDisplayStyle(const QFont& aFont, GUIResources& aResources)
+        : mFont(aFont)
+        , mFontMetrics(aFont)
         , mResources(aResources)
     {
     }
 
     virtual QFont font() const
     {
-        return mWidget.font();
+        return mFont;
     }
 
     virtual QRect boundingRect(const QString& aText) const
     {
-        return mWidget.fontMetrics().boundingRect(aText);
+        return mFontMetrics.boundingRect(aText);
     }
 
     virtual QIcon icon(const QString& aName) const
@@ -36,7 +38,8 @@ public:
     }
 
 private:
-    QWidget& mWidget;
+    QFont mFont;
+    QFontMetrics mFontMetrics;
     GUIResources& mResources;
 };
 

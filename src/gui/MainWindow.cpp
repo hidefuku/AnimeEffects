@@ -129,7 +129,10 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
 
     // create main display
     {
-        mMainDisplayStyle.reset(new MainDisplayStyle(*this, mGUIResources));
+        auto font = this->font();
+        if (font.pixelSize() > 0) font.setPixelSize((int)(font.pixelSize() * 1.3f));
+        else font.setPointSizeF(font.pointSizeF() * 1.3f);
+        mMainDisplayStyle.reset(new MainDisplayStyle(font, mGUIResources));
         mMainDisplay = new MainDisplayWidget(mViaPoint, this);
         this->setCentralWidget(mMainDisplay);
 
