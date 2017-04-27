@@ -815,13 +815,9 @@ void PrimitiveDrawer::flushCommands()
             break;
         case Type_Pen:
             mAppliedState.set(command);
-            bindAppositeShader(index);
             break;
         case Type_Texture:
             mAppliedState.set(command);
-            bindAppositeShader(index);
-            ggl.glActiveTexture(GL_TEXTURE0);
-            ggl.glBindTexture(GL_TEXTURE_2D, mAppliedState.texture);
             break;
         case Type_Ability:
             if (mAppliedState.hasMSAA != command.attr.ability.hasMSAA)
@@ -868,6 +864,8 @@ void PrimitiveDrawer::bindAppositeShader(int aSlotIndex)
     if (nextType == ShaderType_Texture)
     {
         mTextureShader.program.bind();
+        ggl.glActiveTexture(GL_TEXTURE0);
+        ggl.glBindTexture(GL_TEXTURE_2D, mAppliedState.texture);
         ggl.glBindBuffer(GL_ARRAY_BUFFER, mPosSlotIds[aSlotIndex]);
         mTextureShader.program.setAttributeBuffer(mTextureShader.locPosition, GL_FLOAT, 2);
         ggl.glBindBuffer(GL_ARRAY_BUFFER, mSubSlotIds[aSlotIndex]);
