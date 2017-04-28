@@ -146,6 +146,7 @@ cmnd::Vector ObjectTree::createNodeDeleter(ObjectNode& aNode)
     return commands;
 }
 
+#if 0
 cmnd::Vector ObjectTree::createNodeMover(
         const util::TreePos& aFrom, const util::TreePos& aTo)
 {
@@ -183,6 +184,94 @@ cmnd::Vector ObjectTree::createNodeMover(
     commands.push(new MoveNodeCommand(*this, aFrom, aTo));
     return commands;
 }
+#endif
+
+cmnd::Vector ObjectTree::createNodesMover(const QVector<util::TreePos>& aRemoved, const QVector<util::TreePos>& aInserted)
+{
+    class MoveNodesCommand : public cmnd::Stable
+    {
+        util::LinkPointer<ObjectTree> mTree;
+        QVector<util::TreePos> mRemoved;
+        QVector<util::TreePos> mInserted;
+        BoneUnbindWorkspacePtr mWorkspace;
+
+    public:
+        MoveNodesCommand(ObjectTree& aTree,
+                         const QVector<util::TreePos>& aRemoved,
+                         const QVector<util::TreePos>& aInserted,
+                         const BoneUnbindWorkspacePtr& aWorkspace)
+            : mTree(aTree.pointee())
+            , mRemoved(aRemoved)
+            , mInserted(aInserted)
+            , mWorkspace(aWorkspace)
+        {
+        }
+
+        virtual void exec()
+        {
+            redo();
+            mWorkspace.reset();
+        }
+
+        virtual void undo()
+        {
+            if (!mTree) return;
+
+            QVector<ObjectNode*> nodes;
+            for (auto itr = mInserted.rbegin(); itr != mInserted.rend(); ++itr)
+            {
+                ObjectNode* node = mTree->eraseNode(*itr);
+                XC_PTR_ASSERT(node);
+                nodes.push_back(node);
+            }
+            {
+                auto nodeItr = nodes.begin();
+                for (auto itr = mRemoved.rbegin(); itr != mRemoved.rend(); ++itr)
+                {
+                    mTree->insertNode(*itr, *nodeItr);
+                    ++nodeItr;
+                }
+            }
+        }
+
+        virtual void redo()
+        {
+            if (!mTree) return;
+
+            QVector<ObjectNode*> nodes;
+            for (auto itr = mRemoved.begin(); itr != mRemoved.end(); ++itr)
+            {
+                // record one node
+                if (mWorkspace)
+                {
+                    ObjectNode* node = mTree->findNode(*itr);
+                    XC_PTR_ASSERT(node);
+                    mWorkspace->push(*node);
+                }
+                // erase one node
+                {
+                    ObjectNode* node = mTree->eraseNode(*itr);
+                    XC_PTR_ASSERT(node);
+                    nodes.push_back(node);
+                }
+            }
+            {
+                auto nodeItr =nodes.begin();
+                for (auto itr = mInserted.begin(); itr != mInserted.end(); ++itr)
+                {
+                    mTree->insertNode(*itr, *nodeItr);
+                    ++nodeItr;
+                }
+            }
+        }
+    };
+
+    cmnd::Vector commands;
+    BoneUnbindWorkspacePtr workspace = std::make_shared<BoneUnbindWorkspace>();
+    commands.push(new MoveNodesCommand(*this, aRemoved, aInserted, workspace));
+    commands.push(BoneKeyUpdater::createNodesUnbinderForMove(*this, workspace));
+    return commands;
+}
 
 ObjectNode* ObjectTree::findNode(const util::TreePos& aPos)
 {
@@ -194,12 +283,12 @@ ObjectNode* ObjectTree::findNode(const util::TreePos& aPos)
     for (int i = 1; i < aPos.depth() - 1; ++i)
     {
         itr = current->children().at(aPos.row(i));
-        XC_ASSERT(itr != current->children().end());
+        if (itr == current->children().end()) return nullptr;
         current = *itr;
     }
 
     itr = current->children().at(aPos.tailRow());
-    XC_ASSERT(itr != current->children().end());
+    if (itr == current->children().end()) return nullptr;
 
     ObjectNode* target = *itr;
     return target;
@@ -217,6 +306,7 @@ ObjectNode* ObjectTree::eraseNode(const util::TreePos& aPos)
     }
 
     itr = current->children().at(aPos.tailRow());
+    //qDebug() << "erase" << current->name() << aPos.tailRow() << (itr != current->children().end() ? (*itr)->name() : "invalid");
 
     ObjectNode* target = *itr;
     current->children().erase(itr);
@@ -237,6 +327,7 @@ void ObjectTree::insertNode(const util::TreePos& aPos, ObjectNode* aNode)
 
     itr = current->children().at(aPos.tailRow());
     current->children().insert(itr, aNode);
+    //qDebug() << "insert" << current->name() << aPos.tailRow() << aNode->name();
 }
 
 cmnd::Vector ObjectTree::createResourceUpdater(const ResourceEvent& aEvent)

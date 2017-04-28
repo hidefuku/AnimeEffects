@@ -60,6 +60,7 @@ private:
     virtual void showEvent(QShowEvent* aEvent);
     virtual void dragMoveEvent(QDragMoveEvent* aEvent);
     virtual void dropEvent(QDropEvent* aEvent);
+    virtual void rowsAboutToBeRemoved(const QModelIndex& aParent, int aStart, int aEnd);
     virtual void rowsInserted(const QModelIndex& aParent, int aStart, int aEnd);
     virtual void scrollContentsBy(int aDx, int aDy);
     virtual void resizeEvent(QResizeEvent* aEvent);
@@ -69,10 +70,6 @@ private:
     void addItemRecursive(QTreeWidgetItem* aItem, core::ObjectNode* aNode);
     obj::Item* createFolderItem(core::ObjectNode& aNode);
     obj::Item* createFileItem(core::ObjectNode& aNode);
-    void storeInsertion(
-            const util::TreePos& aFrom,
-            const util::TreePos& aTo,
-            QTreeWidgetItem* aItem);
     QModelIndex cheatDragDropPos(QPoint& aPos);
     QPoint treeTopLeftPosition() const;
     int scrollHeight() const { return -treeTopLeftPosition().y(); }
@@ -99,7 +96,8 @@ private:
     util::SlotId mTimeLineSlot;
 
     bool mStoreInsert;
-    std::vector<ItemInfo> mInserts;
+    QVector<util::TreePos> mRemovedPositions;
+    QVector<util::TreePos> mInsertedPositions;
     util::PlacePointer<cmnd::ScopedMacro> mMacroScope;
     core::ObjectTreeNotifier* mObjTreeNotifier;
     QModelIndex mDragIndex;

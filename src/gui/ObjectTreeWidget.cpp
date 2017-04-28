@@ -40,7 +40,8 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
     , mProject()
     , mTimeLineSlot()
     , mStoreInsert(false)
-    , mInserts()
+    , mInsertedPositions()
+    , mRemovedPositions()
     , mMacroScope()
     , mObjTreeNotifier()
     , mDragIndex()
@@ -259,38 +260,6 @@ obj::Item* ObjectTreeWidget::createFileItem(core::ObjectNode& aNode)
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(kItemColumn, aNode.isVisible() ? Qt::Checked : Qt::Unchecked);
     return item;
-}
-
-void ObjectTreeWidget::storeInsertion(
-        const util::TreePos& aFrom, const util::TreePos& aTo, QTreeWidgetItem* aItem)
-{
-    if (aFrom == aTo) return;
-
-    if (mProject)
-    {
-        XC_ASSERT(aFrom.row(0) == 0 && aTo.row(0) == 0);
-
-        // firstly, create macro
-        if (!mMacroScope)
-        {
-            mObjTreeNotifier = new core::ObjectTreeNotifier(*mProject);
-            mObjTreeNotifier->event().setType(core::ObjectTreeEvent::Type_Move);
-
-            mMacroScope.construct(mProject->commandStack(), CmndName::tr("move a object"));
-            mMacroScope->grabListener(mObjTreeNotifier);
-        }
-        // record target
-        auto objItem = obj::Item::cast(aItem);
-        if (objItem && !objItem->isTopNode())
-        {
-            core::ObjectNode& node = objItem->node();
-            mObjTreeNotifier->event().pushTarget(node.parent(), node);
-        }
-
-        // push command
-        mProject->commandStack().push(new obj::MoveItem(*this, aFrom, aTo));
-        mProject->commandStack().push(mProject->objectTree().createNodeMover(aFrom, aTo));
-    }
 }
 
 QModelIndex ObjectTreeWidget::cheatDragDropPos(QPoint& aPos)
@@ -838,21 +807,27 @@ void ObjectTreeWidget::dropEvent(QDropEvent* aEvent)
 
     if (this->visualRect(cursorIndex).contains(aEvent->pos()))
     {
-        mInserts.clear();
+        mRemovedPositions.clear();
+        mInsertedPositions.clear();
 
-        QList<QTreeWidgetItem*> selected = this->selectedItems();
-        for (QList<QTreeWidgetItem*>::iterator itr = selected.begin(); itr != selected.end(); ++itr)
-        {
-            util::TreePos pos(this->indexFromItem(*itr));
-            mInserts.push_back(ItemInfo(*itr, pos));
-        }
-
+        // begin move
         mStoreInsert = true;
         QTreeWidget::dropEvent(&dummyEvent);
         mStoreInsert = false;
 
+        // finalize move command
         if (mMacroScope)
         {
+            // item mover
+            mProject->commandStack().push(
+                        new obj::MoveItems(
+                            *this, mRemovedPositions, mInsertedPositions));
+
+            // node mover
+            mProject->commandStack().push(
+                        mProject->objectTree().createNodesMover(
+                            mRemovedPositions, mInsertedPositions));
+
             mMacroScope->grabListener(new obj::RestructureNotifier(*this));
             mMacroScope.destruct();
         }
@@ -863,6 +838,42 @@ void ObjectTreeWidget::dropEvent(QDropEvent* aEvent)
     }
 }
 
+void ObjectTreeWidget::rowsAboutToBeRemoved(const QModelIndex& aParent, int aStart, int aEnd)
+{
+    if (mStoreInsert)
+    {
+        XC_ASSERT(aStart == aEnd);
+        QTreeWidgetItem* item = this->itemFromIndex(aParent.child(aStart, kItemColumn));
+        util::TreePos removePos(this->indexFromItem(item));
+        XC_ASSERT(removePos.isValid());
+        //qDebug() << "remove"; removePos.dump();
+
+        mRemovedPositions.push_back(removePos);
+
+        // firstly, create macro
+        if (mProject && !mMacroScope)
+        {
+            mObjTreeNotifier = new core::ObjectTreeNotifier(*mProject);
+            mObjTreeNotifier->event().setType(core::ObjectTreeEvent::Type_Move);
+
+            mMacroScope.construct(mProject->commandStack(), CmndName::tr("move a object"));
+            mMacroScope->grabListener(mObjTreeNotifier);
+        }
+        // record target
+        if (mMacroScope)
+        {
+            auto objItem = obj::Item::cast(item);
+            if (objItem)
+            {
+                core::ObjectNode& node = objItem->node();
+                mObjTreeNotifier->event().pushTarget(node.parent(), node);
+                //qDebug() << "node" << node.name() << (node.parent() ? node.parent()->name() : "");
+            }
+        }
+    }
+    QTreeWidget::rowsAboutToBeRemoved(aParent, aStart, aEnd);
+}
+
 void ObjectTreeWidget::rowsInserted(const QModelIndex& aParent, int aStart, int aEnd)
 {
     if (mStoreInsert)
@@ -871,32 +882,9 @@ void ObjectTreeWidget::rowsInserted(const QModelIndex& aParent, int aStart, int 
         QTreeWidgetItem* item = this->itemFromIndex(aParent.child(aStart, kItemColumn));
         util::TreePos insertPos(this->indexFromItem(item));
         XC_ASSERT(insertPos.isValid());
+        //qDebug() << "insert"; insertPos.dump();
 
-        // find item
-        util::TreePos removePos;
-        for (size_t i = 0; i < mInserts.size(); ++i)
-        {
-            if (mInserts[i].ptr && mInserts[i].ptr == item)
-            {
-                removePos = mInserts[i].pos;
-                // record insertion
-                storeInsertion(removePos, insertPos, item);
-                mInserts[i].ptr = nullptr;
-                break;
-            }
-        }
-        // update pos
-        if (removePos.isValid())
-        {
-            for (size_t i = 0; i < mInserts.size(); ++i)
-            {
-                if (mInserts[i].ptr)
-                {
-                    mInserts[i].pos.updateByRemove(removePos);
-                    mInserts[i].pos.updateByInsert(insertPos);
-                }
-            }
-        }
+        mInsertedPositions.push_back(insertPos);
     }
     QTreeWidget::rowsInserted(aParent, aStart, aEnd);
 }

@@ -11,9 +11,28 @@ namespace core { class ObjectTree; }
 namespace core
 {
 
+//-------------------------------------------------------------------------------------------------
+class BoneUnbindWorkspace
+{
+public:
+    struct Unit
+    {
+        Unit();
+        QVector<ObjectNode*> parents;
+        ObjectNode* node;
+    };
+    BoneUnbindWorkspace();
+    QList<Unit> units;
+
+    void push(ObjectNode& aNode);
+};
+typedef std::shared_ptr<BoneUnbindWorkspace> BoneUnbindWorkspacePtr;
+
+//-------------------------------------------------------------------------------------------------
 class BoneKeyUpdater
 {
 public:
+
     static void onTimeLineModified(TimeLineEvent& aEvent);
 
     static void onTreeRestructured(ObjectTreeEvent& aEvent);
@@ -24,8 +43,10 @@ public:
 
      // for tree restructuring
     static cmnd::Base* createNodeUnbinderForDelete(ObjectNode& aNode);
-    static cmnd::Base* createNodeUnbinderForMove(
-            ObjectTree& aTree, const util::TreePos& aFrom, const util::TreePos& aTo);
+    //static cmnd::Base* createNodeUnbinderForMove(
+    //        ObjectTree& aTree, const util::TreePos& aFrom, const util::TreePos& aTo);
+    static cmnd::Base* createNodesUnbinderForMove(
+            ObjectTree& aTree, const BoneUnbindWorkspacePtr& aWorkspace);
 
 private:
     static void onTimeLineModified(

@@ -24,6 +24,22 @@ private:
     util::TreePos mTo;
 };
 
+class MoveItems : public cmnd::Stable
+{
+public:
+    typedef QVector<util::TreePos> Positions;
+    MoveItems(ObjectTreeWidget& aTree,
+              const Positions& aRemoved,
+              const Positions& aInserted);
+    virtual void exec();
+    virtual void undo();
+    virtual void redo();
+
+private:
+    ObjectTreeWidget& mTree;
+    Positions mRemoved;
+    Positions mInserted;
+};
 
 } // namespace obj
 } // namespace gui

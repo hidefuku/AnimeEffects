@@ -23,6 +23,31 @@ bool keyAffectsToInfluenceMap(TimeKeyType aKeyType)
 
 }
 
+//-------------------------------------------------------------------------------------------------
+BoneUnbindWorkspace::BoneUnbindWorkspace()
+    : units()
+{
+}
+
+void BoneUnbindWorkspace::push(ObjectNode& aNode)
+{
+    units.push_back(Unit());
+    auto& unit = units.back();
+    unit.node = &aNode;
+    for (auto parent = aNode.parent(); parent; parent = parent->parent())
+    {
+        if (!parent->timeLine() || parent->timeLine()->isEmpty(TimeKeyType_Bone)) continue;
+        unit.parents.push_back(parent);
+    }
+}
+
+BoneUnbindWorkspace::Unit::Unit()
+    : parents()
+    , node()
+{
+}
+
+//-------------------------------------------------------------------------------------------------
 void BoneKeyUpdater::onTimeLineModified(TimeLineEvent& aEvent)
 {
     bool resetCacheList = false;
@@ -189,9 +214,8 @@ public:
 
     bool add(Bone2& aBone)
     {
-        const int index = aBone.bindingNodes().indexOf(mNode);
-        if (index < 0) return false;
-        Pos pos = { &aBone, index };
+        if (!aBone.bindingNodes().contains(mNode)) return false;
+        Pos pos = { &aBone, -1 };
         mPositions.push_back(pos);
         return true;
     }
@@ -210,8 +234,14 @@ public:
 
     void exec()
     {
-        for (auto pos : mPositions)
+        for (auto& pos : mPositions)
         {
+            if (pos.index < 0)
+            {
+                pos.index = pos.bone->bindingNodes().indexOf(mNode);
+                XC_ASSERT(pos.index >= 0);
+            }
+            //qDebug() << "exec unbind" << mNode->name() << pos.bone << pos.index;
             pos.bone->bindingNodes().removeAt(pos.index);
         }
     }
@@ -220,6 +250,8 @@ public:
     {
         for (auto pos : mPositions)
         {
+            XC_ASSERT(pos.index >= 0);
+            //qDebug() << "undo unbind" << mNode->name();
             pos.bone->bindingNodes().insert(pos.index, mNode);
         }
     }
@@ -271,6 +303,7 @@ cmnd::Base* BoneKeyUpdater::createNodeUnbinderForDelete(ObjectNode& aNode)
     return new UnbinderForDelete(aNode);
 }
 
+#if 0
 cmnd::Base* BoneKeyUpdater::createNodeUnbinderForMove(
         ObjectTree& aTree, const util::TreePos& aFrom, const util::TreePos& aTo)
 {
@@ -330,6 +363,94 @@ cmnd::Base* BoneKeyUpdater::createNodeUnbinderForMove(
     };
 
     return new UnbinderForMove(aTree, aFrom, aTo);
+}
+#endif
+
+cmnd::Base* BoneKeyUpdater::createNodesUnbinderForMove(
+        ObjectTree& aTree, const BoneUnbindWorkspacePtr& aWorkspace)
+{
+    class NodesUnbinderForMove : public cmnd::Stable
+    {
+        ObjectTree& mTree;
+        BoneUnbindWorkspacePtr mWorkspace;
+        QList<Unbinder*> mUnbinders;
+    public:
+        NodesUnbinderForMove(ObjectTree& aTree, const BoneUnbindWorkspacePtr& aWorkspace)
+            : mTree(aTree)
+            , mWorkspace(aWorkspace)
+            , mUnbinders()
+        {
+        }
+
+        ~NodesUnbinderForMove()
+        {
+            qDeleteAll(mUnbinders);
+        }
+
+        virtual void exec()
+        {
+            using util::TreeUtil;
+            XC_ASSERT(mWorkspace);
+
+            // each moved nodes
+            for (auto& unit : mWorkspace->units)
+            {
+                // all children of the node
+                ObjectNode::Iterator nodeItr(unit.node);
+                while (nodeItr.hasNext())
+                {
+                    auto node = nodeItr.next();
+                    XC_PTR_ASSERT(node);
+                    Unbinder* unbinder = nullptr;
+                    // all parent node which has bone
+                    for (auto parent : unit.parents)
+                    {
+                        XC_PTR_ASSERT(parent);
+                        XC_PTR_ASSERT(parent->timeLine());
+                        if (TreeUtil::leftContainsRight<ObjectNode>(*parent, *node))
+                        {
+                            continue;
+                        }
+
+                        auto& map = parent->timeLine()->map(TimeKeyType_Bone);
+                        for (auto itr = map.begin(); itr != map.end(); ++itr)
+                        {
+                            TimeKey* key = itr.value();
+                            TIMEKEY_PTR_TYPE_ASSERT(key, Bone);
+
+                            if (!unbinder)
+                            {
+                                unbinder = new Unbinder();
+                                mUnbinders.push_back(unbinder);
+                                unbinder->initNode(*node);
+                            }
+                            unbinder->addAll(*((BoneKey*)key));
+                        }
+                    }
+                }
+            }
+            mWorkspace.reset();
+            redo();
+        }
+
+        virtual void redo()
+        {
+            for (auto unbinder : mUnbinders)
+            {
+                unbinder->exec();
+            }
+        }
+
+        virtual void undo()
+        {
+            for (auto unbinder : mUnbinders)
+            {
+                unbinder->undo();
+            }
+        }
+    };
+
+    return new NodesUnbinderForMove(aTree, aWorkspace);
 }
 
 } // namespace core

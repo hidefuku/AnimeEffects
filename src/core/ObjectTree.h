@@ -45,7 +45,8 @@ public:
     void render(const RenderInfo& aRenderInfo, bool aUseWorkingCache);
 
     cmnd::Vector createNodeDeleter(ObjectNode& aNode);
-    cmnd::Vector createNodeMover(const util::TreePos& aFrom, const util::TreePos& aTo);
+    //cmnd::Vector createNodeMover(const util::TreePos& aFrom, const util::TreePos& aTo);
+    cmnd::Vector createNodesMover(const QVector<util::TreePos>& aRemoved, const QVector<util::TreePos>& aInserted);
     cmnd::Vector createResourceUpdater(const ResourceEvent& aEvent);
 
     void onTimeLineModified(TimeLineEvent& aEvent, bool aIsUndo);
