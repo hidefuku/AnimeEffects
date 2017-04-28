@@ -129,9 +129,14 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
 
     // create main display
     {
+#if defined(Q_OS_WIN)
+        const float fontScale = 1.5f;
+#else
+        const float fontScale = 1.3f;
+#endif
         auto font = this->font();
-        if (font.pixelSize() > 0) font.setPixelSize((int)(font.pixelSize() * 1.3f));
-        else font.setPointSizeF(font.pointSizeF() * 1.3f);
+        if (font.pixelSize() > 0) font.setPixelSize((int)(font.pixelSize() * fontScale));
+        else font.setPointSizeF(font.pointSizeF() * fontScale);
         mMainDisplayStyle.reset(new MainDisplayStyle(font, mGUIResources));
         mMainDisplay = new MainDisplayWidget(mViaPoint, this);
         this->setCentralWidget(mMainDisplay);
