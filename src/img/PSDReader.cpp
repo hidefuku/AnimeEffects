@@ -499,13 +499,9 @@ bool PSDReader::loadLayerAndMaskInfo()
 
 #if 0
         // entry temp setting
-        if (layer.name.size() >= 3 && layer.name.at(0) == '<' && layer.name.at(1) == '/' && layer.name.back() == '>')
+        if (layer->name == "</Layer group>")
         {
-            layer.entryType = PSDFormat::LayerEntryType_Bounding;
-        }
-        else
-        {
-            layer.entryType = ((layer.flags & 0x10) != 0) ? PSDFormat::LayerEntryType_CloseFolder : PSDFormat::LayerEntryType_Layer;
+            layer->entryType = PSDFormat::LayerEntryType_Bounding;
         }
 #endif
         // additional layer info
@@ -632,6 +628,7 @@ bool PSDReader::loadAdditionalLayerInfo(
             aLayer->entryType = (PSDFormat::LayerEntryType)readUInt32();
             if (checkFailure()) return false;
 
+            // check value validity
             if (aLayer->entryType >= PSDFormat::LayerEntryType_TERM)
             {
                 mSection += "/additional layer info/section divider setting/entry";
@@ -646,6 +643,8 @@ bool PSDReader::loadAdditionalLayerInfo(
                 // signature
                 std::string signature = readString(4);
                 if (checkFailure()) return false;
+
+                // check value validity
                 if (signature != "8BIM")
                 {
                     mSection += "/additional layer info/signature/section divider setting/signature";
@@ -656,6 +655,26 @@ bool PSDReader::loadAdditionalLayerInfo(
                 aLayer->entryKey = readString(4);
                 if (checkFailure()) return false;
             }
+
+            skipTo(dataBeginPos);
+        }
+        else if (aLayer && info->key == "lsdk" && info->dataLength >= 4)
+        {   //Nested Section divider setting (Undocumented option)
+
+            std::ios::pos_type dataBeginPos = tellg();
+            // entry
+            aLayer->entryType = (PSDFormat::LayerEntryType)readUInt32();
+            if (checkFailure()) return false;
+
+            // check value validity
+            if (aLayer->entryType >= PSDFormat::LayerEntryType_TERM)
+            {
+                mSection += "/additional layer info/nested section divider setting/entry";
+                mValue = std::to_string(aLayer->entryType);
+                mResultCode = ResultCode_InvalidValue;
+                return false;
+            }
+            if (checkFailure()) return false;
 
             skipTo(dataBeginPos);
         }
