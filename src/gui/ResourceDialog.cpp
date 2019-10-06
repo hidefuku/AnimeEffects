@@ -44,6 +44,8 @@ ResourceDialog::ResourceDialog(ViaPoint& aViaPoint, bool aModal, QWidget* aParen
 
     // resource tree
     mTree = new ResourceTreeWidget(aViaPoint, !aModal, this);
+    mTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
     this->setMainWidget(mTree, false);
 
     // modal only

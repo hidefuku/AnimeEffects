@@ -567,41 +567,44 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
         // create command
         if (dialog->hasValidNode())
         {
-            // get resource
-            auto resNode = dialog->nodeList().first();
-            if (!resNode) return;
-            XC_ASSERT(resNode->data().hasImage());
-
-            // create node
-            core::LayerNode* ptr = new core::LayerNode(
-                        resNode->data().identifier(),
-                        mProject->objectTree().shaderHolder());
-            ptr->setVisibility(true);
-            ptr->setDefaultImage(resNode->handle());
-            ptr->setDefaultPosture(QVector2D());
-            ptr->setDefaultDepth(depth);
-            ptr->setDefaultOpacity(1.0f); // @todo support default opacity
-
-
-            cmnd::ScopedMacro macro(mProject->commandStack(),
-                                    CmndName::tr("create a layer object"));
-            // notifier
-            {
-                auto coreNotifier = new core::ObjectTreeNotifier(*mProject);
-                coreNotifier->event().setType(core::ObjectTreeEvent::Type_Add);
-                coreNotifier->event().pushTarget(parent, *ptr);
-                macro.grabListener(coreNotifier);
-            }
-            macro.grabListener(new obj::RestructureNotifier(*this));
-
-            // create commands
-            mProject->commandStack().push(new cmnd::GrabNewObject<core::LayerNode>(ptr));
-            mProject->commandStack().push(new cmnd::InsertTree<core::ObjectNode>(&(parent->children()), index, ptr));
-
-            // create gui commands
-            auto itemPtr = createFileItem(*ptr);
-            mProject->commandStack().push(new cmnd::GrabNewObject<obj::Item>(itemPtr));
-            mProject->commandStack().push(new obj::InsertItem(*parentItem, itemIndex, *itemPtr));
+			int node_count = dialog->nodeList().count();
+			for(int i = 0; i < node_count; i++){
+				// get resource
+				auto resNode = dialog->nodeList().at(i);
+				if (!resNode) return;
+				XC_ASSERT(resNode->data().hasImage());
+	
+				// create node
+				core::LayerNode* ptr = new core::LayerNode(
+							resNode->data().identifier(),
+							mProject->objectTree().shaderHolder());
+				ptr->setVisibility(true);
+				ptr->setDefaultImage(resNode->handle());
+				ptr->setDefaultPosture(QVector2D());
+				ptr->setDefaultDepth(depth);
+				ptr->setDefaultOpacity(1.0f); // @todo support default opacity
+	
+	
+				cmnd::ScopedMacro macro(mProject->commandStack(),
+										CmndName::tr("create a layer object"));
+				// notifier
+				{
+					auto coreNotifier = new core::ObjectTreeNotifier(*mProject);
+					coreNotifier->event().setType(core::ObjectTreeEvent::Type_Add);
+					coreNotifier->event().pushTarget(parent, *ptr);
+					macro.grabListener(coreNotifier);
+				}
+				macro.grabListener(new obj::RestructureNotifier(*this));
+	
+				// create commands
+				mProject->commandStack().push(new cmnd::GrabNewObject<core::LayerNode>(ptr));
+				mProject->commandStack().push(new cmnd::InsertTree<core::ObjectNode>(&(parent->children()), index, ptr));
+	
+				// create gui commands
+				auto itemPtr = createFileItem(*ptr);
+				mProject->commandStack().push(new cmnd::GrabNewObject<obj::Item>(itemPtr));
+				mProject->commandStack().push(new obj::InsertItem(*parentItem, itemIndex, *itemPtr));
+			}
         }
     }
 }
