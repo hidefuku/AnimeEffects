@@ -40,8 +40,8 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
     , mProject()
     , mTimeLineSlot()
     , mStoreInsert(false)
-    , mInsertedPositions()
     , mRemovedPositions()
+	, mInsertedPositions()
     , mMacroScope()
     , mObjTreeNotifier()
     , mDragIndex()
@@ -124,7 +124,7 @@ void ObjectTreeWidget::setProject(core::Project* aProject)
                 trees->push_back(this->takeTopLevelItem(0));
             }
             // save
-            auto hook = (ProjectHook*)mProject->hook();
+			auto hook = static_cast<ProjectHook*>(mProject->hook());
             hook->grabObjectTrees(trees.take());
         }
     }
@@ -148,7 +148,7 @@ void ObjectTreeWidget::setProject(core::Project* aProject)
         mTimeLineSlot = mProject->onTimeLineModified.connect(
                     this, &ObjectTreeWidget::onTimeLineModified);
 
-        auto hook = (ProjectHook*)mProject->hook();
+		auto hook = static_cast<ProjectHook*>(mProject->hook());
         // load trees
         if (hook && hook->hasObjectTrees())
         {
@@ -531,7 +531,7 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
             parent = mProject->objectTree().topNode();
             XC_PTR_ASSERT(parent);
 
-            index = (int)parent->children().size();
+			index = static_cast<int>(parent->children().size());
             if (index > 0)
             {
                 auto prevNode = parent->children().back();
@@ -628,7 +628,7 @@ void ObjectTreeWidget::onFolderActionTriggered(bool)
             parent = mProject->objectTree().topNode();
             XC_PTR_ASSERT(parent);
 
-            index = (int)parent->children().size();
+			index = static_cast<int>(parent->children().size());
             if (index > 0)
             {
                 auto prevNode = parent->children().back();
