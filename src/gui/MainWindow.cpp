@@ -212,7 +212,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
         {
             dockWidget->setStyleSheet(QTextStream(&stylesheet).readAll());
         }
-        mTool = new ToolWidget(mViaPoint, mGUIResources, QSize(192, 136), dockWidget);
+		mTool = new ToolWidget(mViaPoint, mGUIResources, *mKeyCommandMap, QSize(192, 136), dockWidget);
         dockWidget->setWidget(mTool);
     }
 

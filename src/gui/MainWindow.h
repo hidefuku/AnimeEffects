@@ -66,7 +66,7 @@ private:
     ctrl::System& mSystem;
     GUIResources& mGUIResources;
     ViaPoint mViaPoint;
-    QScopedPointer<KeyCommandMap> mKeyCommandMap;
+	QScopedPointer<KeyCommandMap> mKeyCommandMap;
     QScopedPointer<KeyCommandInvoker> mKeyCommandInvoker;
     MouseSetting mMouseSetting;
     MainMenuBar* mMainMenuBar;
