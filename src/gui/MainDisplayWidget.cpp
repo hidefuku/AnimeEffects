@@ -97,6 +97,34 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
             }
         }
 
+		// rotate canvas clockwise
+		{
+			auto key = mViaPoint.keyCommandMap()->get("RotateCanvas15Clockwise");
+			if (key)
+			{
+
+				key->invoker = [=]()
+				{
+					mCanvasMover.rotate(qDegreesToRadians(15.0f));
+					updateRender();
+				};
+			}
+		}
+
+		// rotate canvas anti-clockwise
+		{
+			auto key = mViaPoint.keyCommandMap()->get("RotateCanvas15AntiClockwise");
+			if (key)
+			{
+
+				key->invoker = [=]()
+				{
+					mCanvasMover.rotate(qDegreesToRadians(-15.0f));
+					updateRender();
+				};
+			}
+		}
+
         // reset canvas angle
         {
             auto key = mViaPoint.keyCommandMap()->get("ResetCanvasAngle");
@@ -161,7 +189,7 @@ void MainDisplayWidget::resetCamera()
         camera.setCenter(QVector2D(scrSize.width() * 0.5f, scrSize.height() * 0.5f));
         if (scrSize.width() > 0 && scrSize.height() > 0 && imgSize.width() > 0 && imgSize.height() > 0)
         {
-            auto scaleX = (float)scrSize.width() / imgSize.width();
+			auto scaleX = (float)scrSize.width() / imgSize.width();
             auto scaleY = (float)scrSize.height() / imgSize.height();
             auto minScale = scaleX < scaleY ? scaleX : scaleY;
             camera.setScale(minScale);
@@ -490,11 +518,11 @@ void MainDisplayWidget::onViewSettingChanged(const MainViewSetting& aSetting)
     }
     else if (mViewSetting.rotateViewACW)
     {
-        mCanvasMover.rotate((float)(-M_PI / 18.0));
+		mCanvasMover.rotate(qDegreesToRadians(-15.0f));
     }
     else if (mViewSetting.rotateViewCW)
     {
-        mCanvasMover.rotate((float)(M_PI / 18.0));
+		mCanvasMover.rotate(qDegreesToRadians(15.0f));
     }
 
     updateRender();
