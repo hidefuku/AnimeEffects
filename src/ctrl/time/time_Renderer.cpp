@@ -89,6 +89,7 @@ void Renderer::renderLines(const QVector<TimeLineRow>& aRows, const QRect& aCame
 void Renderer::renderHeader(int aHeight, int aFps)
 {
     const QRect cameraRect(-mCamera.leftTopPos().toPoint(), mCamera.screenSize());
+    const QSettings settings;
 
     mPainter.setRenderHint(QPainter::Antialiasing, false);
 
@@ -110,6 +111,9 @@ void Renderer::renderHeader(int aHeight, int aFps)
         const QPoint lt(mMargin, cameraRect.top());
         const QPoint rb = lt + QPoint(mScale->maxPixelWidth(), aHeight);
 
+        const TimeFormat timeFormat(mRange,aFps);
+        const TimeFormatType timeScaleFormatVar = static_cast<TimeFormatType>(settings.value("generalsettings/ui/timescaleformat").toInt());
+
         mPainter.setPen(QPen(kBrush, 1));
 
         for (int i = mRange.min(); i <= mRange.max(); ++i)
@@ -121,8 +125,7 @@ void Renderer::renderHeader(int aHeight, int aFps)
 
             if (attr.showNumber)
             {
-                QString number;
-                number.sprintf("%.1f", (float)i / aFps);
+                QString number = timeFormat.frameToString(i, timeScaleFormatVar);
                 const int width = numberWidth * number.size();
                 const int left = pos.x() - (width >> 1);
                 const int top = lt.y() - 1;

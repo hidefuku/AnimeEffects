@@ -31,6 +31,9 @@ public:
     PlayBackWidget& playBackWidget() { return *mPlayBack; }
     const PlayBackWidget& playBackWidget() const { return *mPlayBack; }
 
+    //InfoLabelWidget& infoLabelWidget() { return *mInfoLabel; }
+    //const InfoLabelWidget& infoLabelWidget() const { return *mInfoLabel; }
+
     // from Animator
     virtual core::Frame currentFrame() const;
     virtual void stop();

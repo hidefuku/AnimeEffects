@@ -3,6 +3,7 @@
 
 #include <QComboBox>
 #include "gui/EasyDialog.h"
+#include "core/TimeFormat.h"
 
 namespace gui
 {
@@ -18,6 +19,9 @@ private:
 
     int mInitialLanguageIndex;
     QComboBox* mLanguageBox;
+
+    int mInitialTimeScaleFormatIndex;
+    QComboBox* mTimeScaleFormatBox;
 };
 
 } // namespace gui

@@ -16,7 +16,10 @@ TargetWidget::TargetWidget(ViaPoint& aViaPoint, GUIResources& aResources, QWidge
     mTimeLine = new TimeLineWidget(aViaPoint, *this, this);
     mPlayBack = new PlayBackWidget(aResources, this);
 
-    mInfoLabel = new InfoLabelWidget(aViaPoint, aResources, this);
+    mInfoLabel = new InfoLabelWidget(aResources, this);
+
+    mTimeLine->onFrameUpdated.connect(mInfoLabel, &InfoLabelWidget::onUpdate);
+    //mTimeLine->onProjectAttributeUpdated.connect(mInfoLabel, &InfoLabelWidget::onUpdate);
 
     mHorizontalSplitter->addWidget(mObjTree);
     mHorizontalSplitter->addWidget(mTimeLine);
@@ -51,6 +54,7 @@ void TargetWidget::setProject(core::Project* aProject)
     mProject = aProject;
     mObjTree->setProject(aProject);
     mTimeLine->setProject(aProject);
+    mInfoLabel->setProject(aProject);
 }
 
 core::Frame TargetWidget::currentFrame() const

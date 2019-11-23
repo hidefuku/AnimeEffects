@@ -34,6 +34,7 @@ public:
     void setFrame(core::Frame aFrame);
     core::Frame currentFrame() const;
 
+    util::Signaler<void()> onCursorUpdated;
     util::Signaler<void()> onFrameUpdated;
     util::Signaler<void(bool)> onPlayBackStateChanged;
 

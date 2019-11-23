@@ -3,9 +3,11 @@
 
 #include <QVector>
 #include <QPainter>
+#include <QSettings>
 #include "util/Range.h"
 #include "core/CameraInfo.h"
 #include "core/ObjectNode.h"
+#include "core/TimeFormat.h"
 #include "ctrl/TimeLineRow.h"
 #include "ctrl/time/time_Scaler.h"
 

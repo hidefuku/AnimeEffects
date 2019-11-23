@@ -1,3 +1,4 @@
+#include <QApplication>
 #include <QSettings>
 #include <QGroupBox>
 #include <QFormLayout>
@@ -9,6 +10,7 @@ namespace
 {
 
 static const int kLanguageTypeCount = 3;
+static const int kTimeScaleFormatTypeCount = 5;
 
 int languageToIndex(const QString& aLanguage)
 {
@@ -29,6 +31,19 @@ QString indexToLanguage(int aIndex)
     }
 }
 
+QString indexToTimeScaleFormat(int aIndex)
+{
+    switch (aIndex)
+    {
+    case core::TimeFormatType::TimeFormatType_Frames_From0:   return QCoreApplication::translate("GeneralSettingsDialog", "Frame number (from 0)");
+    case core::TimeFormatType::TimeFormatType_Frames_From1:   return QCoreApplication::translate("GeneralSettingsDialog", "Frame number (from 1)");
+    case core::TimeFormatType::TimeFormatType_Relative_FPS:   return QCoreApplication::translate("GeneralSettingsDialog", "Relative to FPS (1.0 = 60.0)");
+    case core::TimeFormatType::TimeFormatType_Seconds_Frames: return QCoreApplication::translate("GeneralSettingsDialog", "Seconds + Frame");
+    case core::TimeFormatType::TimeFormatType_Timecode_SMPTE: return QCoreApplication::translate("GeneralSettingsDialog", "Timecode (SMPTE) (HH:MM:SS:FF)");
+    default: return "";
+    }
+}
+
 }
 
 namespace gui
@@ -38,6 +53,8 @@ GeneralSettingDialog::GeneralSettingDialog(QWidget* aParent)
     : EasyDialog(tr("General Settings"), aParent)
     , mInitialLanguageIndex()
     , mLanguageBox()
+    , mInitialTimeScaleFormatIndex()
+    , mTimeScaleFormatBox()
 {
     // read current settings
     {
@@ -47,6 +64,12 @@ GeneralSettingDialog::GeneralSettingDialog(QWidget* aParent)
         if (language.isValid())
         {
             mInitialLanguageIndex = languageToIndex(language.toString());
+        }
+
+        auto timeScale = settings.value("generalsettings/ui/timescaleformat");
+        if (timeScale.isValid())
+        {
+            mInitialTimeScaleFormatIndex = timeScale.toInt();
         }
     }
 
@@ -62,7 +85,15 @@ GeneralSettingDialog::GeneralSettingDialog(QWidget* aParent)
             mLanguageBox->addItem(indexToLanguage(i));
         }
         mLanguageBox->setCurrentIndex(mInitialLanguageIndex);
-        form->addRow(tr("language (needs restarting) :"), mLanguageBox);
+        form->addRow(tr("Language (needs restarting) :"), mLanguageBox);
+
+        mTimeScaleFormatBox = new QComboBox();
+        for (int i = 0; i < kTimeScaleFormatTypeCount; ++i)
+        {
+            mTimeScaleFormatBox->addItem(indexToTimeScaleFormat(i));
+        }
+        mTimeScaleFormatBox->setCurrentIndex(mInitialTimeScaleFormatIndex);
+        form->addRow(tr("Time scale format :"), mTimeScaleFormatBox);
     }
 
     auto group = new QGroupBox(tr("Parameters"));
@@ -81,12 +112,16 @@ GeneralSettingDialog::GeneralSettingDialog(QWidget* aParent)
 
 void GeneralSettingDialog::saveSettings()
 {
+    QSettings settings;
     auto newLangIndex = mLanguageBox->currentIndex();
     if (mInitialLanguageIndex != newLangIndex)
     {
-        QSettings settings;
         settings.setValue("generalsettings/language", indexToLanguage(newLangIndex));
     }
+
+    auto newTimeScaleFormatIndex = mTimeScaleFormatBox->currentIndex();
+    settings.setValue("generalsettings/ui/timescaleformat", newTimeScaleFormatIndex);
+
 }
 
 } // namespace gui
