@@ -1,6 +1,8 @@
 #ifndef CORE_TIMEFORMAT_H
 #define CORE_TIMEFORMAT_H
 
+#include <QDebug>
+
 #include <QString>
 #include "util/Range.h"
 
@@ -9,11 +11,11 @@ namespace core
 
 enum TimeFormatType
 {
-    TimeFormatType_Frames_From0,
-    TimeFormatType_Frames_From1,
-    TimeFormatType_Relative_FPS,
-    TimeFormatType_Seconds_Frames,
-    TimeFormatType_Timecode_SMPTE
+    TimeFormatType_Frames_From0,   // (FF)
+    TimeFormatType_Frames_From1,   // (FF+1)
+    TimeFormatType_Relative_FPS,   // (FF / FPS)
+    TimeFormatType_Seconds_Frames, // (SS:FF)
+    TimeFormatType_Timecode_SMPTE  // (HH:MM:SS:FF)
 };
 
 class TimeFormat
@@ -24,6 +26,8 @@ public:
     const QString frameToString(const int aFrame, const TimeFormatType aTimeFormatType) const;
 
 private:
+
+
     util::Range mRange;
     int mFps;
 };
