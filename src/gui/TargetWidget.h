@@ -6,6 +6,7 @@
 #include "gui/TimeLineWidget.h"
 #include "gui/GUIResources.h"
 #include "gui/PlayBackWidget.h"
+#include "gui/InfoLabelWidget.h"
 #include "gui/ViaPoint.h"
 #include "core/Project.h"
 #include "core/Animator.h"
@@ -46,9 +47,11 @@ private:
     core::Project* mProject;
     GUIResources& mResources;
     const QSize mSizeHint;
+    QSplitter* mHorizontalSplitter;
     ObjectTreeWidget* mObjTree;
     TimeLineWidget* mTimeLine;
     PlayBackWidget* mPlayBack;
+    InfoLabelWidget* mInfoLabel;
     bool mIsFirstTime;
     int mSuspendCount;
 };
