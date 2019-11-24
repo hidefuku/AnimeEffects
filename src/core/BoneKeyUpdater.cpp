@@ -106,11 +106,11 @@ void BoneKeyUpdater::onTimeLineModified(
         TIMEKEY_PTR_TYPE_ASSERT(key, Bone);
         if (aResetCacheList)
         {
-            ((BoneKey*)key)->resetCaches(aProject, aNode);
+            (static_cast<BoneKey*>(key))->resetCaches(aProject, aNode);
         }
         else
         {
-            ((BoneKey*)key)->updateCaches(aProject, aNode, aUniqueRoots);
+            (static_cast<BoneKey*>(key))->updateCaches(aProject, aNode, aUniqueRoots);
         }
     }
 }
@@ -151,7 +151,7 @@ void BoneKeyUpdater::resetInfluenceCachesOfOneNode(Project& aProject, ObjectNode
         {
             TimeKey* key = itr.value();
             TIMEKEY_PTR_TYPE_ASSERT(key, Bone);
-            ((BoneKey*)key)->resetCaches(aProject, aNode);
+            (static_cast<BoneKey*>(key))->resetCaches(aProject, aNode);
         }
     }
 }
@@ -283,7 +283,7 @@ cmnd::Base* BoneKeyUpdater::createNodeUnbinderForDelete(ObjectNode& aNode)
                 {
                     TimeKey* key = itr.value();
                     TIMEKEY_PTR_TYPE_ASSERT(key, Bone);
-                    mUnbinder.addAll(*((BoneKey*)key));
+                    mUnbinder.addAll(*(static_cast<BoneKey*>(key)));
                 }
             }
             redo();
@@ -424,7 +424,7 @@ cmnd::Base* BoneKeyUpdater::createNodesUnbinderForMove(
                                 mUnbinders.push_back(unbinder);
                                 unbinder->initNode(*node);
                             }
-                            unbinder->addAll(*((BoneKey*)key));
+                            unbinder->addAll(*(static_cast<BoneKey*>(key)));
                         }
                     }
                 }
