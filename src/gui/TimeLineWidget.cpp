@@ -185,6 +185,12 @@ void TimeLineWidget::onProjectAttributeUpdated()
     mInner->updateProjectAttribute();
 }
 
+void TimeLineWidget::triggerOnApplicationSettingUpdated()
+{
+    onApplicationSettingUpdated();
+    updateCamera();
+}
+
 //-------------------------------------------------------------------------------------------------
 void TimeLineWidget::mouseMoveEvent(QMouseEvent* aEvent)
 {
