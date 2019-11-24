@@ -42,6 +42,7 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mCanvasMover()
     , mMovingCanvasByTool(false)
     , mMovingCanvasByKey(false)
+    , mMovingCanvasByMiddleMouseButton(false)
     , mDevicePixelRatio(1.0)
 {
 #ifdef USE_GL_CORE_PROFILE
@@ -416,6 +417,7 @@ void MainDisplayWidget::mouseMoveEvent(QMouseEvent* aEvent)
         if (mCanvasMover.updateByMove(mAbstractCursor.screenPos(),
                                       mAbstractCursor.screenVel(),
                                       mAbstractCursor.isPressedLeft(),
+                                      mAbstractCursor.isPressedMiddle(),
                                       mAbstractCursor.isPressedRight()))
         {
             updateRender();
@@ -431,6 +433,11 @@ void MainDisplayWidget::mousePressEvent(QMouseEvent* aEvent)
         {
             updateCursor();
             //if (!mUsingTablet) qDebug() << "press";
+
+            if(mViaPoint.mouseSetting().middleMouseMoveCanvas && aEvent->button() == Qt::MouseButton::MidButton) {
+                mMovingCanvasByMiddleMouseButton = true;
+                mCanvasMover.setDragAndMove(mMovingCanvasByKey || mMovingCanvasByTool || mMovingCanvasByMiddleMouseButton);
+            }
         }
     }
 }
@@ -443,6 +450,11 @@ void MainDisplayWidget::mouseReleaseEvent(QMouseEvent* aEvent)
         {
             updateCursor();
             //if (!mUsingTablet) qDebug() << "release";
+
+            if(aEvent->button() == Qt::MouseButton::MidButton) {
+                mMovingCanvasByMiddleMouseButton = false;
+                mCanvasMover.setDragAndMove(mMovingCanvasByKey || mMovingCanvasByTool || mMovingCanvasByMiddleMouseButton);
+            }
         }
     }
 }
@@ -471,6 +483,7 @@ void MainDisplayWidget::tabletEvent(QTabletEvent* aEvent)
     if (mCanvasMover.updateByMove(mAbstractCursor.screenPos(),
                                   mAbstractCursor.screenVel(),
                                   mAbstractCursor.isPressedLeft(),
+                                  mAbstractCursor.isPressedMiddle(),
                                   mAbstractCursor.isPressedRight()))
     {
         updateRender();
