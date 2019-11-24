@@ -30,7 +30,7 @@ AbstractCursor::AbstractCursor()
     , mSuspendedCount(0)
     , mBlankAfterSuspending()
 {
-    for (int i = 0; i < Button_TERM; ++i)
+    for (unsigned int i = 0; i < Button_TERM; ++i)
     {
         mIsPressed[i] = false;
         mIsDouble[i] = false;
@@ -197,13 +197,13 @@ void AbstractCursor::setTabletPressure(QTabletEvent* aEvent)
     if (type == QEvent::TabletPress)
     {
         mIsPressedTablet = true;
-        mPressure = pressure;
+        mPressure = static_cast<float>(pressure);
     }
     else if (type == QEvent::TabletMove)
     {
         if (mIsPressedTablet)
         {
-            mPressure = 0.5f * mPressure + 0.5f * pressure;
+            mPressure = 0.5f * mPressure + 0.5f * static_cast<float>(pressure);
         }
     }
     else if (type == QEvent::TabletRelease)
@@ -220,12 +220,12 @@ void AbstractCursor::suspendEvent(const std::function<void()>& aEventReflector)
     ++mSuspendedCount;
     if (mSuspendedCount == 1)
     {
-        for (int i = 0; i < Button_TERM; ++i)
+        for (unsigned int i = 0; i < Button_TERM; ++i)
         {
             if (mIsPressed[i]) // invoke a release event
             {
                 mEventType = Event_Release;
-                mEventButton = (Button)i;
+                mEventButton = static_cast<Button>(i);
 
                 mIsPressed[i] = false;
                 mScreenVel = QVector2D();
@@ -244,7 +244,7 @@ void AbstractCursor::resumeEvent()
 
     if (mSuspendedCount == 0)
     {
-        for (int i = 0; i < Button_TERM; ++i)
+        for (unsigned int i = 0; i < Button_TERM; ++i)
         {
             mBlankAfterSuspending[i] = mIsPressed[i]; // set a flag to ignore release event once
         }
