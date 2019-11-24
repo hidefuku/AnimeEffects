@@ -36,23 +36,6 @@ void InfoLabelWidget::onUpdate()
         QString frameNumber = timeFormat.frameToString(currentFrame, timeScaleFormat);
         QString frameMaxNumber = timeFormat.frameToString(frameMax, timeScaleFormat);
 
-        /*
-        if(timeScaleFormat == core::TimeFormatType_Relative_FPS) {
-            QString number;
-            frameNumber = number.sprintf("%.1f", static_cast<double>(currentFrame) / fps);
-        }
-        */
-
-        /*
-        QSettings settings;
-        auto timeScaleFormatVar = settings.value("generalsettings/ui/timescaleformat");
-        auto timeScaleFormat = timeScaleFormatVar.isValid() ? timeScaleFormatVar.toString() : QString();
-        */
-
-        //QString number;
-        //number.sprintf("%.2f", static_cast<double>( timeInfo.frame.getDecimal() / timeInfo.fps ));
-        //qDebug() << number;
-
         this->setText(frameNumber.rightJustified(frameMaxNumber.length()+1, ' ')+" / "+frameMaxNumber+" @"+QString::number(fps)+" "+tr("fps"));
     }
 }
