@@ -19,7 +19,7 @@ TargetWidget::TargetWidget(ViaPoint& aViaPoint, GUIResources& aResources, QWidge
     mInfoLabel = new InfoLabelWidget(aResources, this);
 
     mTimeLine->onFrameUpdated.connect(mInfoLabel, &InfoLabelWidget::onUpdate);
-    //mTimeLine->onProjectAttributeUpdated.connect(mInfoLabel, &InfoLabelWidget::onUpdate);
+    mTimeLine->onApplicationSettingUpdated.connect(mInfoLabel, &InfoLabelWidget::onUpdate);
 
     mHorizontalSplitter->addWidget(mObjTree);
     mHorizontalSplitter->addWidget(mTimeLine);
