@@ -417,7 +417,7 @@ bool BoneKey::serializeBone(Serializer& aOut, const Bone2* aBone) const
     if (!aBone) return true;
 
     // child count
-    aOut.write((int)aBone->children().size());
+    aOut.write(static_cast<int>(aBone->children().size()));
 
     // serialize bone
     if (!aBone->serialize(aOut))
