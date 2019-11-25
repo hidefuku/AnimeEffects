@@ -60,8 +60,8 @@ SOURCES += \
     MainWindow.cpp \
     ObjectTreeWidget.cpp \
     PlayBackWidget.cpp \
-    InfoLabelWidget.cpp \
     PropertyWidget.cpp \
+    TimeLineInfoWidget.cpp \
     TimeLineWidget.cpp \
     ToolWidget.cpp \
     TargetWidget.cpp \
@@ -125,8 +125,8 @@ HEADERS += \
     MainWindow.h \
     ObjectTreeWidget.h \
     PlayBackWidget.h \
-    InfoLabelWidget.h \
     PropertyWidget.h \
+    TimeLineInfoWidget.h \
     TimeLineWidget.h \
     ToolWidget.h \
     TargetWidget.h \

@@ -14,11 +14,11 @@
 namespace gui
 {
 
-class InfoLabelWidget
+class TimeLineInfoWidget
         : public QLabel
 {
 public:
-    InfoLabelWidget(GUIResources& aResources, QWidget* aParent);
+    TimeLineInfoWidget(GUIResources& aResources, QWidget* aParent);
     void setProject(core::Project* aProject);
 
     void onUpdate();

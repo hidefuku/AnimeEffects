@@ -1,9 +1,9 @@
-#include "gui/InfoLabelWidget.h"
+#include "gui/TimeLineInfoWidget.h"
 
 namespace gui
 {
 
-InfoLabelWidget::InfoLabelWidget(GUIResources& aResources, QWidget* aParent)
+TimeLineInfoWidget::TimeLineInfoWidget(GUIResources& aResources, QWidget* aParent)
     : QLabel(aParent)
     , mResources(aResources)
     , mProject()
@@ -14,13 +14,13 @@ InfoLabelWidget::InfoLabelWidget(GUIResources& aResources, QWidget* aParent)
     this->setContentsMargins(2,0,2,2);
 }
 
-void InfoLabelWidget::setProject(core::Project* aProject)
+void TimeLineInfoWidget::setProject(core::Project* aProject)
 {
     mProject = aProject;
     onUpdate();
 }
 
-void InfoLabelWidget::onUpdate()
+void TimeLineInfoWidget::onUpdate()
 {
     if(mProject != nullptr) {
         core::TimeInfo timeInfo = mProject->currentTimeInfo();

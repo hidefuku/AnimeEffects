@@ -6,7 +6,7 @@
 #include "gui/TimeLineWidget.h"
 #include "gui/GUIResources.h"
 #include "gui/PlayBackWidget.h"
-#include "gui/InfoLabelWidget.h"
+#include "gui/TimeLineInfoWidget.h"
 #include "gui/ViaPoint.h"
 #include "core/Project.h"
 #include "core/Animator.h"
@@ -54,7 +54,7 @@ private:
     ObjectTreeWidget* mObjTree;
     TimeLineWidget* mTimeLine;
     PlayBackWidget* mPlayBack;
-    InfoLabelWidget* mInfoLabel;
+    TimeLineInfoWidget* mInfoLabel;
     bool mIsFirstTime;
     int mSuspendCount;
 };
