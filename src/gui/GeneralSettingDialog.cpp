@@ -94,7 +94,7 @@ GeneralSettingDialog::GeneralSettingDialog(QWidget* aParent)
             mTimeScaleFormatBox->addItem(indexToTimeScaleFormat(i));
         }
         mTimeScaleFormatBox->setCurrentIndex(mInitialTimeScaleFormatIndex);
-        form->addRow(tr("Time scale format :"), mTimeScaleFormatBox);
+        form->addRow(tr("Timeline format :"), mTimeScaleFormatBox);
     }
 
     auto group = new QGroupBox(tr("Parameters"));
