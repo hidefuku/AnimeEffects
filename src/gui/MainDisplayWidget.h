@@ -97,6 +97,7 @@ private:
     CanvasMover mCanvasMover;
     bool mMovingCanvasByTool;
     bool mMovingCanvasByKey;
+    bool mMovingCanvasByMiddleMouseButton;
     double mDevicePixelRatio;
 };
 

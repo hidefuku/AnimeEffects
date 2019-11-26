@@ -16,6 +16,7 @@ public:
     void save();
     bool invertMainViewScaling;
     bool invertTimeLineScaling;
+    bool middleMouseMoveCanvas;
 };
 
 } // namespace gui
