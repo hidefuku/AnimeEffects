@@ -264,6 +264,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
         menu.onProjectAttributeUpdated.connect(&disp, &MainDisplayWidget::onProjectAttributeUpdated);
         menu.onProjectAttributeUpdated.connect(&timeLine, &TimeLineWidget::onProjectAttributeUpdated);
         menu.onProjectAttributeUpdated.connect(&driver, &DriverHolder::onProjectAttributeUpdated);
+        menu.onApplicationSettingUpdated.connect(&timeLine, &TimeLineWidget::triggerOnApplicationSettingUpdated);
 
         mSystem.setAnimator(*mTarget);
     }

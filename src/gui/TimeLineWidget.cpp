@@ -110,6 +110,7 @@ void TimeLineWidget::updateCamera()
 
 void TimeLineWidget::updateCursor(const core::AbstractCursor& aCursor)
 {
+    onCursorUpdated();
     if (mInner->updateCursor(aCursor))
     {
         onFrameUpdated();
@@ -182,6 +183,12 @@ void TimeLineWidget::onPlayBackUpdated()
 void TimeLineWidget::onProjectAttributeUpdated()
 {
     mInner->updateProjectAttribute();
+}
+
+void TimeLineWidget::triggerOnApplicationSettingUpdated()
+{
+    onApplicationSettingUpdated();
+    updateCamera();
 }
 
 //-------------------------------------------------------------------------------------------------

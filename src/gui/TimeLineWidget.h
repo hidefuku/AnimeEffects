@@ -34,14 +34,18 @@ public:
     void setFrame(core::Frame aFrame);
     core::Frame currentFrame() const;
 
+    util::Signaler<void()> onCursorUpdated;
     util::Signaler<void()> onFrameUpdated;
+    util::Signaler<void()> onApplicationSettingUpdated;
     util::Signaler<void(bool)> onPlayBackStateChanged;
+
 
 public:
     void onTreeViewUpdated(QTreeWidgetItem* aTopNode);
     void onScrollUpdated(int aValue);
     void onSelectionChanged(core::ObjectNode* aRepresent);
     void onProjectAttributeUpdated();
+    void triggerOnApplicationSettingUpdated();
 
 private:
     virtual void mouseMoveEvent(QMouseEvent* aEvent);

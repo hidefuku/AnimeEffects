@@ -4,23 +4,32 @@ namespace gui
 {
 
 TargetWidget::TargetWidget(ViaPoint& aViaPoint, GUIResources& aResources, QWidget* aParent, const QSize& aSizeHint)
-    : QSplitter(aParent)
+    : QSplitter(Qt::Vertical, aParent)
     , mProject()
     , mResources(aResources)
     , mSizeHint(aSizeHint)
     , mIsFirstTime(true)
     , mSuspendCount(0)
 {
+    mHorizontalSplitter = new QSplitter(this);
     mObjTree = new ObjectTreeWidget(aViaPoint, aResources, this);
     mTimeLine = new TimeLineWidget(aViaPoint, *this, this);
     mPlayBack = new PlayBackWidget(aResources, this);
 
-    this->addWidget(mObjTree);
-    this->addWidget(mTimeLine);
-    this->addWidget(mPlayBack);
-    this->setCollapsible(0, false);
-    this->setCollapsible(1, false);
-    this->setCollapsible(2, false);
+    mInfoLabel = new TimeLineInfoWidget(aResources, this);
+
+    mTimeLine->onFrameUpdated.connect(mInfoLabel, &TimeLineInfoWidget::onUpdate);
+    mTimeLine->onApplicationSettingUpdated.connect(mInfoLabel, &TimeLineInfoWidget::onUpdate);
+
+    mHorizontalSplitter->addWidget(mObjTree);
+    mHorizontalSplitter->addWidget(mTimeLine);
+    mHorizontalSplitter->addWidget(mPlayBack);
+    mHorizontalSplitter->setCollapsible(0, false);
+    mHorizontalSplitter->setCollapsible(1, false);
+    mHorizontalSplitter->setCollapsible(2, false);
+
+    this->addWidget(mHorizontalSplitter);
+    this->addWidget(mInfoLabel);
 
     mPlayBack->setPushDelegate([=](PlayBackWidget::PushType aType)
     {
@@ -34,9 +43,9 @@ void TargetWidget::resizeEvent(QResizeEvent* aEvent)
     if (mIsFirstTime)
     {
         mIsFirstTime = false;
-        this->moveSplitter(this->geometry().width() / 4, 1);
+        //mHorizontalSplitter->moveSplitter(this->geometry().width() / 4, 1);
     }
-    this->moveSplitter(this->geometry().width() - mPlayBack->constantWidth(), 2);
+    //mHorizontalSplitter->moveSplitter(this->geometry().width() - mPlayBack->constantWidth(), 2);
 }
 
 void TargetWidget::setProject(core::Project* aProject)
@@ -45,6 +54,7 @@ void TargetWidget::setProject(core::Project* aProject)
     mProject = aProject;
     mObjTree->setProject(aProject);
     mTimeLine->setProject(aProject);
+    mInfoLabel->setProject(aProject);
 }
 
 core::Frame TargetWidget::currentFrame() const

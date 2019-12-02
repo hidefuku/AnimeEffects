@@ -175,7 +175,8 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
         {
             QScopedPointer<GeneralSettingDialog> dialog(
                         new GeneralSettingDialog(this));
-            dialog->exec();
+            if(dialog->exec() == QDialog::DialogCode::Accepted)
+                this->onApplicationSettingUpdated();
         });
 
         connect(mouse, &QAction::triggered, [&](bool)
