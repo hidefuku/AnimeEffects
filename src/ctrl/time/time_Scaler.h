@@ -24,6 +24,7 @@ public:
     int pixelWidth(int aFrame) const;
     int maxPixelWidth() const;
     int frame(int aPixelWidth) const;
+    int maxFrame() const;
     Attribute attribute(int aFrame) const;
 
 private:

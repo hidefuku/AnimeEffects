@@ -6,6 +6,7 @@
 
 #include <QString>
 #include "util/Range.h"
+#include "util/MathUtil.h"
 
 namespace core
 {
