@@ -1,9 +1,4 @@
-#include "gui/GUIResources.h"
-#include <QPainter>
-#include <QColor>
-#include <QDirIterator>
-#include <QStringList>
-#include "XC.h"
+﻿#include "gui/GUIResources.h"
 
 namespace gui
 {
@@ -11,20 +6,19 @@ namespace gui
 GUIResources::GUIResources(const QString& aResourceDir)
     : mResourceDir(aResourceDir)
     , mIconMap()
-    , mThemeId("classic")
+    , mThemeMap()
+    , mThemeId("default")
 {
-    const QString iconDirPath(mResourceDir + "/themes/"+mThemeId+"/icon");
+    detectThemes();
 
-    QStringList filters;
-    filters << "*.png";
-    QDirIterator itr(iconDirPath, filters, QDir::Files, QDirIterator::Subdirectories);
-
-    while (itr.hasNext())
+    QSettings settings;
+    auto theme = settings.value("generalsettings/ui/theme");
+    if (theme.isValid())
     {
-        loadIcon(itr.next());
+        setTheme(theme.toString());
     }
 
-    //const QString themesDirPath(mResourceDir + "/icon");
+    loadIcons();
 
 }
 
@@ -51,9 +45,9 @@ QIcon GUIResources::icon(const QString& aName) const
     }
 }
 
-QString GUIResources::iconPath(const QString& aName) const
+QString GUIResources::iconPath(const QString& aName)
 {
-    return mResourceDir+"/themes/"+mThemeId+"/icon/"+aName+".png";
+    return themePath()+"/icon/"+aName+".png";
 }
 
 void GUIResources::loadIcon(const QString& aPath)
@@ -81,9 +75,86 @@ void GUIResources::loadIcon(const QString& aPath)
 #endif
 }
 
+void GUIResources::loadIcons()
+{
+    if(!mIconMap.empty())
+    {
+        QHashIterator<QString, QIcon*> i(mIconMap);
+        while (i.hasNext())
+        {
+            i.next();
+            QIcon* icon = i.value();
+            //qDebug() << i.key() << ": " << i.value();
+            delete icon;
+        }
+        mIconMap.clear();
+    }
+
+    const QString iconDirPath(mResourceDir+"/themes/"+mThemeId+"/icon");
+
+    QStringList filters;
+    filters << "*.png";
+    QDirIterator itr(iconDirPath, filters, QDir::Files, QDirIterator::Subdirectories);
+
+    while (itr.hasNext())
+    {
+        loadIcon(itr.next());
+    }
+}
+
+void GUIResources::detectThemes()
+{
+    const QString themesDirPath(mResourceDir+"/themes");
+
+    QDirIterator itr(themesDirPath, QDir::Dirs, QDirIterator::FollowSymlinks);
+
+    while (itr.hasNext())
+    {
+        itr.next();
+        if(itr.fileName() != "." && itr.fileName() != "..")
+        {
+            qDebug() << itr.fileName();
+            mThemeMap.insert(itr.fileName(), itr.fileInfo());
+        }
+    }
+}
+
 QString GUIResources::themeId() const
 {
     return mThemeId;
+}
+
+QString GUIResources::themePath()
+{
+    return mThemeMap[mThemeId].absoluteFilePath();
+}
+
+QStringList GUIResources::themeList()
+{
+    QStringList theThemeList;
+    if(!mThemeMap.empty())
+    {
+        QHashIterator<QString, QFileInfo> i(mThemeMap);
+        while (i.hasNext()) {
+            i.next();
+            theThemeList.append(i.key());
+        }
+    }
+    return theThemeList;
+}
+
+bool GUIResources::hasTheme(const QString &aThemeId)
+{
+    return mThemeMap.contains(aThemeId);
+}
+
+void GUIResources::setTheme(const QString &aThemeId)
+{
+    if(mThemeId != aThemeId) {
+        mThemeId = aThemeId;
+        loadIcons();
+        onThemeChanged();
+    }
 }
 
 } // namespace gui

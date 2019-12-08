@@ -15,14 +15,10 @@ namespace gui
 
 PlayBackWidget::PlayBackWidget(GUIResources& aResources, QWidget* aParent)
     : QWidget(aParent)
-    , mResources(aResources)
+    , mGUIResources(aResources)
     , mButtons()
 {
-    QFile stylesheet("data/themes/"+aResources.themeId()+"/stylesheet/playbackwidget.ssa");
-    if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        this->setStyleSheet(QTextStream(&stylesheet).readAll());
-    }
+    onThemeUpdated();
 
     this->setGeometry(0, 0, kButtonSize, kButtonSize * kButtonCount);
 
@@ -32,6 +28,8 @@ PlayBackWidget::PlayBackWidget(GUIResources& aResources, QWidget* aParent)
     mButtons.push_back(createButton("step",     false, 3, tr("Frame by Frame Forward")));
     mButtons.push_back(createButton("fast",     false, 4, tr("Forward to End")));
     mButtons.push_back(createButton("loop",     true,  5, tr("Loop")));
+
+    mGUIResources.onThemeChanged.connect(this, &PlayBackWidget::onThemeUpdated);
 }
 
 void PlayBackWidget::setPushDelegate(const PushDelegate &aDelegate)
@@ -43,7 +41,7 @@ void PlayBackWidget::setPushDelegate(const PushDelegate &aDelegate)
     {
         const bool isChecked = owner->mButtons.at(2)->isChecked();
         const char* name = isChecked ? "play" : "pause";
-        owner->mButtons.at(2)->setIcon(owner->mResources.icon(name));
+        owner->mButtons.at(2)->setIcon(owner->mGUIResources.icon(name));
         owner->mButtons.at(2)->setToolTip(isChecked ? tr("Play") : tr("Pause"));
         owner->mPushDelegate(isChecked ? PushType_Pause : PushType_Play);
 
@@ -71,7 +69,7 @@ void PlayBackWidget::pushPauseButton()
     QPushButton* button = mButtons.at(2);
     if (button->isChecked())
     {
-        button->setIcon(mResources.icon("play"));
+        button->setIcon(mGUIResources.icon("play"));
         button->setChecked(false);
         mPushDelegate(PushType_Pause);
     }
@@ -83,13 +81,22 @@ QPushButton* PlayBackWidget::createButton(
     QPushButton* button = new QPushButton(this);
     XC_PTR_ASSERT(button);
     button->setObjectName("playbackButton");
-    button->setIcon(mResources.icon(aName));
+    button->setIcon(mGUIResources.icon(aName));
     button->setIconSize(QSize(kButtonSize, kButtonSize));
     button->setCheckable(aIsCheckable);
     button->setToolTip(aToolTip);
     button->setFocusPolicy(Qt::NoFocus);
     button->setGeometry(0, 2 + kButtonSize * aColumn, kButtonSize, kButtonSize);
     return button;
+}
+
+void PlayBackWidget::onThemeUpdated()
+{
+    QFile stylesheet(mGUIResources.themePath()+"/stylesheet/playbackwidget.ssa");
+    if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        this->setStyleSheet(QTextStream(&stylesheet).readAll());
+    }
 }
 
 } // namespace gui

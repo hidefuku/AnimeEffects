@@ -31,7 +31,8 @@ private:
     QVector<core::Project*> mProjects;
     bool mSignal;
 
-    GUIResources& mResources;
+    GUIResources& mGUIResources;
+    void onThemeUpdated();
 };
 
 

@@ -11,7 +11,6 @@ namespace
 
 static const int kLanguageTypeCount = 3;
 static const int kTimeFormatTypeCount = 6;
-static const int kThemeCount = 4;
 
 int languageToIndex(const QString& aLanguage)
 {
@@ -46,31 +45,20 @@ QString indexToTimeFormat(int aIndex)
     }
 }
 
-QString indexToTheme(int aIndex)
-{
-    switch (aIndex)
-    {
-    case 0:   return QCoreApplication::translate("GeneralSettingsDialog", "Auto (System theme)");
-    case 1:   return QCoreApplication::translate("GeneralSettingsDialog", "Light");
-    case 2:   return QCoreApplication::translate("GeneralSettingsDialog", "Dark");
-    case 3:   return QCoreApplication::translate("GeneralSettingsDialog", "Classic");
-    default: return "";
-    }
-}
-
 }
 
 namespace gui
 {
 
-GeneralSettingDialog::GeneralSettingDialog(QWidget* aParent)
+GeneralSettingDialog::GeneralSettingDialog(GUIResources &aGUIResources, QWidget* aParent)
     : EasyDialog(tr("General Settings"), aParent)
     , mInitialLanguageIndex()
     , mLanguageBox()
     , mInitialTimeFormatIndex()
     , mTimeFormatBox()
-    , mInitialThemeIndex()
+    , mInitialThemeKey("default")
     , mThemeBox()
+    , mGUIResources(aGUIResources)
 {
     // read current settings
     {
@@ -91,7 +79,7 @@ GeneralSettingDialog::GeneralSettingDialog(QWidget* aParent)
         auto theme = settings.value("generalsettings/ui/theme");
         if (theme.isValid())
         {
-            mInitialThemeIndex = theme.toInt();
+            mInitialThemeKey = theme.toString();
         }
     }
 
@@ -117,12 +105,14 @@ GeneralSettingDialog::GeneralSettingDialog(QWidget* aParent)
         mTimeFormatBox->setCurrentIndex(mInitialTimeFormatIndex);
         form->addRow(tr("Timeline format :"), mTimeFormatBox);
 
+
         mThemeBox = new QComboBox();
-        for (int i = 0; i < kThemeCount; ++i)
+        QStringList themeList = mGUIResources.themeList();
+        for (int i = 0; i < themeList.size(); ++i)
         {
-            mThemeBox->addItem(indexToTheme(i));
+            mThemeBox->addItem(themeList[i], themeList[i]);
         }
-        mThemeBox->setCurrentIndex(mInitialThemeIndex);
+        mThemeBox->setCurrentIndex(mThemeBox->findData(mInitialThemeKey));
         form->addRow(tr("Theme :"), mThemeBox);
     }
 
@@ -152,7 +142,12 @@ bool GeneralSettingDialog::timeFormatHasChanged()
 
 bool GeneralSettingDialog::themeHasChanged()
 {
-    return (mInitialThemeIndex != mTimeFormatBox->currentIndex());
+    return (mInitialThemeKey != mThemeBox->currentData());
+}
+
+QString GeneralSettingDialog::theme()
+{
+    return mThemeBox->currentData().toString();
 }
 
 void GeneralSettingDialog::saveSettings()
@@ -165,7 +160,7 @@ void GeneralSettingDialog::saveSettings()
         settings.setValue("generalsettings/ui/timeformat", mTimeFormatBox->currentIndex());
 
     if(themeHasChanged())
-        settings.setValue("generalsettings/ui/theme", mThemeBox->currentIndex());
+        settings.setValue("generalsettings/ui/theme", mThemeBox->currentData());
 
 }
 

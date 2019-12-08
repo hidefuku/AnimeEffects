@@ -47,13 +47,14 @@ QDomDocument getVideoExportDocument()
 }
 
 //-------------------------------------------------------------------------------------------------
-MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* aParent)
+MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, GUIResources &aGUIResources, QWidget* aParent)
     : QMenuBar(aParent)
     , mViaPoint(aViaPoint)
     , mProject()
     , mProjectActions()
     , mShowResourceWindow()
     , mVideoFormats()
+    , mGUIResources(aGUIResources)
 {
     // load the list of video formats from a setting file.
     loadVideoFormats();
@@ -173,13 +174,13 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
 
         connect(general, &QAction::triggered, [&](bool)
         {
-            GeneralSettingDialog *generalSettingsDialog = new GeneralSettingDialog(this);
+            GeneralSettingDialog *generalSettingsDialog = new GeneralSettingDialog(mGUIResources, this);
             QScopedPointer<GeneralSettingDialog> dialog(generalSettingsDialog);
             if(dialog->exec() == QDialog::DialogCode::Accepted) {
                 if(generalSettingsDialog->timeFormatHasChanged())
                     this->onTimeFormatChanged();
                 if(generalSettingsDialog->themeHasChanged())
-                    this->onThemeChanged();
+                    this->mGUIResources.setTheme(generalSettingsDialog->theme());
             }
         });
 
