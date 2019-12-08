@@ -18,6 +18,8 @@ public:
 
     QIcon icon(const QString& aName) const;
 
+    QString themeId() const;
+
 private:
     typedef QHash<QString, QIcon*> IconMap;
 
@@ -26,6 +28,8 @@ private:
 
     QString mResourceDir;
     IconMap mIconMap;
+
+    QString mThemeId;
 };
 
 } // namespace gui

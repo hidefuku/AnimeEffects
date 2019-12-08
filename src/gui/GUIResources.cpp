@@ -11,6 +11,7 @@ namespace gui
 GUIResources::GUIResources(const QString& aResourceDir)
     : mResourceDir(aResourceDir)
     , mIconMap()
+    , mThemeId("classic")
 {
     const QString iconDirPath(mResourceDir + "/icon");
 
@@ -75,6 +76,11 @@ void GUIResources::loadIcon(const QString& aPath)
         icon->addPixmap(work, QIcon::Disabled, QIcon::Off);
     }
 #endif
+}
+
+QString GUIResources::themeId() const
+{
+    return mThemeId;
 }
 
 } // namespace gui

@@ -18,7 +18,7 @@ PlayBackWidget::PlayBackWidget(GUIResources& aResources, QWidget* aParent)
     , mResources(aResources)
     , mButtons()
 {
-    QFile stylesheet("data/stylesheet/playbackwidget.ssa");
+    QFile stylesheet("data/themes/"+aResources.themeId()+"/stylesheet/playbackwidget.ssa");
     if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         this->setStyleSheet(QTextStream(&stylesheet).readAll());

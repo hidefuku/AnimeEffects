@@ -71,7 +71,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
     {
         this->setObjectName(QStringLiteral("MainWindow"));
 
-        QFile stylesheet("data/stylesheet/standard.ssa");
+        QFile stylesheet("data/themes/"+aResources.themeId()+"/stylesheet/standard.ssa");
         if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             QString fontOption;
@@ -141,7 +141,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
         mMainDisplay = new MainDisplayWidget(mViaPoint, this);
         this->setCentralWidget(mMainDisplay);
 
-        mProjectTabBar = new ProjectTabBar(mMainDisplay);
+        mProjectTabBar = new ProjectTabBar(mMainDisplay, mGUIResources);
         mMainDisplay->setProjectTabBar(mProjectTabBar);
         mProjectTabBar->onCurrentChanged.connect(this, &MainWindow::onProjectTabChanged);
     }
@@ -166,7 +166,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
         dockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
         this->addDockWidget(Qt::RightDockWidgetArea, dockWidget);
 
-        QFile stylesheet("data/stylesheet/propertywidget.ssa");
+        QFile stylesheet("data/themes/"+aResources.themeId()+"/stylesheet/propertywidget.ssa");
         if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             dockWidget->setStyleSheet(QTextStream(&stylesheet).readAll());
@@ -207,7 +207,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
         dockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
         this->addDockWidget(Qt::LeftDockWidgetArea, dockWidget);
 
-        QFile stylesheet("data/stylesheet/toolwidget.ssa");
+        QFile stylesheet("data/themes/"+aResources.themeId()+"/stylesheet/toolwidget.ssa");
         if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             dockWidget->setStyleSheet(QTextStream(&stylesheet).readAll());

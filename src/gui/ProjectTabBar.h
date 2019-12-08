@@ -5,13 +5,15 @@
 #include <QTabBar>
 #include "core/Project.h"
 
+#include "gui/GUIResources.h"
+
 namespace gui
 {
 
 class ProjectTabBar : public QTabBar
 {
 public:
-    ProjectTabBar(QWidget* aParent);
+    ProjectTabBar(QWidget* aParent, GUIResources &aResources);
     void updateTabPosition(const QSize& aDisplaySize);
     bool pushProject(core::Project& aProject);
     void removeProject(core::Project& aProject);
@@ -28,6 +30,8 @@ private:
 
     QVector<core::Project*> mProjects;
     bool mSignal;
+
+    GUIResources& mResources;
 };
 
 

@@ -54,7 +54,7 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
     , mDeleteAction()
 {
     {
-        QFile stylesheet("data/stylesheet/standard.ssa");
+        QFile stylesheet("data/themes/"+aResources.themeId()+"/stylesheet/standard.ssa");
         if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             this->setStyleSheet(QTextStream(&stylesheet).readAll());

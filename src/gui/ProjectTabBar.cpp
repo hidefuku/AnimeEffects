@@ -6,12 +6,13 @@ namespace gui
 {
 
 //-------------------------------------------------------------------------------------------------
-ProjectTabBar::ProjectTabBar(QWidget* aParent)
+ProjectTabBar::ProjectTabBar(QWidget* aParent, GUIResources& aResources)
     : QTabBar(aParent)
     , mProjects()
     , mSignal(true)
+    , mResources(aResources)
 {
-    QFile stylesheet("data/stylesheet/modetabbar.ssa");
+    QFile stylesheet("data/themes/"+aResources.themeId()+"/stylesheet/modetabbar.ssa");
     if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         this->setStyleSheet(QTextStream(&stylesheet).readAll());
