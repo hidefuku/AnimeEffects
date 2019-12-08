@@ -13,7 +13,7 @@ GUIResources::GUIResources(const QString& aResourceDir)
     , mIconMap()
     , mThemeId("classic")
 {
-    const QString iconDirPath(mResourceDir + "/icon");
+    const QString iconDirPath(mResourceDir + "/themes/"+mThemeId+"/icon");
 
     QStringList filters;
     filters << "*.png";
@@ -23,6 +23,9 @@ GUIResources::GUIResources(const QString& aResourceDir)
     {
         loadIcon(itr.next());
     }
+
+    //const QString themesDirPath(mResourceDir + "/icon");
+
 }
 
 GUIResources::~GUIResources()
@@ -50,7 +53,7 @@ QIcon GUIResources::icon(const QString& aName) const
 
 QString GUIResources::iconPath(const QString& aName) const
 {
-    return mResourceDir + "/icon/" + aName + ".png";
+    return mResourceDir+"/themes/"+mThemeId+"/icon/"+aName+".png";
 }
 
 void GUIResources::loadIcon(const QString& aPath)
