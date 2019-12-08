@@ -30,11 +30,11 @@ void TimeLineInfoWidget::onUpdate()
         const int currentFrame = timeInfo.frame.get();
 
         const core::TimeFormat timeFormat(util::Range(0,frameMax),fps);
-        auto timeScaleFormatVar = mSettings.value("generalsettings/ui/timescaleformat");
-        core::TimeFormatType timeScaleFormat = timeScaleFormatVar.isValid() ? static_cast<core::TimeFormatType>(timeScaleFormatVar.toInt()) : core::TimeFormatType::TimeFormatType_Frames_From0;
+        auto timeFormatVar = mSettings.value("generalsettings/ui/timeformat");
+        core::TimeFormatType formatType = timeFormatVar.isValid() ? static_cast<core::TimeFormatType>(timeFormatVar.toInt()) : core::TimeFormatType::TimeFormatType_Frames_From0;
 
-        QString frameNumber = timeFormat.frameToString(currentFrame, timeScaleFormat);
-        QString frameMaxNumber = timeFormat.frameToString(frameMax, timeScaleFormat);
+        QString frameNumber = timeFormat.frameToString(currentFrame, formatType);
+        QString frameMaxNumber = timeFormat.frameToString(frameMax, formatType);
 
         this->setText(frameNumber.rightJustified(frameMaxNumber.length()+1, ' ')+" / "+frameMaxNumber+" @"+QString::number(fps)+" "+tr("fps"));
     }

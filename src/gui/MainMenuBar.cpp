@@ -173,10 +173,14 @@ MainMenuBar::MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* 
 
         connect(general, &QAction::triggered, [&](bool)
         {
-            QScopedPointer<GeneralSettingDialog> dialog(
-                        new GeneralSettingDialog(this));
-            if(dialog->exec() == QDialog::DialogCode::Accepted)
-                this->onApplicationSettingUpdated();
+            GeneralSettingDialog *generalSettingsDialog = new GeneralSettingDialog(this);
+            QScopedPointer<GeneralSettingDialog> dialog(generalSettingsDialog);
+            if(dialog->exec() == QDialog::DialogCode::Accepted) {
+                if(generalSettingsDialog->timeFormatHasChanged())
+                    this->onTimeFormatChanged();
+                if(generalSettingsDialog->themeHasChanged())
+                    this->onThemeChanged();
+            }
         });
 
         connect(mouse, &QAction::triggered, [&](bool)

@@ -14,14 +14,20 @@ class GeneralSettingDialog : public EasyDialog
 public:
     GeneralSettingDialog(QWidget* aParent);
 
+    bool languageHasChanged();
+    bool timeFormatHasChanged();
+    bool themeHasChanged();
 private:
     void saveSettings();
 
     int mInitialLanguageIndex;
     QComboBox* mLanguageBox;
 
-    int mInitialTimeScaleFormatIndex;
-    QComboBox* mTimeScaleFormatBox;
+    int mInitialTimeFormatIndex;
+    QComboBox* mTimeFormatBox;
+
+    int mInitialThemeIndex;
+    QComboBox* mThemeBox;
 };
 
 } // namespace gui

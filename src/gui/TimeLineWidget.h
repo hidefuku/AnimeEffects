@@ -36,7 +36,7 @@ public:
 
     util::Signaler<void()> onCursorUpdated;
     util::Signaler<void()> onFrameUpdated;
-    util::Signaler<void()> onApplicationSettingUpdated;
+    util::Signaler<void()> onTimeFormatChanged;
     util::Signaler<void(bool)> onPlayBackStateChanged;
 
 
@@ -45,7 +45,7 @@ public:
     void onScrollUpdated(int aValue);
     void onSelectionChanged(core::ObjectNode* aRepresent);
     void onProjectAttributeUpdated();
-    void triggerOnApplicationSettingUpdated();
+    void triggerOnTimeFormatChanged();
 
 private:
     virtual void mouseMoveEvent(QMouseEvent* aEvent);

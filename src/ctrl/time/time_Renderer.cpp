@@ -112,7 +112,7 @@ void Renderer::renderHeader(int aHeight, int aFps)
         const QPoint rb = lt + QPoint(mScale->maxPixelWidth(), aHeight);
 
         const TimeFormat timeFormat(mRange,aFps);
-        const TimeFormatType timeScaleFormatVar = static_cast<TimeFormatType>(settings.value("generalsettings/ui/timescaleformat").toInt());
+        const TimeFormatType timeFormatVar = static_cast<TimeFormatType>(settings.value("generalsettings/ui/timeformat").toInt());
 
         mPainter.setPen(QPen(kBrush, 1));
 
@@ -125,7 +125,7 @@ void Renderer::renderHeader(int aHeight, int aFps)
 
             if (attr.showNumber)
             {
-                QString number = timeFormat.frameToString(i, timeScaleFormatVar);
+                QString number = timeFormat.frameToString(i, timeFormatVar);
                 const int width = numberWidth * number.size();
                 const int left = pos.x() - (width >> 1);
                 const int top = lt.y() - 1;

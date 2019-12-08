@@ -26,7 +26,8 @@ public:
     // signals
     util::Signaler<void()> onVisualUpdated;
     util::Signaler<void()> onProjectAttributeUpdated;
-    util::Signaler<void()> onApplicationSettingUpdated;
+    util::Signaler<void()> onTimeFormatChanged;
+    util::Signaler<void()> onThemeChanged;
 
 private:
     void loadVideoFormats();

@@ -185,9 +185,9 @@ void TimeLineWidget::onProjectAttributeUpdated()
     mInner->updateProjectAttribute();
 }
 
-void TimeLineWidget::triggerOnApplicationSettingUpdated()
+void TimeLineWidget::triggerOnTimeFormatChanged()
 {
-    onApplicationSettingUpdated();
+    onTimeFormatChanged();
     updateCamera();
 }
 

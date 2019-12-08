@@ -10,7 +10,8 @@ namespace
 {
 
 static const int kLanguageTypeCount = 3;
-static const int kTimeScaleFormatTypeCount = 6;
+static const int kTimeFormatTypeCount = 6;
+static const int kThemeCount = 4;
 
 int languageToIndex(const QString& aLanguage)
 {
@@ -31,7 +32,7 @@ QString indexToLanguage(int aIndex)
     }
 }
 
-QString indexToTimeScaleFormat(int aIndex)
+QString indexToTimeFormat(int aIndex)
 {
     switch (aIndex)
     {
@@ -45,6 +46,18 @@ QString indexToTimeScaleFormat(int aIndex)
     }
 }
 
+QString indexToTheme(int aIndex)
+{
+    switch (aIndex)
+    {
+    case 0:   return QCoreApplication::translate("GeneralSettingsDialog", "Auto (System theme)");
+    case 1:   return QCoreApplication::translate("GeneralSettingsDialog", "Light");
+    case 2:   return QCoreApplication::translate("GeneralSettingsDialog", "Dark");
+    case 3:   return QCoreApplication::translate("GeneralSettingsDialog", "Classic");
+    default: return "";
+    }
+}
+
 }
 
 namespace gui
@@ -54,8 +67,10 @@ GeneralSettingDialog::GeneralSettingDialog(QWidget* aParent)
     : EasyDialog(tr("General Settings"), aParent)
     , mInitialLanguageIndex()
     , mLanguageBox()
-    , mInitialTimeScaleFormatIndex()
-    , mTimeScaleFormatBox()
+    , mInitialTimeFormatIndex()
+    , mTimeFormatBox()
+    , mInitialThemeIndex()
+    , mThemeBox()
 {
     // read current settings
     {
@@ -67,10 +82,16 @@ GeneralSettingDialog::GeneralSettingDialog(QWidget* aParent)
             mInitialLanguageIndex = languageToIndex(language.toString());
         }
 
-        auto timeScale = settings.value("generalsettings/ui/timescaleformat");
+        auto timeScale = settings.value("generalsettings/ui/timeformat");
         if (timeScale.isValid())
         {
-            mInitialTimeScaleFormatIndex = timeScale.toInt();
+            mInitialTimeFormatIndex = timeScale.toInt();
+        }
+
+        auto theme = settings.value("generalsettings/ui/theme");
+        if (theme.isValid())
+        {
+            mInitialThemeIndex = theme.toInt();
         }
     }
 
@@ -88,13 +109,21 @@ GeneralSettingDialog::GeneralSettingDialog(QWidget* aParent)
         mLanguageBox->setCurrentIndex(mInitialLanguageIndex);
         form->addRow(tr("Language (needs restarting) :"), mLanguageBox);
 
-        mTimeScaleFormatBox = new QComboBox();
-        for (int i = 0; i < kTimeScaleFormatTypeCount; ++i)
+        mTimeFormatBox = new QComboBox();
+        for (int i = 0; i < kTimeFormatTypeCount; ++i)
         {
-            mTimeScaleFormatBox->addItem(indexToTimeScaleFormat(i));
+            mTimeFormatBox->addItem(indexToTimeFormat(i));
         }
-        mTimeScaleFormatBox->setCurrentIndex(mInitialTimeScaleFormatIndex);
-        form->addRow(tr("Timeline format :"), mTimeScaleFormatBox);
+        mTimeFormatBox->setCurrentIndex(mInitialTimeFormatIndex);
+        form->addRow(tr("Timeline format :"), mTimeFormatBox);
+
+        mThemeBox = new QComboBox();
+        for (int i = 0; i < kThemeCount; ++i)
+        {
+            mThemeBox->addItem(indexToTheme(i));
+        }
+        mThemeBox->setCurrentIndex(mInitialThemeIndex);
+        form->addRow(tr("Theme :"), mThemeBox);
     }
 
     auto group = new QGroupBox(tr("Parameters"));
@@ -111,17 +140,32 @@ GeneralSettingDialog::GeneralSettingDialog(QWidget* aParent)
     });
 }
 
+bool GeneralSettingDialog::languageHasChanged()
+{
+    return (mInitialLanguageIndex != mLanguageBox->currentIndex());
+}
+
+bool GeneralSettingDialog::timeFormatHasChanged()
+{
+    return (mInitialTimeFormatIndex != mTimeFormatBox->currentIndex());
+}
+
+bool GeneralSettingDialog::themeHasChanged()
+{
+    return (mInitialThemeIndex != mTimeFormatBox->currentIndex());
+}
+
 void GeneralSettingDialog::saveSettings()
 {
     QSettings settings;
-    auto newLangIndex = mLanguageBox->currentIndex();
-    if (mInitialLanguageIndex != newLangIndex)
-    {
-        settings.setValue("generalsettings/language", indexToLanguage(newLangIndex));
-    }
+    if (languageHasChanged())
+        settings.setValue("generalsettings/language", indexToLanguage(mLanguageBox->currentIndex()));
 
-    auto newTimeScaleFormatIndex = mTimeScaleFormatBox->currentIndex();
-    settings.setValue("generalsettings/ui/timescaleformat", newTimeScaleFormatIndex);
+    if(timeFormatHasChanged())
+        settings.setValue("generalsettings/ui/timeformat", mTimeFormatBox->currentIndex());
+
+    if(themeHasChanged())
+        settings.setValue("generalsettings/ui/theme", mThemeBox->currentIndex());
 
 }
 
