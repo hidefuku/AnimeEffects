@@ -48,10 +48,10 @@ void Renderer::renderLines(const QVector<TimeLineRow>& aRows, const QRect& aCame
             const int sepa = row.node->timeLine()->validTypeCount();
             for (int i = 1; i < sepa; ++i)
             {
-                const float h = (float)rect.height() / sepa;
+                const float h = static_cast<float>(rect.height()) / sepa;
                 const float y = rect.top() + i * h;
-                const QPointF v0(rect.left(), y);
-                const QPointF v1(rect.right(), y);
+                const QPointF v0(rect.left(), static_cast<double>(y));
+                const QPointF v1(rect.right(), static_cast<double>(y));
                 mPainter.drawLine(v0, v1);
 
             }
@@ -67,9 +67,9 @@ void Renderer::renderLines(const QVector<TimeLineRow>& aRows, const QRect& aCame
                     continue;
                 }
 
-                const float h = (float)rect.height() / sepa;
+                const float h = static_cast<float>(rect.height()) / sepa;
                 mPainter.drawText(
-                            QRect(textLeft, rect.top() + (int)i * h, textWidth, (int)h),
+                            QRect(textLeft, rect.top() + static_cast<int>(i * h), textWidth, static_cast<int>(h)),
                             TimeLine::getTimeKeyName(type),
                             QTextOption(Qt::AlignCenter));
                 ++i;
@@ -138,7 +138,7 @@ void Renderer::renderHeader(int aHeight, int aFps)
 
 void Renderer::renderHandle(const QPoint& aPoint, int aRange)
 {
-    const QPoint pos = aPoint + QPoint(0, -(int)mCamera.leftTopPos().y());
+    const QPoint pos = aPoint + QPoint(0, -static_cast<int>(mCamera.leftTopPos().y()));
     const int range = aRange;
 
     const QBrush kBrushBody(QColor(230, 230, 230, 180));
@@ -170,8 +170,8 @@ void Renderer::drawKeys(const ObjectNode* aNode, const TimeLineRow& aRow)
     const QBrush kBrushKeyBody1(QColor(145, 145, 145, 255));
     const QBrush kBrushKeyBody2(QColor(240, 240, 240, 255));
     const QBrush kBrushKeyEdge(QColor(90, 90, 100, 255));
-    QPointF holder[4] = { QPointF(0.0f, -4.2f), QPointF( 4.2f, 0.0f),
-                          QPointF(0.0f,  4.2f), QPointF(-4.2f, 0.0f) };
+    QPointF holder[4] = { QPointF(0.0, -4.2), QPointF( 4.2, 0.0),
+                          QPointF(0.0,  4.2), QPointF(-4.2, 0.0) };
 
     if (aNode && aNode->timeLine())
     {
@@ -199,7 +199,7 @@ void Renderer::drawKeys(const ObjectNode* aNode, const TimeLineRow& aRow)
                 mPainter.setBrush(isFocused ? kBrushKeyBody2 : kBrushKeyBody1);
 
                 auto attr = mScale->attribute(itr.key());
-                QPointF pos(left + attr.grid.x() + 0.5f, height + 0.5f);
+                QPointF pos(left + attr.grid.x() + 0.5, static_cast<double>(height + 0.5f));
 
                 if (isSlimmed)
                 {
@@ -212,10 +212,10 @@ void Renderer::drawKeys(const ObjectNode* aNode, const TimeLineRow& aRow)
                     */
                     //mPainter.drawEllipse(pos, 3.0f, 1.5f);
                     const QPointF poly[] = {
-                        pos + QPointF(-3.0f, -2.0f),
-                        pos + QPointF( 3.0f, -2.0f),
-                        pos + QPointF( 3.0f,  2.0f),
-                        pos + QPointF(-3.0f,  2.0f) };
+                        pos + QPointF(-3.0, -2.0),
+                        pos + QPointF( 3.0, -2.0),
+                        pos + QPointF( 3.0,  2.0),
+                        pos + QPointF(-3.0,  2.0) };
                     mPainter.drawConvexPolygon(poly, 4);
                 }
                 else if (itr.value()->canHoldChild())
@@ -227,7 +227,7 @@ void Renderer::drawKeys(const ObjectNode* aNode, const TimeLineRow& aRow)
                 }
                 else
                 {
-                    mPainter.drawEllipse(pos, 3.0f, 3.0f);
+                    mPainter.drawEllipse(pos, 3.0, 3.0);
                 }
 
                 ++itr;
@@ -262,7 +262,7 @@ void Renderer::drawChildKeys(const ObjectNode* aNode, const QPoint& aPos)
                 {
                     auto attr = mScale->attribute(itr.key());
                     QPointF pos[3];
-                    pos[0] = QPointF(aPos.x() + attr.grid.x() + 0.5f, aPos.y());
+                    pos[0] = QPointF(aPos.x() + attr.grid.x() + 0.5, aPos.y());
                     pos[1] = pos[0] + QPointF( 3, -5);
                     pos[2] = pos[0] + QPointF(-3, -5);
                     mPainter.drawConvexPolygon(pos, 3);
