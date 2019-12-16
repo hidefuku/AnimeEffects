@@ -24,16 +24,17 @@ const QString TimeFormat::frameToString(const int aFrame, const TimeFormatType a
     case TimeFormatType_Seconds_Frames: { // (SS:FF)
         double min = 0.0;
         double max = 60.0;
-        double v = static_cast<double>(aFrame);
 
         double nMin = 0;
         double nMax = 1;
 
-        double rangeMaxSeconds = remap(static_cast<double>(mRange.max()),min,max,nMin,nMax);
-        double s = remap(v,min,max,nMin,nMax);
+        int rangeMaxSeconds = static_cast<int>(util::MathUtil::remap(mRange.max(),min,max,nMin,nMax));
+        double seconds = util::MathUtil::remap(aFrame,min,max,nMin,nMax);
 
         QString n;
-        n.sprintf("%0*d:%0*d", QString::number(rangeMaxSeconds).length(),static_cast<int>(s) ,QString::number(mRange.max()).length(),aFrame);
+        n.sprintf("%0*d:%02d",
+                  QString::number(rangeMaxSeconds).length(), static_cast<int>(seconds),
+                  static_cast<int>(util::MathUtil::cycle(aFrame, 0.0, 60.0)));
 
         return n;
     }
@@ -41,17 +42,18 @@ const QString TimeFormat::frameToString(const int aFrame, const TimeFormatType a
     case TimeFormatType_Timecode_SMPTE: { // (HH:MM:SS:FF)
         double min = 0.0;
         double max = 60.0;
-        double v = static_cast<double>(aFrame);
 
         double nMin = 0;
         double nMax = 1000.0;
 
-        double ms = remap(v,min,max,nMin,nMax);
+        double ms = util::MathUtil::remap(aFrame,min,max,nMin,nMax);
 
         DDHHMMSSmmm timeStruct = msToDDHHMMSSmmm(ms);
 
         QString n;
-        n.sprintf("%02d:%02d:%02d:%0*d", timeStruct.hours, timeStruct.minutes,timeStruct.seconds,QString::number(mRange.max()).length(),aFrame);
+        n.sprintf("%02d:%02d:%02d:%02d",
+                  timeStruct.hours, timeStruct.minutes,timeStruct.seconds,
+                  static_cast<int>(util::MathUtil::cycle(aFrame, 0.0, 60.0)));
 
         return n;
     }
@@ -59,12 +61,11 @@ const QString TimeFormat::frameToString(const int aFrame, const TimeFormatType a
     case TimeFormatType_Timecode_HHMMSSmmm: { // (HH:MM:SS:mmm)
         double min = 0.0;
         double max = 60.0;
-        double v = static_cast<double>(aFrame);
 
         double nMin = 0;
         double nMax = 1000.0;
 
-        double ms = remap(v,min,max,nMin,nMax);
+        double ms = util::MathUtil::remap(aFrame,min,max,nMin,nMax);
 
         DDHHMMSSmmm timeStruct = msToDDHHMMSSmmm(ms);
 
@@ -79,11 +80,6 @@ const QString TimeFormat::frameToString(const int aFrame, const TimeFormatType a
     }
 }
 
-double TimeFormat::remap(double value, double min, double max, double nMin, double nMax)
-{
-    // Linear range conversion
-    return (((value - min) * (nMax - nMin)) / (max - min)) + nMin;
-}
 
 DDHHMMSSmmm TimeFormat::msToDDHHMMSSmmm(double ms)
 {

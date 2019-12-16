@@ -6,15 +6,15 @@ namespace util
 
 QVector2D MathUtil::getRotateVectorRad(const QVector2D& aVec, float aRotate)
 {
-    const float s = qSin(aRotate);
-    const float c = qCos(aRotate);
+    const float s = static_cast<float>(qSin(static_cast<double>(aRotate)));
+    const float c = static_cast<float>(qCos(static_cast<double>(aRotate)));
     return QVector2D(c * aVec.x() - s * aVec.y(), s * aVec.x() + c * aVec.y());
 }
 
 QPointF MathUtil::getRotateVectorRad(const QPointF& aVec, float aRotate)
 {
-    const float s = qSin(aRotate);
-    const float c = qCos(aRotate);
+    const double s = qSin(static_cast<double>(aRotate));
+    const double c = qCos(static_cast<double>(aRotate));
     return QPointF(c * aVec.x() - s * aVec.y(), s * aVec.x() + c * aVec.y());
 }
 
@@ -34,8 +34,8 @@ float MathUtil::getClockwiseRotationRad(const QVector2D& aFrom, const QVector2D&
 
     const float from = getAngleRad(aFrom);
     const float to = getAngleRad(aTo);
-    const float rotate = to - from;
-    return rotate < 0 ? rotate : (float)(rotate - 2.0 * M_PI);
+    const double rotate = static_cast<const double>(to - from);
+    return static_cast<float>(rotate < 0 ? rotate : (rotate - 2.0 * M_PI));
 }
 
 QVector2D MathUtil::blendVectorByClockwiseRotation(
