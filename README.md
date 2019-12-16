@@ -1,6 +1,6 @@
 # AnimeEffects
 A 2D animation tool which doesn't require a carefully thought-out plan.  
-It provides various animation functions based on deformation of polygon mesh.  
+It provides various animation functions based on deformation of polygon mesh.<br>
 Official Website:<br>
 http://animeeffects.org/en/
 
