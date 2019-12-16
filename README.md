@@ -1,11 +1,11 @@
 # AnimeEffects
 A 2D animation tool which doesn't require a carefully thought-out plan.  
-It provides various animation functions based on deformation of polygon mesh.<br>
+It provides various animation functions based on deformation of polygon mesh.<br><br>
 Official Website:<br>
 http://animeeffects.org/en/
 
 
-Unofficial AnimeEffects boards (but run by developers still has intrest in AE.)
+Unofficial AnimeEffects boards (but run by developers still has interest in AE.)
 
 Discord: <a href='https://discord.gg/sKp8Srm'>AnimeEffects Community Server</a> (courtesy of @Jose-Moreno)<br>
 IRC: <a href='https://webchat.freenode.net/?channels=#animeeffects-dev'>#animeeffects-dev on freenode</a> (courtesy of @Larpon)
