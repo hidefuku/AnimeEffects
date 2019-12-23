@@ -15,6 +15,7 @@
 #include "XC.h"
 #include "util/NonCopyable.h"
 #include "util/Signaler.h"
+#include "theme/Theme.h"
 
 namespace gui
 {
@@ -27,19 +28,19 @@ public:
 
     QIcon icon(const QString& aName) const;
 
-    QString themeId() const;
-    QString themePath();
     QStringList themeList();
     bool hasTheme(const QString& aThemeId);
     void setTheme(const QString& aThemeId);
 
 public:
     // signals
-    util::Signaler<void()> onThemeChanged;
+    util::Signaler<void(theme::Theme&)> onThemeChanged;
+
+    void triggerOnThemeChanged();
 
 private:
     typedef QHash<QString, QIcon*> IconMap;
-    typedef QHash<QString, QFileInfo> ThemeMap;
+    typedef QHash<QString, theme::Theme> ThemeMap;
 
     void loadIcons();
     void detectThemes();
@@ -51,7 +52,8 @@ private:
     IconMap mIconMap;
 
     ThemeMap mThemeMap;
-    QString mThemeId;
+
+    theme::Theme mTheme;
 };
 
 } // namespace gui

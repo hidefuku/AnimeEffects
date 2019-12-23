@@ -1,3 +1,8 @@
+QWidget {
+    background-color: #dcdedf;
+    color: #101010;
+}
+
 QMenuBar {
     color: #000000;
     background-color: qlineargradient(

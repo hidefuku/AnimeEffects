@@ -156,11 +156,14 @@ int entryPoint(int argc, char *argv[])
         mainWindow->testNewProject(testPath);
 #endif
 
+        resources->triggerOnThemeChanged();
+
         // execute application
         result = app.exec();
 
         // save settings(window status, etc.)
         mainWindow->saveCurrentSettings(result);
+
 
         // bind gl context for destructors
         gl::Global::makeCurrent();

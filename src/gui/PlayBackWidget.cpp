@@ -18,8 +18,6 @@ PlayBackWidget::PlayBackWidget(GUIResources& aResources, QWidget* aParent)
     , mGUIResources(aResources)
     , mButtons()
 {
-    onThemeUpdated();
-
     this->setGeometry(0, 0, kButtonSize, kButtonSize * kButtonCount);
 
     mButtons.push_back(createButton("rewind",   false, 0, tr("Rewind to Beginning")));
@@ -90,9 +88,9 @@ QPushButton* PlayBackWidget::createButton(
     return button;
 }
 
-void PlayBackWidget::onThemeUpdated()
+void PlayBackWidget::onThemeUpdated(theme::Theme& aTheme)
 {
-    QFile stylesheet(mGUIResources.themePath()+"/stylesheet/playbackwidget.ssa");
+    QFile stylesheet(aTheme.path()+"/stylesheet/playbackwidget.ssa");
     if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         this->setStyleSheet(QTextStream(&stylesheet).readAll());

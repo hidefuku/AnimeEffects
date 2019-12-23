@@ -12,8 +12,6 @@ ProjectTabBar::ProjectTabBar(QWidget* aParent, GUIResources& aResources)
     , mSignal(true)
     , mGUIResources(aResources)
 {
-    onThemeUpdated();
-
     static const int kHeight = 18;
     this->setGeometry(0, 0, aParent->geometry().width(), kHeight);
     this->setUsesScrollButtons(false);
@@ -38,9 +36,9 @@ QString ProjectTabBar::getTabName(const core::Project& aProject) const
     return name.isEmpty() ? QString("New Project") : QFileInfo(name).fileName();
 }
 
-void ProjectTabBar::onThemeUpdated()
+void ProjectTabBar::onThemeUpdated(theme::Theme& aTheme)
 {
-    QFile stylesheet(mGUIResources.themePath()+"/stylesheet/modetabbar.ssa");
+    QFile stylesheet(aTheme.path()+"/stylesheet/modetabbar.ssa");
     if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         this->setStyleSheet(QTextStream(&stylesheet).readAll());

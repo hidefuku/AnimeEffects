@@ -251,9 +251,6 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
 
     this->setFocusPolicy(Qt::StrongFocus);
 
-    // Update theme
-    this->onThemeUpdated();
-
 #if 0
     auto scUndo = new QShortcut(QKeySequence("Ctrl+Z"), this);
     auto scRedo = new QShortcut(QKeySequence("Ctrl+Shift+Z"), this);
@@ -384,9 +381,10 @@ void MainWindow::onProjectTabChanged(core::Project& aProject)
     resetProjectRefs(&aProject);
 }
 
-void MainWindow::onThemeUpdated()
+void MainWindow::onThemeUpdated(theme::Theme &aTheme)
 {
-    QFile stylesheet(mGUIResources.themePath()+"/stylesheet/standard.ssa");
+
+    QFile stylesheet(aTheme.path()+"/stylesheet/standard.ssa");
     if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         QString fontOption;
@@ -404,7 +402,7 @@ void MainWindow::onThemeUpdated()
         stylesheet.close();
     }
 
-    stylesheet.setFileName(mGUIResources.themePath()+"/stylesheet/propertywidget.ssa");
+    stylesheet.setFileName(aTheme.path()+"/stylesheet/propertywidget.ssa");
     if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         mDockPropertyWidget->setStyleSheet(QTextStream(&stylesheet).readAll());
@@ -412,7 +410,7 @@ void MainWindow::onThemeUpdated()
     }
 
 
-    stylesheet.setFileName(mGUIResources.themePath()+"/stylesheet/toolwidget.ssa");
+    stylesheet.setFileName(aTheme.path()+"/stylesheet/toolwidget.ssa");
     if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         mDockToolWidget->setStyleSheet(QTextStream(&stylesheet).readAll());

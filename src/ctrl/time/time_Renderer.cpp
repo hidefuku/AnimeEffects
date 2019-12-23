@@ -5,9 +5,10 @@ using namespace core;
 namespace ctrl {
 namespace time {
 
-Renderer::Renderer(QPainter& aPainter, const CameraInfo& aCamera)
+Renderer::Renderer(QPainter& aPainter, const CameraInfo& aCamera, const theme::TimeLine &aTheme)
     : mPainter(aPainter)
     , mCamera(aCamera)
+    , mTheme(aTheme)
     , mMargin()
     , mRange()
     , mScale()
@@ -19,11 +20,11 @@ void Renderer::renderLines(const QVector<TimeLineRow>& aRows, const QRect& aCame
     // draw each line
     mPainter.setRenderHint(QPainter::Antialiasing);
 
-    const QBrush kBrushBody(QColor(250, 250, 250, 255));
-    const QBrush kBrushBodySelect(QColor(235, 240, 250, 255));
-    const QBrush kBrushEdge(QColor(190, 190, 190, 255));
-    const QBrush kBrushSepa(QColor(200, 200, 205, 255));
-    const QBrush kBrushText(QColor(170, 170, 170, 255));
+    const QBrush kBrushBody(mTheme.trackColor());
+    const QBrush kBrushBodySelect(mTheme.trackSelectColor());
+    const QBrush kBrushEdge(mTheme.trackEdgeColor());
+    const QBrush kBrushSepa(mTheme.trackSeperatorColor());
+    const QBrush kBrushText(mTheme.trackTextColor());
     const int textWidth = 100;
     const int textLeft = aCameraRect.center().x() - textWidth / 2;
 
@@ -95,7 +96,7 @@ void Renderer::renderHeader(int aHeight, int aFps)
 
     // draw header background
     {
-        const QBrush kBrush(QColor(160, 160, 160, 255));
+        const QBrush kBrush(mTheme.headerBackgroundColor());
         QRect rect = cameraRect;
         rect.setHeight(aHeight);
         mPainter.setPen(QPen(kBrush, 1));
@@ -105,7 +106,7 @@ void Renderer::renderHeader(int aHeight, int aFps)
 
     // draw header info
     {
-        const QBrush kBrush(QColor(60, 60, 70, 255));
+        const QBrush kBrush(mTheme.headerContentColor());
         const int numberHeight = 14;
         const int numberWidth = 6;
         const QPoint lt(mMargin, cameraRect.top());

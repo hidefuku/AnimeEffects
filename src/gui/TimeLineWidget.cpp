@@ -5,8 +5,9 @@ namespace gui
 {
 
 //-------------------------------------------------------------------------------------------------
-TimeLineWidget::TimeLineWidget(ViaPoint& aViaPoint, core::Animator& aAnimator, QWidget* aParent)
+TimeLineWidget::TimeLineWidget(GUIResources& aResources, ViaPoint& aViaPoint, core::Animator& aAnimator, QWidget* aParent)
     : QScrollArea(aParent)
+    , mGUIResources(aResources)
     , mProject()
     , mAnimator(aAnimator)
     , mInner()
@@ -19,13 +20,16 @@ TimeLineWidget::TimeLineWidget(ViaPoint& aViaPoint, core::Animator& aAnimator, Q
     , mLastFrame()
     , mDoesLoop(false)
 {
-    mInner = new TimeLineInnerWidget(aViaPoint, this);
+    mInner = new TimeLineEditorWidget(aViaPoint, this);
 
     this->setWidget(mInner);
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setMouseTracking(true);
     this->connect(&mTimer, &QTimer::timeout, this, &TimeLineWidget::onPlayBackUpdated);
+
+    mGUIResources.onThemeChanged.connect(this, &TimeLineWidget::onThemeUpdated);
+
     updateCamera();
 }
 
@@ -177,6 +181,16 @@ void TimeLineWidget::onPlayBackUpdated()
         setFrame(core::Frame(static_cast<int>(nextFrame)));
         mLastFrame = core::Frame(static_cast<int>(nextFrame));
 #endif
+    }
+}
+
+void TimeLineWidget::onThemeUpdated(theme::Theme& aTheme)
+{
+    QFile stylesheet(aTheme.path()+"/stylesheet/timelinewidget.ssa");
+    if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        this->setStyleSheet(QTextStream(&stylesheet).readAll());
+        mInner->updateTheme(aTheme);
     }
 }
 

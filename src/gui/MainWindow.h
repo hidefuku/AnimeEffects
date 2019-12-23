@@ -62,7 +62,7 @@ private:
     bool processProjectSaving(core::Project& aProject, bool aRename = false);
     int confirmProjectClosing(bool aCurrentOnly);
     void onProjectTabChanged(core::Project&);
-    void onThemeUpdated();
+    void onThemeUpdated(theme::Theme&);
 
     ctrl::System& mSystem;
     GUIResources& mGUIResources;

@@ -13,7 +13,7 @@ TargetWidget::TargetWidget(ViaPoint& aViaPoint, GUIResources& aResources, QWidge
 {
     mHorizontalSplitter = new QSplitter(this);
     mObjTree = new ObjectTreeWidget(aViaPoint, aResources, this);
-    mTimeLine = new TimeLineWidget(aViaPoint, *this, this);
+    mTimeLine = new TimeLineWidget(aResources, aViaPoint, *this, this);
     mPlayBack = new PlayBackWidget(aResources, this);
 
     mInfoLabel = new TimeLineInfoWidget(aResources, this);

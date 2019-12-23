@@ -89,7 +89,7 @@ private:
     void onObjectActionTriggered(bool aIsTriggered);
     void onFolderActionTriggered(bool aIsTriggered);
     void onDeleteActionTriggered(bool aIsTriggered);
-    void onThemeUpdated();
+    void onThemeUpdated(theme::Theme&);
 
     ViaPoint& mViaPoint;
     GUIResources& mGUIResources;

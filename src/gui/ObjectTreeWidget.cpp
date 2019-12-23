@@ -53,8 +53,6 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
     , mFolderAction()
     , mDeleteAction()
 {
-
-    this->onThemeUpdated();
     this->setObjectName("objectTree");
     this->setFocusPolicy(Qt::NoFocus);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -374,9 +372,9 @@ bool ObjectTreeWidget::updateItemHeights(QTreeWidgetItem* aItem)
     return changed;
 }
 
-void ObjectTreeWidget::onThemeUpdated()
+void ObjectTreeWidget::onThemeUpdated(theme::Theme& aTheme)
 {
-    QFile stylesheet(mGUIResources.themePath()+"/stylesheet/standard.ssa");
+    QFile stylesheet(aTheme.path()+"/stylesheet/standard.ssa");
     if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         this->setStyleSheet(QTextStream(&stylesheet).readAll());

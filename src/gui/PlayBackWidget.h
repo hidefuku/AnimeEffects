@@ -40,7 +40,7 @@ private:
     GUIResources& mGUIResources;
     std::vector<QPushButton*> mButtons;
     PushDelegate mPushDelegate;
-    void onThemeUpdated();
+    void onThemeUpdated(theme::Theme&);
 };
 
 } // namespace gui

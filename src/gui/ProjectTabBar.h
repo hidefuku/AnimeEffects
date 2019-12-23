@@ -32,7 +32,7 @@ private:
     bool mSignal;
 
     GUIResources& mGUIResources;
-    void onThemeUpdated();
+    void onThemeUpdated(theme::Theme&);
 };
 
 

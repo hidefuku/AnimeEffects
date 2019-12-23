@@ -7,7 +7,7 @@ GUIResources::GUIResources(const QString& aResourceDir)
     : mResourceDir(aResourceDir)
     , mIconMap()
     , mThemeMap()
-    , mThemeId("default")
+    , mTheme(aResourceDir)
 {
     detectThemes();
 
@@ -47,7 +47,7 @@ QIcon GUIResources::icon(const QString& aName) const
 
 QString GUIResources::iconPath(const QString& aName)
 {
-    return themePath()+"/icon/"+aName+".png";
+    return mTheme.path()+"/icon/"+aName+".png";
 }
 
 void GUIResources::loadIcon(const QString& aPath)
@@ -90,7 +90,7 @@ void GUIResources::loadIcons()
         mIconMap.clear();
     }
 
-    const QString iconDirPath(mResourceDir+"/themes/"+mThemeId+"/icon");
+    const QString iconDirPath(mResourceDir+"/themes/"+mTheme.id()+"/icon");
 
     QStringList filters;
     filters << "*.png";
@@ -113,34 +113,25 @@ void GUIResources::detectThemes()
         itr.next();
         if(itr.fileName() != "." && itr.fileName() != "..")
         {
-            qDebug() << itr.fileName();
-            mThemeMap.insert(itr.fileName(), itr.fileInfo());
+            qDebug() << Q_FUNC_INFO << itr.fileName();
+            theme::Theme theme(mResourceDir, itr.fileName());
+            mThemeMap.insert(itr.fileName(), theme);
         }
     }
-}
-
-QString GUIResources::themeId() const
-{
-    return mThemeId;
-}
-
-QString GUIResources::themePath()
-{
-    return mThemeMap[mThemeId].absoluteFilePath();
 }
 
 QStringList GUIResources::themeList()
 {
-    QStringList theThemeList;
+    QStringList kThemeList;
     if(!mThemeMap.empty())
     {
-        QHashIterator<QString, QFileInfo> i(mThemeMap);
+        QHashIterator<QString, theme::Theme> i(mThemeMap);
         while (i.hasNext()) {
             i.next();
-            theThemeList.append(i.key());
+            kThemeList.append(i.key());
         }
     }
-    return theThemeList;
+    return kThemeList;
 }
 
 bool GUIResources::hasTheme(const QString &aThemeId)
@@ -150,11 +141,16 @@ bool GUIResources::hasTheme(const QString &aThemeId)
 
 void GUIResources::setTheme(const QString &aThemeId)
 {
-    if(mThemeId != aThemeId) {
-        mThemeId = aThemeId;
+    if(mTheme.id() != aThemeId && hasTheme(aThemeId)) {
+        mTheme = mThemeMap.value(aThemeId);
         loadIcons();
-        onThemeChanged();
+        onThemeChanged(mTheme);
     }
+}
+
+void GUIResources::triggerOnThemeChanged()
+{
+    onThemeChanged(mTheme);
 }
 
 } // namespace gui
