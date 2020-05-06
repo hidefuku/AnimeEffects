@@ -238,7 +238,7 @@ obj::Item* ObjectTreeWidget::createFolderItem(core::ObjectNode& aNode)
 
     obj::Item* item = new obj::Item(*this, aNode);
     item->setSizeHint(kItemColumn, QSize(kItemSize, itemHeight(aNode)));
-    item->setBackgroundColor(kItemColumn, QColor(235, 235, 235, 255));
+    //item->setBackgroundColor(kItemColumn, QColor(235, 235, 235, 255));
     item->setIcon(kItemColumn, mGUIResources.icon("folder"));
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(kItemColumn, aNode.isVisible() ? Qt::Checked : Qt::Unchecked);
