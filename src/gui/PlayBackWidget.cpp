@@ -78,7 +78,7 @@ QPushButton* PlayBackWidget::createButton(
 {
     QPushButton* button = new QPushButton(this);
     XC_PTR_ASSERT(button);
-    button->setObjectName("playbackButton");
+    button->setObjectName(aName);
     button->setIcon(mGUIResources.icon(aName));
     button->setIconSize(QSize(kButtonSize, kButtonSize));
     button->setCheckable(aIsCheckable);
@@ -95,6 +95,14 @@ void PlayBackWidget::onThemeUpdated(theme::Theme& aTheme)
     {
         this->setStyleSheet(QTextStream(&stylesheet).readAll());
     }
+
+    if(mButtons.size() > 0) {
+        for (auto button : mButtons)
+        {
+            button->setIcon(mGUIResources.icon(button->objectName()));
+        }
+    }
+
 }
 
 } // namespace gui

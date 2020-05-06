@@ -45,4 +45,10 @@ bool Theme::isDefault() const
     return mId == "default";
 }
 
+bool Theme::isDark() const
+{
+    QPalette palette;
+    return palette.window().color().lightnessF() < 0.5;
+}
+
 } // namespace theme

@@ -47,7 +47,8 @@ QIcon GUIResources::icon(const QString& aName) const
 
 QString GUIResources::iconPath(const QString& aName)
 {
-    return mTheme.path()+"/icon/"+aName+".png";
+    bool loadLightIcons = mTheme.isDefault() && mTheme.isDark();
+    return mTheme.path()+"/icon"+(loadLightIcons ? "/light" : "")+"/"+aName+".png";
 }
 
 void GUIResources::loadIcon(const QString& aPath)
@@ -90,7 +91,8 @@ void GUIResources::loadIcons()
         mIconMap.clear();
     }
 
-    const QString iconDirPath(mResourceDir+"/themes/"+mTheme.id()+"/icon");
+    bool loadLightIcons = mTheme.isDefault() && mTheme.isDark();
+    const QString iconDirPath(mResourceDir+"/themes/"+mTheme.id()+"/icon"+(loadLightIcons ? "/light" : ""));
 
     QStringList filters;
     filters << "*.png";

@@ -4,6 +4,8 @@
 #include <QString>
 #include <QFileInfo>
 
+#include <QPalette>
+
 namespace theme
 {
 
@@ -19,6 +21,8 @@ public:
     QString path() const;
     QFileInfo fileInfo() const;
     bool isDefault() const;
+
+    bool isDark() const;
 
 private:
     QString mId;
