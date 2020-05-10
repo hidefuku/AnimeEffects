@@ -36,7 +36,7 @@ namespace gui
 ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources, QWidget* aParent)
     : QTreeWidget(aParent)
     , mViaPoint(aViaPoint)
-    , mResources(aResources)
+    , mGUIResources(aResources)
     , mProject()
     , mTimeLineSlot()
     , mStoreInsert(false)
@@ -53,14 +53,6 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
     , mFolderAction()
     , mDeleteAction()
 {
-    {
-        QFile stylesheet("data/stylesheet/standard.ssa");
-        if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            this->setStyleSheet(QTextStream(&stylesheet).readAll());
-        }
-    }
-
     this->setObjectName("objectTree");
     this->setFocusPolicy(Qt::NoFocus);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -88,6 +80,8 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
     this->connect(this, &QTreeWidget::itemCollapsed, this, &ObjectTreeWidget::onItemCollapsed);
     this->connect(this, &QTreeWidget::itemExpanded, this, &ObjectTreeWidget::onItemExpanded);
     this->connect(this, &QTreeWidget::itemSelectionChanged, this, &ObjectTreeWidget::onItemSelectionChanged);
+
+    mGUIResources.onThemeChanged.connect(this, &ObjectTreeWidget::onThemeUpdated);
 
     {
         mSlimAction = new QAction(tr("slim down"), this);
@@ -244,8 +238,8 @@ obj::Item* ObjectTreeWidget::createFolderItem(core::ObjectNode& aNode)
 
     obj::Item* item = new obj::Item(*this, aNode);
     item->setSizeHint(kItemColumn, QSize(kItemSize, itemHeight(aNode)));
-    item->setBackgroundColor(kItemColumn, QColor(235, 235, 235, 255));
-    item->setIcon(kItemColumn, mResources.icon("folder"));
+    //item->setBackgroundColor(kItemColumn, QColor(235, 235, 235, 255));
+    item->setIcon(kItemColumn, mGUIResources.icon("folder"));
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(kItemColumn, aNode.isVisible() ? Qt::Checked : Qt::Unchecked);
     return item;
@@ -255,7 +249,7 @@ obj::Item* ObjectTreeWidget::createFileItem(core::ObjectNode& aNode)
 {
     obj::Item* item = new obj::Item(*this, aNode);
     item->setSizeHint(kItemColumn, QSize(kItemSize, itemHeight(aNode)));
-    item->setIcon(kItemColumn, mResources.icon("filew"));
+    item->setIcon(kItemColumn, mGUIResources.icon("filew"));
     item->setFlags(item->flags() & ~Qt::ItemIsDropEnabled);
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(kItemColumn, aNode.isVisible() ? Qt::Checked : Qt::Unchecked);
@@ -376,6 +370,15 @@ bool ObjectTreeWidget::updateItemHeights(QTreeWidgetItem* aItem)
         changed |= updateItemHeights(aItem->child(i));
     }
     return changed;
+}
+
+void ObjectTreeWidget::onThemeUpdated(theme::Theme& aTheme)
+{
+    QFile stylesheet(aTheme.path()+"/stylesheet/standard.ssa");
+    if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        this->setStyleSheet(QTextStream(&stylesheet).readAll());
+    }
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -1,0 +1,225 @@
+QMenuBar {
+
+}
+
+QMenuBar::item {
+    spacing: 8px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 1px;
+}
+
+QMenuBar::item:selected {
+    padding-top: 1px;
+}
+
+QMenuBar::item:pressed {
+    padding-top: 5px;
+}
+
+QFrame {
+
+}
+
+QScrollArea {
+    border-radius:1px;
+}
+
+QPlainTextEdit {
+    border-radius: 1px;
+}
+
+QSplitter::handle:horizontal {
+
+}
+QSplitter::handle:vertical {
+
+}
+
+QComboBox {
+    padding-left: 8px;
+    padding-bottom: 1px;
+}
+
+QDoubleSpinBox, QSpinBox {
+
+}
+
+QDoubleSpinBox::disabled, QSpinBox::disabled {
+
+}
+
+QLineEdit {
+
+}
+
+QLineEdit::read-only {
+    border-radius: 1px;
+}
+
+QLineEdit::disabled {
+
+}
+
+QLabel {
+
+}
+
+QGroupBox {
+    border-radius: 8px;
+    margin-top: 0ex;
+    padding-top: 16px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position:top left;
+    padding-left: 8px;
+}
+
+QGroupBox::indicator:unchecked {
+    image: url(data/themes/default/icon/branchclose.png);
+}
+
+QGroupBox::indicator:checked {
+    image: url(data/themes/default/icon/branchopen.png);
+}
+
+QGroupBox#note {
+    border-radius: 2px;
+    margin-top: 0px;
+    padding-top: 0px;
+}
+
+QDockWidget {
+    border-radius: 2px;
+}
+
+QDockWidget::title {
+    text-align: left;
+    border-radius: 1px;
+    padding: 2px;
+    padding-left: 5px;
+    margin: 1px;
+}
+
+QDockWidget::close-button, QDockWidget::float-button {
+    border-radius: 0px;
+}
+
+QDockWidget::close-button:hover, QDockWidget::float-button:hover {
+
+}
+
+QDockWidget::close-button:pressed, QDockWidget::float-button:pressed {
+
+}
+
+QPushButton {
+    border-radius: 2px;
+    padding: 6px 12px 6px 12px;
+}
+
+QPushButton:disabled {
+    padding-top: 6px;
+}
+
+QPushButton:hover {
+    padding-top: 6px;
+}
+
+QPushButton:pressed {
+    padding-top: 10px;
+}
+
+QPushButton#standardButton {
+    padding: 2px 4px 2px 4px;
+    width: 54px;
+    height: 22px;
+}
+
+QPushButton#standardButton:disabled {
+    padding-top: 2px;
+}
+
+QPushButton#standardButton:hover {
+    padding-top: 2px;
+}
+
+QPushButton#standardButton:pressed {
+    padding-top: 6px;
+}
+
+QPushButton#browser {
+    border-radius: 2px;
+    padding: 2px;
+    width: 18px;
+    height: 15px;
+}
+QPushButton#browser::enabled {
+    image: url(data/themes/default/icon/filew.png);
+}
+QPushButton#browser::disabled {
+    image: url(data/themes/default/icon/file.png);
+}
+
+QTreeView#objectTree {
+    show-decoration-selected: 1;
+    border-radius: 1px;
+}
+
+QTreeView#objectTree::item {
+
+}
+
+QTreeView#objectTree::item:hover {
+
+}
+
+QTreeView#objectTree::item:selected {
+
+}
+
+QTreeView#objectTree::item:selected:active{
+
+}
+
+QTreeView#objectTree::item:selected:!active {
+
+}
+
+QTreeView#objectTree::indicator:unchecked {
+    image: url(data/themes/default/icon/eyeclose.png);
+}
+
+QTreeView#objectTree::indicator:checked {
+    image: url(data/themes/default/icon/eyeopen.png);
+}
+
+
+QTreeView#resourceTree {
+    show-decoration-selected: 1;
+    border-radius: 2px;
+}
+
+QTreeView#resourceTree::item {
+
+}
+
+QTreeView#resourceTree::item:hover {
+
+}
+
+QTreeView#resourceTree::item:selected {
+
+}
+
+QTreeView#resourceTree::item:selected:active{
+
+}
+
+QTreeView#resourceTree::item:selected:!active {
+
+}

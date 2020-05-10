@@ -13,8 +13,10 @@
 #include "core/Animator.h"
 #include "core/TimeLineEvent.h"
 #include "ctrl/TimeLineEditor.h"
-#include "gui/TimeLineInnerWidget.h"
+#include "gui/theme/TimeLine.h"
+#include "gui/TimeLineEditorWidget.h"
 #include "gui/ViaPoint.h"
+#include "gui/GUIResources.h"
 
 namespace gui
 {
@@ -22,10 +24,11 @@ namespace gui
 class TimeLineWidget : public QScrollArea
 {
     Q_OBJECT
+
 public:
     //typedef std::function<void(const core::TimeInfo&)> PlayBackFunc;
 
-    TimeLineWidget(ViaPoint& aViaPoint, core::Animator& aAnimator, QWidget* aParent);
+    TimeLineWidget(GUIResources& aResources, ViaPoint& aViaPoint, core::Animator& aAnimator, QWidget* aParent);
 
     void setProject(core::Project* aProject);
     void updateLines(QTreeWidgetItem* aTopNode);
@@ -36,7 +39,7 @@ public:
 
     util::Signaler<void()> onCursorUpdated;
     util::Signaler<void()> onFrameUpdated;
-    util::Signaler<void()> onApplicationSettingUpdated;
+    util::Signaler<void()> onTimeFormatChanged;
     util::Signaler<void(bool)> onPlayBackStateChanged;
 
 
@@ -45,7 +48,7 @@ public:
     void onScrollUpdated(int aValue);
     void onSelectionChanged(core::ObjectNode* aRepresent);
     void onProjectAttributeUpdated();
-    void triggerOnApplicationSettingUpdated();
+    void triggerOnTimeFormatChanged();
 
 private:
     virtual void mouseMoveEvent(QMouseEvent* aEvent);
@@ -63,10 +66,12 @@ private:
     void updateCamera();
     void updateCursor(const core::AbstractCursor& aCursor);
     void onPlayBackUpdated();
+    void onThemeUpdated(theme::Theme&);
 
+    GUIResources& mGUIResources;
     util::LinkPointer<core::Project> mProject;
     core::Animator& mAnimator;
-    TimeLineInnerWidget* mInner;
+    TimeLineEditorWidget* mInner;
     core::CameraInfo mCameraInfo;
     core::AbstractCursor mAbstractCursor;
     int mVerticalScrollValue;
@@ -77,6 +82,7 @@ private:
     core::Frame mBeginFrame;
     core::Frame mLastFrame;
     bool mDoesLoop;
+
 };
 
 } // namespace gui

@@ -55,6 +55,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
     , mResourceDialog()
     , mDriverHolder()
     , mCurrent()
+    , mLocaleParam(aLocaleParam)
 {
     // setup default opengl format
     {
@@ -70,22 +71,6 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
     // setup UI
     {
         this->setObjectName(QStringLiteral("MainWindow"));
-
-        QFile stylesheet("data/stylesheet/standard.ssa");
-        if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            QString fontOption;
-            {
-                auto hasFamily = !aLocaleParam.fontFamily.isEmpty();
-                auto hasSize = !aLocaleParam.fontSize.isEmpty();
-                fontOption = "QWidget {" +
-                        (hasFamily ? ("font-family: " + aLocaleParam.fontFamily + ";") : "") +
-                        (hasSize ? ("font-size: " + aLocaleParam.fontSize + ";") : "") +
-                        " }\n";
-            }
-
-            this->setStyleSheet(fontOption + QTextStream(&stylesheet).readAll());
-        }
 
         this->setMouseTracking(true);
         this->setFocusPolicy(Qt::NoFocus);
@@ -122,7 +107,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
 
     // create main menu bar
     {
-        mMainMenuBar = new MainMenuBar(*this, mViaPoint, this);
+        mMainMenuBar = new MainMenuBar(*this, mViaPoint, mGUIResources, this);
         mViaPoint.setMainMenuBar(mMainMenuBar);
         this->setMenuBar(mMainMenuBar);
     }
@@ -141,7 +126,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
         mMainDisplay = new MainDisplayWidget(mViaPoint, this);
         this->setCentralWidget(mMainDisplay);
 
-        mProjectTabBar = new ProjectTabBar(mMainDisplay);
+        mProjectTabBar = new ProjectTabBar(mMainDisplay, mGUIResources);
         mMainDisplay->setProjectTabBar(mProjectTabBar);
         mProjectTabBar->onCurrentChanged.connect(this, &MainWindow::onProjectTabChanged);
     }
@@ -166,11 +151,7 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
         dockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
         this->addDockWidget(Qt::RightDockWidgetArea, dockWidget);
 
-        QFile stylesheet("data/stylesheet/propertywidget.ssa");
-        if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            dockWidget->setStyleSheet(QTextStream(&stylesheet).readAll());
-        }
+        mDockPropertyWidget = dockWidget;
 
 #if 0
         mProperty = new PropertyWidget(dockWidget);
@@ -207,11 +188,8 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
         dockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
         this->addDockWidget(Qt::LeftDockWidgetArea, dockWidget);
 
-        QFile stylesheet("data/stylesheet/toolwidget.ssa");
-        if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            dockWidget->setStyleSheet(QTextStream(&stylesheet).readAll());
-        }
+        mDockToolWidget = dockWidget;
+
 		mTool = new ToolWidget(mViaPoint, mGUIResources, *mKeyCommandMap, QSize(192, 136), dockWidget);
         dockWidget->setWidget(mTool);
     }
@@ -264,7 +242,9 @@ MainWindow::MainWindow(ctrl::System& aSystem, GUIResources& aResources, const Lo
         menu.onProjectAttributeUpdated.connect(&disp, &MainDisplayWidget::onProjectAttributeUpdated);
         menu.onProjectAttributeUpdated.connect(&timeLine, &TimeLineWidget::onProjectAttributeUpdated);
         menu.onProjectAttributeUpdated.connect(&driver, &DriverHolder::onProjectAttributeUpdated);
-        menu.onApplicationSettingUpdated.connect(&timeLine, &TimeLineWidget::triggerOnApplicationSettingUpdated);
+        menu.onTimeFormatChanged.connect(&timeLine, &TimeLineWidget::triggerOnTimeFormatChanged);
+
+        mGUIResources.onThemeChanged.connect(this, &MainWindow::onThemeUpdated);
 
         mSystem.setAnimator(*mTarget);
     }
@@ -399,6 +379,43 @@ void MainWindow::resetProjectRefs(core::Project* aProject)
 void MainWindow::onProjectTabChanged(core::Project& aProject)
 {
     resetProjectRefs(&aProject);
+}
+
+void MainWindow::onThemeUpdated(theme::Theme &aTheme)
+{
+
+    QFile stylesheet(aTheme.path()+"/stylesheet/standard.ssa");
+    if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QString fontOption;
+        {
+            auto hasFamily = !mLocaleParam.fontFamily.isEmpty();
+            auto hasSize = !mLocaleParam.fontSize.isEmpty();
+            fontOption = "QWidget {" +
+                    (hasFamily ? ("font-family: " + mLocaleParam.fontFamily + ";") : "") +
+                    (hasSize ? ("font-size: " + mLocaleParam.fontSize + ";") : "") +
+                    " }\n";
+        }
+
+        this->setStyleSheet(fontOption + QTextStream(&stylesheet).readAll());
+
+        stylesheet.close();
+    }
+
+    stylesheet.setFileName(aTheme.path()+"/stylesheet/propertywidget.ssa");
+    if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        mDockPropertyWidget->setStyleSheet(QTextStream(&stylesheet).readAll());
+        stylesheet.close();
+    }
+
+
+    stylesheet.setFileName(aTheme.path()+"/stylesheet/toolwidget.ssa");
+    if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        mDockToolWidget->setStyleSheet(QTextStream(&stylesheet).readAll());
+        stylesheet.close();
+    }
 }
 
 #if 0

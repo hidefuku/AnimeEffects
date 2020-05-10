@@ -10,6 +10,7 @@
 #include "core/TimeFormat.h"
 #include "ctrl/TimeLineRow.h"
 #include "ctrl/time/time_Scaler.h"
+#include "gui/theme/TimeLine.h"
 
 namespace ctrl {
 namespace time {
@@ -17,7 +18,7 @@ namespace time {
 class Renderer
 {
 public:
-    Renderer(QPainter& aPainter, const core::CameraInfo& aCamera);
+    Renderer(QPainter& aPainter, const core::CameraInfo& aCamera, const theme::TimeLine &aTheme);
 
     void setMargin(int aMargin) { mMargin = aMargin; }
     void setRange(const util::Range& aRange) { mRange = aRange; }
@@ -35,6 +36,7 @@ private:
 
     QPainter& mPainter;
     const core::CameraInfo& mCamera;
+    const theme::TimeLine &mTheme;
     int mMargin;
     util::Range mRange;
     const Scaler* mScale;

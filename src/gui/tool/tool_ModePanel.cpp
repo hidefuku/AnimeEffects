@@ -7,7 +7,7 @@ namespace tool {
 
 ModePanel::ModePanel(QWidget* aParent, GUIResources& aResources, const PushDelegate& aOnPushed)
     : QGroupBox(aParent)
-    , mResources(aResources)
+    , mGUIResources(aResources)
     , mGroup(new QButtonGroup(this))
     , mButtons()
     , mLayout(this, 0, 2, 2)
@@ -24,14 +24,15 @@ ModePanel::ModePanel(QWidget* aParent, GUIResources& aResources, const PushDeleg
     addButton(ctrl::ToolType_Mesh,   "mesh",   tr("Mesh Creating"));
     addButton(ctrl::ToolType_FFD,    "ffd",    tr("Free Form Deform"));
 
+    mGUIResources.onThemeChanged.connect(this, &ModePanel::onThemeUpdated);
 }
 
 void ModePanel::addButton(
         ctrl::ToolType aType, const QString& aIconName, const QString& aToolTip)
 {
     QPushButton* button = new QPushButton(this);
-    button->setObjectName("toolButton");
-    button->setIcon(mResources.icon(aIconName));
+    button->setObjectName(aIconName);
+    button->setIcon(mGUIResources.icon(aIconName));
     button->setCheckable(true);
     button->setToolTip(aToolTip);
 
@@ -43,6 +44,16 @@ void ModePanel::addButton(
 
     this->connect(button, &QPushButton::clicked,
                   [=](bool aChecked) { this->mOnPushed(aType, aChecked); });
+}
+
+void ModePanel::onThemeUpdated(theme::Theme &)
+{
+    if(mButtons.size() > 0) {
+        for (auto button : mButtons)
+        {
+            button->setIcon(mGUIResources.icon(button->objectName()));
+        }
+    }
 }
 
 void ModePanel::pushButton(ctrl::ToolType aId)
