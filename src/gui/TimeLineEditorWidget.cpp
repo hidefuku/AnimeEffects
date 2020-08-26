@@ -230,7 +230,7 @@ bool TimeLineEditorWidget::updateCursor(const core::AbstractCursor& aCursor)
 
 void TimeLineEditorWidget::updateWheel(QWheelEvent* aEvent)
 {
-    mEditor->updateWheel(aEvent->delta(), mViaPoint.mouseSetting().invertTimeLineScaling);
+    mEditor->updateWheel(aEvent->angleDelta().y(), mViaPoint.mouseSetting().invertTimeLineScaling);
     updateSize();
 }
 

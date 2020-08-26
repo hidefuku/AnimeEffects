@@ -849,7 +849,7 @@ void ObjectTreeWidget::rowsAboutToBeRemoved(const QModelIndex& aParent, int aSta
     if (mStoreInsert)
     {
         XC_ASSERT(aStart == aEnd);
-        QTreeWidgetItem* item = this->itemFromIndex(aParent.child(aStart, kItemColumn));
+        QTreeWidgetItem* item = this->itemFromIndex(aParent.model()->index(aStart, kItemColumn, aParent));
         util::TreePos removePos(this->indexFromItem(item));
         XC_ASSERT(removePos.isValid());
         //qDebug() << "remove"; removePos.dump();
@@ -885,7 +885,7 @@ void ObjectTreeWidget::rowsInserted(const QModelIndex& aParent, int aStart, int 
     if (mStoreInsert)
     {
         XC_ASSERT(aStart == aEnd);
-        QTreeWidgetItem* item = this->itemFromIndex(aParent.child(aStart, kItemColumn));
+        QTreeWidgetItem* item = this->itemFromIndex(aParent.model()->index(aStart, kItemColumn, aParent));
         util::TreePos insertPos(this->indexFromItem(item));
         XC_ASSERT(insertPos.isValid());
         //qDebug() << "insert"; insertPos.dump();

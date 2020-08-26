@@ -34,7 +34,7 @@ float MathUtil::getClockwiseRotationRad(const QVector2D& aFrom, const QVector2D&
 
     const float from = getAngleRad(aFrom);
     const float to = getAngleRad(aTo);
-    const double rotate = static_cast<const double>(to - from);
+    const double rotate = static_cast<double>(to - from);
     return static_cast<float>(rotate < 0 ? rotate : (rotate - 2.0 * M_PI));
 }
 
