@@ -2,6 +2,8 @@
 #include "gl/Global.h"
 #include "gl/Util.h"
 
+#include <QPainterPath>
+
 namespace
 {
 static const int kAttachmentId = 0;
