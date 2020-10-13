@@ -63,9 +63,11 @@ void ModePanel::pushButton(ctrl::ToolType aId)
 
 int ModePanel::updateGeometry(const QPoint& aPos, int aWidth)
 {
-    int l, t, r, b;
-    this->getContentsMargins(&l, &t, &r, &b);
-
+    QMargins margins = this->contentsMargins();
+    int l = margins.left();
+    int r = margins.right();
+    int b = margins.bottom();
+ 
     auto height = mLayout.heightForWidth(aWidth - l - r);
     this->setGeometry(aPos.x(), aPos.y(), aWidth, height + b);
 

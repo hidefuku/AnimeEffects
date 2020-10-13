@@ -17,8 +17,9 @@ const QString TimeFormat::frameToString(const int aFrame, const TimeFormatType a
         return QString::number(aFrame+1);
 
     case TimeFormatType_Relative_FPS: {
-        QString number;
-        return number.sprintf("%.1f", static_cast<double>(aFrame) / mFps);
+        QString number = QString("%1")
+            .arg(static_cast<double>(aFrame) / mFps, 0, 'f');
+        return number;
     }
 
     case TimeFormatType_Seconds_Frames: { // (SS:FF)
@@ -31,10 +32,9 @@ const QString TimeFormat::frameToString(const int aFrame, const TimeFormatType a
         int rangeMaxSeconds = static_cast<int>(util::MathUtil::remap(mRange.max(),min,max,nMin,nMax));
         double seconds = util::MathUtil::remap(aFrame,min,max,nMin,nMax);
 
-        QString n;
-        n.sprintf("%0*d:%02d",
-                  QString::number(rangeMaxSeconds).length(), static_cast<int>(seconds),
-                  static_cast<int>(util::MathUtil::cycle(aFrame, 0.0, 60.0)));
+        QString n = QString("%1:%2")
+            .arg(static_cast<int>(seconds), rangeMaxSeconds, 10, QLatin1Char('0'))
+            .arg(static_cast<int>(util::MathUtil::cycle(aFrame, 0.0, 60.0)), 2, 10, QLatin1Char('0'));
 
         return n;
     }
@@ -50,10 +50,11 @@ const QString TimeFormat::frameToString(const int aFrame, const TimeFormatType a
 
         DDHHMMSSmmm timeStruct = msToDDHHMMSSmmm(ms);
 
-        QString n;
-        n.sprintf("%02d:%02d:%02d:%02d",
-                  timeStruct.hours, timeStruct.minutes,timeStruct.seconds,
-                  static_cast<int>(util::MathUtil::cycle(aFrame, 0.0, 60.0)));
+        QString n = QString("%1:%2:%3:%4")
+            .arg(timeStruct.hours, 2, 10, QLatin1Char('0'))
+            .arg(timeStruct.minutes, 2, 10, QLatin1Char('0'))
+            .arg(timeStruct.seconds, 2, 10, QLatin1Char('0'))
+            .arg(static_cast<int>(util::MathUtil::cycle(aFrame, 0.0, 60.0)), 2, 10, QLatin1Char('0'));
 
         return n;
     }
@@ -69,8 +70,11 @@ const QString TimeFormat::frameToString(const int aFrame, const TimeFormatType a
 
         DDHHMMSSmmm timeStruct = msToDDHHMMSSmmm(ms);
 
-        QString n;
-        n.sprintf("%02d:%02d:%02d:%03d", timeStruct.hours, timeStruct.minutes,timeStruct.seconds,timeStruct.milliseconds);
+        QString n = QString("%1:%2:%3:%4")
+            .arg(timeStruct.hours, 2, 10, QLatin1Char('0'))
+            .arg(timeStruct.minutes, 2, 10, QLatin1Char('0'))
+            .arg(timeStruct.seconds, 2, 10, QLatin1Char('0'))
+            .arg(timeStruct.milliseconds, 3, 10, QLatin1Char('0'));
 
         return n;
     }

@@ -461,7 +461,7 @@ void MainDisplayWidget::mouseReleaseEvent(QMouseEvent* aEvent)
 
 void MainDisplayWidget::wheelEvent(QWheelEvent* aEvent)
 {
-    if (mCanvasMover.updateByWheel(QVector2D(aEvent->pos()), aEvent->delta(),
+    if (mCanvasMover.updateByWheel(QVector2D(aEvent->position()), aEvent->angleDelta().y(),
                                    mViaPoint.mouseSetting().invertMainViewScaling))
     {
         updateRender();

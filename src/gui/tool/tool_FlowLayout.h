@@ -20,7 +20,6 @@ public:
     void addItem(QLayoutItem* aItem);
     int horizontalSpacing() const;
     int verticalSpacing() const;
-    Qt::Orientations expandingDirections() const;
     bool hasHeightForWidth() const;
     int heightForWidth(int) const;
     int count() const;

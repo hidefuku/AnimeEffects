@@ -62,11 +62,6 @@ QLayoutItem* FlowLayout::takeAt(int aIndex)
     return mItemList.takeAt(aIndex);
 }
 
-Qt::Orientations FlowLayout::expandingDirections() const
-{
-    return 0;
-}
-
 bool FlowLayout::hasHeightForWidth() const
 {
     return true;
