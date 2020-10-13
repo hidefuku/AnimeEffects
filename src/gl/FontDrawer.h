@@ -2,6 +2,7 @@
 #define GL_FONTDRAWER_H
 
 #include <QFont>
+#include <QPainterPath>
 #include "gl/Framebuffer.h"
 #include "gl/Texture.h"
 #include "gl/BufferObject.h"
