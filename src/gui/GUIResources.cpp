@@ -1,9 +1,4 @@
-#include "gui/GUIResources.h"
-#include <QPainter>
-#include <QColor>
-#include <QDirIterator>
-#include <QStringList>
-#include "XC.h"
+﻿#include "gui/GUIResources.h"
 
 namespace gui
 {
@@ -11,17 +6,20 @@ namespace gui
 GUIResources::GUIResources(const QString& aResourceDir)
     : mResourceDir(aResourceDir)
     , mIconMap()
+    , mThemeMap()
+    , mTheme(aResourceDir)
 {
-    const QString iconDirPath(mResourceDir + "/icon");
+    detectThemes();
 
-    QStringList filters;
-    filters << "*.png";
-    QDirIterator itr(iconDirPath, filters, QDir::Files, QDirIterator::Subdirectories);
-
-    while (itr.hasNext())
+    QSettings settings;
+    auto theme = settings.value("generalsettings/ui/theme");
+    if (theme.isValid())
     {
-        loadIcon(itr.next());
+        setTheme(theme.toString());
     }
+
+    loadIcons();
+
 }
 
 GUIResources::~GUIResources()
@@ -47,9 +45,10 @@ QIcon GUIResources::icon(const QString& aName) const
     }
 }
 
-QString GUIResources::iconPath(const QString& aName) const
+QString GUIResources::iconPath(const QString& aName)
 {
-    return mResourceDir + "/icon/" + aName + ".png";
+    bool loadLightIcons = mTheme.isDefault() && mTheme.isDark();
+    return mTheme.path()+"/icon"+(loadLightIcons ? "/light" : "")+"/"+aName+".png";
 }
 
 void GUIResources::loadIcon(const QString& aPath)
@@ -75,6 +74,85 @@ void GUIResources::loadIcon(const QString& aPath)
         icon->addPixmap(work, QIcon::Disabled, QIcon::Off);
     }
 #endif
+}
+
+void GUIResources::loadIcons()
+{
+    if(!mIconMap.empty())
+    {
+        QHashIterator<QString, QIcon*> i(mIconMap);
+        while (i.hasNext())
+        {
+            i.next();
+            QIcon* icon = i.value();
+            //qDebug() << i.key() << ": " << i.value();
+            delete icon;
+        }
+        mIconMap.clear();
+    }
+
+    bool loadLightIcons = mTheme.isDefault() && mTheme.isDark();
+    const QString iconDirPath(mResourceDir+"/themes/"+mTheme.id()+"/icon"+(loadLightIcons ? "/light" : ""));
+
+    QStringList filters;
+    filters << "*.png";
+    QDirIterator itr(iconDirPath, filters, QDir::Files, QDirIterator::Subdirectories);
+
+    while (itr.hasNext())
+    {
+        loadIcon(itr.next());
+    }
+}
+
+void GUIResources::detectThemes()
+{
+    const QString themesDirPath(mResourceDir+"/themes");
+
+    QDirIterator itr(themesDirPath, QDir::Dirs, QDirIterator::FollowSymlinks);
+
+    while (itr.hasNext())
+    {
+        itr.next();
+        if(itr.fileName() != "." && itr.fileName() != "..")
+        {
+            qDebug() << Q_FUNC_INFO << itr.fileName();
+            theme::Theme theme(mResourceDir, itr.fileName());
+            mThemeMap.insert(itr.fileName(), theme);
+        }
+    }
+}
+
+QStringList GUIResources::themeList()
+{
+    QStringList kThemeList;
+    if(!mThemeMap.empty())
+    {
+        QHashIterator<QString, theme::Theme> i(mThemeMap);
+        while (i.hasNext()) {
+            i.next();
+            kThemeList.append(i.key());
+        }
+    }
+    return kThemeList;
+}
+
+bool GUIResources::hasTheme(const QString &aThemeId)
+{
+    return mThemeMap.contains(aThemeId);
+}
+
+void GUIResources::setTheme(const QString &aThemeId)
+{
+    if(mTheme.id() != aThemeId && hasTheme(aThemeId)) {
+        mTheme = mThemeMap.value(aThemeId);
+        loadIcons();
+        onThemeChanged(mTheme);
+    }
+}
+
+void GUIResources::triggerOnThemeChanged()
+{
+    onThemeChanged(mTheme);
 }
 
 } // namespace gui

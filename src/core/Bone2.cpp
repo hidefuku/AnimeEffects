@@ -114,13 +114,13 @@ void Bone2::setRange(int aIndex, const QVector2D& aRange)
 {
     XC_ASSERT(!mOrigin);
     XC_ASSERT(0 <= aIndex && aIndex < 2);
-    mRange.at(aIndex) = aRange;
+    mRange.at(static_cast<unsigned int>(aIndex)) = aRange;
 }
 
 const QVector2D& Bone2::range(int aIndex) const
 {
     XC_ASSERT(0 <= aIndex && aIndex < 2);
-    return mOrigin ? mOrigin->mRange.at(aIndex) : mRange.at(aIndex);
+    return mOrigin ? mOrigin->mRange.at(static_cast<unsigned int>(aIndex)) : mRange.at(static_cast<unsigned int>(aIndex));
 }
 
 bool Bone2::hasValidRange() const
@@ -261,7 +261,7 @@ bool Bone2::deserialize(Deserializer& aIn)
 
     // order to write a pointer later
     {
-        auto solver = [=](void* aPtr){this->mOrigin = (Bone2*)aPtr; };
+        auto solver = [=](void* aPtr){this->mOrigin = static_cast<Bone2*>(aPtr); };
         if (!aIn.orderIDData(solver))
         {
             return aIn.errored("invalid reference id");
@@ -285,7 +285,7 @@ bool Bone2::deserialize(Deserializer& aIn)
 
         for (int i = 0; i < bindCount; ++i)
         {
-            auto solver = [=](void* aPtr){ if (aPtr) { this->mBindingNodes.push_back((ObjectNode*)aPtr); } };
+            auto solver = [=](void* aPtr){ if (aPtr) { this->mBindingNodes.push_back(static_cast<ObjectNode*>(aPtr)); } };
             if (!aIn.orderIDData(solver))
             {
                 return aIn.errored("invalid reference id");

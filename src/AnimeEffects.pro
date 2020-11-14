@@ -4,6 +4,8 @@
 #
 #-------------------------------------------------
 
+TARGET = AnimeEffects
+
 TEMPLATE    = subdirs
 SUBDIRS     = util thr cmnd gl img core ctrl gui
 
@@ -38,4 +40,22 @@ export(first.depends)
 export(copydata.commands)
 export(copytools.commands)
 QMAKE_EXTRA_TARGETS += first copydata copytools
+}
+
+# Installs
+unix{
+    isEmpty(PREFIX) {
+        PREFIX = /usr/local
+    }
+
+    target.path = $$PREFIX/bin
+
+    shortcutfiles.files = dist/AnimeEffects.desktop
+    shortcutfiles.path = $$PREFIX/share/applications/
+    iconfiles.files = dist/AnimeEffects.png
+    iconfiles.path = $$PREFIX/share/icons/hicolor/256x256/
+
+    INSTALLS += target
+    INSTALLS += shortcutfiles
+    INSTALLS += iconfiles
 }

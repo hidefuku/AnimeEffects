@@ -6,6 +6,7 @@
 #include "gui/TimeLineWidget.h"
 #include "gui/GUIResources.h"
 #include "gui/PlayBackWidget.h"
+#include "gui/TimeLineInfoWidget.h"
 #include "gui/ViaPoint.h"
 #include "core/Project.h"
 #include "core/Animator.h"
@@ -30,6 +31,9 @@ public:
     PlayBackWidget& playBackWidget() { return *mPlayBack; }
     const PlayBackWidget& playBackWidget() const { return *mPlayBack; }
 
+    //InfoLabelWidget& infoLabelWidget() { return *mInfoLabel; }
+    //const InfoLabelWidget& infoLabelWidget() const { return *mInfoLabel; }
+
     // from Animator
     virtual core::Frame currentFrame() const;
     virtual void stop();
@@ -46,9 +50,11 @@ private:
     core::Project* mProject;
     GUIResources& mResources;
     const QSize mSizeHint;
+    QSplitter* mHorizontalSplitter;
     ObjectTreeWidget* mObjTree;
     TimeLineWidget* mTimeLine;
     PlayBackWidget* mPlayBack;
+    TimeLineInfoWidget* mInfoLabel;
     bool mIsFirstTime;
     int mSuspendCount;
 };

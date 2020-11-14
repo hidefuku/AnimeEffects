@@ -5,20 +5,22 @@ namespace tool {
 
 ViewPanel::ViewPanel(QWidget* aParent, GUIResources& aResources, const QString& aTitle)
     : QGroupBox(aParent)
-    , mResources(aResources)
+    , mGUIResources(aResources)
     , mButtons()
     , mLayout(this, 0, 2, 2)
 {
     this->setTitle(aTitle);
     this->setLayout(&mLayout);
+
+    mGUIResources.onThemeChanged.connect(this, &ViewPanel::onThemeUpdated);
 }
 
 void ViewPanel::addButton(const QString& aIconName, bool aCheckable,
                           const QString& aToolTip, const PushDelegate& aDelegate)
 {
     QPushButton* button = new QPushButton();
-    button->setObjectName("viewButton");
-    button->setIcon(mResources.icon(aIconName));
+    button->setObjectName(aIconName);
+    button->setIcon(mGUIResources.icon(aIconName));
     button->setCheckable(aCheckable);
     button->setToolTip(aToolTip);
     button->setFocusPolicy(Qt::NoFocus);
@@ -38,6 +40,16 @@ int ViewPanel::updateGeometry(const QPoint& aPos, int aWidth)
     this->setGeometry(aPos.x(), aPos.y(), aWidth, height + b);
 
     return aPos.y() + height + b;
+}
+
+void ViewPanel::onThemeUpdated(theme::Theme &)
+{
+    if(mButtons.size() > 0) {
+        for (auto button : mButtons)
+        {
+            button->setIcon(mGUIResources.icon(button->objectName()));
+        }
+    }
 }
 
 } // namespace tool

@@ -5,8 +5,9 @@ namespace gui
 {
 
 //-------------------------------------------------------------------------------------------------
-TimeLineWidget::TimeLineWidget(ViaPoint& aViaPoint, core::Animator& aAnimator, QWidget* aParent)
+TimeLineWidget::TimeLineWidget(GUIResources& aResources, ViaPoint& aViaPoint, core::Animator& aAnimator, QWidget* aParent)
     : QScrollArea(aParent)
+    , mGUIResources(aResources)
     , mProject()
     , mAnimator(aAnimator)
     , mInner()
@@ -19,13 +20,16 @@ TimeLineWidget::TimeLineWidget(ViaPoint& aViaPoint, core::Animator& aAnimator, Q
     , mLastFrame()
     , mDoesLoop(false)
 {
-    mInner = new TimeLineInnerWidget(aViaPoint, this);
+    mInner = new TimeLineEditorWidget(aViaPoint, this);
 
     this->setWidget(mInner);
     this->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     this->setMouseTracking(true);
     this->connect(&mTimer, &QTimer::timeout, this, &TimeLineWidget::onPlayBackUpdated);
+
+    mGUIResources.onThemeChanged.connect(this, &TimeLineWidget::onThemeUpdated);
+
     updateCamera();
 }
 
@@ -43,7 +47,7 @@ void TimeLineWidget::setPlayBackActivity(bool aIsActive)
 {
     if (aIsActive)
     {
-        mTimer.setInterval((int)getOneFrameTime());
+        mTimer.setInterval(static_cast<int>(getOneFrameTime()));
         mTimer.start();
         mElapsed.start();
         mBeginFrame = currentFrame();
@@ -110,6 +114,7 @@ void TimeLineWidget::updateCamera()
 
 void TimeLineWidget::updateCursor(const core::AbstractCursor& aCursor)
 {
+    onCursorUpdated();
     if (mInner->updateCursor(aCursor))
     {
         onFrameUpdated();
@@ -140,14 +145,14 @@ void TimeLineWidget::onPlayBackUpdated()
     {
         const double oneFrameTime = getOneFrameTime();
         const core::Frame curFrame = currentFrame();
-        double nextFrame = curFrame.getDecimal() + 1.0;
+        double nextFrame = static_cast<double>(curFrame.getDecimal()) + 1.0;
 
         if (mDoesLoop && nextFrame > mInner->maxFrame())
         {
             nextFrame = 0.0;
             mBeginFrame.set(0);
             mElapsed.restart();
-            mTimer.setInterval((int)oneFrameTime);
+            mTimer.setInterval(static_cast<int>(oneFrameTime));
         }
         else
         {
@@ -155,17 +160,17 @@ void TimeLineWidget::onPlayBackUpdated()
             {
                 const int elapsedTime = mElapsed.elapsed();
                 const double elapsedFrame = elapsedTime / oneFrameTime;
-                nextFrame = mBeginFrame.getDecimal() + elapsedFrame;
+                nextFrame = static_cast<double>(mBeginFrame.getDecimal()) + elapsedFrame;
 
-                const double nextUpdateTime = oneFrameTime * ((int)elapsedFrame + 1);
+                const double nextUpdateTime = oneFrameTime * (static_cast<int>(elapsedFrame) + 1);
                 const double intervalTime = nextUpdateTime - elapsedTime;
-                mTimer.setInterval(std::max((int)intervalTime, 1));
+                mTimer.setInterval(std::max(static_cast<int>(intervalTime), 1));
             }
             else
             {
                 mBeginFrame = curFrame;
                 mElapsed.restart();
-                mTimer.setInterval((int)oneFrameTime);
+                mTimer.setInterval(static_cast<int>(oneFrameTime));
             }
         }
 
@@ -173,15 +178,31 @@ void TimeLineWidget::onPlayBackUpdated()
         setFrame(core::Frame::fromDecimal(nextFrame));
         mLastFrame = core::Frame::fromDecimal(nextFrame);
 #else
-        setFrame(core::Frame((int)nextFrame));
-        mLastFrame = core::Frame((int)nextFrame);
+        setFrame(core::Frame(static_cast<int>(nextFrame)));
+        mLastFrame = core::Frame(static_cast<int>(nextFrame));
 #endif
+    }
+}
+
+void TimeLineWidget::onThemeUpdated(theme::Theme& aTheme)
+{
+    QFile stylesheet(aTheme.path()+"/stylesheet/timelinewidget.ssa");
+    if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        this->setStyleSheet(QTextStream(&stylesheet).readAll());
+        mInner->updateTheme(aTheme);
     }
 }
 
 void TimeLineWidget::onProjectAttributeUpdated()
 {
     mInner->updateProjectAttribute();
+}
+
+void TimeLineWidget::triggerOnTimeFormatChanged()
+{
+    onTimeFormatChanged();
+    updateCamera();
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -230,8 +251,8 @@ void TimeLineWidget::wheelEvent(QWheelEvent* aEvent)
     mInner->updateWheel(aEvent);
 
     const QRect rectNext = mInner->rect();
-    const double scale = (double)rectNext.width() / rectPrev.width();
-    viewTrans.setX(cursor.x() + scale * (viewTrans.x() - cursor.x()));
+    const double scale = static_cast<double>(rectNext.width() / rectPrev.width());
+    viewTrans.setX(static_cast<int>(cursor.x() + scale * (viewTrans.x() - cursor.x())));
     setScrollBarValue(viewTrans);
     updateCamera();
 }

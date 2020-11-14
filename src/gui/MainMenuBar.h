@@ -8,6 +8,7 @@
 #include "core/Project.h"
 #include "ctrl/VideoFormat.h"
 #include "gui/EasyDialog.h"
+#include "gui/GUIResources.h"
 namespace gui { class MainWindow; }
 namespace gui { class ViaPoint; }
 namespace gui
@@ -18,7 +19,7 @@ class MainMenuBar : public QMenuBar
 {
     Q_OBJECT
 public:
-    MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, QWidget* aParent);
+    MainMenuBar(MainWindow& aMainWindow, ViaPoint& aViaPoint, GUIResources& aGUIResources, QWidget* aParent);
     void setProject(core::Project* aProject);
     void setShowResourceWindow(bool aShow);
 
@@ -26,6 +27,7 @@ public:
     // signals
     util::Signaler<void()> onVisualUpdated;
     util::Signaler<void()> onProjectAttributeUpdated;
+    util::Signaler<void()> onTimeFormatChanged;
 
 private:
     void loadVideoFormats();
@@ -39,6 +41,7 @@ private:
     QVector<QAction*> mProjectActions;
     QAction* mShowResourceWindow;
     QList<ctrl::VideoFormat> mVideoFormats;
+    GUIResources& mGUIResources;
 };
 
 //-------------------------------------------------------------------------------------------------
