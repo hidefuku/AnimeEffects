@@ -23,7 +23,7 @@ Note: For the present, there may be incompatible changes without notice in advan
 * FFmpeg (Please install ffmpeg on your own for video exporting, you can also place a ffmpeg executable in /tools.)
 
 ## Linux build instruction
-* first make shure you have qtcreator installed:  
+* first make sure you have qtcreator installed:  
 ```
 sudo apt-get install qtcreator -y
 ```
