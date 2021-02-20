@@ -45,8 +45,8 @@ sudo pacman -S git gcc glib2 qt5 make
 ```
 git clone https://github.com/herace/AnimeEffects  
 cd AnimeEffects/src
-sudo qmake AnimeEffects.pro
-sudo make
+qmake AnimeEffects.pro
+make
 ```
 
 * When building is done, run AnimeEffects:
