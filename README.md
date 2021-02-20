@@ -22,22 +22,35 @@ Note: For the present, there may be incompatible changes without notice in advan
   * On linux, you can check whether your graphics card supports OpenGL4.0 CoreProfile or not, run `glxinfo | grep "OpenGL core profile version"` on your terminal
 * FFmpeg (Please install ffmpeg on your own for video exporting, you can also place a ffmpeg executable in /tools.)
 
-## Linux build instruction
-* first make sure you have qtcreator installed:  
+## Linux
+
+### Installing Dependencies
+#### Debian / Ubuntu
+* first update and install dependencies:
 ```
-sudo apt-get install qtcreator -y
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install git gcc libglib2.0-0 qt5-default make
+```
+#### Arch / Manjaro
+* first update and install dependencies:  
+```
+sudo pacman -Syu
+sudo pacman -S git gcc glib2 qt5 make
 ```
 
-* clone AnimeEffects git repo and open it:  
+### Clone / Building
+
+* clone AnimeEffects git repo and go to the "src" folder:  
 ```
 git clone https://github.com/herace/AnimeEffects  
-cd AnimeEffects  
-qtcreator ./src/AnimeEffects.pro  
+cd AnimeEffects/src
+sudo qmake AnimeEffects.pro
+sudo make
 ```
 
-* In qt-creator click on configure project.  
-* Press ctrl+b to build it.  
-* When building is done, run it with:
+* When building is done, run AnimeEffects:
 ```
-./AnimeEffects/build-AnimeEffects-Desktop-Debug/AnimeEffects  
+./AnimeEffects  
 ```
+If you have any issues feel free to ask questions on our <a href='https://discord.gg/sKp8Srm'>Discord</a>!
