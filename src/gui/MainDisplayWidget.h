@@ -6,6 +6,7 @@
 #include <QScopedPointer>
 #include <QTabBar>
 #include <QReadWriteLock>
+#include <QtMath>
 #include "util/LinkPointer.h"
 #include "gl/Global.h"
 #include "gl/Root.h"
@@ -96,6 +97,7 @@ private:
     CanvasMover mCanvasMover;
     bool mMovingCanvasByTool;
     bool mMovingCanvasByKey;
+    bool mMovingCanvasByMiddleMouseButton;
     double mDevicePixelRatio;
 };
 

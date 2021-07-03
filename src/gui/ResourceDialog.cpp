@@ -25,7 +25,7 @@ ResourceDialog::ResourceDialog(ViaPoint& aViaPoint, bool aModal, QWidget* aParen
     {
         auto menuBar = new QMenuBar(this);
         auto fileMenu = new QMenu(tr("File"), menuBar);
-        auto addResource = new QAction(tr("Add Resource"), fileMenu);
+        auto addResource = new QAction(tr("Add Resources"), fileMenu);
         connect(addResource, &QAction::triggered, this, &ResourceDialog::onAddResourceTriggered);
         fileMenu->addAction(addResource);
         menuBar->setNativeMenuBar(false);
@@ -44,6 +44,8 @@ ResourceDialog::ResourceDialog(ViaPoint& aViaPoint, bool aModal, QWidget* aParen
 
     // resource tree
     mTree = new ResourceTreeWidget(aViaPoint, !aModal, this);
+    mTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
     this->setMainWidget(mTree, false);
 
     // modal only
@@ -100,11 +102,13 @@ void ResourceDialog::onAddResourceTriggered(bool)
 {
     if (!mProject) return;
 
-    const QString fileName = QFileDialog::getOpenFileName(
-                this, tr("Open File"), "", "ImageFile (*.psd *.jpg *.jpeg *.png *.gif)");
+    const QStringList fileName = QFileDialog::getOpenFileNames(
+                this, tr("Open Files"), "", "ImageFile (*.psd *.jpg *.jpeg *.png *.gif)");
     if (fileName.isEmpty()) return;
 
-    mTree->load(fileName);
+    for(int i = 0; i < fileName.count();i++){
+       mTree->load(fileName[i]);
+    }
 }
 
 void ResourceDialog::keyPressEvent(QKeyEvent* aEvent)

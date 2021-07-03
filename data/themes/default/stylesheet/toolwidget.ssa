@@ -1,0 +1,105 @@
+QPushButton#toolButton {
+    border-radius: 6px;
+    padding: -1px;
+    width: 26px;
+    height: 26px;
+    icon-size: 26px;
+}
+
+QPushButton#toolButton:hover {
+
+}
+
+QPushButton#toolButton:disabled {
+
+}
+
+QPushButton#toolButton:pressed {
+    margin-top: 3px;
+}
+
+QPushButton#toolButton:checked {
+    margin-top: 2px;
+}
+
+QPushButton#viewButton {
+    border-radius: 6px;
+    padding: -1px;
+    width: 26px;
+    height: 26px;
+    icon-size: 26px;
+}
+
+QPushButton#viewButton:hover {
+
+}
+
+QPushButton#viewButton:disabled {
+
+}
+
+QPushButton#viewButton:pressed {
+    margin-top: 3px;
+}
+
+QPushButton#viewButton:checked {
+    margin-top: 2px;
+}
+
+QGroupBox {
+    border-radius:8px;
+    margin-top: 6px;
+    padding-left:  6px;
+    padding-right: 6px;
+    padding-top:   12px;
+    padding-bottom: 24px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position:top left;
+}
+
+QPushButton {
+    border-radius: 2px;
+    padding: 2px;
+}
+
+QPushButton:hover {
+
+}
+
+QPushButton:disabled {
+
+}
+
+QPushButton:pressed {
+    margin-top: 2px;
+}
+
+QPushButton:checked {
+    margin-top: 0px;
+}
+
+QSlider::groove:horizontal {
+    height: 3px;
+    margin: 2px 0;
+    border-radius: 1px;
+}
+
+QSlider::handle:horizontal {
+    width: 7px;
+    margin: -6px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
+    border-radius: 2px;
+}
+
+QCheckBox#checkItem {
+
+}
+
+QCheckBox#checkItem::indicator {
+    margin: 0px;
+    padding: 4px;
+    width: 16px;
+    height: 16px;
+}

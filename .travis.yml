@@ -1,0 +1,39 @@
+os: linux
+dist: xenial
+language: cpp
+compiler: gcc
+
+addons:
+  apt:
+    sources:
+      - sourceline: ppa:beineri/opt-qt-5.14.1-xenial
+    packages:
+      - qt514base
+      - qt514x11extras
+      - qt514tools
+      - libgl1-mesa-dev
+      - libopencv-dev
+
+install:
+  - source /opt/qt*/bin/qt*-env.sh
+
+script:
+  - qmake src/AnimeEffects.pro -r CONFIG+=release PREFIX=/usr
+  - make -j$(nproc)
+  - make INSTALL_ROOT=appdir install
+  - mkdir -p appdir/usr/bin
+  - cp AnimeEffects appdir/usr/bin/
+  - cp -R data appdir/usr/bin/data
+  - find appdir/
+  - wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+  - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+  - ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -appimage
+
+after_success:
+  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - bash upload.sh AnimeEffects*.AppImage*
+
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)/

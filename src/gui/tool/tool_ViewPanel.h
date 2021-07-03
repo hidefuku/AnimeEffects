@@ -26,7 +26,8 @@ public:
     const QPushButton* button(int aId) const { return mButtons[aId]; }
 
 private:
-    GUIResources& mResources;
+    GUIResources& mGUIResources;
+    void onThemeUpdated(theme::Theme&);
     std::vector<QPushButton*> mButtons;
     FlowLayout mLayout;
 };

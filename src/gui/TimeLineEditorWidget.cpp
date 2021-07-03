@@ -1,19 +1,21 @@
 #include <QMenu>
 #include <QMessageBox>
-#include "gui/TimeLineInnerWidget.h"
+#include "gui/TimeLineEditorWidget.h"
 #include "gui/MouseSetting.h"
 #include "gui/obj/obj_Item.h"
 
 namespace gui
 {
 //-------------------------------------------------------------------------------------------------
-TimeLineInnerWidget::TimeCursor::TimeCursor(QWidget* aParent)
+TimeCursor::TimeCursor(QWidget* aParent)
     : QWidget(aParent)
+    , mBodyColor(QColor(230, 230, 230, 180))
+    , mEdgeColor(QColor(80, 80, 80, 180))
 {
     this->setAutoFillBackground(false);
 }
 
-void TimeLineInnerWidget::TimeCursor::setCursorPos(const QPoint& aPos, int aHeight)
+void TimeCursor::setCursorPos(const QPoint& aPos, int aHeight)
 {
     const QPoint range(5, 5);
     QRect rect;
@@ -22,28 +24,48 @@ void TimeLineInnerWidget::TimeCursor::setCursorPos(const QPoint& aPos, int aHeig
     this->setGeometry(rect);
 }
 
-void TimeLineInnerWidget::TimeCursor::paintEvent(QPaintEvent* aEvent)
+void TimeCursor::paintEvent(QPaintEvent* aEvent)
 {
     (void)aEvent;
     QPainter painter;
     painter.begin(this);
 
     const QPoint range(5, 5);
-    const QBrush kBrushBody(QColor(230, 230, 230, 180));
-    const QBrush kBrushEdge(QColor(80, 80, 80, 180));
+    const QBrush kBrushBody(mBodyColor);
+    const QBrush kBrushEdge(mEdgeColor);
 
     painter.setPen(QPen(kBrushEdge, 1));
     painter.setBrush(kBrushBody);
     painter.drawLine(range + QPoint(0, range.y()), range + QPoint(0, this->geometry().height()));
 
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.drawEllipse(QPointF(range), range.x() - 0.5f, range.y() - 0.5f);
+    painter.drawEllipse(QPointF(range), range.x() - static_cast<qreal>(0.5f), range.y() - static_cast<qreal>(0.5f));
 
     painter.end();
 }
 
+QColor TimeCursor::edgeColor() const
+{
+    return mEdgeColor;
+}
+
+void TimeCursor::setEdgeColor(const QColor &cursorEdgeColor)
+{
+    mEdgeColor = cursorEdgeColor;
+}
+
+QColor TimeCursor::bodyColor() const
+{
+    return mBodyColor;
+}
+
+void TimeCursor::setBodyColor(const QColor &cursorBodyColor)
+{
+    mBodyColor = cursorBodyColor;
+}
+
 //-------------------------------------------------------------------------------------------------
-TimeLineInnerWidget::TimeLineInnerWidget(ViaPoint& aViaPoint, QWidget* aParent)
+TimeLineEditorWidget::TimeLineEditorWidget(ViaPoint& aViaPoint, QWidget* aParent)
     : QWidget(aParent)
     , mViaPoint(aViaPoint)
     , mProject()
@@ -60,6 +82,7 @@ TimeLineInnerWidget::TimeLineInnerWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mCopyTargets()
     , mPastePos()
     , mOnPasting()
+    , mTimelineTheme()
 {
     mTimeCursor.show();
 
@@ -69,21 +92,21 @@ TimeLineInnerWidget::TimeLineInnerWidget(ViaPoint& aViaPoint, QWidget* aParent)
 
     this->connect(
                 this, &QWidget::customContextMenuRequested,
-                this, &TimeLineInnerWidget::onContextMenuRequested);
+                this, &TimeLineEditorWidget::onContextMenuRequested);
 
     {
         mCopyKey = new QAction(tr("copy key"), this);
-        mCopyKey->connect(mCopyKey, &QAction::triggered, this, &TimeLineInnerWidget::onCopyKeyTriggered);
+        mCopyKey->connect(mCopyKey, &QAction::triggered, this, &TimeLineEditorWidget::onCopyKeyTriggered);
 
         mPasteKey = new QAction(tr("paste key"), this);
-        mPasteKey->connect(mPasteKey, &QAction::triggered, this, &TimeLineInnerWidget::onPasteKeyTriggered);
+        mPasteKey->connect(mPasteKey, &QAction::triggered, this, &TimeLineEditorWidget::onPasteKeyTriggered);
 
         mDeleteKey = new QAction(tr("delete key"), this);
-        mDeleteKey->connect(mDeleteKey, &QAction::triggered, this, &TimeLineInnerWidget::onDeleteKeyTriggered);
+        mDeleteKey->connect(mDeleteKey, &QAction::triggered, this, &TimeLineEditorWidget::onDeleteKeyTriggered);
     }
 }
 
-void TimeLineInnerWidget::setProject(core::Project* aProject)
+void TimeLineEditorWidget::setProject(core::Project* aProject)
 {
     if (mProject)
     {
@@ -96,13 +119,13 @@ void TimeLineInnerWidget::setProject(core::Project* aProject)
     {
         mProject = aProject->pointee();
         mTimeLineSlot = aProject->onTimeLineModified.connect(
-                    this, &TimeLineInnerWidget::onTimeLineModified);
+                    this, &TimeLineEditorWidget::onTimeLineModified);
 
         mTreeRestructSlot = aProject->onTreeRestructured.connect(
-                    this, &TimeLineInnerWidget::onTreeRestructured);
+                    this, &TimeLineEditorWidget::onTreeRestructured);
 
         mProjectAttrSlot = aProject->onProjectAttributeModified.connect(
-                    this, &TimeLineInnerWidget::onProjectAttributeModified);
+                    this, &TimeLineEditorWidget::onProjectAttributeModified);
     }
     else
     {
@@ -113,7 +136,7 @@ void TimeLineInnerWidget::setProject(core::Project* aProject)
     updateSize();
 }
 
-void TimeLineInnerWidget::setFrame(core::Frame aFrame)
+void TimeLineEditorWidget::setFrame(core::Frame aFrame)
 {
     mEditor->setFrame(aFrame);
 
@@ -121,35 +144,35 @@ void TimeLineInnerWidget::setFrame(core::Frame aFrame)
     updateTimeCursorPos();
 }
 
-core::Frame TimeLineInnerWidget::currentFrame() const
+core::Frame TimeLineEditorWidget::currentFrame() const
 {
     return mEditor->currentFrame();
 }
 
-int TimeLineInnerWidget::maxFrame() const
+int TimeLineEditorWidget::maxFrame() const
 {
     return mEditor->maxFrame();
 }
 
-void TimeLineInnerWidget::updateTimeCursorPos()
+void TimeLineEditorWidget::updateTimeCursorPos()
 {
     if (mCamera)
     {
         auto pos = mEditor->currentTimeCursorPos();
         mTimeCursor.setCursorPos(
-                    QPoint(pos.x(), pos.y() - (int)mCamera->leftTopPos().y()),
+                    QPoint(pos.x(), pos.y() - static_cast<int>(mCamera->leftTopPos().y())),
                     mCamera->screenHeight());
     }
 }
 
-void TimeLineInnerWidget::updateCamera(const core::CameraInfo& aCamera)
+void TimeLineEditorWidget::updateCamera(const core::CameraInfo& aCamera)
 {
     mCamera = &aCamera;
     updateSize();
     updateTimeCursorPos();
 }
 
-void TimeLineInnerWidget::updateLines(QTreeWidgetItem* aTopNode)
+void TimeLineEditorWidget::updateLines(QTreeWidgetItem* aTopNode)
 {
     mEditor->clearRows();
 
@@ -162,7 +185,7 @@ void TimeLineInnerWidget::updateLines(QTreeWidgetItem* aTopNode)
     updateSize();
 }
 
-void TimeLineInnerWidget::updateLinesRecursive(QTreeWidgetItem* aItem)
+void TimeLineEditorWidget::updateLinesRecursive(QTreeWidgetItem* aItem)
 {
     if (!aItem) return;
 
@@ -170,7 +193,7 @@ void TimeLineInnerWidget::updateLinesRecursive(QTreeWidgetItem* aItem)
     obj::Item* objItem = obj::Item::cast(aItem);
     if (objItem && !objItem->isTopNode())
     {
-        int screenTop = mCamera ? -mCamera->leftTopPos().y() : 0;
+        int screenTop = mCamera ? static_cast<int>(-mCamera->leftTopPos().y()) : 0;
 
         const QRect vrect = objItem->visualRect();
         const int t = vrect.top() + screenTop;
@@ -187,13 +210,13 @@ void TimeLineInnerWidget::updateLinesRecursive(QTreeWidgetItem* aItem)
     }
 }
 
-void TimeLineInnerWidget::updateLineSelection(core::ObjectNode* aRepresent)
+void TimeLineEditorWidget::updateLineSelection(core::ObjectNode* aRepresent)
 {
     mEditor->updateRowSelection(aRepresent);
     this->update();
 }
 
-bool TimeLineInnerWidget::updateCursor(const core::AbstractCursor& aCursor)
+bool TimeLineEditorWidget::updateCursor(const core::AbstractCursor& aCursor)
 {
     ctrl::TimeLineEditor::UpdateFlags flags = mEditor->updateCursor(aCursor);
 
@@ -205,13 +228,13 @@ bool TimeLineInnerWidget::updateCursor(const core::AbstractCursor& aCursor)
     return (flags & ctrl::TimeLineEditor::UpdateFlag_ModFrame);
 }
 
-void TimeLineInnerWidget::updateWheel(QWheelEvent* aEvent)
+void TimeLineEditorWidget::updateWheel(QWheelEvent* aEvent)
 {
-    mEditor->updateWheel(aEvent->delta(), mViaPoint.mouseSetting().invertTimeLineScaling);
+    mEditor->updateWheel(aEvent->angleDelta().y(), mViaPoint.mouseSetting().invertTimeLineScaling);
     updateSize();
 }
 
-void TimeLineInnerWidget::updateSize()
+void TimeLineEditorWidget::updateSize()
 {
     // get inner size
     // add enough margin to coordinate height with ObjectTreeWidget.
@@ -227,25 +250,31 @@ void TimeLineInnerWidget::updateSize()
     this->update();
 }
 
-void TimeLineInnerWidget::updateProjectAttribute()
+void TimeLineEditorWidget::updateProjectAttribute()
 {
     mEditor->updateProjectAttribute();
     updateTimeCursorPos();
     updateSize();
 }
 
-void TimeLineInnerWidget::paintEvent(QPaintEvent* aEvent)
+void TimeLineEditorWidget::updateTheme(theme::Theme& aTheme)
+{
+    Q_UNUSED(aTheme) // TODO
+    mTimelineTheme.reset();
+}
+
+void TimeLineEditorWidget::paintEvent(QPaintEvent* aEvent)
 {
     QPainter painter;
     painter.begin(this);
     if (mCamera)
     {
-        mEditor->render(painter, *mCamera, aEvent->rect());
+        mEditor->render(painter, *mCamera, mTimelineTheme, aEvent->rect());
     }
     painter.end();
 }
 
-void TimeLineInnerWidget::onTimeLineModified(core::TimeLineEvent&, bool)
+void TimeLineEditorWidget::onTimeLineModified(core::TimeLineEvent&, bool)
 {
     if (!mOnPasting)
     {
@@ -255,17 +284,17 @@ void TimeLineInnerWidget::onTimeLineModified(core::TimeLineEvent&, bool)
     this->update();
 }
 
-void TimeLineInnerWidget::onTreeRestructured(core::ObjectTreeEvent&, bool)
+void TimeLineEditorWidget::onTreeRestructured(core::ObjectTreeEvent&, bool)
 {
     mCopyTargets = core::TimeLineEvent();
 }
 
-void TimeLineInnerWidget::onProjectAttributeModified(core::ProjectEvent&, bool)
+void TimeLineEditorWidget::onProjectAttributeModified(core::ProjectEvent&, bool)
 {
     mCopyTargets = core::TimeLineEvent();
 }
 
-void TimeLineInnerWidget::onContextMenuRequested(const QPoint& aPos)
+void TimeLineEditorWidget::onContextMenuRequested(const QPoint& aPos)
 {
     QMenu menu(this);
 
@@ -286,12 +315,12 @@ void TimeLineInnerWidget::onContextMenuRequested(const QPoint& aPos)
     this->update();
 }
 
-void TimeLineInnerWidget::onCopyKeyTriggered(bool)
+void TimeLineEditorWidget::onCopyKeyTriggered(bool)
 {
     mCopyTargets = mTargets;
 }
 
-void TimeLineInnerWidget::onPasteKeyTriggered(bool)
+void TimeLineEditorWidget::onPasteKeyTriggered(bool)
 {
     mOnPasting = true;
     if (!mEditor->pasteCopiedKeys(mCopyTargets, mPastePos))
@@ -301,9 +330,80 @@ void TimeLineInnerWidget::onPasteKeyTriggered(bool)
     mOnPasting = false;
 }
 
-void TimeLineInnerWidget::onDeleteKeyTriggered(bool)
+void TimeLineEditorWidget::onDeleteKeyTriggered(bool)
 {
     mEditor->deleteCheckedKeys(mTargets);
 }
+
+QColor TimeLineEditorWidget::headerContentColor() const
+{
+    return mTimelineTheme.headerContentColor();
+}
+
+void TimeLineEditorWidget::setHeaderContentColor(const QColor &headerContentColor)
+{
+    mTimelineTheme.setHeaderContentColor(headerContentColor);
+}
+
+QColor TimeLineEditorWidget::headerBackgroundColor() const
+{
+    return mTimelineTheme.headerBackgroundColor();
+}
+
+void TimeLineEditorWidget::setHeaderBackgroundColor(const QColor &headerBackgroundColor)
+{
+    mTimelineTheme.setHeaderBackgroundColor(headerBackgroundColor);
+}
+
+QColor TimeLineEditorWidget::trackColor() const
+{
+    return mTimelineTheme.trackColor();
+}
+
+void TimeLineEditorWidget::setTrackColor(const QColor &trackColor)
+{
+    mTimelineTheme.setTrackColor(trackColor);
+}
+
+QColor TimeLineEditorWidget::trackTextColor() const
+{
+    return mTimelineTheme.trackTextColor();
+}
+
+void TimeLineEditorWidget::setTrackTextColor(const QColor &trackTextColor)
+{
+    mTimelineTheme.setTrackTextColor(trackTextColor);
+}
+
+QColor TimeLineEditorWidget::trackEdgeColor() const
+{
+    return mTimelineTheme.trackEdgeColor();
+}
+
+void TimeLineEditorWidget::setTrackEdgeColor(const QColor &trackEdgeColor)
+{
+    mTimelineTheme.setTrackEdgeColor(trackEdgeColor);
+}
+
+QColor TimeLineEditorWidget::trackSelectColor() const
+{
+    return mTimelineTheme.trackSelectColor();
+}
+
+void TimeLineEditorWidget::setTrackSelectColor(const QColor &trackSelectColor)
+{
+    mTimelineTheme.setTrackSelectColor(trackSelectColor);
+}
+
+QColor TimeLineEditorWidget::trackSeperatorColor() const
+{
+    return mTimelineTheme.trackSeperatorColor();
+}
+
+void TimeLineEditorWidget::setTrackSeperatorColor(const QColor &trackSeperatorColor)
+{
+    mTimelineTheme.setTrackSeperatorColor(trackSeperatorColor);
+}
+
 
 } // namespace gui

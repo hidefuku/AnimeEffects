@@ -52,6 +52,11 @@ int Scaler::frame(int aPixelWidth) const
     return std::max(0, std::min(mMaxFrame, frame));
 }
 
+int Scaler::maxFrame() const
+{
+    return mMaxFrame;
+}
+
 Scaler::Attribute Scaler::attribute(int aFrame) const
 {
     Attribute attr;

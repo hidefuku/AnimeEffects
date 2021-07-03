@@ -1,0 +1,184 @@
+QSplitter#propertysplitter {
+    width: 380px;
+}
+
+QFrame#holder {
+    border-radius:2px;
+}
+
+QComboBox {
+    border-radius: 2px;
+    padding-top: 1px;
+    padding-left: 8px;
+    padding-bottom: 1px;
+    padding-right: 8px;
+}
+
+QComboBox::enabled {
+
+}
+
+QComboBox::disabled {
+
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: right;
+    width:  16px;
+    height: 16px;
+}
+
+QComboBox::down-arrow {
+    image: url(data/themes/default/icon/downarrow.png);
+    width:   10px;
+    height:  10px;
+}
+QComboBox::down-arrow:disabled {
+    image: url(data/themes/default/icon/downarrow2.png);
+}
+
+QCheckBox#keyIcon {
+}
+
+QCheckBox#keyIcon::indicator {
+    width: 15px;
+    height: 15px;
+}
+QCheckBox#keyIcon::indicator:unchecked {
+    image: url(data/themes/default/icon/branchclose.png);
+}
+
+QCheckBox#keyIcon::indicator:checked {
+    image: url(data/themes/default/icon/branchopen.png);
+}
+
+QGroupBox#keyGroup {
+    border-radius:4px;
+    margin: 2px;
+    padding-top: 16px;
+    padding-bottom: 4px;
+}
+
+QGroupBox#keyGroup::title {
+    subcontrol-origin: margin;
+    subcontrol-position:top left;
+    margin: 0px;
+    padding-left: 0px;
+    padding-top: 4px;
+}
+
+QGroupBox#keyGroup::indicator {
+    width: 14px;
+    height: 14px;
+    padding-left: 7px;
+    padding-top: 2px;
+    margin: 0px;
+}
+
+QGroupBox#keyGroup::indicator:unchecked {
+    image: url(data/themes/default/icon/branchclose.png);
+}
+
+QGroupBox#keyGroup::indicator:checked {
+    image: url(data/themes/default/icon/branchopen.png);
+}
+
+QGroupBox#attrGroup {
+    border-radius:4px;
+    margin: 2px;
+    padding-top: 16px;
+    padding-bottom: 4px;
+}
+
+QGroupBox#attrGroup::title {
+    subcontrol-origin: margin;
+    subcontrol-position:top left;
+    margin: 0px;
+    padding-left: 0px;
+    padding-top: 4px;
+}
+
+QGroupBox#attrGroup::indicator {
+    width: 14px;
+    height: 14px;
+    padding-left: 7px;
+    padding-top: 2px;
+    margin: 0px;
+}
+
+QGroupBox#attrGroup::indicator:unchecked {
+    image: url(data/themes/default/icon/branchclose.png);
+}
+
+QGroupBox#attrGroup::indicator:checked {
+    image: url(data/themes/default/icon/branchopen.png);
+}
+
+QGroupBox#keyKnocker {
+    border-radius:4px;
+    margin: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+QPushButton#keyKnocker {
+    border-radius: 2px;
+    padding: 0px;
+    margin: 0px;
+    width: 14px;
+    height: 14px;
+}
+QPushButton#keyKnocker::enabled {
+    image: url(data/themes/default/icon/knockkey.png);
+}
+QPushButton#keyKnocker::disabled {
+    image: url(data/themes/default/icon/minus.png);
+}
+
+QPushButton#browser {
+    border-radius: 2px;
+    padding: 2px;
+    width: 18px;
+    height: 15px;
+}
+QPushButton#browser::enabled {
+    image: url(data/themes/default/icon/filew.png);
+}
+QPushButton#browser::disabled {
+    image: url(data/themes/default/icon/file.png);
+}
+
+QGroupBox#propertyPanel {
+    border-radius:4px;
+    margin-top: 2px;
+    margin-bottom: 4px;
+    margin-left: 2px;
+    margin-right: 2px;
+    padding-top: 16px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-bottom: 4px;
+}
+
+QGroupBox#propertyPanel::title {
+    subcontrol-origin: margin;
+    subcontrol-position:top left;
+    padding-left: 8px;
+}
+
+QGroupBox#propertyPanel::indicator {
+    width: 15px;
+    height: 15px;
+    padding: 2px;
+}
+
+QGroupBox#propertyPanel::indicator:unchecked {
+    image: url(data/themes/default/icon/branchclose.png);
+}
+
+QGroupBox#propertyPanel::indicator:checked {
+    image: url(data/themes/default/icon/branchopen.png);
+}

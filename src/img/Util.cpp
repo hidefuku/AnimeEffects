@@ -261,7 +261,7 @@ std::pair<XCMemBlock, QRect> Util::createTextureImage(const QImage& aImage)
         return std::pair<XCMemBlock, QRect>(block, QRect(0, 0, 1, 1));
     }
 
-    const size_t length = (size_t)aImage.byteCount();
+    const size_t length = (size_t)aImage.sizeInBytes();
 
     XCMemBlock workImage;
     workImage.size = length;

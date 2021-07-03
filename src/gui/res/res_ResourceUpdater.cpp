@@ -364,7 +364,7 @@ img::ResourceNode* ResourceUpdater::createQImageTree(const QString& aFilePath, b
                              tr("Failed to load image file."));
         return nullptr;
     }
-    return img::Util::createResourceNode(image, "topnode", aLoadImage);
+    return img::Util::createResourceNode(image, fileInfo.baseName(), aLoadImage);
 }
 
 img::ResourceNode* ResourceUpdater::createPsdTree(const QString& aFilePath, bool aLoadImage)

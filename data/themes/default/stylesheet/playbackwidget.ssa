@@ -1,0 +1,20 @@
+QPushButton#playbackButton {
+    border-radius: 2px;
+    padding: 2px;
+}
+
+QPushButton#playbackButton:hover {
+
+}
+
+QPushButton#playbackButton:disabled {
+
+}
+
+QPushButton#playbackButton:pressed {
+    margin-top: 3px;
+}
+
+QPushButton#playbackButton:checked {
+    margin-top: 2px;
+}

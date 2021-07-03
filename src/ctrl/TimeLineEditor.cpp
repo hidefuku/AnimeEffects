@@ -86,7 +86,7 @@ void TimeLineEditor::clearState()
 {
     mFocus.clear();
     mState = State_Standby;
-    mMoveRef = NULL;
+    mMoveRef = nullptr;
     mMoveFrame = 0;
     mShowSelectionRange = false;
 }
@@ -210,7 +210,7 @@ TimeLineEditor::UpdateFlags TimeLineEditor::updateCursor(const AbstractCursor& a
             if (!modifyMoveKeys(aCursor.worldPoint()))
             {
                 mState = State_Standby;
-                mMoveRef = NULL;
+                mMoveRef = nullptr;
                 mFocus.clear();
             }
             flags |= UpdateFlag_ModView;
@@ -226,7 +226,7 @@ TimeLineEditor::UpdateFlags TimeLineEditor::updateCursor(const AbstractCursor& a
     {
         if (mState != State_EncloseKeys || !mFocus.hasRange())
         {
-            mMoveRef = NULL;
+            mMoveRef = nullptr;
             mState = State_Standby;
             mShowSelectionRange = false;
             flags |= UpdateFlag_ModView;
@@ -288,7 +288,7 @@ bool TimeLineEditor::beginMoveKeys(const QPoint& aWorldPos)
         else
         {
             delete notifier;
-            mMoveRef = NULL;
+            mMoveRef = nullptr;
         }
     }
     mOnUpdatingKey = false;
@@ -493,7 +493,7 @@ QPoint TimeLineEditor::currentTimeCursorPos() const
     return mTimeCurrent.handlePos();
 }
 
-void TimeLineEditor::render(QPainter& aPainter, const CameraInfo& aCamera, const QRect& aCullRect)
+void TimeLineEditor::render(QPainter& aPainter, const CameraInfo& aCamera, theme::TimeLine &aTheme, const QRect& aCullRect)
 {
     if (aCamera.screenWidth() < 2 * kTimeLineMargin) return;
 
@@ -504,7 +504,7 @@ void TimeLineEditor::render(QPainter& aPainter, const CameraInfo& aCamera, const
     const int bgn = mTimeScale.frame(cullRect.left() - margin - 5);
     const int end = mTimeScale.frame(cullRect.right() - margin + 5);
 
-    time::Renderer renderer(aPainter, aCamera);
+    time::Renderer renderer(aPainter, aCamera, aTheme);
     renderer.setMargin(margin);
     renderer.setRange(util::Range(bgn, end));
     renderer.setTimeScale(mTimeScale);

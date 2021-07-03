@@ -23,6 +23,7 @@ public:
     int subKeyCode() const { return mSubKeyCode; }
     bool hasSubKeyCode() const { return mSubKeyCode != -1; }
     bool isValidBinding() const;
+	bool hasKeypadModifier() const;
     bool hasControlModifier() const;
     bool hasShiftModifier() const;
     bool hasAltModifier() const;

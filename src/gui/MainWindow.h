@@ -62,11 +62,12 @@ private:
     bool processProjectSaving(core::Project& aProject, bool aRename = false);
     int confirmProjectClosing(bool aCurrentOnly);
     void onProjectTabChanged(core::Project&);
+    void onThemeUpdated(theme::Theme&);
 
     ctrl::System& mSystem;
     GUIResources& mGUIResources;
     ViaPoint mViaPoint;
-    QScopedPointer<KeyCommandMap> mKeyCommandMap;
+	QScopedPointer<KeyCommandMap> mKeyCommandMap;
     QScopedPointer<KeyCommandInvoker> mKeyCommandInvoker;
     MouseSetting mMouseSetting;
     MainMenuBar* mMainMenuBar;
@@ -76,10 +77,13 @@ private:
     ProjectTabBar* mProjectTabBar;
     TargetWidget* mTarget;
     PropertyWidget* mProperty;
+    QDockWidget* mDockPropertyWidget;
     ToolWidget* mTool;
+    QDockWidget* mDockToolWidget;
     ResourceDialog* mResourceDialog;
     QScopedPointer<DriverHolder> mDriverHolder;
     core::Project* mCurrent;
+    LocaleParam mLocaleParam;
 };
 
 } // namespace gui

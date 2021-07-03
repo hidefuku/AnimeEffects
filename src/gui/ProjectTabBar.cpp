@@ -6,17 +6,12 @@ namespace gui
 {
 
 //-------------------------------------------------------------------------------------------------
-ProjectTabBar::ProjectTabBar(QWidget* aParent)
+ProjectTabBar::ProjectTabBar(QWidget* aParent, GUIResources& aResources)
     : QTabBar(aParent)
     , mProjects()
     , mSignal(true)
+    , mGUIResources(aResources)
 {
-    QFile stylesheet("data/stylesheet/modetabbar.ssa");
-    if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        this->setStyleSheet(QTextStream(&stylesheet).readAll());
-    }
-
     static const int kHeight = 18;
     this->setGeometry(0, 0, aParent->geometry().width(), kHeight);
     this->setUsesScrollButtons(false);
@@ -26,6 +21,7 @@ ProjectTabBar::ProjectTabBar(QWidget* aParent)
     this->setDrawBase(false);
 
     this->connect(this, &QTabBar::currentChanged, this, &ProjectTabBar::onTabChanged);
+    mGUIResources.onThemeChanged.connect(this, &ProjectTabBar::onThemeUpdated);
 }
 
 void ProjectTabBar::updateTabPosition(const QSize& aDisplaySize)
@@ -38,6 +34,15 @@ QString ProjectTabBar::getTabName(const core::Project& aProject) const
 {
     QString name = aProject.fileName();
     return name.isEmpty() ? QString("New Project") : QFileInfo(name).fileName();
+}
+
+void ProjectTabBar::onThemeUpdated(theme::Theme& aTheme)
+{
+    QFile stylesheet(aTheme.path()+"/stylesheet/modetabbar.ssa");
+    if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        this->setStyleSheet(QTextStream(&stylesheet).readAll());
+    }
 }
 
 QString ProjectTabBar::getTabNameWithStatus(const core::Project& aProject) const

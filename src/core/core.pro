@@ -94,7 +94,8 @@ SOURCES += \
     RotateKey.cpp \
     ScaleKey.cpp \
     SRTExpans.cpp \
-    DepthKey.cpp
+    DepthKey.cpp \
+    TimeFormat.cpp
 
 HEADERS += \
     AbstractCursor.h \
@@ -157,4 +158,5 @@ HEADERS += \
     MoveKey.h \
     RotateKey.h \
     ScaleKey.h \
-    DepthKey.h
+    DepthKey.h\
+    TimeFormat.h

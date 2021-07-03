@@ -61,6 +61,8 @@ SOURCES += \
     ObjectTreeWidget.cpp \
     PlayBackWidget.cpp \
     PropertyWidget.cpp \
+    TimeLineEditorWidget.cpp \
+    TimeLineInfoWidget.cpp \
     TimeLineWidget.cpp \
     ToolWidget.cpp \
     TargetWidget.cpp \
@@ -74,10 +76,11 @@ SOURCES += \
     obj/obj_RemoveItem.cpp \
     obj/obj_Notifiers.cpp \
     obj/obj_Util.cpp \
+    theme/Theme.cpp \
+    theme/TimeLine.cpp \
     tool/tool_ModePanel.cpp \
     tool/tool_FFDPanel.cpp \
     DriverHolder.cpp \
-    TimeLineInnerWidget.cpp \
     tool/tool_BonePanel.cpp \
     tool/tool_ItemTable.cpp \
     tool/tool_Items.cpp \
@@ -125,6 +128,8 @@ HEADERS += \
     ObjectTreeWidget.h \
     PlayBackWidget.h \
     PropertyWidget.h \
+    TimeLineEditorWidget.h \
+    TimeLineInfoWidget.h \
     TimeLineWidget.h \
     ToolWidget.h \
     TargetWidget.h \
@@ -139,10 +144,11 @@ HEADERS += \
     obj/obj_RemoveItem.h \
     obj/obj_Notifiers.h \
     obj/obj_Util.h \
+    theme/Theme.h \
+    theme/TimeLine.h \
     tool/tool_ModePanel.h \
     tool/tool_FFDPanel.h \
     DriverHolder.h \
-    TimeLineInnerWidget.h \
     tool/tool_BonePanel.h \
     tool/tool_ItemTable.h \
     tool/tool_Items.h \

@@ -22,6 +22,7 @@ private:
     MouseSetting mInitialValues;
     QCheckBox* mInvertMainViewScalingBox;
     QCheckBox* mInvertTimeLineScalingBox;
+    QCheckBox* mMiddleMouseMoveCanvas;
 };
 
 } // namespace gui

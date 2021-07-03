@@ -17,6 +17,7 @@
 #include "ctrl/time/time_Current.h"
 #include "ctrl/time/time_Scaler.h"
 #include "ctrl/time/time_Focuser.h"
+#include "gui/theme/TimeLine.h"
 
 namespace ctrl
 {
@@ -46,7 +47,7 @@ public:
     void clearRows();
     void pushRow(core::ObjectNode* aNode, util::Range aWorldTB, bool aClosedFolder);
     void updateRowSelection(const core::ObjectNode* aRepresent);
-    void render(QPainter& aPainter, const core::CameraInfo& aCamera,
+    void render(QPainter& aPainter, const core::CameraInfo& aCamera, theme::TimeLine& aTheme,
                 const QRect& aCullRect);
 
     core::Frame currentFrame() const;

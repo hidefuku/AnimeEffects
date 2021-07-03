@@ -25,7 +25,7 @@ class ToolWidget : public QWidget
 {
     Q_OBJECT
 public:
-    ToolWidget(ViaPoint& aViaPoint, GUIResources& aResources,
+	ToolWidget(ViaPoint& aViaPoint, GUIResources& aResources, KeyCommandMap& aKeyCommandMap,
                const QSize& aSizeHint, QWidget* aParent);
 
     void setDriver(ctrl::Driver* aDriver);
@@ -51,6 +51,7 @@ private:
 
     ViaPoint& mViaPoint;
     GUIResources& mResources;
+	KeyCommandMap& mKeyCommandMap;
     const QSize mSizeHint;
     tool::ViewPanel* mViewPanel;
     tool::ModePanel* mModePanel;

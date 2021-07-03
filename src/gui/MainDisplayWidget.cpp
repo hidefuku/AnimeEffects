@@ -42,6 +42,7 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
     , mCanvasMover()
     , mMovingCanvasByTool(false)
     , mMovingCanvasByKey(false)
+    , mMovingCanvasByMiddleMouseButton(false)
     , mDevicePixelRatio(1.0)
 {
 #ifdef USE_GL_CORE_PROFILE
@@ -96,6 +97,34 @@ MainDisplayWidget::MainDisplayWidget(ViaPoint& aViaPoint, QWidget* aParent)
                 };
             }
         }
+
+		// rotate canvas clockwise
+		{
+			auto key = mViaPoint.keyCommandMap()->get("RotateCanvas15Clockwise");
+			if (key)
+			{
+
+				key->invoker = [=]()
+				{
+					mCanvasMover.rotate(qDegreesToRadians(15.0f));
+					updateRender();
+				};
+			}
+		}
+
+		// rotate canvas anti-clockwise
+		{
+			auto key = mViaPoint.keyCommandMap()->get("RotateCanvas15AntiClockwise");
+			if (key)
+			{
+
+				key->invoker = [=]()
+				{
+					mCanvasMover.rotate(qDegreesToRadians(-15.0f));
+					updateRender();
+				};
+			}
+		}
 
         // reset canvas angle
         {
@@ -161,7 +190,7 @@ void MainDisplayWidget::resetCamera()
         camera.setCenter(QVector2D(scrSize.width() * 0.5f, scrSize.height() * 0.5f));
         if (scrSize.width() > 0 && scrSize.height() > 0 && imgSize.width() > 0 && imgSize.height() > 0)
         {
-            auto scaleX = (float)scrSize.width() / imgSize.width();
+			auto scaleX = (float)scrSize.width() / imgSize.width();
             auto scaleY = (float)scrSize.height() / imgSize.height();
             auto minScale = scaleX < scaleY ? scaleX : scaleY;
             camera.setScale(minScale);
@@ -388,6 +417,7 @@ void MainDisplayWidget::mouseMoveEvent(QMouseEvent* aEvent)
         if (mCanvasMover.updateByMove(mAbstractCursor.screenPos(),
                                       mAbstractCursor.screenVel(),
                                       mAbstractCursor.isPressedLeft(),
+                                      mAbstractCursor.isPressedMiddle(),
                                       mAbstractCursor.isPressedRight()))
         {
             updateRender();
@@ -403,6 +433,11 @@ void MainDisplayWidget::mousePressEvent(QMouseEvent* aEvent)
         {
             updateCursor();
             //if (!mUsingTablet) qDebug() << "press";
+
+            if(mViaPoint.mouseSetting().middleMouseMoveCanvas && aEvent->button() == Qt::MouseButton::MidButton) {
+                mMovingCanvasByMiddleMouseButton = true;
+                mCanvasMover.setDragAndMove(mMovingCanvasByKey || mMovingCanvasByTool || mMovingCanvasByMiddleMouseButton);
+            }
         }
     }
 }
@@ -415,13 +450,18 @@ void MainDisplayWidget::mouseReleaseEvent(QMouseEvent* aEvent)
         {
             updateCursor();
             //if (!mUsingTablet) qDebug() << "release";
+
+            if(aEvent->button() == Qt::MouseButton::MidButton) {
+                mMovingCanvasByMiddleMouseButton = false;
+                mCanvasMover.setDragAndMove(mMovingCanvasByKey || mMovingCanvasByTool || mMovingCanvasByMiddleMouseButton);
+            }
         }
     }
 }
 
 void MainDisplayWidget::wheelEvent(QWheelEvent* aEvent)
 {
-    if (mCanvasMover.updateByWheel(QVector2D(aEvent->pos()), aEvent->delta(),
+    if (mCanvasMover.updateByWheel(QVector2D(aEvent->position()), aEvent->angleDelta().y(),
                                    mViaPoint.mouseSetting().invertMainViewScaling))
     {
         updateRender();
@@ -443,6 +483,7 @@ void MainDisplayWidget::tabletEvent(QTabletEvent* aEvent)
     if (mCanvasMover.updateByMove(mAbstractCursor.screenPos(),
                                   mAbstractCursor.screenVel(),
                                   mAbstractCursor.isPressedLeft(),
+                                  mAbstractCursor.isPressedMiddle(),
                                   mAbstractCursor.isPressedRight()))
     {
         updateRender();
@@ -490,11 +531,11 @@ void MainDisplayWidget::onViewSettingChanged(const MainViewSetting& aSetting)
     }
     else if (mViewSetting.rotateViewACW)
     {
-        mCanvasMover.rotate((float)(-M_PI / 18.0));
+		mCanvasMover.rotate(qDegreesToRadians(-15.0f));
     }
     else if (mViewSetting.rotateViewCW)
     {
-        mCanvasMover.rotate((float)(M_PI / 18.0));
+		mCanvasMover.rotate(qDegreesToRadians(15.0f));
     }
 
     updateRender();

@@ -36,12 +36,12 @@ namespace gui
 ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources, QWidget* aParent)
     : QTreeWidget(aParent)
     , mViaPoint(aViaPoint)
-    , mResources(aResources)
+    , mGUIResources(aResources)
     , mProject()
     , mTimeLineSlot()
     , mStoreInsert(false)
-    , mInsertedPositions()
     , mRemovedPositions()
+	, mInsertedPositions()
     , mMacroScope()
     , mObjTreeNotifier()
     , mDragIndex()
@@ -53,14 +53,6 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
     , mFolderAction()
     , mDeleteAction()
 {
-    {
-        QFile stylesheet("data/stylesheet/standard.ssa");
-        if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            this->setStyleSheet(QTextStream(&stylesheet).readAll());
-        }
-    }
-
     this->setObjectName("objectTree");
     this->setFocusPolicy(Qt::NoFocus);
     this->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -88,6 +80,8 @@ ObjectTreeWidget::ObjectTreeWidget(ViaPoint& aViaPoint, GUIResources& aResources
     this->connect(this, &QTreeWidget::itemCollapsed, this, &ObjectTreeWidget::onItemCollapsed);
     this->connect(this, &QTreeWidget::itemExpanded, this, &ObjectTreeWidget::onItemExpanded);
     this->connect(this, &QTreeWidget::itemSelectionChanged, this, &ObjectTreeWidget::onItemSelectionChanged);
+
+    mGUIResources.onThemeChanged.connect(this, &ObjectTreeWidget::onThemeUpdated);
 
     {
         mSlimAction = new QAction(tr("slim down"), this);
@@ -124,7 +118,7 @@ void ObjectTreeWidget::setProject(core::Project* aProject)
                 trees->push_back(this->takeTopLevelItem(0));
             }
             // save
-            auto hook = (ProjectHook*)mProject->hook();
+			auto hook = static_cast<ProjectHook*>(mProject->hook());
             hook->grabObjectTrees(trees.take());
         }
     }
@@ -148,7 +142,7 @@ void ObjectTreeWidget::setProject(core::Project* aProject)
         mTimeLineSlot = mProject->onTimeLineModified.connect(
                     this, &ObjectTreeWidget::onTimeLineModified);
 
-        auto hook = (ProjectHook*)mProject->hook();
+		auto hook = static_cast<ProjectHook*>(mProject->hook());
         // load trees
         if (hook && hook->hasObjectTrees())
         {
@@ -244,8 +238,8 @@ obj::Item* ObjectTreeWidget::createFolderItem(core::ObjectNode& aNode)
 
     obj::Item* item = new obj::Item(*this, aNode);
     item->setSizeHint(kItemColumn, QSize(kItemSize, itemHeight(aNode)));
-    item->setBackgroundColor(kItemColumn, QColor(235, 235, 235, 255));
-    item->setIcon(kItemColumn, mResources.icon("folder"));
+    //item->setBackgroundColor(kItemColumn, QColor(235, 235, 235, 255));
+    item->setIcon(kItemColumn, mGUIResources.icon("folder"));
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(kItemColumn, aNode.isVisible() ? Qt::Checked : Qt::Unchecked);
     return item;
@@ -255,7 +249,7 @@ obj::Item* ObjectTreeWidget::createFileItem(core::ObjectNode& aNode)
 {
     obj::Item* item = new obj::Item(*this, aNode);
     item->setSizeHint(kItemColumn, QSize(kItemSize, itemHeight(aNode)));
-    item->setIcon(kItemColumn, mResources.icon("filew"));
+    item->setIcon(kItemColumn, mGUIResources.icon("filew"));
     item->setFlags(item->flags() & ~Qt::ItemIsDropEnabled);
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(kItemColumn, aNode.isVisible() ? Qt::Checked : Qt::Unchecked);
@@ -376,6 +370,15 @@ bool ObjectTreeWidget::updateItemHeights(QTreeWidgetItem* aItem)
         changed |= updateItemHeights(aItem->child(i));
     }
     return changed;
+}
+
+void ObjectTreeWidget::onThemeUpdated(theme::Theme& aTheme)
+{
+    QFile stylesheet(aTheme.path()+"/stylesheet/standard.ssa");
+    if (stylesheet.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        this->setStyleSheet(QTextStream(&stylesheet).readAll());
+    }
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -531,7 +534,7 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
             parent = mProject->objectTree().topNode();
             XC_PTR_ASSERT(parent);
 
-            index = (int)parent->children().size();
+			index = static_cast<int>(parent->children().size());
             if (index > 0)
             {
                 auto prevNode = parent->children().back();
@@ -567,41 +570,44 @@ void ObjectTreeWidget::onObjectActionTriggered(bool)
         // create command
         if (dialog->hasValidNode())
         {
-            // get resource
-            auto resNode = dialog->nodeList().first();
-            if (!resNode) return;
-            XC_ASSERT(resNode->data().hasImage());
-
-            // create node
-            core::LayerNode* ptr = new core::LayerNode(
-                        resNode->data().identifier(),
-                        mProject->objectTree().shaderHolder());
-            ptr->setVisibility(true);
-            ptr->setDefaultImage(resNode->handle());
-            ptr->setDefaultPosture(QVector2D());
-            ptr->setDefaultDepth(depth);
-            ptr->setDefaultOpacity(1.0f); // @todo support default opacity
-
-
-            cmnd::ScopedMacro macro(mProject->commandStack(),
-                                    CmndName::tr("create a layer object"));
-            // notifier
-            {
-                auto coreNotifier = new core::ObjectTreeNotifier(*mProject);
-                coreNotifier->event().setType(core::ObjectTreeEvent::Type_Add);
-                coreNotifier->event().pushTarget(parent, *ptr);
-                macro.grabListener(coreNotifier);
-            }
-            macro.grabListener(new obj::RestructureNotifier(*this));
-
-            // create commands
-            mProject->commandStack().push(new cmnd::GrabNewObject<core::LayerNode>(ptr));
-            mProject->commandStack().push(new cmnd::InsertTree<core::ObjectNode>(&(parent->children()), index, ptr));
-
-            // create gui commands
-            auto itemPtr = createFileItem(*ptr);
-            mProject->commandStack().push(new cmnd::GrabNewObject<obj::Item>(itemPtr));
-            mProject->commandStack().push(new obj::InsertItem(*parentItem, itemIndex, *itemPtr));
+			int node_count = dialog->nodeList().count();
+			for(int i = 0; i < node_count; i++){
+				// get resource
+				auto resNode = dialog->nodeList().at(i);
+				if (!resNode) return;
+				XC_ASSERT(resNode->data().hasImage());
+	
+				// create node
+				core::LayerNode* ptr = new core::LayerNode(
+							resNode->data().identifier(),
+							mProject->objectTree().shaderHolder());
+				ptr->setVisibility(true);
+				ptr->setDefaultImage(resNode->handle());
+				ptr->setDefaultPosture(QVector2D());
+				ptr->setDefaultDepth(depth);
+				ptr->setDefaultOpacity(1.0f); // @todo support default opacity
+	
+	
+				cmnd::ScopedMacro macro(mProject->commandStack(),
+										CmndName::tr("create a layer object"));
+				// notifier
+				{
+					auto coreNotifier = new core::ObjectTreeNotifier(*mProject);
+					coreNotifier->event().setType(core::ObjectTreeEvent::Type_Add);
+					coreNotifier->event().pushTarget(parent, *ptr);
+					macro.grabListener(coreNotifier);
+				}
+				macro.grabListener(new obj::RestructureNotifier(*this));
+	
+				// create commands
+				mProject->commandStack().push(new cmnd::GrabNewObject<core::LayerNode>(ptr));
+				mProject->commandStack().push(new cmnd::InsertTree<core::ObjectNode>(&(parent->children()), index, ptr));
+	
+				// create gui commands
+				auto itemPtr = createFileItem(*ptr);
+				mProject->commandStack().push(new cmnd::GrabNewObject<obj::Item>(itemPtr));
+				mProject->commandStack().push(new obj::InsertItem(*parentItem, itemIndex, *itemPtr));
+			}
         }
     }
 }
@@ -625,7 +631,7 @@ void ObjectTreeWidget::onFolderActionTriggered(bool)
             parent = mProject->objectTree().topNode();
             XC_PTR_ASSERT(parent);
 
-            index = (int)parent->children().size();
+			index = static_cast<int>(parent->children().size());
             if (index > 0)
             {
                 auto prevNode = parent->children().back();
@@ -843,7 +849,7 @@ void ObjectTreeWidget::rowsAboutToBeRemoved(const QModelIndex& aParent, int aSta
     if (mStoreInsert)
     {
         XC_ASSERT(aStart == aEnd);
-        QTreeWidgetItem* item = this->itemFromIndex(aParent.child(aStart, kItemColumn));
+        QTreeWidgetItem* item = this->itemFromIndex(aParent.model()->index(aStart, kItemColumn, aParent));
         util::TreePos removePos(this->indexFromItem(item));
         XC_ASSERT(removePos.isValid());
         //qDebug() << "remove"; removePos.dump();
@@ -879,7 +885,7 @@ void ObjectTreeWidget::rowsInserted(const QModelIndex& aParent, int aStart, int 
     if (mStoreInsert)
     {
         XC_ASSERT(aStart == aEnd);
-        QTreeWidgetItem* item = this->itemFromIndex(aParent.child(aStart, kItemColumn));
+        QTreeWidgetItem* item = this->itemFromIndex(aParent.model()->index(aStart, kItemColumn, aParent));
         util::TreePos insertPos(this->indexFromItem(item));
         XC_ASSERT(insertPos.isValid());
         //qDebug() << "insert"; insertPos.dump();

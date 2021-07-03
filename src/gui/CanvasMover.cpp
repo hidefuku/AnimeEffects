@@ -82,12 +82,12 @@ void CanvasMover::setDragAndRotate(bool aIsActive)
 }
 
 bool CanvasMover::updateByMove(const QVector2D& aCursorPos, const QVector2D& aMoved,
-                               bool aPressedL, bool aPressedR)
+                               bool aPressedL, bool aPressedM, bool aPressedR)
 {
     if (mCamera)
     {
         // translate canvas
-        if (mMoving && aPressedL)
+        if (mMoving && (aPressedL || aPressedM))
         {
             mCamera->setCenter(mCamera->center() + aMoved);
             mResetRotationOrigin = true;
@@ -96,7 +96,7 @@ bool CanvasMover::updateByMove(const QVector2D& aCursorPos, const QVector2D& aMo
         else if (mMoving || mRotating)
         { // rotate canvas
 
-            const bool isPressed = mMoving ? aPressedR : aPressedL;
+            const bool isPressed = mMoving ? aPressedR : (aPressedL || aPressedM);
 
             if (isPressed)
             {

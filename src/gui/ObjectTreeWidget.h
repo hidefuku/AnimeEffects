@@ -48,7 +48,7 @@ private:
     struct ItemInfo
     {
         ItemInfo()
-            : ptr(NULL), pos() {}
+            : ptr(nullptr), pos() {}
         ItemInfo(QTreeWidgetItem* aPtr, const util::TreePos& aPos)
             : ptr(aPtr), pos(aPos) {}
         QTreeWidgetItem* ptr;
@@ -89,9 +89,10 @@ private:
     void onObjectActionTriggered(bool aIsTriggered);
     void onFolderActionTriggered(bool aIsTriggered);
     void onDeleteActionTriggered(bool aIsTriggered);
+    void onThemeUpdated(theme::Theme&);
 
     ViaPoint& mViaPoint;
-    GUIResources& mResources;
+    GUIResources& mGUIResources;
     util::LinkPointer<core::Project> mProject;
     util::SlotId mTimeLineSlot;
 
