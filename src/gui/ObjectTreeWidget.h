@@ -96,8 +96,8 @@ private:
     util::SlotId mTimeLineSlot;
 
     bool mStoreInsert;
-    QVector<util::TreePos> mRemovedPositions;
     QVector<util::TreePos> mInsertedPositions;
+    QVector<util::TreePos> mRemovedPositions;
     util::PlacePointer<cmnd::ScopedMacro> mMacroScope;
     core::ObjectTreeNotifier* mObjTreeNotifier;
     QModelIndex mDragIndex;

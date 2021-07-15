@@ -284,7 +284,7 @@ void MainMenuBar::loadVideoFormats()
         // optional attributes
         format.label = domFormat.attribute("label");
         format.icodec = domFormat.attribute("icodec");
-        format.command = domFormat.attribute("command");
+        format.command = domFormat.attribute("command").split(' ');
         if (format.label.isEmpty()) format.label = format.name;
         if (format.icodec.isEmpty()) format.icodec = "png";
         // add one format
@@ -301,7 +301,7 @@ void MainMenuBar::loadVideoFormats()
             // optional attributes
             codec.label = domCodec.attribute("label");
             codec.icodec = domCodec.attribute("icodec");
-            codec.command = domCodec.attribute("command");
+            codec.command = domCodec.attribute("command").split(' ');
             if (codec.label.isEmpty()) codec.label = codec.name;
             if (codec.icodec.isEmpty()) codec.icodec = format.icodec;
             if (codec.command.isEmpty()) codec.command = format.command;

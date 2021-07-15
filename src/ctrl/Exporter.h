@@ -105,10 +105,10 @@ private:
     {
     public:
         FFMpeg();
-        bool start(const QString& aArgments);
+        bool start(const QStringList& aArgments);
         void write(const QByteArray& aBytes);
         bool finish(const std::function<bool()>& aWaiter);
-        bool execute(const QString& aArgments,
+        bool execute(const QStringList& aArgments,
                      const std::function<bool()>& aWaiter);
         bool errorOccurred() const { return mErrorOccurred; }
         QString errorString() const { return mErrorString; }

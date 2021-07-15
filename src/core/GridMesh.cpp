@@ -624,7 +624,7 @@ bool GridMesh::deserialize(Deserializer& aIn)
     {
         // note: the bug on version 0.4 or lower. mVertexRect doesn't be serialized.
         auto positions = mPositions.data();
-        float l, t, r, b = 0.0f;
+        float l = 0.0f, t = 0.0f, r = 0.0f, b = 0.0f;
         for (int i = 0; i < mVertexCount; ++i)
         {
             auto pos = positions[i];

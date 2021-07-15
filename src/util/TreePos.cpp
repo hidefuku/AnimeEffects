@@ -123,9 +123,8 @@ void TreePos::dump() const
     QString text;
     for (size_t i = 0; i < mRows.size(); ++i)
     {
-        QString row;
-        row.sprintf("%d,", mRows[i]);
-        text += row;
+        text += QString::number(mRows[i]);
+        text += ",";
     }
     qDebug() << text;
 }

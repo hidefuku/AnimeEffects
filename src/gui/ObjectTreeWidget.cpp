@@ -244,7 +244,7 @@ obj::Item* ObjectTreeWidget::createFolderItem(core::ObjectNode& aNode)
 
     obj::Item* item = new obj::Item(*this, aNode);
     item->setSizeHint(kItemColumn, QSize(kItemSize, itemHeight(aNode)));
-    item->setBackgroundColor(kItemColumn, QColor(235, 235, 235, 255));
+    item->setBackground(kItemColumn, QBrush(QColor(235, 235, 235, 255)));
     item->setIcon(kItemColumn, mResources.icon("folder"));
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(kItemColumn, aNode.isVisible() ? Qt::Checked : Qt::Unchecked);
@@ -843,7 +843,7 @@ void ObjectTreeWidget::rowsAboutToBeRemoved(const QModelIndex& aParent, int aSta
     if (mStoreInsert)
     {
         XC_ASSERT(aStart == aEnd);
-        QTreeWidgetItem* item = this->itemFromIndex(aParent.child(aStart, kItemColumn));
+        QTreeWidgetItem* item = this->itemFromIndex(aParent.model()->index(aStart, kItemColumn));
         util::TreePos removePos(this->indexFromItem(item));
         XC_ASSERT(removePos.isValid());
         //qDebug() << "remove"; removePos.dump();
@@ -879,7 +879,7 @@ void ObjectTreeWidget::rowsInserted(const QModelIndex& aParent, int aStart, int 
     if (mStoreInsert)
     {
         XC_ASSERT(aStart == aEnd);
-        QTreeWidgetItem* item = this->itemFromIndex(aParent.child(aStart, kItemColumn));
+        QTreeWidgetItem* item = this->itemFromIndex(aParent.model()->index(aStart, kItemColumn, aParent));
         util::TreePos insertPos(this->indexFromItem(item));
         XC_ASSERT(insertPos.isValid());
         //qDebug() << "insert"; insertPos.dump();

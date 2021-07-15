@@ -31,13 +31,12 @@ void ViewPanel::addButton(const QString& aIconName, bool aCheckable,
 
 int ViewPanel::updateGeometry(const QPoint& aPos, int aWidth)
 {
-    int l, t, r, b;
-    this->getContentsMargins(&l, &t, &r, &b);
+    QMargins margins = this->contentsMargins();
 
-    auto height = mLayout.heightForWidth(aWidth - l - r);
-    this->setGeometry(aPos.x(), aPos.y(), aWidth, height + b);
+    auto height = mLayout.heightForWidth(aWidth - margins.left() - margins.right());
+    this->setGeometry(aPos.x(), aPos.y(), aWidth, height + margins.bottom());
 
-    return aPos.y() + height + b;
+    return aPos.y() + height + margins.bottom();
 }
 
 } // namespace tool
