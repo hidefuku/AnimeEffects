@@ -121,8 +121,7 @@ void Renderer::renderHeader(int aHeight, int aFps)
 
             if (attr.showNumber)
             {
-                QString number;
-                number.sprintf("%.1f", (float)i / aFps);
+                QString number = QString::number((float)i / aFps);
                 const int width = numberWidth * number.size();
                 const int left = pos.x() - (width >> 1);
                 const int top = lt.y() - 1;

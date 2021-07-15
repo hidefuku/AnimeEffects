@@ -207,7 +207,7 @@ bool TimeLineInnerWidget::updateCursor(const core::AbstractCursor& aCursor)
 
 void TimeLineInnerWidget::updateWheel(QWheelEvent* aEvent)
 {
-    mEditor->updateWheel(aEvent->delta(), mViaPoint.mouseSetting().invertTimeLineScaling);
+    mEditor->updateWheel(aEvent->angleDelta().y(), mViaPoint.mouseSetting().invertTimeLineScaling);
     updateSize();
 }
 

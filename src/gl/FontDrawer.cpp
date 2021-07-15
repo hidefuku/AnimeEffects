@@ -1,3 +1,4 @@
+#include <QPainterPath>
 #include "gl/FontDrawer.h"
 #include "gl/Global.h"
 #include "gl/Util.h"

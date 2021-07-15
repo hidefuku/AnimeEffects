@@ -14,7 +14,7 @@ public:
     QString name;
     QString label;
     QString icodec;
-    QString command;
+    QStringList command;
     QStringList pixfmts;
     bool lossless;
     bool transparent;
@@ -29,7 +29,7 @@ public:
     QString name;
     QString label;
     QString icodec;
-    QString command;
+    QStringList command;
     QList<VideoCodec> codecs;
 };
 

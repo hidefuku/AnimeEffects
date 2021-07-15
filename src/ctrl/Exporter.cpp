@@ -84,7 +84,7 @@ Exporter::FFMpeg::FFMpeg()
 {
 }
 
-bool Exporter::FFMpeg::start(const QString& aArgments)
+bool Exporter::FFMpeg::start(const QStringList& aArgments)
 {
 #if defined(Q_OS_WIN)
     const QFileInfo localEncoderInfo("./tools/ffmpeg.exe");
@@ -125,7 +125,7 @@ bool Exporter::FFMpeg::start(const QString& aArgments)
         this->mFinished = true;
     });
 
-    mProcess->start(program + " " + aArgments, QIODevice::ReadWrite);
+    mProcess->start(program, aArgments, QIODevice::ReadWrite);
 
     return !mErrorOccurred;
 }
@@ -156,7 +156,7 @@ bool Exporter::FFMpeg::finish(const std::function<bool()>& aWaiter)
     return (exitStatus == QProcess::NormalExit);
 }
 
-bool Exporter::FFMpeg::execute(const QString& aArgments,
+bool Exporter::FFMpeg::execute(const QStringList& aArgments,
                                const std::function<bool()>& aWaiter)
 {
     if (!start(aArgments)) return false;
@@ -278,9 +278,9 @@ Exporter::Result Exporter::execute(const CommonParam& aCommon, const GifParam& a
     {
 
         auto waiter = [=]()->bool { return true; };
-        if (mFFMpeg.execute(" -i " + workFile + " -vf palettegen -y " + palette, waiter))
+        if (mFFMpeg.execute({"-i", workFile, "-vf", "palettegen", "-y", palette}, waiter))
         {
-            mFFMpeg.execute(" -i " + workFile + " -i " + palette + " -lavfi paletteuse -y " + outFile, waiter);
+            mFFMpeg.execute({"-i", workFile, "-i", palette, "-lavfi", "paletteuse", "-y", outFile}, waiter);
         }
 
         QFile::remove(workFile);
@@ -395,17 +395,33 @@ Exporter::Result Exporter::execute(const CommonParam& aCommon, const VideoParam&
 
         if (videoCodec.command.isEmpty())
         {
-            videoCodec.command = "-y -f image2pipe -framerate $ifps -vcodec $icodec -i - -b:v $obps -r $ofps $opath";
+            videoCodec.command = QStringList({"-y", "-f", "image2pipe", "-framerate", "$ifps", "-vcodec", "$icodec", "-i", "-", "-b:v", "$obps", "-r", "$ofps", "$opath"});
         }
-        videoCodec.command.replace(QRegExp("\\$ifps(\\s|$)"), QString::number(mCommonParam.fps) + "\\1");
-        videoCodec.command.replace(QRegExp("\\$icodec(\\s|$)"), videoCodec.icodec + "\\1");
-        videoCodec.command.replace(QRegExp("\\$obps(\\s|$)"), QString::number(aVideo.bps) + "\\1");
-        videoCodec.command.replace(QRegExp("\\$ofps(\\s|$)"), QString::number(mCommonParam.fps) + "\\1");
-        videoCodec.command.replace(QRegExp("\\$ocodec(\\s|$)"), videoCodec.name + "\\1");
-        videoCodec.command.replace(QRegExp("\\$opath(\\s|$)"), outPath + "\\1");
-        videoCodec.command.replace(QRegExp("\\$pixfmt(\\s|$)"), aVideo.pixfmt + "\\1");
-        videoCodec.command.replace(QRegExp("\\$arg_colorfilter(\\s|$)"), (colorIndex == 0 ? QString("-vf colormatrix=bt601:bt709") : QString("")) + "\\1");
-        videoCodec.command.replace(QRegExp("\\$arg_colorspace(\\s|$)"), QString("-colorspace ") + (colorIndex == 0 ? QString("bt709") : QString("smpte170m")) + "\\1");
+        videoCodec.command.replaceInStrings(QRegExp("\\$ifps(\\s|$)"), QString::number(mCommonParam.fps) + "\\1");
+        videoCodec.command.replaceInStrings(QRegExp("\\$icodec(\\s|$)"), videoCodec.icodec + "\\1");
+        videoCodec.command.replaceInStrings(QRegExp("\\$obps(\\s|$)"), QString::number(aVideo.bps) + "\\1");
+        videoCodec.command.replaceInStrings(QRegExp("\\$ofps(\\s|$)"), QString::number(mCommonParam.fps) + "\\1");
+        videoCodec.command.replaceInStrings(QRegExp("\\$ocodec(\\s|$)"), videoCodec.name + "\\1");
+        videoCodec.command.replaceInStrings(QRegExp("\\$opath(\\s|$)"), outPath + "\\1");
+        videoCodec.command.replaceInStrings(QRegExp("\\$pixfmt(\\s|$)"), aVideo.pixfmt + "\\1");
+
+        int index;
+        while ((index = videoCodec.command.indexOf("$arg_colorfilter"))) {
+            if (colorIndex == 0) {
+                videoCodec.command.removeAt(index);
+	    } else {
+                videoCodec.command.replace(index, "colormatrix=bt601:bt709");
+                videoCodec.command.insert(index, "-vf");
+            }
+        }
+        while ((index = videoCodec.command.indexOf("$arg_colorspace"))) {
+            if (colorIndex == 0) {
+                videoCodec.command.replace(index, "bt709");
+            } else {
+                videoCodec.command.replace(index, "smpte170");
+            }
+            videoCodec.command.insert(index, "-colorspace");
+        }
 
         qDebug() << videoCodec.command;
 
