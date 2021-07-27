@@ -1,3 +1,6 @@
+New Main repo
+https://github.com/AnimeEffectsDevs/AnimeEffects
+
 # AnimeEffects
 A 2D animation tool which doesn't require a carefully thought-out plan.  
 It provides various animation functions based on deformation of polygon mesh.<br><br>
