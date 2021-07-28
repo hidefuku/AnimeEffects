@@ -1,0 +1,16 @@
+gui--TimeLineEditorWidget {
+    qproperty-headerContentColor: rgba(60, 60, 70, 255);
+    qproperty-headerBackgroundColor: rgba(160, 160, 160, 255);
+
+    qproperty-trackColor: rgba(250, 250, 250, 255);
+    qproperty-trackColor: rgba(250, 250, 250, 255);
+    qproperty-trackEdgeColor: rgba(190, 190, 190, 255);
+    qproperty-trackTextColor: rgba(170, 170, 170, 255);
+    qproperty-trackSelectColor: rgba(235, 240, 250, 255);
+    qproperty-trackSeperatorColor: rgba(200, 200, 205, 255);
+}
+
+gui--TimeCursor {
+    qproperty-bodyColor: rgba(230, 230, 230, 180);
+    qproperty-edgeColor: rgba(80, 80, 80, 180);
+}

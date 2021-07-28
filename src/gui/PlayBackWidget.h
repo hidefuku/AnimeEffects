@@ -37,9 +37,10 @@ private:
     QPushButton* createButton(
             const QString& aName, bool aIsCheckable,
             int aColumn, const QString& aToolTip);
-    GUIResources& mResources;
+    GUIResources& mGUIResources;
     std::vector<QPushButton*> mButtons;
     PushDelegate mPushDelegate;
+    void onThemeUpdated(theme::Theme&);
 };
 
 } // namespace gui

@@ -30,7 +30,7 @@ MoveFrameOfKey::MoveFrameOfKey(const TimeLineEvent& aCommandEvent)
         mSortedTargets.push_back(target);
     }
     // sort targets for the purpose of the move with no conflict.
-    qSort(mSortedTargets.begin(), mSortedTargets.end(), lessThan);
+    std::sort(mSortedTargets.begin(), mSortedTargets.end(), lessThan);
 }
 
 bool MoveFrameOfKey::lessThan(const TimeLineEvent::Target& aLhs, const TimeLineEvent::Target& aRhs)

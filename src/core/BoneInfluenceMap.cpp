@@ -154,7 +154,7 @@ void BoneInfluenceMap::makeBoneList(const QList<Bone2*>& aTopBones)
             if (bone && mBoneList.params.size() < mMaxBoneCount)
             {
                 BoneParam param;
-                param.hasParent = (bool)(bone->parent());
+                param.hasParent = static_cast<bool>(bone->parent());
 
                 if (param.hasParent)
                 {
@@ -425,25 +425,25 @@ BoneInfluenceMap::Accessor::Accessor(const BoneInfluenceMap& aOwner)
 const gl::Vector4I* BoneInfluenceMap::Accessor::indices0() const
 {
     XC_PTR_ASSERT(mOwner);
-    return (const gl::Vector4I*)mOwner->mIndices[0].data();
+    return reinterpret_cast<const gl::Vector4I*>(mOwner->mIndices[0].data());
 }
 
 const gl::Vector4I* BoneInfluenceMap::Accessor::indices1() const
 {
     XC_PTR_ASSERT(mOwner);
-    return (const gl::Vector4I*)mOwner->mIndices[1].data();
+    return reinterpret_cast<const gl::Vector4I*>(mOwner->mIndices[1].data());
 }
 
 const gl::Vector4* BoneInfluenceMap::Accessor::weights0() const
 {
     XC_PTR_ASSERT(mOwner);
-    return (const gl::Vector4*)mOwner->mWeights[0].data();
+    return reinterpret_cast<const gl::Vector4*>(mOwner->mWeights[0].data());
 }
 
 const gl::Vector4* BoneInfluenceMap::Accessor::weights1() const
 {
     XC_PTR_ASSERT(mOwner);
-    return (const gl::Vector4*)mOwner->mWeights[1].data();
+    return reinterpret_cast<const gl::Vector4*>(mOwner->mWeights[1].data());
 }
 
 } // namespace core

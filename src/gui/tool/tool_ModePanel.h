@@ -29,8 +29,9 @@ public:
 
 private:
     void addButton(ctrl::ToolType aType, const QString& aIconName, const QString& aToolTip);
+    void onThemeUpdated(theme::Theme&);
 
-    GUIResources& mResources;
+    GUIResources& mGUIResources;
     QButtonGroup* mGroup;
     std::vector<QPushButton*> mButtons;
     FlowLayout mLayout;

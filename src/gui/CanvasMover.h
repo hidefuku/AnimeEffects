@@ -18,7 +18,7 @@ public:
     void setDragAndRotate(bool aIsActive);
 
     bool updateByMove(const QVector2D& aCursorPos, const QVector2D& aMoved,
-                      bool aPressedL, bool aPressedR);
+                      bool aPressedL, bool aPressedM, bool aPressedR);
     bool updateByWheel(const QVector2D& aCursorPos, int aDelta, bool aInvertScaling);
 
     void rotate(float aRotateRad);

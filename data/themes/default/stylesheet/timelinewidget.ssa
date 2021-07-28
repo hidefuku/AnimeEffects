@@ -1,0 +1,9 @@
+/*
+gui--TimeLineEditorWidget {
+    qproperty-trackColor: rgba(55, 57, 58, 180);
+}*/
+
+gui--TimeCursor {
+    qproperty-bodyColor: rgba(30, 230, 230, 180);
+    qproperty-edgeColor: rgba(80, 80, 80, 180);
+}
